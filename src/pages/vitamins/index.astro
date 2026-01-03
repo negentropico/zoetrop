@@ -1,0 +1,25 @@
+---
+/**
+ * Vitamins Category Page
+ */
+import Layout from '../../layouts/Layout.astro';
+import CategoryPageView from '@/components/categories/CategoryPageView';
+import { CATEGORY_INFO } from '@/types/metrics';
+---
+
+<Layout title="Vitamins">
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white py-4 shadow-md">
+      <div class="container mx-auto px-4">
+        <h1 class="text-2xl font-semibold">Wellness Tracker</h1>
+        <p class="text-blue-100 text-sm mt-1">Vitamins - B-vitamins, fat-soluble</p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+      <CategoryPageView client:load categoryId="vitamins" />
+    </main>
+  </div>
+</Layout>

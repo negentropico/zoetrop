@@ -204,6 +204,8 @@ git checkout main && git merge dev && git push  # Deploy to production
 - TypeScript 5.x (strict mode enabled) + React 19, Astro 5, date-fns
 - Drizzle ORM + Neon Postgres (via Netlify extension)
 - LocalStorage (primary phases 1-4), Neon Postgres (phase 5+)
+- TypeScript 5.x (strict mode) + Astro 5, React 19, Tailwind CSS 4.x, Recharts (002-mvp-dashboard)
+- LocalStorage (Phase 1 adapter) + optional Neon Postgres sync (002-mvp-dashboard)
 
 ## Recent Changes
 - 001-core-data-layer: Configured Neon Postgres database via Netlify, Drizzle ORM setup

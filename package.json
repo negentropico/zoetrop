@@ -8,6 +8,9 @@
     "preview": "astro preview",
     "check": "astro check",
     "ci": "astro check && npm run build",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "astro": "astro",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "netlify dev:exec drizzle-kit migrate",
@@ -31,7 +34,9 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "^4.0.16",
     "drizzle-kit": "^0.31.8",
