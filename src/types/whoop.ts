@@ -1,5 +1,49 @@
 // WHOOP types - based on /Users/mac/Code/Whoop/results/whoop_analysis_report.json
 
+/**
+ * Raw WHOOP CSV export row from physiological_cycles.csv
+ */
+export interface WhoopCsvRow {
+  cycleStartTime: string;
+  cycleEndTime: string;
+  timezone: string;
+  recoveryScore: number | null;
+  restingHeartRate: number | null;
+  hrv: number | null;
+  skinTemp: number | null;
+  bloodOxygen: number | null;
+  dayStrain: number | null;
+  energyBurned: number | null;
+  maxHr: number | null;
+  avgHr: number | null;
+  sleepOnset: string;
+  wakeOnset: string;
+  sleepPerformance: number | null;
+  respiratoryRate: number | null;
+  asleepDuration: number | null;
+  inBedDuration: number | null;
+  lightSleepDuration: number | null;
+  deepSwsDuration: number | null;
+  remDuration: number | null;
+  awakeDuration: number | null;
+  sleepNeed: number | null;
+  sleepDebt: number | null;
+  sleepEfficiency: number | null;
+  sleepConsistency: number | null;
+}
+
+/**
+ * Parsed WHOOP CSV data
+ */
+export interface WhoopCsvData {
+  rows: WhoopCsvRow[];
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  rowCount: number;
+}
+
 export interface WhoopKeyMetrics {
   avg_hrv_rmssd: number;
   avg_resting_heart_rate: number;

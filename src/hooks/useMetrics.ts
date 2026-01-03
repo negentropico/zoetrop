@@ -9,8 +9,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Metric, MetricCategory } from '@/types/metrics';
 import { LocalStorageAdapter } from '@/lib/storage/local';
 import type { StorageAdapter, SyncStatusSummary } from '@/lib/storage/adapter';
-import { parseWhoopJson, mapWhoopToMetrics } from '@/lib/whoop';
-import type { WhoopMapConfig, WhoopMapResult } from '@/lib/whoop';
+import { parseWhoopJson, mapWhoopToMetrics, parseWhoopCsv, mapWhoopCsvToMetrics } from '@/lib/whoop';
+import type { WhoopMapConfig, WhoopMapResult, WhoopCsvMapConfig, WhoopCsvMapResult } from '@/lib/whoop';
 
 export interface UseMetricsReturn {
   metrics: Metric[];
@@ -25,6 +25,7 @@ export interface UseMetricsReturn {
   exportMetrics: () => Promise<string>;
   importMetrics: (metrics: Metric[]) => Promise<void>;
   importWhoopData: (jsonInput: string | unknown, config?: WhoopMapConfig) => Promise<WhoopMapResult | null>;
+  importWhoopCsvData: (csvContent: string, config?: WhoopCsvMapConfig) => Promise<WhoopCsvMapResult | null>;
   clearMetrics: (confirm: boolean) => Promise<void>;
   clearError: () => void;
   getSyncStatus: () => Promise<SyncStatusSummary | null>;
@@ -243,6 +244,46 @@ export function useMetrics(): UseMetricsReturn {
     return mapResult;
   }, []);
 
+  const importWhoopCsvData = useCallback(async (
+    csvContent: string,
+    config?: WhoopCsvMapConfig
+  ): Promise<WhoopCsvMapResult | null> => {
+    if (!storageRef.current) {
+      setError(new Error('Storage not initialized'));
+      return null;
+    }
+
+    // Parse the WHOOP CSV
+    const parseResult = parseWhoopCsv(csvContent);
+
+    if (!parseResult.success || !parseResult.data) {
+      setError(new Error(parseResult.errors.join(', ') || 'Failed to parse WHOOP CSV'));
+      return null;
+    }
+
+    // Map to metrics
+    const mapResult = mapWhoopCsvToMetrics(parseResult.data, config);
+
+    if (mapResult.metrics.length === 0) {
+      setError(new Error('No metrics could be extracted from WHOOP CSV'));
+      return mapResult;
+    }
+
+    // Import the metrics
+    const importResult = await storageRef.current.importMetrics(mapResult.metrics);
+
+    if (!importResult.success) {
+      setError(new Error(importResult.error?.message || 'Failed to import WHOOP CSV metrics'));
+      return null;
+    }
+
+    if (importResult.data) {
+      setMetrics(prev => [...prev, ...importResult.data!]);
+    }
+
+    return mapResult;
+  }, []);
+
   return {
     metrics,
     loading,
@@ -256,6 +297,7 @@ export function useMetrics(): UseMetricsReturn {
     exportMetrics,
     importMetrics,
     importWhoopData,
+    importWhoopCsvData,
     clearMetrics,
     clearError,
     getSyncStatus,

@@ -52,14 +52,17 @@ export function WhoopImport({ onComplete, onCancel }: WhoopImportProps) {
             Import WHOOP Data
           </h2>
           <p className="text-gray-600 max-w-md mx-auto">
-            Upload your WHOOP analysis JSON file to import your health metrics.
-            The file should be exported from WHOOP Analyzer.
+            Import your WHOOP health metrics from either format:
           </p>
+          <ul className="text-sm text-gray-500 mt-2 space-y-1">
+            <li><strong>CSV</strong> — Raw WHOOP export (physiological_cycles.csv)</li>
+            <li><strong>JSON</strong> — WHOOP Analyzer report</li>
+          </ul>
         </div>
 
         <FileUpload
           onFileSelect={handleFile}
-          accept=".json"
+          accept=".json,.csv"
           error={error || undefined}
           disabled={step === 'selecting'}
         />

@@ -69,10 +69,10 @@ describe('WhoopImport', () => {
     expect(screen.getByTestId('file-input')).toBeInTheDocument();
   });
 
-  it('should accept .json files only', () => {
+  it('should accept .json and .csv files', () => {
     render(<WhoopImport />);
     const input = screen.getByTestId('file-input');
-    expect(input).toHaveAttribute('accept', '.json');
+    expect(input).toHaveAttribute('accept', '.json,.csv');
   });
 
   it('should show back button when onCancel is provided', () => {
@@ -93,6 +93,12 @@ describe('WhoopImport', () => {
 
   it('should show description text', () => {
     render(<WhoopImport />);
-    expect(screen.getByText(/Upload your WHOOP analysis JSON file/i)).toBeInTheDocument();
+    expect(screen.getByText(/Import your WHOOP health metrics/i)).toBeInTheDocument();
+  });
+
+  it('should show supported formats', () => {
+    render(<WhoopImport />);
+    expect(screen.getByText(/CSV/)).toBeInTheDocument();
+    expect(screen.getByText(/JSON/)).toBeInTheDocument();
   });
 });
