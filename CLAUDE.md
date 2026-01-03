@@ -160,10 +160,41 @@ npm run db:studio    # Open Drizzle Studio (visual DB browser)
 npm run dev          # Start dev server
 npm run build        # Production build
 npm run preview      # Preview build
+npm run check        # Type check only
+npm run ci           # Full CI (types + build)
 npm run db:generate  # Generate DB migrations
 npm run db:migrate   # Run DB migrations
 npm run db:studio    # Drizzle Studio UI
 ```
+
+## Mobile Workflow (Claude Code)
+
+### Quick Commands
+```bash
+npm run check              # Type check only (~30s)
+npm run ci                 # Full CI check (types + build)
+git push origin dev        # Deploy to preview
+git checkout main && git merge dev && git push  # Deploy to production
+```
+
+### Workflow
+1. Test app at preview URL on phone
+2. Note issues/improvements in conversation
+3. Implement changes with Claude Code
+4. Push to `dev` branch → auto preview deploy
+5. When ready: merge `dev` → `main` → production
+
+### URLs
+| Environment | URL |
+|-------------|-----|
+| Production | https://zoetrop.netlify.app |
+| Dev preview | https://dev--zoetrop.netlify.app |
+| Branch previews | https://{branch}--zoetrop.netlify.app |
+
+### CI/CD
+- **GitHub Actions**: Type check + build on push to `dev`/`main`
+- **Netlify**: Auto-deploys all branches with unique preview URLs
+- **Checks**: ~1-2 min (quick mode: types + build only)
 
 ---
 
