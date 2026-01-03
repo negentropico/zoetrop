@@ -1,43 +1,73 @@
-# Astro Starter Kit: Minimal
+# Wellness Tracker
 
-```sh
-npm create astro@latest -- --template minimal
+Comprehensive wellness tracking dashboard consolidating WHOOP biometrics, blood work, body composition, and protocol progress.
+
+## Tech Stack
+
+- **Framework**: Astro 5 + React 19
+- **Styling**: Tailwind CSS 4
+- **Charts**: Recharts
+- **Storage**: LocalStorage + Neon Postgres (optional sync)
+- **Deployment**: Netlify
+
+## Quick Start
+
+```bash
+npm install
+npm run dev     # Start dev server at localhost:4321
+npm run build   # Production build
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Project Structure
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```
+src/
+├── components/     # React components
+│   ├── charts/     # Recharts visualizations
+│   ├── data/       # Import/export
+│   ├── layout/     # Header, nav
+│   ├── metrics/    # MetricCard, StatusBadge
+│   └── protocol/   # Timeline, cessation
+├── hooks/          # React hooks (useMetrics, useStorage)
+├── layouts/        # Astro layouts
+├── lib/            # Utilities
+│   ├── calculations/
+│   ├── storage/
+│   └── whoop/
+├── pages/          # Routes (9 categories)
+├── styles/         # Global CSS
+└── types/          # TypeScript interfaces
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 9 Metric Categories
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+1. **Vitamins** - B-vitamins, fat-soluble
+2. **Minerals** - Zn, Mg, Fe, trace
+3. **Inflammatory** - hs-CRP, homocysteine
+4. **Metabolic** - Glucose, kidney
+5. **Hormones** - Sex, thyroid, cortisol
+6. **Autonomic** - HRV, RHR, sleep (WHOOP)
+7. **Body Composition** - DEXA, lean mass
+8. **Lipids** - Cholesterol, triglycerides
+9. **Hematology** - CBC, WBC
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Development with Spec-Kit
 
-## 🧞 Commands
+This project uses [spec-kit](https://github.com/github/spec-kit) for spec-driven development.
 
-All commands are run from the root of the project, from a terminal:
+```bash
+/speckit.specify    # Create feature spec
+/speckit.plan       # Technical plan
+/speckit.tasks      # Task breakdown
+/speckit.implement  # Execute
+```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Documentation
 
-## 👀 Want to learn more?
+- `CLAUDE.md` - AI assistant guidance
+- `HANDOFF.md` - Session handoff notes
+- `.specify/memory/constitution.md` - Project principles
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## License
+
+MIT

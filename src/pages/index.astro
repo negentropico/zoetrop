@@ -1,16 +1,131 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import { CATEGORY_INFO } from '../types/metrics';
 
+const categories = Object.values(CATEGORY_INFO);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Dashboard">
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-primary text-white py-4 shadow-md">
+      <div class="container mx-auto px-4">
+        <h1 class="text-2xl font-semibold">Wellness Tracker</h1>
+        <p class="text-primary-light text-sm mt-1">Comprehensive health metrics dashboard</p>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b border-border">
+      <div class="container mx-auto px-4">
+        <div class="flex gap-1 overflow-x-auto py-2">
+          <a
+            href="/"
+            class="px-4 py-2 rounded-t-lg bg-primary text-white font-medium text-sm whitespace-nowrap"
+          >
+            Dashboard
+          </a>
+          {categories.map((cat) => (
+            <a
+              href={`/${cat.id === 'bodyComposition' ? 'body-composition' : cat.id}/`}
+              class="px-4 py-2 rounded-t-lg hover:bg-surface-muted text-text-muted font-medium text-sm whitespace-nowrap transition-colors"
+            >
+              {cat.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+          <h4 class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+            Deficient
+          </h4>
+          <div class="text-3xl font-bold text-danger">0</div>
+          <div class="text-xs text-text-muted mt-1">markers</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+          <h4 class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+            Optimal
+          </h4>
+          <div class="text-3xl font-bold text-success">0</div>
+          <div class="text-xs text-text-muted mt-1">markers</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+          <h4 class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+            Borderline
+          </h4>
+          <div class="text-3xl font-bold text-warning">0</div>
+          <div class="text-xs text-text-muted mt-1">markers</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+          <h4 class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+            Last Updated
+          </h4>
+          <div class="text-lg font-semibold text-text">--</div>
+          <div class="text-xs text-text-muted mt-1">No data yet</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+          <h4 class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+            Cessation Day
+          </h4>
+          <div class="text-3xl font-bold text-primary">11</div>
+          <div class="text-xs text-text-muted mt-1">of 150</div>
+        </div>
+      </div>
+
+      <!-- Category Grid -->
+      <h2 class="text-lg font-semibold text-text mb-4">Categories</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {categories.map((cat) => (
+          <a
+            href={`/${cat.id === 'bodyComposition' ? 'body-composition' : cat.id}/`}
+            class="metric-card bg-white rounded-lg shadow-sm p-4 hover:shadow-md"
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <div class={`w-10 h-10 rounded-lg bg-surface flex items-center justify-center ${cat.color}`}>
+                <span class="text-lg">●</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-text">{cat.label}</h3>
+                <p class="text-xs text-text-muted">{cat.description}</p>
+              </div>
+            </div>
+            <div class="flex justify-between text-sm mt-3 pt-3 border-t border-border">
+              <span class="text-text-muted">0 metrics</span>
+              <span class="text-primary">View →</span>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-text mb-4">Quick Actions</h2>
+        <div class="flex flex-wrap gap-3">
+          <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors">
+            Import WHOOP Data
+          </button>
+          <button class="px-4 py-2 bg-surface text-text rounded-lg hover:bg-surface-muted transition-colors border border-border">
+            Add Blood Work
+          </button>
+          <button class="px-4 py-2 bg-surface text-text rounded-lg hover:bg-surface-muted transition-colors border border-border">
+            Add DEXA Results
+          </button>
+          <button class="px-4 py-2 bg-surface text-text rounded-lg hover:bg-surface-muted transition-colors border border-border">
+            Export Data
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-4 text-center text-xs text-text-muted">
+      <p>Wellness Tracker v0.1.0 | Phase 0 Foundation</p>
+    </footer>
+  </div>
+</Layout>
