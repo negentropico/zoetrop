@@ -26,6 +26,12 @@ const categories = Object.values(CATEGORY_INFO);
           >
             Dashboard
           </a>
+          <a
+            href="/all-metrics/"
+            class="px-4 py-2 rounded-t-lg hover:bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-colors"
+          >
+            All Metrics
+          </a>
           {categories.map((cat) => (
             <a
               href={`/${cat.id === 'bodyComposition' ? 'body-composition' : cat.id}/`}

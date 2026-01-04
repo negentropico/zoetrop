@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load Seed Data</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .status {
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .loading { background: #e3f2fd; color: #1565c0; }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .error { background: #ffebee; color: #c62828; }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #10b981;
+      color: white;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover { background: #059669; }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    .stats { text-align: left; background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    .stats h3 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>🌱 Load Seed Data</h1>
+  <p>This will load 2,850 health metrics into your browser storage.</p>
+
+  <div id="status" class="status loading">Ready to load...</div>
+
+  <div id="stats" class="stats" style="display: none;">
+    <h3>📊 Data Summary</h3>
+    <div id="summary"></div>
+  </div>
+
+  <button id="loadBtn" onclick="loadData()">Load Seed Data</button>
+  <button onclick="window.location.href='/'">Go to Dashboard</button>
+
+  <script>
+    async function loadData() {
+      const status = document.getElementById('status');
+      const loadBtn = document.getElementById('loadBtn');
+      const statsDiv = document.getElementById('stats');
+      const summaryDiv = document.getElementById('summary');
+
+      loadBtn.disabled = true;
+      status.className = 'status loading';
+      status.textContent = 'Loading seed data...';
+
+      try {
+        // Fetch the seed data
+        const response = await fetch('/.dev/seed-data.json');
+        if (!response.ok) throw new Error('Failed to fetch seed data');
+
+        const seedData = await response.json();
+
+        status.textContent = `Processing ${seedData.metrics.length} metrics...`;
+
+        // Convert to localStorage format
+        const storageData = {
+          metrics: seedData.metrics,
+          lastUpdated: new Date().toISOString(),
+          syncVersion: 1
+        };
+
+        // Store in localStorage
+        localStorage.setItem('wellness_tracker_metrics', JSON.stringify(storageData));
+
+        // Show success
+        status.className = 'status success';
+        status.textContent = `✅ Successfully loaded ${seedData.metrics.length} metrics!`;
+
+        // Show stats
+        statsDiv.style.display = 'block';
+        const cats = {};
+        seedData.metrics.forEach(m => {
+          cats[m.category] = (cats[m.category] || 0) + 1;
+        });
+
+        let html = '<ul style="margin: 0; padding-left: 20px;">';
+        Object.entries(cats)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([cat, count]) => {
+            html += `<li><strong>${cat}</strong>: ${count.toLocaleString()}</li>`;
+          });
+        html += '</ul>';
+        html += `<p style="margin-bottom: 0;"><strong>Date range:</strong> ${seedData.summary.dateRange.start} to ${seedData.summary.dateRange.end}</p>`;
+        summaryDiv.innerHTML = html;
+
+        loadBtn.textContent = 'Data Loaded!';
+
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = `❌ Error: ${error.message}`;
+        loadBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

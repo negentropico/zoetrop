@@ -73,10 +73,12 @@ export function enrichMetric(
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   // Calculate status
-  const calculatedStatus = metric.referenceRange
+  // Use referenceRange if available, fall back to optimalRange
+  const effectiveReferenceRange = metric.referenceRange || metric.optimalRange;
+  const calculatedStatus = effectiveReferenceRange
     ? calculateStatus({
         value: metric.value,
-        referenceRange: metric.referenceRange,
+        referenceRange: effectiveReferenceRange,
         optimalRange: metric.optimalRange,
       })
     : null;

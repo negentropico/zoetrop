@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Loading Seed Data...</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .status {
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .loading { background: #e3f2fd; color: #1565c0; }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .error { background: #ffebee; color: #c62828; }
+    .stats { text-align: left; background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    .stats h3 { margin-top: 0; }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #10b981;
+      color: white;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover { background: #059669; }
+  </style>
+</head>
+<body>
+  <h1>🌱 Auto-Loading Seed Data...</h1>
+
+  <div id="status" class="status loading">Loading data automatically...</div>
+
+  <div id="stats" class="stats" style="display: none;">
+    <h3>📊 Data Summary</h3>
+    <div id="summary"></div>
+  </div>
+
+  <button onclick="window.location.href='/'" style="display: none;" id="dashBtn">Go to Dashboard</button>
+  <button onclick="window.location.href='/all-metrics/'" style="display: none;" id="allBtn">View All Metrics</button>
+
+  <script>
+    async function autoLoad() {
+      const status = document.getElementById('status');
+      const statsDiv = document.getElementById('stats');
+      const summaryDiv = document.getElementById('summary');
+      const dashBtn = document.getElementById('dashBtn');
+      const allBtn = document.getElementById('allBtn');
+
+      try {
+        // Fetch the seed data
+        const response = await fetch('/.dev/seed-data.json');
+        if (!response.ok) throw new Error('Failed to fetch seed data: ' + response.status);
+
+        const seedData = await response.json();
+
+        status.textContent = `Processing ${seedData.metrics.length.toLocaleString()} metrics...`;
+
+        // Convert to localStorage format
+        const storageData = {
+          metrics: seedData.metrics,
+          lastUpdated: new Date().toISOString(),
+          syncVersion: 1
+        };
+
+        // Store in localStorage
+        localStorage.setItem('wellness_tracker_metrics', JSON.stringify(storageData));
+
+        // Show success
+        status.className = 'status success';
+        status.textContent = `✅ Successfully loaded ${seedData.metrics.length.toLocaleString()} metrics!`;
+
+        // Show stats
+        statsDiv.style.display = 'block';
+        const cats = {};
+        seedData.metrics.forEach(m => {
+          cats[m.category] = (cats[m.category] || 0) + 1;
+        });
+
+        let html = '<ul style="margin: 0; padding-left: 20px;">';
+        Object.entries(cats)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([cat, count]) => {
+            html += `<li><strong>${cat}</strong>: ${count.toLocaleString()}</li>`;
+          });
+        html += '</ul>';
+        html += `<p style="margin-bottom: 0;"><strong>Date range:</strong> ${seedData.summary.dateRange.start} to ${seedData.summary.dateRange.end}</p>`;
+        summaryDiv.innerHTML = html;
+
+        dashBtn.style.display = 'inline-block';
+        allBtn.style.display = 'inline-block';
+
+        // Auto-redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = `❌ Error: ${error.message}`;
+        console.error('Load error:', error);
+      }
+    }
+
+    // Auto-load on page load
+    autoLoad();
+  </script>
+</body>
+</html>

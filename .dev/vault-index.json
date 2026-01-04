@@ -1,0 +1,134 @@
+{
+  "vault_path": "/Users/mac/vaults/#Bwell",
+  "generated": "2026-01-03",
+  "total_files": 675,
+
+  "authoritative_documents": {
+    "path": "/Users/mac/vaults/#Bwell/602",
+    "files": [
+      {"name": "00_Index.md", "purpose": "Master navigation", "keywords": ["index", "navigation", "quick reference"]},
+      {"name": "01_Demographics.md", "purpose": "Age, height, weight, DOB", "keywords": ["demographics", "age", "height", "weight", "BMI"]},
+      {"name": "02_Genetic_Profile.md", "purpose": "20+ SNP variants", "keywords": ["genetics", "SNPs", "NAFLD", "FAAH", "COMT", "MTHFR", "CYP1A2", "APOE", "BDNF"]},
+      {"name": "03_Body_Composition.md", "purpose": "DEXA M1-M3 progression", "keywords": ["DEXA", "body composition", "lean mass", "fat mass", "bone density"]},
+      {"name": "04_Blood_Work.md", "purpose": "May 2025 panel", "keywords": ["blood work", "labs", "testosterone", "B6", "biotin", "eGFR", "lipids", "homocysteine"]},
+      {"name": "05_Physiological_Metrics.md", "purpose": "WHOOP biometrics", "keywords": ["WHOOP", "HRV", "RHR", "recovery", "sleep", "strain", "TDEE"]},
+      {"name": "06_Supplement_Protocol.md", "purpose": "Tier 1/2/3 supplements", "keywords": ["supplements", "protocol", "timing", "dosage", "tiers"]},
+      {"name": "06a_Daily_Guide.md", "purpose": "Daily supplement timing", "keywords": ["daily", "timing", "morning", "evening", "meals"]},
+      {"name": "06b_Inventory.md", "purpose": "Product stock status", "keywords": ["inventory", "stock", "products", "shopping"]},
+      {"name": "07_Training_Protocol.md", "purpose": "Resistance/cardio programming", "keywords": ["training", "exercise", "resistance", "cardio", "volume"]},
+      {"name": "08_Cessation_Protocol.md", "purpose": "120-day cannabis protocol", "keywords": ["cessation", "cannabis", "FAAH", "withdrawal", "phases"]},
+      {"name": "09_Targets_2026.md", "purpose": "Goals and metrics", "keywords": ["targets", "goals", "2026", "metrics", "success criteria"]},
+      {"name": "10_Contraindications.md", "purpose": "Avoid list", "keywords": ["contraindications", "avoid", "interactions", "cautions"]},
+      {"name": "11_Historical_Context.md", "purpose": "Protocol evolution", "keywords": ["history", "evolution", "lessons learned", "timeline"]},
+      {"name": "12_Data_Sources.md", "purpose": "Raw data locations", "keywords": ["data sources", "CSVs", "PDFs", "tests"]},
+      {"name": "13_Family_Genetics_Guidelines.md", "purpose": "Family genetic guidance", "keywords": ["family", "genetics", "guidelines", "relatives"]},
+      {"name": "13a_Family_OnePager.md", "purpose": "Simplified family guide", "keywords": ["family", "one-pager", "simple"]},
+      {"name": "14_ASD_ADHD_Protocol_Guide.md", "purpose": "Neurodivergent guide", "keywords": ["ASD", "ADHD", "neurodivergent", "protocol"]}
+    ]
+  },
+
+  "subject_profile": {
+    "age": 45,
+    "height_inches": 76,
+    "height_cm": 193,
+    "weight_lbs": 208.74,
+    "bmi": 25.6,
+    "current_phase": "M6",
+    "cessation_day": 10,
+    "cessation_start": "2025-12-23",
+    "cessation_target_days": 120
+  },
+
+  "critical_genetics": {
+    "NAFLD_risk": "98th percentile",
+    "FAAH": "lower activity",
+    "COMT": "A/G intermediate",
+    "MTHFR": "A1298C G/T heterozygous",
+    "CYP1A2": "lower activity (slow caffeine)",
+    "APOE": "E3/E4 (CV risk)",
+    "BDNF": "C/T altered"
+  },
+
+  "blood_work_flags": {
+    "last_date": "2025-05",
+    "gap_months": 8,
+    "critical": {
+      "B6_P5P": {"value": 102.9, "unit": "μg/L", "status": "HIGH"},
+      "biotin": {"value": 7.78, "unit": "ng/mL", "status": "HIGH"},
+      "testosterone": {"value": 470, "unit": "ng/dL", "status": "declining"},
+      "eGFR": {"value": 78, "unit": "mL/min", "status": "low"}
+    }
+  },
+
+  "whoop_data": {
+    "raw_export_path": "/Users/mac/vaults/#Bwell/_archive/my_whoop_data_2026_01_01",
+    "files": ["workouts.csv", "sleeps.csv", "physiological_cycles.csv", "journal_entries.csv"],
+    "records": {"cycles": 426, "sleeps": 414, "workouts": 328},
+    "current_metrics": {
+      "HRV_7day": 33.7,
+      "HRV_27mo_avg": 35.7,
+      "RHR": 55,
+      "recovery": 58.6
+    }
+  },
+
+  "archive_structure": {
+    "plan5": {
+      "path": "/Users/mac/vaults/#Bwell/_archive/Well/Plan5",
+      "file_count": 81,
+      "subfolders": ["500", "501", "502", "503", "504", "505"],
+      "key_content": "M3 milestone, protocol v4.0, DEXA assessments"
+    },
+    "plan4": {
+      "path": "/Users/mac/vaults/#Bwell/_archive/Well/Plan4",
+      "file_count": 136,
+      "subfolders": ["401", "402", "403", "404"],
+      "key_content": "Pre-M3 protocols, tracking system, practitioner packages"
+    },
+    "plan3": {
+      "path": "/Users/mac/vaults/#Bwell/_archive/Well/Plan3",
+      "file_count": 81,
+      "subfolders": ["301", "302", "303", "304", "305"],
+      "key_content": "Investigation phase, hypothesis testing"
+    },
+    "plan2": {
+      "path": "/Users/mac/vaults/#Bwell/_archive/Well/Plan2",
+      "file_count": 144,
+      "subfolders": ["100", "101", "102", "103", "104", "104_notion", "105", "105_gemi", "106", "Ins1"],
+      "key_content": "Early protocols, action plans"
+    },
+    "plan1": {
+      "path": "/Users/mac/vaults/#Bwell/_archive/Well/Plan1",
+      "file_count": 105,
+      "subfolders": ["091", "092", "093", "094", "100", "101", "102", "103", "104"],
+      "key_content": "Initial development, KPU/autism protocols"
+    },
+    "tests": {
+      "path": "/Users/mac/vaults/#Bwell/_archive/Well/Tests",
+      "subfolders": ["blood", "hormone", "May25", "sti", "vitamin"],
+      "pdfs": ["Autism-Evaluations.pdf", "Dexa_250206.pdf", "labs.pdf", "Tests.pdf", "Food sensitivity.pdf"],
+      "key_content": "Lab results, medical history"
+    }
+  },
+
+  "milestone_files": {
+    "M0": {"period": "2025-01", "files": ["602/Nutrients_M0.md"]},
+    "M1": {"period": "2025-02 to 2025-03", "files": ["Plan5/504/assess_M1_dexa.md", "602/Nutrients_M1.md"]},
+    "M2": {"period": "2025-03 to 2025-04", "files": ["Plan5/504/assess_M2_dexa.md", "602/Nutrients_M2.md"]},
+    "M3": {"period": "2025-05 to 2025-09", "files": ["Plan5/505/M3 MILESTONE ANALYSIS & RESULTS.md", "602/Nutrients_M3.md"]},
+    "M4_M5": {"period": "2025-10 to 2025-12", "files": ["600/M4*.md", "600/M5*.md", "602/Nutrients_M4M5.md"]},
+    "M6": {"period": "2026-01+", "files": ["602/Nutrients_M6.md", "602/06_Supplement_Protocol.md"]}
+  },
+
+  "topic_retrieval": {
+    "blood_work": ["602/04_Blood_Work.md", "_archive/Well/Tests/"],
+    "body_composition": ["602/03_Body_Composition.md", "Plan5/505/M3 Dexa.md"],
+    "genetics": ["602/02_Genetic_Profile.md", "601/_archive_extracts/genetic_snps.md"],
+    "supplements": ["602/06_Supplement_Protocol.md", "602/06a_Daily_Guide.md"],
+    "training": ["602/07_Training_Protocol.md", "Plan4/401/program*.md"],
+    "cessation": ["602/08_Cessation_Protocol.md"],
+    "whoop": ["602/05_Physiological_Metrics.md", "_archive/my_whoop_data_2026_01_01/"],
+    "targets": ["602/09_Targets_2026.md"],
+    "contraindications": ["602/10_Contraindications.md"]
+  }
+}

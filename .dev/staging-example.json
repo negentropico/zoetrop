@@ -1,0 +1,504 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "file": "/Users/mac/vaults/#Bwell/602/04_Blood_Work.md",
+    "type": "vault",
+    "collectedAt": "2025-05-01",
+    "generatedAt": "2026-01-03T16:50:00Z",
+    "version": "M2",
+    "notes": [
+      "8-month data gap - retest critical",
+      "Values collected during cannabis use period"
+    ]
+  },
+  "summary": {
+    "totalMetrics": 32,
+    "byCategory": {
+      "metabolic": 7,
+      "lipids": 6,
+      "vitamins": 5,
+      "minerals": 3,
+      "inflammatory": 1,
+      "hormones": 7,
+      "hematology": 6,
+      "autonomic": 0,
+      "bodyComposition": 0
+    },
+    "byStatus": {
+      "optimal": 18,
+      "borderline": 10,
+      "deficient": 2,
+      "excess": 2,
+      "unknown": 0
+    }
+  },
+  "validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+      "Data is 8 months old - retest recommended",
+      "B6 and Biotin values marked as HIGH - verify normalization"
+    ]
+  },
+  "categories": [
+    {
+      "category": "metabolic",
+      "label": "Metabolic Panel",
+      "sourceSection": "## Metabolic Panel",
+      "metrics": [
+        {
+          "name": "Glucose",
+          "value": 82,
+          "unit": "mg/dL",
+          "category": "metabolic",
+          "subcategory": "glucose",
+          "status": "optimal",
+          "referenceRange": { "min": 70, "max": 100 },
+          "optimalRange": { "min": 75, "max": 90 },
+          "improvement": "target range",
+          "priority": "Medium"
+        },
+        {
+          "name": "HbA1c",
+          "value": 5.2,
+          "unit": "%",
+          "category": "metabolic",
+          "subcategory": "glucose",
+          "status": "optimal",
+          "optimalRange": { "operator": "lt", "value": 5.3 },
+          "improvement": "lower is better",
+          "priority": "Medium"
+        },
+        {
+          "name": "Insulin",
+          "value": 5.7,
+          "unit": "μIU/mL",
+          "category": "metabolic",
+          "subcategory": "glucose",
+          "status": "optimal",
+          "optimalRange": { "operator": "lt", "value": 8 },
+          "improvement": "lower is better",
+          "priority": "Medium"
+        },
+        {
+          "name": "HOMA-IR",
+          "value": 1.16,
+          "unit": "",
+          "category": "metabolic",
+          "subcategory": "glucose",
+          "status": "optimal",
+          "optimalRange": { "operator": "lt", "value": 1.5 },
+          "improvement": "lower is better",
+          "priority": "Medium",
+          "notes": ["Calculated from fasting glucose and insulin"]
+        },
+        {
+          "name": "Creatinine",
+          "value": 1.18,
+          "unit": "mg/dL",
+          "category": "metabolic",
+          "subcategory": "kidney",
+          "status": "borderline",
+          "referenceRange": { "min": 0.7, "max": 1.3 },
+          "optimalRange": { "min": 0.7, "max": 1.1 },
+          "improvement": "target range",
+          "priority": "High",
+          "notes": ["Elevated - monitor kidney function"]
+        },
+        {
+          "name": "eGFR",
+          "value": 78,
+          "unit": "mL/min",
+          "category": "metabolic",
+          "subcategory": "kidney",
+          "status": "borderline",
+          "optimalRange": { "operator": "gt", "value": 90 },
+          "improvement": "higher is better",
+          "priority": "High",
+          "targets": { "q1": 85, "q2": 90 }
+        },
+        {
+          "name": "BUN",
+          "value": 20.0,
+          "unit": "mg/dL",
+          "category": "metabolic",
+          "subcategory": "kidney",
+          "status": "borderline",
+          "referenceRange": { "min": 10, "max": 20 },
+          "improvement": "target range",
+          "priority": "Medium",
+          "notes": ["Upper limit of reference range"]
+        }
+      ]
+    },
+    {
+      "category": "lipids",
+      "label": "Lipid Panel",
+      "sourceSection": "## Lipid Panel",
+      "metrics": [
+        {
+          "name": "Total Cholesterol",
+          "value": 175,
+          "unit": "mg/dL",
+          "category": "lipids",
+          "status": "optimal",
+          "optimalRange": { "operator": "lt", "value": 200 },
+          "improvement": "lower is better",
+          "priority": "Low"
+        },
+        {
+          "name": "HDL",
+          "value": 43,
+          "unit": "mg/dL",
+          "category": "lipids",
+          "status": "optimal",
+          "optimalRange": { "operator": "gt", "value": 40 },
+          "improvement": "higher is better",
+          "priority": "Medium",
+          "notes": ["Adequate but could improve"]
+        },
+        {
+          "name": "LDL",
+          "value": 115,
+          "unit": "mg/dL",
+          "category": "lipids",
+          "status": "borderline",
+          "optimalRange": { "operator": "lt", "value": 100 },
+          "improvement": "lower is better",
+          "priority": "High",
+          "targets": { "q1": 100, "q2": 90 },
+          "notes": ["APOE E3/E4 status elevates cardiovascular risk"]
+        },
+        {
+          "name": "Triglycerides",
+          "value": 86,
+          "unit": "mg/dL",
+          "category": "lipids",
+          "status": "optimal",
+          "optimalRange": { "operator": "lt", "value": 150 },
+          "improvement": "lower is better",
+          "priority": "Low"
+        },
+        {
+          "name": "Total/HDL Ratio",
+          "value": 4.1,
+          "unit": "",
+          "category": "lipids",
+          "status": "borderline",
+          "optimalRange": { "operator": "lt", "value": 3.5 },
+          "improvement": "lower is better",
+          "priority": "High",
+          "targets": { "q1": 3.5, "q2": 3.0 }
+        },
+        {
+          "name": "TG/HDL Ratio",
+          "value": 2.0,
+          "unit": "",
+          "category": "lipids",
+          "status": "borderline",
+          "optimalRange": { "operator": "lt", "value": 2.0 },
+          "improvement": "lower is better",
+          "priority": "Medium"
+        }
+      ]
+    },
+    {
+      "category": "vitamins",
+      "label": "Vitamins",
+      "sourceSection": "## Nutrient Status",
+      "metrics": [
+        {
+          "name": "Vitamin D",
+          "value": 48.43,
+          "unit": "ng/mL",
+          "category": "vitamins",
+          "subcategory": "fat-soluble",
+          "status": "optimal",
+          "referenceRange": { "min": 30, "max": 100 },
+          "optimalRange": { "min": 40, "max": 60 },
+          "improvement": "target range",
+          "priority": "Medium"
+        },
+        {
+          "name": "B12",
+          "value": 678,
+          "unit": "pg/mL",
+          "category": "vitamins",
+          "subcategory": "b-vitamins",
+          "status": "optimal",
+          "referenceRange": { "min": 200, "max": 1100 },
+          "optimalRange": { "min": 400, "max": 900 },
+          "improvement": "target range",
+          "priority": "Low"
+        },
+        {
+          "name": "Folate",
+          "value": 16.2,
+          "unit": "ng/mL",
+          "category": "vitamins",
+          "subcategory": "b-vitamins",
+          "status": "optimal",
+          "referenceRange": { "min": 5.9, "max": 24.8 },
+          "improvement": "target range",
+          "priority": "Low"
+        },
+        {
+          "name": "B6 (P5P)",
+          "value": 102.9,
+          "unit": "μg/L",
+          "category": "vitamins",
+          "subcategory": "b-vitamins",
+          "status": "excess",
+          "referenceRange": { "min": 5, "max": 50 },
+          "optimalRange": { "min": 20, "max": 50 },
+          "improvement": "target range",
+          "priority": "CRITICAL",
+          "targets": { "q1": 40, "q2": 40 },
+          "notes": ["Caused by AG1 - eliminated after May 2025"]
+        },
+        {
+          "name": "Biotin",
+          "value": 7.78,
+          "unit": "ng/mL",
+          "category": "vitamins",
+          "subcategory": "b-vitamins",
+          "status": "excess",
+          "referenceRange": { "min": 0.5, "max": 4.0 },
+          "optimalRange": { "min": 2.0, "max": 4.0 },
+          "improvement": "target range",
+          "priority": "CRITICAL",
+          "targets": { "q1": 3, "q2": 3 },
+          "notes": ["Caused by AG1 - eliminated after May 2025"]
+        }
+      ]
+    },
+    {
+      "category": "minerals",
+      "label": "Minerals",
+      "sourceSection": "## Nutrient Status",
+      "metrics": [
+        {
+          "name": "Zinc",
+          "value": 89,
+          "unit": "μg/dL",
+          "category": "minerals",
+          "status": "optimal",
+          "referenceRange": { "min": 60, "max": 130 },
+          "optimalRange": { "min": 70, "max": 120 },
+          "improvement": "target range",
+          "priority": "Medium"
+        },
+        {
+          "name": "Copper",
+          "value": 104,
+          "unit": "μg/dL",
+          "category": "minerals",
+          "status": "optimal",
+          "referenceRange": { "min": 70, "max": 140 },
+          "improvement": "target range",
+          "priority": "Low"
+        },
+        {
+          "name": "RBC Magnesium",
+          "value": 6.7,
+          "unit": "mg/dL",
+          "category": "minerals",
+          "status": "optimal",
+          "referenceRange": { "min": 4.2, "max": 6.8 },
+          "improvement": "target range",
+          "priority": "Medium"
+        }
+      ]
+    },
+    {
+      "category": "inflammatory",
+      "label": "Inflammatory Markers",
+      "sourceSection": "## Nutrient Status",
+      "metrics": [
+        {
+          "name": "Homocysteine",
+          "value": 9.4,
+          "unit": "μmol/L",
+          "category": "inflammatory",
+          "status": "borderline",
+          "optimalRange": { "operator": "lt", "value": 8.0 },
+          "improvement": "lower is better",
+          "priority": "High",
+          "targets": { "q1": 8.0, "q2": 7.0 }
+        }
+      ]
+    },
+    {
+      "category": "hormones",
+      "label": "Hormonal Panel",
+      "sourceSection": "## Hormonal Panel",
+      "metrics": [
+        {
+          "name": "Total Testosterone",
+          "value": 470,
+          "unit": "ng/dL",
+          "category": "hormones",
+          "subcategory": "sex-hormones",
+          "status": "deficient",
+          "referenceRange": { "min": 264, "max": 916 },
+          "optimalRange": { "min": 500, "max": 800 },
+          "improvement": "higher is better",
+          "priority": "CRITICAL",
+          "previousValue": 564,
+          "previousDate": "2025-02-01",
+          "change": {
+            "absolute": -94,
+            "percent": -16.7,
+            "direction": "down"
+          },
+          "targets": { "q1": 550, "q2": 600 },
+          "notes": ["Significant decline from M1"]
+        },
+        {
+          "name": "Free Testosterone",
+          "value": 99,
+          "unit": "pg/mL",
+          "category": "hormones",
+          "subcategory": "sex-hormones",
+          "status": "borderline",
+          "referenceRange": { "min": 8.7, "max": 25.1 },
+          "improvement": "target range",
+          "priority": "High",
+          "notes": ["Above reference range"]
+        },
+        {
+          "name": "Cortisol AM",
+          "value": 9.09,
+          "unit": "μg/dL",
+          "category": "hormones",
+          "subcategory": "stress-hormones",
+          "status": "optimal",
+          "referenceRange": { "min": 6.2, "max": 19.4 },
+          "improvement": "target range",
+          "priority": "Medium"
+        },
+        {
+          "name": "TSH",
+          "value": 2.30,
+          "unit": "μIU/mL",
+          "category": "hormones",
+          "subcategory": "thyroid",
+          "status": "optimal",
+          "referenceRange": { "min": 0.4, "max": 4.0 },
+          "improvement": "target range",
+          "priority": "Medium"
+        },
+        {
+          "name": "Free T4",
+          "value": 1.28,
+          "unit": "ng/dL",
+          "category": "hormones",
+          "subcategory": "thyroid",
+          "status": "optimal",
+          "referenceRange": { "min": 0.8, "max": 1.8 },
+          "improvement": "target range",
+          "priority": "Low"
+        },
+        {
+          "name": "Free T3",
+          "value": 3.40,
+          "unit": "pg/mL",
+          "category": "hormones",
+          "subcategory": "thyroid",
+          "status": "optimal",
+          "referenceRange": { "min": 2.3, "max": 4.2 },
+          "improvement": "target range",
+          "priority": "Low"
+        },
+        {
+          "name": "DHEA-S",
+          "value": 256,
+          "unit": "μg/dL",
+          "category": "hormones",
+          "subcategory": "stress-hormones",
+          "status": "borderline",
+          "referenceRange": { "min": 250, "max": 500 },
+          "improvement": "higher is better",
+          "priority": "Medium",
+          "notes": ["Lower end of range"]
+        }
+      ]
+    },
+    {
+      "category": "hematology",
+      "label": "Hematology",
+      "sourceSection": "## Hematology",
+      "metrics": [
+        {
+          "name": "WBC",
+          "value": 5.3,
+          "unit": "K/uL",
+          "category": "hematology",
+          "status": "optimal",
+          "referenceRange": { "min": 4.5, "max": 11.0 },
+          "optimalRange": { "min": 4.5, "max": 7.5 },
+          "improvement": "target range",
+          "priority": "Low"
+        },
+        {
+          "name": "RBC",
+          "value": 4.15,
+          "unit": "M/uL",
+          "category": "hematology",
+          "status": "borderline",
+          "referenceRange": { "min": 4.5, "max": 5.5 },
+          "improvement": "target range",
+          "priority": "Medium",
+          "notes": ["Below reference range"]
+        },
+        {
+          "name": "Hemoglobin",
+          "value": 13.7,
+          "unit": "g/dL",
+          "category": "hematology",
+          "status": "borderline",
+          "referenceRange": { "min": 14.0, "max": 17.5 },
+          "optimalRange": { "min": 14.0, "max": 16.5 },
+          "improvement": "target range",
+          "priority": "Medium",
+          "notes": ["Slightly below reference"]
+        },
+        {
+          "name": "Hematocrit",
+          "value": 41.2,
+          "unit": "%",
+          "category": "hematology",
+          "status": "borderline",
+          "referenceRange": { "min": 42, "max": 52 },
+          "optimalRange": { "min": 42, "max": 48 },
+          "improvement": "target range",
+          "priority": "Medium",
+          "notes": ["Slightly below reference"]
+        },
+        {
+          "name": "MCV",
+          "value": 99.3,
+          "unit": "fL",
+          "category": "hematology",
+          "status": "borderline",
+          "referenceRange": { "min": 80, "max": 100 },
+          "optimalRange": { "min": 80, "max": 95 },
+          "improvement": "target range",
+          "priority": "Medium",
+          "notes": ["Upper end - may indicate B12/folate issue despite normal levels"]
+        },
+        {
+          "name": "Platelets",
+          "value": 205,
+          "unit": "K/uL",
+          "category": "hematology",
+          "status": "optimal",
+          "referenceRange": { "min": 150, "max": 400 },
+          "optimalRange": { "min": 200, "max": 270 },
+          "improvement": "target range",
+          "priority": "Low"
+        }
+      ]
+    }
+  ]
+}

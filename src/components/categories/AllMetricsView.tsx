@@ -1,0 +1,334 @@
+/**
+ * AllMetricsView Component
+ *
+ * Displays all metrics from all categories in a single unified view.
+ * Groups metrics by category with collapsible sections.
+ */
+
+import { useState, useMemo } from 'react';
+import * as LucideIcons from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, Search, Filter } from 'lucide-react';
+import type { MetricStatus, MetricCategory } from '@/types/metrics';
+import { CATEGORY_INFO } from '@/types/metrics';
+import { useDashboard } from '@/hooks/useDashboard';
+import { MetricCard } from '../metrics/MetricCard';
+import { StatusBadge } from '../metrics/StatusBadge';
+
+type SortOption = 'category' | 'name' | 'status' | 'date';
+type StatusFilter = 'all' | MetricStatus | 'empty';
+
+export function AllMetricsView() {
+  const { categories, isLoading, error } = useDashboard();
+  const [expandedCategories, setExpandedCategories] = useState<Set<MetricCategory>>(
+    new Set(['vitamins', 'minerals', 'inflammatory', 'metabolic', 'hormones', 'autonomic', 'bodyComposition', 'lipids', 'hematology'])
+  );
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('category');
+
+  // Collect all metrics with their categories
+  const allMetrics = useMemo(() => {
+    return categories.flatMap(cat =>
+      cat.metrics.map(metric => ({
+        ...metric,
+        categoryId: cat.category,
+        categoryInfo: cat.info,
+      }))
+    );
+  }, [categories]);
+
+  // Filter and sort metrics
+  const filteredMetrics = useMemo(() => {
+    let result = allMetrics;
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(m =>
+        m.name.toLowerCase().includes(query) ||
+        m.categoryInfo.label.toLowerCase().includes(query)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      result = result.filter(m => {
+        if (statusFilter === 'empty') {
+          return !m.calculatedStatus;
+        }
+        return m.calculatedStatus === statusFilter;
+      });
+    }
+
+    // Sort
+    if (sortBy === 'name') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'status') {
+      const statusOrder: Record<string, number> = { deficient: 0, excess: 1, borderline: 2, optimal: 3 };
+      result = [...result].sort((a, b) => {
+        const aOrder = a.calculatedStatus ? statusOrder[a.calculatedStatus] ?? 4 : 4;
+        const bOrder = b.calculatedStatus ? statusOrder[b.calculatedStatus] ?? 4 : 4;
+        return aOrder - bOrder;
+      });
+    } else if (sortBy === 'date') {
+      result = [...result].sort((a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    }
+
+    return result;
+  }, [allMetrics, searchQuery, statusFilter, sortBy]);
+
+  // Group by category for display
+  const metricsByCategory = useMemo(() => {
+    if (sortBy !== 'category') return null;
+
+    const grouped = new Map<MetricCategory, typeof filteredMetrics>();
+    for (const metric of filteredMetrics) {
+      const existing = grouped.get(metric.categoryId) || [];
+      grouped.set(metric.categoryId, [...existing, metric]);
+    }
+    return grouped;
+  }, [filteredMetrics, sortBy]);
+
+  // Calculate status counts
+  const statusCounts = useMemo(() => {
+    return {
+      optimal: allMetrics.filter(m => m.calculatedStatus === 'optimal').length,
+      borderline: allMetrics.filter(m => m.calculatedStatus === 'borderline').length,
+      deficient: allMetrics.filter(m => m.calculatedStatus === 'deficient').length,
+      excess: allMetrics.filter(m => m.calculatedStatus === 'excess').length,
+      empty: allMetrics.filter(m => !m.calculatedStatus).length,
+    };
+  }, [allMetrics]);
+
+  const toggleCategory = (category: MetricCategory) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  };
+
+  const expandAll = () => {
+    setExpandedCategories(new Set(categories.map(c => c.category)));
+  };
+
+  const collapseAll = () => {
+    setExpandedCategories(new Set());
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">Loading all metrics...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Bar */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">All Metrics</h2>
+            <p className="text-sm text-gray-600">{allMetrics.length} total metrics across {categories.filter(c => c.metricCount > 0).length} categories</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-1 text-sm">
+              <span className="px-2 py-1 rounded bg-green-100 text-green-700 font-medium">{statusCounts.optimal} optimal</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">{statusCounts.borderline} borderline</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <span className="px-2 py-1 rounded bg-red-100 text-red-700 font-medium">{statusCounts.deficient + statusCounts.excess} attention</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px] max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search metrics..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        {/* Status Filter */}
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="all">All statuses</option>
+            <option value="optimal">Optimal</option>
+            <option value="borderline">Borderline</option>
+            <option value="deficient">Deficient</option>
+            <option value="excess">Excess</option>
+            <option value="empty">No status</option>
+          </select>
+        </div>
+
+        {/* Sort */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="category">Sort by category</option>
+          <option value="name">Sort by name</option>
+          <option value="status">Sort by status</option>
+          <option value="date">Sort by date</option>
+        </select>
+
+        {/* Expand/Collapse */}
+        {sortBy === 'category' && (
+          <div className="flex gap-2">
+            <button
+              onClick={expandAll}
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Expand all
+            </button>
+            <button
+              onClick={collapseAll}
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Collapse all
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Results count */}
+      {(searchQuery || statusFilter !== 'all') && (
+        <p className="text-sm text-gray-600">
+          Showing {filteredMetrics.length} of {allMetrics.length} metrics
+        </p>
+      )}
+
+      {/* Metrics Display */}
+      {sortBy === 'category' && metricsByCategory ? (
+        // Grouped by category
+        <div className="space-y-4">
+          {categories.map((cat) => {
+            const categoryMetrics = metricsByCategory.get(cat.category) || [];
+            if (categoryMetrics.length === 0 && (searchQuery || statusFilter !== 'all')) return null;
+
+            const isExpanded = expandedCategories.has(cat.category);
+            const IconComponent = (LucideIcons as Record<string, React.ComponentType<{ className?: string }>>)[
+              cat.info.icon
+            ] || LucideIcons.Activity;
+
+            return (
+              <div key={cat.category} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                {/* Category Header */}
+                <button
+                  onClick={() => toggleCategory(cat.category)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    )}
+                    <div
+                      className={`
+                        flex items-center justify-center w-10 h-10 rounded-lg
+                        ${cat.overallStatus === 'optimal' ? 'bg-green-100' : ''}
+                        ${cat.overallStatus === 'borderline' ? 'bg-yellow-100' : ''}
+                        ${cat.overallStatus === 'deficient' || cat.overallStatus === 'excess' ? 'bg-red-100' : ''}
+                        ${cat.overallStatus === 'empty' ? 'bg-gray-100' : ''}
+                      `}
+                    >
+                      <IconComponent
+                        className={`
+                          w-5 h-5
+                          ${cat.overallStatus === 'optimal' ? 'text-green-600' : ''}
+                          ${cat.overallStatus === 'borderline' ? 'text-yellow-600' : ''}
+                          ${cat.overallStatus === 'deficient' || cat.overallStatus === 'excess' ? 'text-red-600' : ''}
+                          ${cat.overallStatus === 'empty' ? 'text-gray-400' : ''}
+                        `}
+                      />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-gray-900">{cat.info.label}</h3>
+                      <p className="text-sm text-gray-500">{categoryMetrics.length} metrics</p>
+                    </div>
+                  </div>
+                  {cat.overallStatus !== 'empty' && (
+                    <StatusBadge status={cat.overallStatus} size="sm" />
+                  )}
+                </button>
+
+                {/* Metrics Grid */}
+                {isExpanded && categoryMetrics.length > 0 && (
+                  <div className="border-t border-gray-100 p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {categoryMetrics.map((metric) => (
+                        <MetricCard key={metric.id} metric={metric} compact />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {isExpanded && categoryMetrics.length === 0 && (
+                  <div className="border-t border-gray-100 p-4 text-center text-gray-500 text-sm">
+                    No metrics in this category
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        // Flat list (sorted by name, status, or date)
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredMetrics.map((metric) => (
+            <MetricCard key={metric.id} metric={metric} compact />
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {filteredMetrics.length === 0 && (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+          <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No metrics found</h3>
+          <p className="text-gray-600">
+            {searchQuery || statusFilter !== 'all'
+              ? 'Try adjusting your search or filters.'
+              : 'Import data to get started.'}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default AllMetricsView;
