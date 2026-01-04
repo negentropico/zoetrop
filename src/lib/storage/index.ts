@@ -13,8 +13,11 @@ export type {
   SyncStatusSummary,
 } from './adapter';
 
-// LocalStorage implementation
+// LocalStorage implementation (browser)
 export { LocalStorageAdapter, STORAGE_KEY } from './local';
+
+// SQLite implementation (Node.js - local persistence)
+export { SQLiteAdapter } from './sqlite';
 
 // Validation utilities
 export { validateMetric, validateFullMetric } from './validation';

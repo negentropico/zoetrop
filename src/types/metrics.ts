@@ -2,8 +2,8 @@
 
 export type MetricStatus = 'optimal' | 'borderline' | 'deficient' | 'excess';
 export type MetricTrend = 'improving' | 'stable' | 'declining';
-export type ImprovementDirection = 'higher is better' | 'lower is better';
-export type DataSource = 'manual' | 'whoop' | 'dexa' | 'bloodwork' | 'csv';
+export type ImprovementDirection = 'higher is better' | 'lower is better' | 'target range';
+export type DataSource = 'manual' | 'whoop' | 'dexa' | 'bloodwork' | 'csv' | 'vault';
 export type SyncStatus = 'local' | 'synced' | 'pending';
 
 // 9 Metric Categories

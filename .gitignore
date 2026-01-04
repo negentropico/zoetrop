@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # Local Netlify folder
 .netlify
+
+# SQLite database files
+data/
+*.db
+*.db-wal
+*.db-shm

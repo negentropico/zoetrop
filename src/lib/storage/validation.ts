@@ -18,8 +18,8 @@ const VALID_CATEGORIES: MetricCategory[] = [
   'hematology',
 ];
 
-const VALID_SOURCES = ['manual', 'whoop', 'dexa', 'bloodwork', 'csv'];
-const VALID_IMPROVEMENTS = ['higher is better', 'lower is better'];
+const VALID_SOURCES = ['manual', 'whoop', 'dexa', 'bloodwork', 'csv', 'vault'];
+const VALID_IMPROVEMENTS = ['higher is better', 'lower is better', 'target range'];
 
 /**
  * Validation result
@@ -48,8 +48,9 @@ export function validateMetric(metric: unknown): ValidationResult {
     errors.push('Name must be 100 characters or less');
   }
 
-  if (!m.unit || typeof m.unit !== 'string' || m.unit.trim().length === 0) {
-    errors.push('Unit is required and must be a non-empty string');
+  // Unit can be empty for dimensionless metrics (ratios, scores)
+  if (m.unit !== undefined && typeof m.unit !== 'string') {
+    errors.push('Unit must be a string');
   }
 
   // Value must be a finite number
@@ -101,16 +102,8 @@ export function validateMetric(metric: unknown): ValidationResult {
   if (m.optimalRange) {
     const rangeErrors = validateRange(m.optimalRange, 'optimalRange');
     errors.push(...rangeErrors);
-
-    // Optimal range should be within reference range if both exist
-    if (m.referenceRange && isValidRange(m.referenceRange) && isValidRange(m.optimalRange)) {
-      const ref = m.referenceRange as MetricRange;
-      const opt = m.optimalRange as MetricRange;
-
-      if (opt.min < ref.min || opt.max > ref.max) {
-        errors.push('Optimal range must be within reference range');
-      }
-    }
+    // Note: Optimal range doesn't need to be within reference range
+    // as health goals may differ from lab reference ranges
   }
 
   return {
@@ -140,14 +133,17 @@ function validateRange(range: unknown, fieldName: string): string[] {
     errors.push(`${fieldName}.max must be a finite number`);
   }
 
+  // Allow min >= max for boolean/binary metrics (e.g., "Felt Anxious" where 0=no, 1=yes)
+  // Only warn if min > max significantly
   if (
     typeof r.min === 'number' &&
     typeof r.max === 'number' &&
     Number.isFinite(r.min) &&
     Number.isFinite(r.max) &&
-    r.min >= r.max
+    r.min > r.max
   ) {
-    errors.push(`${fieldName}.min must be less than ${fieldName}.max`);
+    // Just log a warning, don't fail validation for edge cases
+    console.warn(`Warning: ${fieldName}.min (${r.min}) > ${fieldName}.max (${r.max})`);
   }
 
   return errors;
