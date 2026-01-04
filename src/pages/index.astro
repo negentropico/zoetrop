@@ -1,63 +1,34 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import DashboardView from '../components/categories/DashboardView';
-import { CATEGORY_INFO } from '../types/metrics';
-
-const categories = Object.values(CATEGORY_INFO);
+import AllMetricsView from '../components/categories/AllMetricsView';
 ---
 
-<Layout title="Dashboard">
-  <div class="min-h-screen">
+<Layout title="Wellness Tracker">
+  <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-blue-600 text-white py-4 shadow-md">
-      <div class="container mx-auto px-4">
-        <h1 class="text-2xl font-semibold">Wellness Tracker</h1>
-        <p class="text-blue-100 text-sm mt-1">Comprehensive health metrics dashboard</p>
+      <div class="container mx-auto px-4 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Wellness Tracker</h1>
+          <p class="text-blue-100 text-sm mt-1">Comprehensive health metrics dashboard</p>
+        </div>
+        <a
+          href="/import/"
+          class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+        >
+          Import Data
+        </a>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="bg-white border-b border-gray-200">
-      <div class="container mx-auto px-4">
-        <div class="flex gap-1 overflow-x-auto py-2">
-          <a
-            href="/"
-            class="px-4 py-2 rounded-t-lg bg-blue-600 text-white font-medium text-sm whitespace-nowrap"
-          >
-            Dashboard
-          </a>
-          <a
-            href="/all-metrics/"
-            class="px-4 py-2 rounded-t-lg hover:bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-colors"
-          >
-            All Metrics
-          </a>
-          {categories.map((cat) => (
-            <a
-              href={`/${cat.id === 'bodyComposition' ? 'body-composition' : cat.id}/`}
-              class="px-4 py-2 rounded-t-lg hover:bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-colors"
-            >
-              {cat.label}
-            </a>
-          ))}
-          <a
-            href="/import/"
-            class="px-4 py-2 rounded-t-lg hover:bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-colors ml-auto"
-          >
-            Import Data
-          </a>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6">
-      <DashboardView client:load />
+    <!-- Main Content - Single View with Collapsible Sections -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+      <AllMetricsView client:load />
     </main>
 
     <!-- Footer -->
-    <footer class="mt-auto py-4 text-center text-xs text-gray-500">
-      <p>Wellness Tracker v0.2.0 | Phase 2 MVP Dashboard</p>
+    <footer class="py-4 text-center text-xs text-gray-500">
+      <p>Wellness Tracker v0.3.0 | Single View Dashboard</p>
     </footer>
   </div>
 </Layout>

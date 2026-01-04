@@ -1,30 +1,39 @@
 /**
  * AllMetricsView Component
  *
- * Displays all metrics from all categories in a single unified view.
- * Groups metrics by category with collapsible sections.
+ * Main dashboard view showing all metrics with collapsible category sections.
+ * Includes trend charts for metrics with historical data.
  */
 
 import { useState, useMemo } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { ChevronDown, ChevronRight, Loader2, Search, Filter } from 'lucide-react';
-import type { MetricStatus, MetricCategory } from '@/types/metrics';
+import { ChevronDown, ChevronRight, Loader2, Search, Filter, TrendingUp, X } from 'lucide-react';
+import type { MetricStatus, MetricCategory, Metric } from '@/types/metrics';
 import { CATEGORY_INFO } from '@/types/metrics';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useMetrics } from '@/hooks/useMetrics';
 import { MetricCard } from '../metrics/MetricCard';
 import { StatusBadge } from '../metrics/StatusBadge';
+import { TrendChart } from '../charts/TrendChart';
 
 type SortOption = 'category' | 'name' | 'status' | 'date';
 type StatusFilter = 'all' | MetricStatus | 'empty';
 
+interface MetricWithCategory extends Metric {
+  categoryId: MetricCategory;
+  categoryInfo: typeof CATEGORY_INFO[MetricCategory];
+}
+
 export function AllMetricsView() {
   const { categories, isLoading, error } = useDashboard();
+  const { getMetricHistory } = useMetrics();
   const [expandedCategories, setExpandedCategories] = useState<Set<MetricCategory>>(
     new Set(['vitamins', 'minerals', 'inflammatory', 'metabolic', 'hormones', 'autonomic', 'bodyComposition', 'lipids', 'hematology'])
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('category');
+  const [selectedMetric, setSelectedMetric] = useState<MetricWithCategory | null>(null);
 
   // Collect all metrics with their categories
   const allMetrics = useMemo(() => {
@@ -37,9 +46,28 @@ export function AllMetricsView() {
     );
   }, [categories]);
 
+  // Get unique metrics by name (latest value for each)
+  const uniqueMetrics = useMemo(() => {
+    const metricMap = new Map<string, MetricWithCategory>();
+
+    // Sort by date descending to get latest first
+    const sorted = [...allMetrics].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    for (const metric of sorted) {
+      const key = `${metric.categoryId}-${metric.name}`;
+      if (!metricMap.has(key)) {
+        metricMap.set(key, metric);
+      }
+    }
+
+    return Array.from(metricMap.values());
+  }, [allMetrics]);
+
   // Filter and sort metrics
   const filteredMetrics = useMemo(() => {
-    let result = allMetrics;
+    let result = uniqueMetrics;
 
     // Search filter
     if (searchQuery) {
@@ -77,7 +105,7 @@ export function AllMetricsView() {
     }
 
     return result;
-  }, [allMetrics, searchQuery, statusFilter, sortBy]);
+  }, [uniqueMetrics, searchQuery, statusFilter, sortBy]);
 
   // Group by category for display
   const metricsByCategory = useMemo(() => {
@@ -94,13 +122,19 @@ export function AllMetricsView() {
   // Calculate status counts
   const statusCounts = useMemo(() => {
     return {
-      optimal: allMetrics.filter(m => m.calculatedStatus === 'optimal').length,
-      borderline: allMetrics.filter(m => m.calculatedStatus === 'borderline').length,
-      deficient: allMetrics.filter(m => m.calculatedStatus === 'deficient').length,
-      excess: allMetrics.filter(m => m.calculatedStatus === 'excess').length,
-      empty: allMetrics.filter(m => !m.calculatedStatus).length,
+      optimal: uniqueMetrics.filter(m => m.calculatedStatus === 'optimal').length,
+      borderline: uniqueMetrics.filter(m => m.calculatedStatus === 'borderline').length,
+      deficient: uniqueMetrics.filter(m => m.calculatedStatus === 'deficient').length,
+      excess: uniqueMetrics.filter(m => m.calculatedStatus === 'excess').length,
+      empty: uniqueMetrics.filter(m => !m.calculatedStatus).length,
     };
-  }, [allMetrics]);
+  }, [uniqueMetrics]);
+
+  // Get history for selected metric
+  const metricHistory = useMemo(() => {
+    if (!selectedMetric) return [];
+    return getMetricHistory(selectedMetric.name);
+  }, [selectedMetric, getMetricHistory]);
 
   const toggleCategory = (category: MetricCategory) => {
     setExpandedCategories(prev => {
@@ -122,11 +156,15 @@ export function AllMetricsView() {
     setExpandedCategories(new Set());
   };
 
+  const handleMetricClick = (metric: MetricWithCategory) => {
+    setSelectedMetric(selectedMetric?.id === metric.id ? null : metric);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-gray-600">Loading all metrics...</span>
+        <span className="ml-2 text-gray-600">Loading metrics...</span>
       </div>
     );
   }
@@ -145,22 +183,100 @@ export function AllMetricsView() {
       <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">All Metrics</h2>
-            <p className="text-sm text-gray-600">{allMetrics.length} total metrics across {categories.filter(c => c.metricCount > 0).length} categories</p>
+            <h2 className="text-lg font-semibold text-gray-900">Health Metrics</h2>
+            <p className="text-sm text-gray-600">
+              {uniqueMetrics.length} unique metrics • {allMetrics.length} total readings
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-1 text-sm">
-              <span className="px-2 py-1 rounded bg-green-100 text-green-700 font-medium">{statusCounts.optimal} optimal</span>
+              <span className="px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
+                {statusCounts.optimal} optimal
+              </span>
             </div>
             <div className="flex items-center gap-1 text-sm">
-              <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">{statusCounts.borderline} borderline</span>
+              <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">
+                {statusCounts.borderline} borderline
+              </span>
             </div>
             <div className="flex items-center gap-1 text-sm">
-              <span className="px-2 py-1 rounded bg-red-100 text-red-700 font-medium">{statusCounts.deficient + statusCounts.excess} attention</span>
+              <span className="px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
+                {statusCounts.deficient + statusCounts.excess} attention
+              </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Trend Chart Panel (when metric selected) */}
+      {selectedMetric && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+              <div>
+                <h3 className="font-semibold text-gray-900">{selectedMetric.name}</h3>
+                <p className="text-sm text-gray-500">
+                  {metricHistory.length} readings • {selectedMetric.categoryInfo.label}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedMetric(null)}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-400" />
+            </button>
+          </div>
+
+          {metricHistory.length > 1 ? (
+            <TrendChart
+              metrics={metricHistory}
+              height={250}
+              showOptimalRange={true}
+            />
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              Only 1 data point available. Need more readings for trend.
+            </div>
+          )}
+
+          {/* Data table */}
+          {metricHistory.length > 0 && (
+            <div className="mt-4 border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">History</h4>
+              <div className="max-h-48 overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-gray-500 text-left">
+                    <tr>
+                      <th className="pb-2">Date</th>
+                      <th className="pb-2 text-right">Value</th>
+                      <th className="pb-2 text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {[...metricHistory].reverse().slice(0, 10).map((m, i) => (
+                      <tr key={i}>
+                        <td className="py-2 text-gray-600">
+                          {new Date(m.timestamp).toLocaleDateString()}
+                        </td>
+                        <td className="py-2 text-right font-medium">
+                          {m.value} {m.unit}
+                        </td>
+                        <td className="py-2 text-right">
+                          {m.calculatedStatus && (
+                            <StatusBadge status={m.calculatedStatus} size="sm" />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
@@ -227,7 +343,7 @@ export function AllMetricsView() {
       {/* Results count */}
       {(searchQuery || statusFilter !== 'all') && (
         <p className="text-sm text-gray-600">
-          Showing {filteredMetrics.length} of {allMetrics.length} metrics
+          Showing {filteredMetrics.length} of {uniqueMetrics.length} metrics
         </p>
       )}
 
@@ -238,6 +354,7 @@ export function AllMetricsView() {
           {categories.map((cat) => {
             const categoryMetrics = metricsByCategory.get(cat.category) || [];
             if (categoryMetrics.length === 0 && (searchQuery || statusFilter !== 'all')) return null;
+            if (categoryMetrics.length === 0) return null;
 
             const isExpanded = expandedCategories.has(cat.category);
             const IconComponent = (LucideIcons as Record<string, React.ComponentType<{ className?: string }>>)[
@@ -291,15 +408,19 @@ export function AllMetricsView() {
                   <div className="border-t border-gray-100 p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {categoryMetrics.map((metric) => (
-                        <MetricCard key={metric.id} metric={metric} compact />
+                        <div
+                          key={metric.id}
+                          onClick={() => handleMetricClick(metric)}
+                          className={`cursor-pointer transition-all ${
+                            selectedMetric?.id === metric.id
+                              ? 'ring-2 ring-blue-500 rounded-lg'
+                              : 'hover:shadow-md'
+                          }`}
+                        >
+                          <MetricCard metric={metric} compact showTrendIcon />
+                        </div>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {isExpanded && categoryMetrics.length === 0 && (
-                  <div className="border-t border-gray-100 p-4 text-center text-gray-500 text-sm">
-                    No metrics in this category
                   </div>
                 )}
               </div>
@@ -310,7 +431,17 @@ export function AllMetricsView() {
         // Flat list (sorted by name, status, or date)
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredMetrics.map((metric) => (
-            <MetricCard key={metric.id} metric={metric} compact />
+            <div
+              key={metric.id}
+              onClick={() => handleMetricClick(metric)}
+              className={`cursor-pointer transition-all ${
+                selectedMetric?.id === metric.id
+                  ? 'ring-2 ring-blue-500 rounded-lg'
+                  : 'hover:shadow-md'
+              }`}
+            >
+              <MetricCard metric={metric} compact showTrendIcon />
+            </div>
           ))}
         </div>
       )}
