@@ -8,13 +8,14 @@
 
 | Location | Purpose | Status |
 |----------|---------|--------|
-| **Browser LocalStorage** | Primary runtime storage | ✅ Active |
-| **`public/.dev/seed-data.json`** | Pre-generated seed data (3.2MB) | ✅ Active |
-| **Neon Postgres** | Future cloud sync | 🔲 Scaffolded only |
+| **Browser LocalStorage** | Runtime storage (browser) | ✅ Active |
+| **SQLite** | Local persistence (Node.js) | ✅ Active |
+| **`public/.dev/seed-data.json`** | Pre-generated seed data | ✅ Active |
+| **Neon Postgres** | Cloud sync | 🔲 Scaffolded only |
 
 ---
 
-## 1. LocalStorage (Primary Store)
+## 1. LocalStorage (Browser Runtime)
 
 **Key:** `wellness_tracker_metrics`
 
@@ -43,7 +44,69 @@ interface StoredMetrics {
 
 ---
 
-## 2. Seed Data (Dev/Staging)
+## 2. SQLite (Local Persistence)
+
+**File:** `data/wellness.db`
+
+**Size:** 1.9MB (40% smaller than JSON)
+
+**Implementation:** `src/lib/storage/sqlite.ts`
+
+**Schema:**
+```sql
+CREATE TABLE metrics (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  value REAL NOT NULL,
+  unit TEXT NOT NULL,
+  timestamp TEXT NOT NULL,
+  description TEXT,
+  improvement TEXT NOT NULL,
+  category TEXT NOT NULL,
+  subcategory TEXT,
+  reference_min REAL,
+  reference_max REAL,
+  optimal_min REAL,
+  optimal_max REAL,
+  source TEXT NOT NULL,
+  sync_status TEXT NOT NULL DEFAULT 'local',
+  sync_version INTEGER NOT NULL DEFAULT 1
+);
+
+-- Indexes for common queries
+CREATE INDEX idx_metrics_category ON metrics(category);
+CREATE INDEX idx_metrics_name ON metrics(name);
+CREATE INDEX idx_metrics_timestamp ON metrics(timestamp);
+CREATE INDEX idx_metrics_sync_status ON metrics(sync_status);
+```
+
+**Features:**
+- WAL mode enabled for better concurrency
+- Atomic transactions for bulk imports
+- Same StorageAdapter interface as LocalStorage
+
+**Usage:**
+```typescript
+import { SQLiteAdapter } from '@/lib/storage';
+
+const adapter = new SQLiteAdapter('data/wellness.db');
+await adapter.initialize();
+
+// Same API as LocalStorageAdapter
+const metrics = await adapter.getMetrics({ category: 'autonomic' });
+await adapter.importMetrics(newMetrics);
+adapter.close();
+```
+
+**Migration:**
+```bash
+npx tsx scripts/migrate-to-sqlite.ts        # Import seed data
+npx tsx scripts/migrate-to-sqlite.ts --force # Clear and reimport
+```
+
+---
+
+## 3. Seed Data (Dev/Staging)
 
 **File:** `public/.dev/seed-data.json`
 
@@ -70,7 +133,7 @@ interface StoredMetrics {
 
 ---
 
-## 3. Import/Export Flow
+## 4. Import/Export Flow
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
@@ -80,19 +143,19 @@ interface StoredMetrics {
 └─────────────────┘              │
                                  ▼
                     ┌─────────────────────┐
-                    │  LocalStorageAdapter│
-                    │  persist()          │
+                    │  StorageAdapter     │
+                    │  (Local or SQLite)  │
                     └────────┬────────────┘
                              │
-                             ▼
-                    ┌─────────────────────┐
-                    │  localStorage       │
-                    │  "wellness_tracker_ │
-                    │   metrics"          │
-                    └─────────────────────┘
+              ┌──────────────┴──────────────┐
+              ▼                             ▼
+┌─────────────────────┐       ┌─────────────────────┐
+│  localStorage       │       │  SQLite             │
+│  (browser)          │       │  data/wellness.db   │
+└─────────────────────┘       └─────────────────────┘
 ```
 
-**Export:** `useMetrics().exportMetrics()` → JSON string with all metrics
+**Export:** `adapter.exportMetrics()` → JSON string with all metrics
 
 **Import Sources:**
 - WHOOP JSON (analyzer report)
@@ -102,7 +165,7 @@ interface StoredMetrics {
 
 ---
 
-## 4. Neon Postgres (Cloud - Future)
+## 5. Neon Postgres (Cloud - Future)
 
 **Config:** `drizzle.config.ts`
 ```typescript
@@ -125,109 +188,38 @@ interface StoredMetrics {
 
 ---
 
-## 5. Recommended: Local Database Options
+## 6. Storage Adapter Interface
 
-### Option A: SQLite (Recommended for Local-First)
+All adapters implement the same interface:
 
-**Why SQLite:**
-- Single file, no server process
-- Works offline completely
-- Can sync file to cloud backup
-- Fast for 10k-100k records
-- Native in most languages
-
-**Implementation:**
 ```typescript
-// Use better-sqlite3 for Node.js
-import Database from 'better-sqlite3';
-
-const db = new Database('wellness.db');
-db.exec(`
-  CREATE TABLE IF NOT EXISTS metrics (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    value REAL NOT NULL,
-    unit TEXT,
-    category TEXT NOT NULL,
-    timestamp TEXT NOT NULL,
-    sync_status TEXT DEFAULT 'local',
-    sync_version INTEGER DEFAULT 1,
-    optimal_min REAL,
-    optimal_max REAL,
-    reference_min REAL,
-    reference_max REAL,
-    source TEXT,
-    metadata TEXT
-  )
-`);
+interface StorageAdapter {
+  initialize(): Promise<StorageResult<void>>;
+  getMetrics(query?: MetricQuery): Promise<StorageResult<Metric[]>>;
+  getMetricById(id: string): Promise<StorageResult<Metric | null>>;
+  getMetricHistory(name: string): Promise<StorageResult<Metric[]>>;
+  addMetric(metric: Omit<Metric, 'id' | 'syncStatus' | 'syncVersion'>): Promise<StorageResult<Metric>>;
+  updateMetric(id: string, updates: Partial<Metric>): Promise<StorageResult<Metric>>;
+  deleteMetric(id: string): Promise<StorageResult<void>>;
+  importMetrics(metrics: Metric[]): Promise<StorageResult<Metric[]>>;
+  exportMetrics(): Promise<StorageResult<string>>;
+  clearMetrics(confirm: boolean): Promise<StorageResult<void>>;
+  getSyncStatus(): Promise<StorageResult<SyncStatusSummary>>;
+  markAsSynced(ids: string[]): Promise<StorageResult<void>>;
+}
 ```
 
-**Sync Strategy:**
-- Export SQLite → JSON → Cloud backup
-- Or use Litestream for continuous replication to S3/R2
-
-**Packages:**
-- `better-sqlite3` - Fast native SQLite
-- `drizzle-orm` - Already in project, supports SQLite
-- `sql.js` - SQLite in browser via WASM (if needed)
+**Available Adapters:**
+| Adapter | Environment | Persistence | Use Case |
+|---------|-------------|-------------|----------|
+| `LocalStorageAdapter` | Browser | Session/Cache | UI runtime |
+| `SQLiteAdapter` | Node.js | File | Local backup, scripts |
+| `PostgresAdapter` | Server | Cloud | Multi-device sync (future) |
 
 ---
 
-### Option B: Local Postgres
+## 7. Hybrid Architecture (Recommended)
 
-**Why Local Postgres:**
-- Same schema as production Neon
-- Full SQL power (CTEs, window functions)
-- Better for complex queries
-- Easier migration to cloud
-
-**Setup:**
-```bash
-# macOS
-brew install postgresql@16
-brew services start postgresql@16
-
-# Create database
-createdb wellness_tracker
-
-# Update .env
-DATABASE_URL="postgresql://localhost/wellness_tracker"
-```
-
-**Schema Migration:**
-```typescript
-// db/schema.ts - Replace placeholder
-import { pgTable, text, real, timestamp, integer } from 'drizzle-orm/pg-core';
-
-export const metrics = pgTable('metrics', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  value: real('value').notNull(),
-  unit: text('unit'),
-  category: text('category').notNull(),
-  timestamp: timestamp('timestamp').notNull(),
-  syncStatus: text('sync_status').default('local'),
-  syncVersion: integer('sync_version').default(1),
-  optimalMin: real('optimal_min'),
-  optimalMax: real('optimal_max'),
-  referenceMin: real('reference_min'),
-  referenceMax: real('reference_max'),
-  source: text('source'),
-  metadata: text('metadata'), // JSON string
-});
-```
-
-**Commands:**
-```bash
-npm run db:generate  # Generate migrations
-npm run db:migrate   # Apply migrations
-```
-
----
-
-### Option C: Hybrid (Recommended)
-
-**Architecture:**
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │ localStorage│────▶│ SQLite      │────▶│ Neon/Cloud  │
@@ -236,50 +228,40 @@ npm run db:migrate   # Apply migrations
      Fast              Persistent         Sync/Share
 ```
 
-**Benefits:**
-- localStorage for instant UI
-- SQLite for persistence beyond browser
-- Cloud for backup/multi-device
-
 **Sync Flow:**
-1. Write to localStorage (instant)
+1. Write to localStorage (instant UI)
 2. Background sync to SQLite (persistent)
 3. Periodic sync to cloud (backup)
 
 ---
 
-## 6. Implementation Priority
+## 8. Implementation Status
 
-### Phase 1: Current (LocalStorage Only)
-- ✅ Works offline
-- ✅ Fast reads/writes
-- ⚠️ Browser-only, cleared on cache clear
-- ⚠️ ~5MB limit
-
-### Phase 2: Add SQLite
-- Persist beyond browser
-- Export/backup capability
-- No server needed
-
-### Phase 3: Add Cloud Sync
-- Multi-device access
-- Backup/recovery
-- Share with providers
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **Phase 1** | LocalStorage (browser) | ✅ Complete |
+| **Phase 2** | SQLite (local persistence) | ✅ Complete |
+| **Phase 3** | Cloud sync (Neon Postgres) | 🔲 Pending |
 
 ---
 
-## 7. File Locations Summary
+## 9. File Locations Summary
 
 ```
 /Users/mac/Code/Tracker/
+├── data/
+│   └── wellness.db             # SQLite database (1.9MB)
 ├── public/.dev/
 │   └── seed-data.json          # Pre-generated seed (3.2MB)
 ├── scripts/
-│   └── seed-initial-data.ts    # Generates seed from vault
+│   ├── seed-initial-data.ts    # Generates seed from vault
+│   └── migrate-to-sqlite.ts    # Migrates seed to SQLite
 ├── src/lib/storage/
 │   ├── adapter.ts              # Storage interface
 │   ├── local.ts                # LocalStorage implementation
-│   └── validation.ts           # Metric validation
+│   ├── sqlite.ts               # SQLite implementation
+│   ├── validation.ts           # Metric validation
+│   └── index.ts                # Exports all adapters
 ├── db/
 │   ├── index.ts                # Drizzle/Neon client
 │   └── schema.ts               # Database schema (placeholder)
