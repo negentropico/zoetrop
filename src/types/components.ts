@@ -227,6 +227,8 @@ export interface UseDashboardReturn {
   error: string | null;
   /** Refresh dashboard data */
   refresh: () => void;
+  /** Current storage mode */
+  storageMode: 'localStorage' | 'api';
 }
 
 /**

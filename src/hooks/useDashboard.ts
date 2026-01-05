@@ -6,16 +6,22 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { useMetrics } from './useMetrics';
+import { useMetrics, type StorageMode } from './useMetrics';
 import { aggregateByCategory, getCategorySummary } from '@/lib/calculations/aggregate';
 import type { MetricCategory } from '@/types/metrics';
 import type { CategorySummary, UseDashboardReturn } from '@/types/components';
 
+export interface UseDashboardOptions {
+  /** Storage mode: 'localStorage' (browser) or 'api' (server SQLite) */
+  mode?: StorageMode;
+}
+
 /**
  * Hook for dashboard data with category aggregations
  */
-export function useDashboard(): UseDashboardReturn {
-  const { metrics, loading, error, clearError } = useMetrics();
+export function useDashboard(options: UseDashboardOptions = {}): UseDashboardReturn {
+  const { mode = 'localStorage' } = options;
+  const { metrics, loading, error, clearError, refresh: refreshMetrics, storageMode } = useMetrics({ mode });
 
   // Aggregate metrics by category
   const categories = useMemo<CategorySummary[]>(() => {
@@ -26,21 +32,21 @@ export function useDashboard(): UseDashboardReturn {
     return aggregateByCategory(metrics);
   }, [metrics, loading]);
 
-  // Refresh function (triggers re-render via useMetrics internal state)
-  const refresh = useCallback(() => {
+  // Refresh function
+  const refresh = useCallback(async () => {
     // Clear any existing error to allow retry
     if (error) {
       clearError();
     }
-    // useMetrics handles data refresh internally
-    // This is a placeholder for future refresh logic if needed
-  }, [error, clearError]);
+    await refreshMetrics();
+  }, [error, clearError, refreshMetrics]);
 
   return {
     categories,
     isLoading: loading,
     error: error?.message || null,
     refresh,
+    storageMode,
   };
 }
 

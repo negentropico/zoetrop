@@ -1,21 +1,31 @@
 /**
  * useMetrics Hook
  *
- * React hook for metric CRUD operations with LocalStorage persistence.
- * Ported from Dash and enhanced with sync status tracking.
+ * React hook for metric CRUD operations.
+ * Supports multiple storage backends: localStorage (browser), API (server-side SQLite).
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Metric, MetricCategory } from '@/types/metrics';
 import { LocalStorageAdapter } from '@/lib/storage/local';
+import { ApiAdapter } from '@/lib/storage/api';
 import type { StorageAdapter, SyncStatusSummary } from '@/lib/storage/adapter';
 import { parseWhoopJson, mapWhoopToMetrics, parseWhoopCsv, mapWhoopCsvToMetrics } from '@/lib/whoop';
 import type { WhoopMapConfig, WhoopMapResult, WhoopCsvMapConfig, WhoopCsvMapResult } from '@/lib/whoop';
+
+export type StorageMode = 'localStorage' | 'api';
+
+export interface UseMetricsOptions {
+  /** Storage backend to use. Defaults to 'localStorage' */
+  mode?: StorageMode;
+}
 
 export interface UseMetricsReturn {
   metrics: Metric[];
   loading: boolean;
   error: Error | null;
+  /** Current storage mode */
+  storageMode: StorageMode;
   addMetric: (metric: Omit<Metric, 'id' | 'syncStatus' | 'syncVersion'>) => Promise<Metric | null>;
   updateMetric: (id: string, updates: Partial<Metric>) => Promise<void>;
   deleteMetric: (id: string) => Promise<void>;
@@ -29,9 +39,25 @@ export interface UseMetricsReturn {
   clearMetrics: (confirm: boolean) => Promise<void>;
   clearError: () => void;
   getSyncStatus: () => Promise<SyncStatusSummary | null>;
+  /** Refresh metrics from storage */
+  refresh: () => Promise<void>;
 }
 
-export function useMetrics(): UseMetricsReturn {
+/**
+ * Create the appropriate storage adapter based on mode
+ */
+function createAdapter(mode: StorageMode): StorageAdapter {
+  switch (mode) {
+    case 'api':
+      return new ApiAdapter();
+    case 'localStorage':
+    default:
+      return new LocalStorageAdapter();
+  }
+}
+
+export function useMetrics(options: UseMetricsOptions = {}): UseMetricsReturn {
+  const { mode = 'localStorage' } = options;
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -41,7 +67,7 @@ export function useMetrics(): UseMetricsReturn {
   useEffect(() => {
     const initStorage = async () => {
       try {
-        const adapter = new LocalStorageAdapter();
+        const adapter = createAdapter(mode);
         const initResult = await adapter.initialize();
 
         if (!initResult.success) {
@@ -62,6 +88,25 @@ export function useMetrics(): UseMetricsReturn {
     };
 
     initStorage();
+  }, [mode]);
+
+  // Refresh metrics from storage
+  const refresh = useCallback(async (): Promise<void> => {
+    if (!storageRef.current) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const metricsResult = await storageRef.current.getMetrics();
+      if (metricsResult.success && metricsResult.data) {
+        setMetrics(metricsResult.data);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to refresh metrics'));
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const addMetric = useCallback(async (
@@ -288,6 +333,7 @@ export function useMetrics(): UseMetricsReturn {
     metrics,
     loading,
     error,
+    storageMode: mode,
     addMetric,
     updateMetric,
     deleteMetric,
@@ -301,5 +347,6 @@ export function useMetrics(): UseMetricsReturn {
     clearMetrics,
     clearError,
     getSyncStatus,
+    refresh,
   };
 }

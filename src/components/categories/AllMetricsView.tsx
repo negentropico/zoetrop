@@ -3,15 +3,16 @@
  *
  * Main dashboard view showing all metrics with collapsible category sections.
  * Includes trend charts for metrics with historical data.
+ * Supports switching between localStorage and API (SQLite) storage.
  */
 
 import { useState, useMemo } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { ChevronDown, ChevronRight, Loader2, Search, Filter, TrendingUp, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, Search, Filter, TrendingUp, X, Database, HardDrive, RefreshCw } from 'lucide-react';
 import type { MetricStatus, MetricCategory, Metric } from '@/types/metrics';
 import { CATEGORY_INFO } from '@/types/metrics';
 import { useDashboard } from '@/hooks/useDashboard';
-import { useMetrics } from '@/hooks/useMetrics';
+import { useMetrics, type StorageMode } from '@/hooks/useMetrics';
 import { MetricCard } from '../metrics/MetricCard';
 import { StatusBadge } from '../metrics/StatusBadge';
 import { TrendChart } from '../charts/TrendChart';
@@ -25,8 +26,9 @@ interface MetricWithCategory extends Metric {
 }
 
 export function AllMetricsView() {
-  const { categories, isLoading, error } = useDashboard();
-  const { getMetricHistory } = useMetrics();
+  const [storageMode, setStorageMode] = useState<StorageMode>('localStorage');
+  const { categories, isLoading, error, refresh, storageMode: currentMode } = useDashboard({ mode: storageMode });
+  const { getMetricHistory } = useMetrics({ mode: storageMode });
   const [expandedCategories, setExpandedCategories] = useState<Set<MetricCategory>>(
     new Set(['vitamins', 'minerals', 'inflammatory', 'metabolic', 'hormones', 'autonomic', 'bodyComposition', 'lipids', 'hematology'])
   );
@@ -188,6 +190,44 @@ export function AllMetricsView() {
               {uniqueMetrics.length} unique metrics • {allMetrics.length} total readings
             </p>
           </div>
+
+          {/* Storage Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setStorageMode('localStorage')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  storageMode === 'localStorage'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Browser localStorage"
+              >
+                <HardDrive className="w-4 h-4" />
+                <span className="hidden sm:inline">Local</span>
+              </button>
+              <button
+                onClick={() => setStorageMode('api')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  storageMode === 'api'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="SQLite database via API"
+              >
+                <Database className="w-4 h-4" />
+                <span className="hidden sm:inline">SQLite</span>
+              </button>
+            </div>
+            <button
+              onClick={refresh}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Refresh data"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-1 text-sm">
               <span className="px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
