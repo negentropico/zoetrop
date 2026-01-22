@@ -17,6 +17,12 @@ export default [
     route("protocol/cessation", "routes/protocol/cessation.tsx"),
     route("protocol/compare", "routes/protocol/compare.tsx"),
   ]),
+  // Insights routes (correlations, genetics)
+  layout("routes/insights/layout.tsx", [
+    route("insights", "routes/insights/index.tsx"),
+    route("insights/correlations", "routes/insights/correlations.tsx"),
+    route("insights/genetics", "routes/insights/genetics.tsx"),
+  ]),
   // Import routes
   layout("routes/import/layout.tsx", [
     route("import", "routes/import/index.tsx"),
