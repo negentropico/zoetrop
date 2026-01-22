@@ -95,30 +95,66 @@ const metricTemplates: Record<
   ],
 };
 
-// Generate metrics with realistic values
+// Seeded random for deterministic values
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+}
+
+// Generate metrics with deterministic realistic values
 export function generateSeedMetrics(): Metric[] {
   const metrics: Metric[] = [];
   const categories = Object.keys(metricTemplates) as MetricCategory[];
 
+  // Fixed base date for consistency
+  const baseDate = new Date("2026-01-15T12:00:00.000Z");
+
+  let globalIndex = 0;
   categories.forEach((category) => {
     const templates = metricTemplates[category];
     templates.forEach((template, index) => {
       // Generate 4 historical data points over 12 months
       for (let month = 0; month < 4; month++) {
-        const monthsAgo = month * 3;
-        const date = new Date();
-        date.setMonth(date.getMonth() - monthsAgo);
+        const date = new Date(baseDate);
+        date.setMonth(date.getMonth() - month * 3);
 
-        // Add some variance to make it realistic
+        // Deterministic value based on global index + month
+        const seed = globalIndex * 100 + month;
+        const rand = seededRandom(seed);
+
+        // Value distribution: 70% in optimal, 20% borderline, 10% outside
         const midpoint = (template.optMin + template.optMax) / 2;
-        const range = template.optMax - template.optMin;
-        const variance = (Math.random() - 0.5) * range * 1.5;
-        const value = Number((midpoint + variance).toFixed(2));
+        const optRange = template.optMax - template.optMin;
+        const refRange = template.refMax - template.refMin;
+
+        let value: number;
+        if (rand < 0.7) {
+          // Optimal range
+          value = template.optMin + rand / 0.7 * optRange;
+        } else if (rand < 0.9) {
+          // Borderline (between ref and optimal)
+          const borderRand = (rand - 0.7) / 0.2;
+          if (borderRand < 0.5) {
+            // Below optimal, above ref min
+            value = template.refMin + borderRand * 2 * (template.optMin - template.refMin);
+          } else {
+            // Above optimal, below ref max
+            value = template.optMax + (borderRand - 0.5) * 2 * (template.refMax - template.optMax);
+          }
+        } else {
+          // Outside reference (deficient or excess)
+          const outsideRand = (rand - 0.9) / 0.1;
+          if (outsideRand < 0.5) {
+            value = template.refMin * (0.7 + outsideRand * 0.6);
+          } else {
+            value = template.refMax * (1.05 + (outsideRand - 0.5) * 0.3);
+          }
+        }
 
         metrics.push({
           id: `${category}-${index}-${month}`,
           name: template.name,
-          value,
+          value: Number(value.toFixed(2)),
           unit: template.unit,
           category,
           subcategory: "default" as any,
@@ -131,6 +167,7 @@ export function generateSeedMetrics(): Metric[] {
           syncVersion: 1,
         });
       }
+      globalIndex++;
     });
   });
 
