@@ -84,6 +84,16 @@ function Header() {
             >
               Protocol
             </NavLink>
+            <NavLink
+              to="/import"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-gray-900 dark:text-gray-100 font-medium"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              }
+            >
+              Import
+            </NavLink>
           </nav>
         </div>
       </div>
