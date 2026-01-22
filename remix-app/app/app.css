@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Status colors */
+  --color-optimal: #22c55e;
+  --color-borderline: #eab308;
+  --color-deficient: #ef4444;
+  --color-excess: #f97316;
+}
+
+html {
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+  }
+}
+
+/* Smooth transitions for theme changes */
+* {
+  @apply transition-colors duration-150;
+}
