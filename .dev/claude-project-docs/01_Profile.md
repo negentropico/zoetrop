@@ -34,15 +34,15 @@
 
 ### High-Priority Variants (Protocol-Defining)
 
-| Gene | Status | Clinical Implication | Protocol Action |
-|------|--------|---------------------|-----------------|
-| **NAFLD Risk** | 98th percentile | Liver protection essential | Vitamin E 800 IU, hepatotoxin avoidance |
-| **FAAH** | Lower activity | Cannabis sensitivity, slower clearance | 120+ day cessation minimum |
-| **CYP1A2** | Lower activity | Slow caffeine metabolism | <200mg caffeine, AM only |
-| **MTHFR** | A1298C (G/T) | Reduced methylation capacity | Methylfolate 800mcg |
-| **COMT** | V158M A/G | Intermediate activity, catecholamines clear 40% slower | Avoid methyl donors, tyrosine |
-| **APOE** | E3/E4 | Elevated cardiovascular risk | LDL management priority |
-| **BDNF** | C/T Altered | Altered neuroplasticity | Exercise non-negotiable |
+| Gene | Status | Confidence | Clinical Implication | Protocol Action |
+|------|--------|------------|---------------------|-----------------|
+| **NAFLD Risk** | 98th percentile | K1 Confirmed | Liver protection essential | Vitamin E 800 IU, hepatotoxin avoidance |
+| **FAAH** | Lower activity | K3 Inferred | Cannabis sensitivity, slower clearance | 120+ day cessation minimum |
+| **CYP1A2** | Lower activity | K3 Inferred | Slow caffeine metabolism | <200mg caffeine, AM only |
+| **MTHFR** | A1298C (G/T) | K1 Confirmed | Reduced methylation capacity | Methylfolate 800mcg |
+| **COMT** | V158M A/G | K1 Confirmed | Intermediate activity, catecholamines 40% slower | Avoid methyl donors, tyrosine |
+| **APOE** | E3/E4 (C/T + C/C) | K1 Confirmed | Elevated cardiovascular risk | LDL management priority |
+| **BDNF** | C/T Val66Met | K1 Confirmed | Altered neuroplasticity | Exercise non-negotiable |
 
 ### Methylation Pathway
 
@@ -55,26 +55,29 @@
 
 ### Detoxification & Inflammation
 
-| Gene | Status | Impact | Support |
-|------|--------|--------|---------|
-| **GPX1** | A/G | Heterozygous | Selenium 200mcg |
-| **SOD2** | A/G | Moderate risk | Antioxidant support |
-| **CYP2D6** | C/T | Intermediate metabolizer | Drug metabolism variation |
-| **IL-6** | C/G | Moderate inflammatory signaling | Anti-inflammatory protocol |
-| **NAT2** | Slow acetylator (K2 unverified) | Inferred from SNP patterns | Slower drug/toxin clearance if confirmed |
-| **PON1** | C/T | Reduced paraoxonase activity | Oxidative stress vulnerability |
+| Gene | Genotype | Confidence | Impact | Support |
+|------|----------|------------|--------|---------|
+| **GPX1** | A/G | K1 Confirmed | Heterozygous | Selenium 200mcg |
+| **SOD2** | A/G | K1 Confirmed | Moderate oxidative risk | Antioxidant support |
+| **CYP2D6** | C/T | K1 Confirmed | Intermediate metabolizer | Drug metabolism variation |
+| **IL-6** | C/G | K1 Confirmed | Moderate inflammatory signaling | Anti-inflammatory protocol |
+| **NAT2** | G/G + G/G + A/G | K1 Confirmed | Slow acetylator (3 SNPs) | Slower drug/toxin clearance |
+| **PON1** | C/T | K1 Confirmed | Reduced paraoxonase activity | Oxidative stress vulnerability |
 
 ### Neurotransmitter Metabolism (Extended)
 
 | Gene | Genotype | Confidence | Impact | Implication |
 |------|----------|------------|--------|-------------|
 | **COMT** | A/G | K1 Confirmed | Intermediate activity | Avoid high-dose methyl donors, SAMe, TMG |
+| **COMT rs165599** | G/G | K1 Confirmed | High-risk expression variant | Dopamine regulation affected |
 | **DRD4** | C/T | K1 Confirmed | Heterozygous | Dopamine sensitivity variation |
-| **BDNF** | C/T | K2 Likely | Altered neuroplasticity | Exercise compensatory |
-| **MAOA** | Conflicting | K2/Unverified | SelfDecode: "lower activity" | Needs verification |
-| **DRD2/ANKK1** | A/G | K2 Likely | Taq1A variant | Reduced D2 receptor density |
+| **BDNF** | C/T | K1 Confirmed | Val66Met heterozygous | Exercise compensatory, neuroplasticity |
+| **MAOA** | T (hemizygous) | K1 Confirmed | Higher activity (faster breakdown) | Normal monoamine clearance |
+| **MAOB** | C (hemizygous) | K1 Confirmed | Observed | Monoamine oxidase B |
+| **DRD2/ANKK1** | A/G | K1 Confirmed | Taq1A heterozygous | Reduced D2 receptor density |
+| **HTR2A** | C/T | K1 Confirmed | Serotonin 2A variant | Serotonin signaling variation |
 
-*Note: MAOA data conflicting - verification recommended.*
+*Note: MAOA conflict RESOLVED - 23andMe raw data confirms T allele (hemizygous male) = higher MAOA activity. SelfDecode "lower activity" claim was incorrect.*
 
 ### Oxytocin Pathway (ASD-Relevant)
 
@@ -86,31 +89,31 @@
 
 *Note: OXTR variants are associated with ASD phenotype - not actionable via supplements but inform social/stress management approaches.*
 
-### Nutritional Variants (Inferred - Require Verification)
+### Nutritional Variants
 
 | Gene | Genotype | Confidence | Impact | Protocol Action |
 |------|----------|------------|--------|-----------------|
-| **HFE H63D** | C/G | Low (30% impact per clinical assessment) | Heterozygous carrier | Monitor iron - but iron markers normal |
-| **BCMO1** | A/T | Unverified (K2) | Beta-carotene conversion | Consider preformed vitamin A |
+| **HFE H63D** | C/G | K1 Confirmed | Heterozygous carrier (30% clinical impact) | Monitor iron - markers currently normal |
+| **HFE C282Y** | G/G | K1 Confirmed | Wild-type (no risk) | No hemochromatosis risk |
+| **BCMO1 rs12934922** | A/T | K1 Confirmed | Heterozygous | Reduced beta-carotene conversion |
+| **BCMO1 rs7501331** | C/C | K1 Confirmed | Wild-type | Normal conversion at this locus |
+| **TCN2** | C/C | K1 Confirmed | Wild-type | Normal B12 transport |
+| **FUT2** | A/A | K1 Confirmed | Non-secretor variant | B12/gut microbiome implications |
+| **NBPF3 rs4654748** | T/T | K1 Confirmed | B6 pathway variant | B6 toxicity was from AG1, not genetics |
 
-*Note: B6 toxicity attributed to AG1 supplementation, not genetics.*
+*Note: BCMO1 heterozygous suggests moderate benefit from preformed vitamin A over beta-carotene.*
 
-### Genetic Supplement Considerations
+### FAAH Variant - Cessation Implications
 
-**Favorable For:**
-- Creatine (typical responder)
-- Omega-3 (standard metabolism)
-- Vitamin D (standard)
-- Low-dose caffeine (<200mg AM)
+**Confidence**: K3 (SelfDecode inferred - rs324420 not in 23andMe array)
 
-**Caution Required:**
-- High-dose B-vitamins (B6 elevation history)
-- Methyl donors (COMT intermediate)
-- GABAergics (ASD 50% paradox risk)
-- Serotonergics (5-HTP, tryptophan)
-- Adaptogens (ADHD flattened cortisol)
+- Lower FAAH = slower anandamide breakdown
+- Extended withdrawal timeline required
+- **Minimum**: 120 days (vs typical 30-60 days)
+- **Optimal**: 150+ days for full metabolic clearing
+- Historical 76-day attempt was insufficient
 
-*See 07_Safety.md for complete contraindications and avoid list.*
+*Note: FAAH and CYP1A2 variants are inferred from SelfDecode analysis, not directly confirmed in 23andMe raw data. Clinical response supports these inferences.*
 
 ---
 

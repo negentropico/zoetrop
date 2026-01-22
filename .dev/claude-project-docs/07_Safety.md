@@ -11,11 +11,11 @@
 | Slow COMT | Prolonged catecholamine effects | COMT V158M A/G (intermediate) | K1 Confirmed |
 | GABAergic | Paradoxical response (~50% ASD) | Altered chloride gradient | Clinical |
 | Methylation | Excessive methyl donor loading | MTHFR + COMT interaction | K1 Confirmed |
-| Caffeine | Slow metabolism | CYP1A2 lower activity | K1 Confirmed |
+| Caffeine | Slow metabolism | CYP1A2 lower activity | K3 Inferred |
 | B-Vitamin | Previous toxicity (AG1) | B6/Biotin elevation history | Lab Confirmed |
 | Hepatotoxin | Liver damage risk | NAFLD 98th percentile | K1 Confirmed |
-| Iron | Low-priority monitoring | HFE H63D C/G (30% impact) | K2 Unverified |
-| Slow Acetylator | Slower drug/toxin clearance | NAT2 (inferred) | K2 Unverified |
+| Iron | Low-priority monitoring | HFE H63D C/G (30% clinical impact) | K1 Confirmed |
+| Slow Acetylator | Slower drug/toxin clearance | NAT2 (3 SNPs verified) | K1 Confirmed |
 
 ---
 
@@ -63,7 +63,7 @@
 
 ## Caffeine Restrictions
 
-**Basis**: CYP1A2 lower activity (slow metabolizer)
+**Basis**: CYP1A2 lower activity (slow metabolizer) - K3 Inferred (not in 23andMe, SelfDecode analysis)
 
 | Guideline | Reason |
 |-----------|--------|
@@ -79,6 +79,7 @@
 - B6: 102.9 μg/L (2x upper limit)
 - Biotin: 7.78 ng/mL (elevated)
 - **Root cause**: AG1 mega-dose B-vitamins
+- NBPF3 rs4654748 T/T confirmed (K1) but NOT causative - toxicity from supplementation, not genetics
 
 | Avoid | Reason |
 |-------|--------|
@@ -94,8 +95,9 @@
 
 ## Iron Supplementation - Caution (Low Priority)
 
-**Basis**: HFE H63D C/G (heterozygous carrier) - **30% clinical impact likelihood**
-- Genotype unverified (K2 status)
+**Basis**: HFE H63D C/G (heterozygous carrier) - K1 Confirmed
+- **30% clinical impact likelihood** per clinical assessment
+- HFE C282Y G/G (wild-type) - no hemochromatosis primary risk allele
 - Iron markers currently normal per clinical assessment
 
 | Guidance | Reason |
