@@ -8,7 +8,15 @@ export default [
     route("metrics/:category", "routes/metrics/category.tsx"),
     route("metrics/:category/:metricId", "routes/metrics/detail.tsx"),
   ]),
-  route("protocol", "routes/protocol.tsx"),
+  // Protocol routes with version management
+  layout("routes/protocol/layout.tsx", [
+    route("protocol", "routes/protocol/index.tsx"),
+    route("protocol/versions", "routes/protocol/versions.tsx"),
+    route("protocol/versions/:version", "routes/protocol/version-detail.tsx"),
+    route("protocol/supplements", "routes/protocol/supplements.tsx"),
+    route("protocol/cessation", "routes/protocol/cessation.tsx"),
+    route("protocol/compare", "routes/protocol/compare.tsx"),
+  ]),
   // Import routes
   layout("routes/import/layout.tsx", [
     route("import", "routes/import/index.tsx"),
