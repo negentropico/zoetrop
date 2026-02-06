@@ -1,20 +1,20 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/versions";
-import { seedProtocolVersions, seedProtocolChanges, seedMilestones } from "../../lib/seed-data";
+import { realProtocolVersions, realProtocolChanges, realMilestones } from "../../lib/protocol-data";
 import { format, parseISO } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Protocol Versions - Wellness Tracker" },
-    { name: "description", content: "Track protocol evolution from 601 to 603" },
+    { name: "description", content: "Track protocol evolution from M0 to M6" },
   ];
 }
 
 export function loader() {
   // Enrich versions with change counts and milestones
-  const versions = seedProtocolVersions.map((version) => {
-    const changes = seedProtocolChanges.filter((c) => c.versionId === version.id);
-    const milestones = seedMilestones.filter((m) => m.protocolVersion === version.version);
+  const versions = realProtocolVersions.map((version) => {
+    const changes = realProtocolChanges.filter((c) => c.versionId === version.id);
+    const milestones = realMilestones.filter((m) => m.protocolVersion === version.version);
 
     return {
       ...version,

@@ -1,14 +1,12 @@
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/genetics";
-import {
-  seedGeneticVariants,
-  type GeneticVariant,
-} from "../../lib/seed-data";
+import { seedGeneticVariants } from "../../lib/seed-data";
 import {
   CONFIDENCE_LEVELS,
   VARIANT_CATEGORIES,
   type ConfidenceLevel,
   type VariantCategory,
+  type GeneticVariant,
 } from "../../types/genetics";
 
 export function meta({}: Route.MetaArgs) {

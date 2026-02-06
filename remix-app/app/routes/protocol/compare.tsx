@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/compare";
-import { seedProtocolVersions, seedProtocolChanges } from "../../lib/seed-data";
+import { realProtocolVersions, realProtocolChanges } from "../../lib/protocol-data";
 import { format, parseISO } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
@@ -15,7 +15,7 @@ export function loader({ request }: Route.LoaderArgs) {
   const fromParam = url.searchParams.get("from");
   const toParam = url.searchParams.get("to");
 
-  const versions = seedProtocolVersions;
+  const versions = realProtocolVersions;
 
   // Default to comparing last two versions if not specified
   const fromVersion = fromParam
@@ -27,7 +27,7 @@ export function loader({ request }: Route.LoaderArgs) {
 
   // Get all changes for the "to" version (changes from previous)
   const changes = toVersion
-    ? seedProtocolChanges.filter((c) => c.versionId === toVersion.id)
+    ? realProtocolChanges.filter((c) => c.versionId === toVersion.id)
     : [];
 
   // Categorize changes
@@ -60,7 +60,7 @@ function VersionSelector({
 }: {
   label: string;
   value: string | undefined;
-  versions: typeof seedProtocolVersions;
+  versions: typeof realProtocolVersions;
   onChange: (version: string) => void;
   excludeVersion?: string;
 }) {

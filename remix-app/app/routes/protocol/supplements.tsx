@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/supplements";
-import { seedSupplements } from "../../lib/seed-data";
+import { realSupplements } from "../../lib/protocol-data";
 import { SUPPLEMENT_TIERS, type SupplementTier, type Supplement } from "../../types/protocol";
 
 export function meta({}: Route.MetaArgs) {
@@ -12,7 +12,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export function loader() {
-  const supplements = seedSupplements;
+  const supplements = realSupplements;
 
   // Group by tier
   const byTier = supplements.reduce((acc, supp) => {

@@ -1,33 +1,33 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/version-detail";
 import {
-  seedProtocolVersions,
-  seedProtocolChanges,
-  seedMilestones,
-  seedSupplements,
-} from "../../lib/seed-data";
+  realProtocolVersions,
+  realProtocolChanges,
+  realMilestones,
+  realSupplements,
+} from "../../lib/protocol-data";
 import { format, parseISO } from "date-fns";
 
 export function loader({ params }: Route.LoaderArgs) {
   const { version: versionParam } = params;
 
-  const version = seedProtocolVersions.find((v) => v.version === versionParam);
+  const version = realProtocolVersions.find((v) => v.version === versionParam);
   if (!version) {
     throw new Response("Version not found", { status: 404 });
   }
 
-  const changes = seedProtocolChanges.filter((c) => c.versionId === version.id);
-  const milestones = seedMilestones.filter((m) => m.protocolVersion === version.version);
+  const changes = realProtocolChanges.filter((c) => c.versionId === version.id);
+  const milestones = realMilestones.filter((m) => m.protocolVersion === version.version);
 
   // Get supplements active during this version
-  // For simplicity, we'll show all supplements for the current version
-  const supplements = version.version === "603" ? seedSupplements : [];
+  // For M6 (current), show all supplements
+  const supplements = version.version === "M6" ? realSupplements : [];
 
   // Find previous and next versions for navigation
-  const versionIndex = seedProtocolVersions.findIndex((v) => v.id === version.id);
-  const previousVersion = versionIndex > 0 ? seedProtocolVersions[versionIndex - 1] : null;
+  const versionIndex = realProtocolVersions.findIndex((v) => v.id === version.id);
+  const previousVersion = versionIndex > 0 ? realProtocolVersions[versionIndex - 1] : null;
   const nextVersion =
-    versionIndex < seedProtocolVersions.length - 1 ? seedProtocolVersions[versionIndex + 1] : null;
+    versionIndex < realProtocolVersions.length - 1 ? realProtocolVersions[versionIndex + 1] : null;
 
   return {
     version,
@@ -36,7 +36,7 @@ export function loader({ params }: Route.LoaderArgs) {
     supplements,
     previousVersion,
     nextVersion,
-    isLatest: version.version === seedProtocolVersions[seedProtocolVersions.length - 1].version,
+    isLatest: version.version === realProtocolVersions[realProtocolVersions.length - 1].version,
   };
 }
 

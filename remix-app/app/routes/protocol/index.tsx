@@ -1,11 +1,11 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/index";
 import {
-  seedProtocolVersions,
-  seedSupplements,
-  seedCessationLog,
-  seedMilestones,
-} from "../../lib/seed-data";
+  realProtocolVersions,
+  realSupplements,
+  realCessationLog,
+  realMilestones,
+} from "../../lib/protocol-data";
 import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "../../types/protocol";
 import { differenceInDays, parseISO, format } from "date-fns";
 
@@ -17,11 +17,11 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export function loader() {
-  // TODO: Replace with database queries
-  const currentVersion = seedProtocolVersions[seedProtocolVersions.length - 1];
-  const activeSupplements = seedSupplements.filter((s) => s.isActive);
-  const cessation = seedCessationLog[0];
-  const latestMilestone = seedMilestones[seedMilestones.length - 1];
+  // Using real protocol data from vault
+  const currentVersion = realProtocolVersions[realProtocolVersions.length - 1];
+  const activeSupplements = realSupplements.filter((s) => s.isActive);
+  const cessation = realCessationLog[0];
+  const latestMilestone = realMilestones[realMilestones.length - 1];
 
   // Calculate cessation progress
   let cessationDay = 0;
@@ -47,7 +47,8 @@ export function loader() {
     cessationDay,
     cessationPhase,
     latestMilestone,
-    totalVersions: seedProtocolVersions.length,
+    totalVersions: realProtocolVersions.length,
+    protocolVersions: realProtocolVersions,
   };
 }
 
@@ -61,6 +62,7 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
     cessationPhase,
     latestMilestone,
     totalVersions,
+    protocolVersions,
   } = loaderData;
 
   const targetDay = 150;
@@ -189,7 +191,7 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
             </Link>
           </div>
           <div className="space-y-2">
-            {seedProtocolVersions.slice().reverse().map((version) => (
+            {protocolVersions.slice().reverse().slice(0, 5).map((version) => (
               <Link
                 key={version.id}
                 to={`/protocol/versions/${version.version}`}

@@ -1,5 +1,5 @@
 import type { Route } from "./+types/cessation";
-import { seedCessationLog } from "../../lib/seed-data";
+import { realCessationLog, CESSATION_START_DATE } from "../../lib/protocol-data";
 import { CESSATION_PHASES, type CessationPhase } from "../../types/protocol";
 import { differenceInDays, parseISO, format, addDays } from "date-fns";
 
@@ -11,7 +11,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export function loader() {
-  const cessation = seedCessationLog[0];
+  const cessation = realCessationLog[0];
 
   if (!cessation) {
     return {
@@ -21,7 +21,7 @@ export function loader() {
       currentPhase: CESSATION_PHASES[0],
       daysInPhase: 0,
       daysUntilNextPhase: 0,
-      projectedCompletion: null,
+      projectedCompletion: null as string | null,
       phaseProgress: [] as Array<{
         phase: CessationPhase;
         label: string;
@@ -30,6 +30,9 @@ export function loader() {
         endDay: number;
         progress: number;
       }>,
+      phaseDuration: 0,
+      targetDay: 150,
+      startDate: null as string | null,
     };
   }
 
@@ -293,18 +296,18 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">Started</span>
-            <span className="font-medium">{format(parseISO(startDate), "MMMM d, yyyy")}</span>
+            <span className="font-medium">{startDate ? format(parseISO(startDate), "MMMM d, yyyy") : "—"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Current Phase End</span>
             <span className="font-medium">
-              {format(addDays(parseISO(startDate), currentPhase.dayRange.end), "MMMM d, yyyy")}
+              {startDate ? format(addDays(parseISO(startDate), currentPhase.dayRange.end), "MMMM d, yyyy") : "—"}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Projected Completion</span>
             <span className="font-medium text-green-600 dark:text-green-400">
-              {format(parseISO(projectedCompletion), "MMMM d, yyyy")}
+              {projectedCompletion ? format(parseISO(projectedCompletion), "MMMM d, yyyy") : "—"}
             </span>
           </div>
         </div>

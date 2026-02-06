@@ -6,6 +6,8 @@ import {
   type MetricStatus,
   type Metric,
 } from "../../types/metrics";
+import { getRealMetrics, getProjections, getMetricTargets, MILESTONES } from "../../lib/real-data";
+import { TrendChart } from "../../components/TrendChart";
 import { format, parseISO } from "date-fns";
 
 function isValidCategory(category: string): category is MetricCategory {
@@ -25,21 +27,31 @@ export function loader({ params }: Route.LoaderArgs) {
 
   const categoryInfo = CATEGORY_INFO[category];
 
-  // TODO: Replace with actual database query
-  const metric = getMockMetric(category, metricId);
+  // Get all real metrics and find by ID
+  const allMetrics = getRealMetrics();
+  const metric = allMetrics.find((m) => m.id === metricId);
 
   if (!metric) {
     throw new Response("Metric not found", { status: 404 });
   }
 
-  // TODO: Get historical values for trend chart
-  const history = generateMockHistory(metric, 10);
+  // Get historical values for this metric (all entries with same name)
+  const history = allMetrics
+    .filter((m) => m.name === metric.name)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .map((m) => ({ timestamp: m.timestamp, value: m.value }));
+
+  // Get projections (Q1/Q2 targets) for this metric
+  const projections = getProjections(metric.name);
+  const targets = getMetricTargets(metric.name);
 
   return {
     category,
     categoryInfo,
     metric,
     history,
+    projections,
+    targets,
   };
 }
 
@@ -136,7 +148,7 @@ function RangeIndicator({ metric }: { metric: Metric }) {
 }
 
 export default function MetricDetail({ loaderData }: Route.ComponentProps) {
-  const { category, categoryInfo, metric, history } = loaderData;
+  const { category, categoryInfo, metric, history, projections, targets } = loaderData;
   const status = getMetricStatus(metric);
 
   return (
@@ -180,9 +192,75 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
         <RangeIndicator metric={metric} />
       </div>
 
-      {/* History */}
+      {/* Trend Chart with Projections */}
+      {(history.length > 1 || projections.length > 0) && (
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-medium">Trend Over Time</h2>
+            {projections.length > 0 && (
+              <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                With 2026 Targets
+              </span>
+            )}
+          </div>
+          <TrendChart
+            data={history}
+            projections={projections}
+            unit={metric.unit}
+            optimalRange={metric.optimalRange}
+            referenceRange={metric.referenceRange}
+            height={280}
+          />
+          <div className="flex flex-wrap gap-4 mt-4 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-blue-500" />
+              Actual
+            </span>
+            {projections.length > 0 && (
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-0.5 bg-purple-500" style={{ borderTop: "2px dashed #a855f7" }} />
+                Target
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-green-500 opacity-50" />
+              Optimal
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-yellow-500 opacity-50" />
+              Reference
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* 2026 Targets */}
+      {targets && (
+        <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-4">
+          <h2 className="font-medium mb-3 text-purple-900 dark:text-purple-100">2026 Targets</h2>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div className="text-purple-600 dark:text-purple-400 text-xs mb-1">Q1 Target (Apr)</div>
+              <div className="font-semibold text-purple-900 dark:text-purple-100">
+                {targets.q1Target} {targets.unit}
+              </div>
+            </div>
+            <div>
+              <div className="text-purple-600 dark:text-purple-400 text-xs mb-1">Q2 Stretch (Jul)</div>
+              <div className="font-semibold text-purple-900 dark:text-purple-100">
+                {targets.q2Stretch} {targets.unit}
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-purple-600 dark:text-purple-400">
+            Direction: {targets.direction === "higher" ? "Higher is better" : targets.direction === "lower" ? "Lower is better" : "Target range"}
+          </div>
+        </div>
+      )}
+
+      {/* History Table */}
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-4">History</h2>
+        <h2 className="font-medium mb-4">Measurements ({history.length})</h2>
         <div className="space-y-2">
           {history.map((entry, index) => (
             <div
@@ -248,71 +326,3 @@ function getMetricStatus(metric: Metric): MetricStatus {
   return "optimal";
 }
 
-function getMockMetric(category: MetricCategory, metricId: string): Metric | null {
-  const parts = metricId.split("-");
-  if (parts.length < 2) return null;
-
-  const index = parseInt(parts[1], 10);
-  if (isNaN(index)) return null;
-
-  const names: Record<MetricCategory, string[]> = {
-    vitamins: ["Vitamin D", "Vitamin B12", "Folate", "Vitamin B6"],
-    minerals: ["Zinc", "Magnesium", "Iron", "Selenium"],
-    inflammatory: ["hs-CRP", "Homocysteine", "Ferritin"],
-    metabolic: ["Fasting Glucose", "HbA1c", "eGFR", "BUN"],
-    hormones: ["Free Testosterone", "TSH", "Cortisol (AM)", "DHEA-S"],
-    autonomic: ["HRV (RMSSD)", "Resting Heart Rate", "Recovery Score", "Sleep Score"],
-    bodyComposition: ["Body Fat", "Lean Mass", "BMI", "Visceral Fat"],
-    lipids: ["Total Cholesterol", "LDL-C", "HDL-C", "Triglycerides"],
-    hematology: ["Hemoglobin", "Hematocrit", "WBC", "Platelets"],
-  };
-
-  const units: Record<MetricCategory, string[]> = {
-    vitamins: ["ng/mL", "pg/mL", "ng/mL", "μg/L"],
-    minerals: ["μg/dL", "mg/dL", "μg/dL", "μg/L"],
-    inflammatory: ["mg/L", "μmol/L", "ng/mL"],
-    metabolic: ["mg/dL", "%", "mL/min", "mg/dL"],
-    hormones: ["pg/mL", "mIU/L", "μg/dL", "μg/dL"],
-    autonomic: ["ms", "bpm", "%", "%"],
-    bodyComposition: ["%", "kg", "kg/m²", "cm²"],
-    lipids: ["mg/dL", "mg/dL", "mg/dL", "mg/dL"],
-    hematology: ["g/dL", "%", "K/uL", "K/uL"],
-  };
-
-  const categoryNames = names[category] || [];
-  const categoryUnits = units[category] || [];
-
-  if (index >= categoryNames.length) return null;
-
-  return {
-    id: metricId,
-    name: categoryNames[index],
-    value: 50 + Math.random() * 50,
-    unit: categoryUnits[index],
-    category: category as any,
-    subcategory: "default" as any,
-    timestamp: new Date().toISOString(),
-    improvement: "target range",
-    referenceRange: { min: 30, max: 100 },
-    optimalRange: { min: 40, max: 80 },
-    source: "manual",
-    syncStatus: "local",
-    syncVersion: 1,
-  };
-}
-
-function generateMockHistory(metric: Metric, count: number): Array<{ timestamp: string; value: number }> {
-  const history = [];
-  const baseValue = metric.value;
-
-  for (let i = 0; i < count; i++) {
-    const daysAgo = i * 30;
-    const variance = (Math.random() - 0.5) * 20;
-    history.push({
-      timestamp: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString(),
-      value: Number((baseValue + variance).toFixed(2)),
-    });
-  }
-
-  return history;
-}

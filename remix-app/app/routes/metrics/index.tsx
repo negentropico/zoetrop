@@ -6,7 +6,7 @@ import {
   type MetricStatus,
   type Metric,
 } from "../../types/metrics";
-import { generateSeedMetrics } from "../../lib/seed-data";
+import { getRealMetrics, getLatestRealMetrics } from "../../lib/real-data";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -16,18 +16,8 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export function loader() {
-  const allMetrics = generateSeedMetrics();
-
-  // Get latest value for each unique metric name
-  const latestByName = new Map<string, Metric>();
-  allMetrics.forEach((m) => {
-    const existing = latestByName.get(m.name);
-    if (!existing || new Date(m.timestamp) > new Date(existing.timestamp)) {
-      latestByName.set(m.name, m);
-    }
-  });
-
-  const metrics = Array.from(latestByName.values());
+  // Use real tracked data from vault
+  const metrics = getLatestRealMetrics();
 
   // Group by category
   const byCategory = (Object.keys(CATEGORY_INFO) as MetricCategory[]).reduce(
@@ -144,7 +134,7 @@ function MetricRow({ metric }: { metric: Metric }) {
 
   return (
     <Link
-      to={`/metrics/${metric.category}/${metric.category}-${metric.id.split("-")[1]}`}
+      to={`/metrics/${metric.category}/${metric.id}`}
       className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
     >
       <StatusDot status={status} />
