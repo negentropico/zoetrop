@@ -56,6 +56,7 @@ function Header() {
           <nav className="flex items-center gap-6 text-sm">
             <NavLink
               to="/"
+              end
               className={({ isActive }) =>
                 isActive
                   ? "text-gray-900 dark:text-gray-100 font-medium"
@@ -83,6 +84,16 @@ function Header() {
               }
             >
               Protocol
+            </NavLink>
+            <NavLink
+              to="/insights"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-gray-900 dark:text-gray-100 font-medium"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              }
+            >
+              Insights
             </NavLink>
             <NavLink
               to="/import"
