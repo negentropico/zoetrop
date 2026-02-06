@@ -21,7 +21,7 @@ export function loader({ params }: Route.LoaderArgs) {
 
   // Get supplements active during this version
   // For M6 (current), show all supplements
-  const supplements = version.version === "M6" ? realSupplements : [];
+  const supplements = version.version === "P6" ? realSupplements : [];
 
   // Find previous and next versions for navigation
   const versionIndex = realProtocolVersions.findIndex((v) => v.id === version.id);

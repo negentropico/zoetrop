@@ -4,11 +4,11 @@ export type SupplementTier = 'tier1' | 'tier2' | 'tier3' | 'as_needed';
 export type ProtocolChangeType = 'added' | 'removed' | 'dosage_changed' | 'timing_changed' | 'frequency_changed';
 export type CessationPhase = 'acute' | 'stabilization' | 'clearing' | 'optimization';
 
-// Protocol version (M0 → M1 → M2 → M3 → M4 → M5 → M6)
+// Protocol version (P0 → P1 → P2 → P3 → P4 → P5 → P6)
 export interface ProtocolVersion {
   id: number;
-  version: string;      // Milestone: "M0", "M1", etc.
-  protocol?: string;    // Protocol name: "v0", "v9.1", "M4M5-v2"
+  version: string;      // Protocol: "P0", "P1", etc.
+  protocol?: string;    // Protocol name: "v0", "v9.1", "P4P5-v2"
   effectiveDate: string;
   notes?: string;
 }

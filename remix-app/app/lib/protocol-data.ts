@@ -54,18 +54,18 @@ export const realCessationLog: CessationLog[] = [
 ];
 
 // =============================================================================
-// PROTOCOL VERSIONS (M0 -> M6 Milestones)
+// PROTOCOL VERSIONS (P0 -> P6)
 // =============================================================================
 
 /**
  * Real protocol versions from vault
- * Maps milestone codes (M0-M6) to protocol versions and dates
+ * Maps protocol codes (P0-P6) to protocol versions and dates
  * Source: 11_Historical_Context.md, Nutrients_Evolution.md
  */
 export const realProtocolVersions: ProtocolVersion[] = [
   {
     id: 1,
-    version: "M0",
+    version: "P0",
     protocol: undefined,
     effectiveDate: "2024-12-01T00:00:00.000Z",
     notes:
@@ -73,7 +73,7 @@ export const realProtocolVersions: ProtocolVersion[] = [
   },
   {
     id: 2,
-    version: "M1",
+    version: "P1",
     protocol: "v0",
     effectiveDate: "2025-01-15T00:00:00.000Z",
     notes:
@@ -81,7 +81,7 @@ export const realProtocolVersions: ProtocolVersion[] = [
   },
   {
     id: 3,
-    version: "M2",
+    version: "P2",
     protocol: "v9.1",
     effectiveDate: "2025-03-01T00:00:00.000Z",
     notes:
@@ -89,7 +89,7 @@ export const realProtocolVersions: ProtocolVersion[] = [
   },
   {
     id: 4,
-    version: "M3",
+    version: "P3",
     protocol: "v9.1",
     effectiveDate: "2025-05-01T00:00:00.000Z",
     notes:
@@ -97,7 +97,7 @@ export const realProtocolVersions: ProtocolVersion[] = [
   },
   {
     id: 5,
-    version: "M4",
+    version: "P4",
     protocol: "v9.1",
     effectiveDate: "2025-07-01T00:00:00.000Z",
     notes:
@@ -105,16 +105,16 @@ export const realProtocolVersions: ProtocolVersion[] = [
   },
   {
     id: 6,
-    version: "M5",
-    protocol: "M4M5-v2",
+    version: "P5",
+    protocol: "P4P5-v2",
     effectiveDate: "2025-09-01T00:00:00.000Z",
     notes:
       "Consolidation: ASD+ADHD optimized protocol, 8-week sleep architecture recovery initiated. -4.53 lbs lean from training crash.",
   },
   {
     id: 7,
-    version: "M6",
-    protocol: "M4M5-v2",
+    version: "P6",
+    protocol: "P4P5-v2",
     effectiveDate: "2025-12-23T00:00:00.000Z",
     notes:
       "Current: FAAH-informed 120+ day cessation started. Melatonin 0.3mg @ 8:30 PM (ADHD chronobiotic), Rhodiola, Glycine, Taurine added.",
@@ -130,7 +130,7 @@ export const realProtocolVersions: ProtocolVersion[] = [
  * Source: Nutrients_Evolution.md
  */
 export const realProtocolChanges: ProtocolChange[] = [
-  // M0 -> M1: NSAID Recovery
+  // P0 -> P1: NSAID Recovery
   {
     id: 1,
     versionId: 2,
@@ -188,7 +188,7 @@ export const realProtocolChanges: ProtocolChange[] = [
     rationale: "Gut repair protocol",
   },
 
-  // M1 -> M2: KPU Testing
+  // P1 -> P2: KPU Testing
   {
     id: 8,
     versionId: 3,
@@ -216,7 +216,7 @@ export const realProtocolChanges: ProtocolChange[] = [
     rationale: "MTHFR A1298C support",
   },
 
-  // M2 -> M3: AG1 Elimination
+  // P2 -> P3: AG1 Elimination
   {
     id: 11,
     versionId: 4,
@@ -268,7 +268,7 @@ export const realProtocolChanges: ProtocolChange[] = [
     rationale: "Standalone B12 for MTRR support",
   },
 
-  // M3 -> M5: ASD/ADHD Protocol Development
+  // P3 -> P5: ASD/ADHD Protocol Development
   {
     id: 17,
     versionId: 6,
@@ -286,7 +286,7 @@ export const realProtocolChanges: ProtocolChange[] = [
     rationale: "ADHD chronobiotic protocol - physiological dose, not sedative",
   },
 
-  // M5 -> M6: Current Protocol
+  // P5 -> P6: Current Protocol
   {
     id: 19,
     versionId: 7,
@@ -338,7 +338,7 @@ export const realProtocolChanges: ProtocolChange[] = [
 ];
 
 // =============================================================================
-// SUPPLEMENTS (Current M6 Protocol)
+// SUPPLEMENTS (Current P6 Protocol)
 // =============================================================================
 
 /**
@@ -559,7 +559,7 @@ export const realMilestones: Milestone[] = [
     id: 1,
     date: "2025-02-06T00:00:00.000Z",
     description: "M1 DEXA - Foundation baseline",
-    protocolVersion: "M1",
+    protocolVersion: "P1",
     biometricSnapshot: {
       bodyFat: 27.3,
       leanMass: 153.13,
@@ -570,13 +570,13 @@ export const realMilestones: Milestone[] = [
     id: 2,
     date: "2025-04-15T00:00:00.000Z",
     description: "KPU ruled out - 3.65 mcg/dL (normal range)",
-    protocolVersion: "M2",
+    protocolVersion: "P2",
   },
   {
     id: 3,
     date: "2025-05-01T00:00:00.000Z",
     description: "M2 DEXA - Best composition achieved",
-    protocolVersion: "M2",
+    protocolVersion: "P2",
     biometricSnapshot: {
       bodyFat: 22.6,
       leanMass: 166.36,
@@ -587,13 +587,13 @@ export const realMilestones: Milestone[] = [
     id: 4,
     date: "2025-05-05T00:00:00.000Z",
     description: "Cessation Attempt 1 started",
-    protocolVersion: "M3",
+    protocolVersion: "P3",
   },
   {
     id: 5,
     date: "2025-05-15T00:00:00.000Z",
     description: "AG1 eliminated - B6/Biotin toxicity confirmed",
-    protocolVersion: "M3",
+    protocolVersion: "P3",
     biometricSnapshot: {
       b6: 102.9, // ug/L - toxic
       biotin: 7.78, // ng/mL - 2x limit
@@ -603,13 +603,13 @@ export const realMilestones: Milestone[] = [
     id: 6,
     date: "2025-07-20T00:00:00.000Z",
     description: "Cessation Attempt 1 ended (76 days - insufficient for FAAH)",
-    protocolVersion: "M4",
+    protocolVersion: "P4",
   },
   {
     id: 7,
     date: "2025-09-04T00:00:00.000Z",
     description: "M3 DEXA - Training crash impact visible",
-    protocolVersion: "M5",
+    protocolVersion: "P5",
     biometricSnapshot: {
       bodyFat: 22.5,
       leanMass: 161.83,
@@ -620,7 +620,7 @@ export const realMilestones: Milestone[] = [
     id: 8,
     date: "2025-12-23T00:00:00.000Z",
     description: "Cessation Attempt 2 started - FAAH-informed 120+ day target",
-    protocolVersion: "M6",
+    protocolVersion: "P6",
   },
 ];
 
@@ -727,15 +727,15 @@ export interface AvoidItem {
  * Source: 06_Supplement_Protocol.md, Nutrients_Evolution.md
  */
 export const avoidList: AvoidItem[] = [
-  { category: "NSAIDs", item: "Ibuprofen (chronic)", reason: "Hepatotoxic + gut damage", phaseAdded: "M1" },
-  { category: "Methyl donors", item: "SAM-e, TMG, Betaine", reason: "COMT methyl overload", phaseAdded: "M1" },
-  { category: "Unnecessary", item: "Berberine", reason: "HOMA-IR 1.16 is excellent", phaseAdded: "M2" },
-  { category: "B-vitamins", item: "AG1, mega-dose B-complex", reason: "B6/Biotin toxicity history", phaseAdded: "M3" },
-  { category: "B-vitamins", item: "B6 >25mg, Biotin >1000mcg", reason: "Previous elevation (102.9 ug/L B6)", phaseAdded: "M3" },
-  { category: "GABAergics (high)", item: "Benzos, Z-drugs, phenibut, alcohol", reason: "ASD paradox risk (~50%)", phaseAdded: "M5" },
-  { category: "GABAergics (moderate)", item: "Valerian, hops, passionflower, kava, GABA", reason: "ASD paradox risk", phaseAdded: "M5" },
-  { category: "Catecholamines", item: "L-tyrosine, L-DOPA, Mucuna", reason: "COMT intermediate catecholamine load", phaseAdded: "M5" },
-  { category: "Melatonin", item: "Melatonin >0.5mg", reason: "ADHD - use 0.3mg chronobiotic only", phaseAdded: "M6" },
+  { category: "NSAIDs", item: "Ibuprofen (chronic)", reason: "Hepatotoxic + gut damage", phaseAdded: "P1" },
+  { category: "Methyl donors", item: "SAM-e, TMG, Betaine", reason: "COMT methyl overload", phaseAdded: "P1" },
+  { category: "Unnecessary", item: "Berberine", reason: "HOMA-IR 1.16 is excellent", phaseAdded: "P2" },
+  { category: "B-vitamins", item: "AG1, mega-dose B-complex", reason: "B6/Biotin toxicity history", phaseAdded: "P3" },
+  { category: "B-vitamins", item: "B6 >25mg, Biotin >1000mcg", reason: "Previous elevation (102.9 ug/L B6)", phaseAdded: "P3" },
+  { category: "GABAergics (high)", item: "Benzos, Z-drugs, phenibut, alcohol", reason: "ASD paradox risk (~50%)", phaseAdded: "P5" },
+  { category: "GABAergics (moderate)", item: "Valerian, hops, passionflower, kava, GABA", reason: "ASD paradox risk", phaseAdded: "P5" },
+  { category: "Catecholamines", item: "L-tyrosine, L-DOPA, Mucuna", reason: "COMT intermediate catecholamine load", phaseAdded: "P5" },
+  { category: "Melatonin", item: "Melatonin >0.5mg", reason: "ADHD - use 0.3mg chronobiotic only", phaseAdded: "P6" },
   { category: "Hepatotoxins", item: "Acetaminophen, high-dose niacin", reason: "NAFLD 98th percentile", phaseAdded: "All" },
-  { category: "Caffeine", item: ">200mg or after 10 AM", reason: "CYP1A2 slow metabolizer", phaseAdded: "M2" },
+  { category: "Caffeine", item: ">200mg or after 10 AM", reason: "CYP1A2 slow metabolizer", phaseAdded: "P2" },
 ];

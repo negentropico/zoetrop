@@ -6,7 +6,7 @@ import {
   type MetricStatus,
   type Metric,
 } from "../../types/metrics";
-import { getRealMetrics, getLatestRealMetrics } from "../../lib/real-data";
+import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
 import { TrendSparkline, TrendChart } from "../../components/TrendChart";
 import { format, parseISO } from "date-fns";
 
@@ -46,10 +46,11 @@ export function loader({ params }: Route.LoaderArgs) {
     historyByName.set(m.name, history);
   });
 
-  // Convert to array with history attached
+  // Convert to array with history and projection info attached
   const metricsWithHistory = latestMetrics.map((m) => ({
     ...m,
     history: historyByName.get(m.name) || [],
+    hasProjections: !!getMetricTargets(m.name),
   }));
 
   return {
@@ -166,7 +167,7 @@ function getTrendInfo(history: Array<{ timestamp: string; value: number }>) {
   };
 }
 
-type MetricWithHistory = Metric & { history: Array<{ timestamp: string; value: number }> };
+type MetricWithHistory = Metric & { history: Array<{ timestamp: string; value: number }>; hasProjections: boolean };
 
 export default function CategoryView({ loaderData }: Route.ComponentProps) {
   const { category, categoryInfo, metrics, totalCount } = loaderData;
@@ -214,6 +215,16 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium truncate">{metric.name}</h3>
                       <StatusBadge status={status} />
+                      {(metric.history.length > 1 || metric.hasProjections) && (
+                        <span
+                          className="flex-shrink-0 text-blue-500 dark:text-blue-400"
+                          title={`${metric.history.length} data points${metric.hasProjections ? " + projections" : ""}`}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                          </svg>
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-500">
                       {format(parseISO(metric.timestamp), "MMM d, yyyy")}

@@ -193,10 +193,12 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* Trend Chart with Projections */}
-      {(history.length > 1 || projections.length > 0) && (
+      {history.length > 0 && (
         <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-medium">Trend Over Time</h2>
+            <h2 className="font-medium">
+              {history.length > 1 ? "Trend Over Time" : "Current vs Target"}
+            </h2>
             {projections.length > 0 && (
               <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
                 With 2026 Targets

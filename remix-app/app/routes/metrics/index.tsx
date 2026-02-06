@@ -6,7 +6,7 @@ import {
   type MetricStatus,
   type Metric,
 } from "../../types/metrics";
-import { getRealMetrics, getLatestRealMetrics } from "../../lib/real-data";
+import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,9 +15,25 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+type MetricWithChartInfo = Metric & { historyCount: number; hasProjections: boolean };
+
 export function loader() {
   // Use real tracked data from vault
-  const metrics = getLatestRealMetrics();
+  const allMetrics = getRealMetrics();
+  const latestMetrics = getLatestRealMetrics();
+
+  // Count history points per metric name
+  const countByName = new Map<string, number>();
+  allMetrics.forEach((m) => {
+    countByName.set(m.name, (countByName.get(m.name) || 0) + 1);
+  });
+
+  // Attach chart info
+  const metrics: MetricWithChartInfo[] = latestMetrics.map((m) => ({
+    ...m,
+    historyCount: countByName.get(m.name) || 1,
+    hasProjections: !!getMetricTargets(m.name),
+  }));
 
   // Group by category
   const byCategory = (Object.keys(CATEGORY_INFO) as MetricCategory[]).reduce(
@@ -27,7 +43,7 @@ export function loader() {
         .sort((a, b) => a.name.localeCompare(b.name));
       return acc;
     },
-    {} as Record<MetricCategory, Metric[]>
+    {} as Record<MetricCategory, MetricWithChartInfo[]>
   );
 
   return { metrics, byCategory };
@@ -129,7 +145,21 @@ function MiniRangeBar({ metric }: { metric: Metric }) {
   );
 }
 
-function MetricRow({ metric }: { metric: Metric }) {
+function ChartIndicator({ metric }: { metric: MetricWithChartInfo }) {
+  if (metric.historyCount <= 1 && !metric.hasProjections) return null;
+  return (
+    <span
+      className="flex-shrink-0 text-blue-500 dark:text-blue-400"
+      title={`${metric.historyCount} data points${metric.hasProjections ? " + projections" : ""}`}
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+    </span>
+  );
+}
+
+function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
   const status = getMetricStatus(metric);
 
   return (
@@ -138,8 +168,9 @@ function MetricRow({ metric }: { metric: Metric }) {
       className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
     >
       <StatusDot status={status} />
-      <span className="font-medium text-sm flex-1 min-w-0 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
+      <span className="font-medium text-sm flex-1 min-w-0 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1.5">
         {metric.name}
+        <ChartIndicator metric={metric} />
       </span>
       <div className="w-24 flex-shrink-0">
         <MiniRangeBar metric={metric} />
@@ -157,7 +188,7 @@ function CategorySection({
   metrics,
 }: {
   category: MetricCategory;
-  metrics: Metric[];
+  metrics: MetricWithChartInfo[];
 }) {
   const info = CATEGORY_INFO[category];
 
@@ -238,7 +269,7 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
           acc[cat] = byCategory[cat].filter((m) => getMetricStatus(m) === filterStatus);
           return acc;
         },
-        {} as Record<MetricCategory, Metric[]>
+        {} as Record<MetricCategory, MetricWithChartInfo[]>
       )
     : byCategory;
 
@@ -347,6 +378,12 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
         <span className="flex items-center gap-1.5">
           <span className="w-0.5 h-3 bg-gray-800 dark:bg-white rounded-sm" />
           Value
+        </span>
+        <span className="flex items-center gap-1.5">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          Trend chart
         </span>
       </div>
     </div>

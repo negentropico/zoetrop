@@ -53,7 +53,7 @@ export function TrendChart({
   height = 200,
   showMilestones = true,
 }: TrendChartProps) {
-  if (data.length === 0) {
+  if (data.length === 0 && projections.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
         No historical data available
