@@ -8,47 +8,60 @@ Comprehensive wellness tracking dashboard consolidating WHOOP biometrics, blood 
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Astro 5 + React 19 |
-| Styling | Tailwind CSS 4.x |
+| Framework | React Router 7 (Remix) |
+| Language | TypeScript 5.x (strict mode) |
+| UI | React 19 + Tailwind CSS 4.x |
 | Charts | Recharts |
-| Storage | LocalStorage + Neon Postgres |
-| ORM | Drizzle ORM |
+| Database | Neon Postgres + Drizzle ORM |
 | Deployment | Netlify |
 
 ## Directory Structure
 
-```
-db/
-├── schema.ts         # Drizzle table definitions
-drizzle.config.ts     # Drizzle ORM configuration
-migrations/           # Generated SQL migrations
+The app lives in `remix-app/`. All build commands run from that directory.
 
-src/
-├── components/
-│   ├── charts/       # Recharts visualizations
-│   ├── data/         # Import/export components
-│   ├── layout/       # Header, footer, nav
-│   ├── metrics/      # MetricCard, StatusBadge, TrendIndicator
-│   └── protocol/     # Timeline, cessation tracker
-├── hooks/            # useMetrics, useStorage, useCessation
-├── layouts/          # Astro layouts
-├── lib/
-│   ├── calculations/ # Metric math
-│   ├── storage/      # LocalStorage + Postgres adapters
-│   └── whoop/        # JSON parser, mapper
-├── pages/
-│   ├── api/          # Netlify functions
-│   ├── vitamins/     # Category views
-│   ├── minerals/
-│   ├── inflammatory/
-│   ├── metabolic/
-│   ├── hormones/
-│   ├── autonomic/    # WHOOP data
-│   ├── body-composition/
-│   └── lipids/
-├── styles/           # global.css
-└── types/            # TypeScript interfaces
 ```
+remix-app/
+├── app/
+│   ├── components/
+│   │   ├── TrendChart.tsx     # Shared chart (TrendChart + TrendSparkline)
+│   │   ├── Header.tsx         # Navigation
+│   │   └── ...                # Metric cards, protocol components
+│   ├── lib/
+│   │   ├── real-data.ts       # Real blood work, body comp, WHOOP data
+│   │   ├── protocol-data.ts   # Protocol versions, supplements, cessation
+│   │   └── seed-data.ts       # Seed data for correlations, genetics
+│   ├── routes/                # File-based routing (React Router 7)
+│   └── types/
+│       ├── metrics.ts         # 9 categories with CATEGORY_INFO
+│       └── protocol.ts        # Protocol types, CESSATION_PHASES, SUPPLEMENT_TIERS
+├── db/
+│   └── schema.ts              # Drizzle table definitions (201 lines)
+├── drizzle.config.ts          # Drizzle ORM configuration
+├── vite.config.ts
+├── tsconfig.json
+└── package.json
+```
+
+## Route Structure
+
+| Route | File | Description |
+|-------|------|-------------|
+| `/` | `home.tsx` | Dashboard with cessation tracker |
+| `/metrics` | `metrics.tsx` | Metrics overview |
+| `/metrics/:category` | `metrics.$category.tsx` | Category detail |
+| `/metrics/:category/:metricId` | `metrics.$category.$metricId.tsx` | Metric detail |
+| `/protocol` | `protocol.tsx` | Protocol overview |
+| `/protocol/versions` | `protocol.versions.tsx` | Version history |
+| `/protocol/versions/:version` | `protocol.versions.$version.tsx` | Version detail |
+| `/protocol/supplements` | `protocol.supplements.tsx` | Supplement tiers |
+| `/protocol/cessation` | `protocol.cessation.tsx` | Cessation timeline |
+| `/protocol/compare` | `protocol.compare.tsx` | Version comparison |
+| `/insights` | `insights.tsx` | Insights overview |
+| `/insights/correlations` | `insights.correlations.tsx` | Metric correlations |
+| `/insights/genetics` | `insights.genetics.tsx` | Genetic variants |
+| `/import` | `import.tsx` | Import overview |
+| `/import/whoop` | `import.whoop.tsx` | WHOOP data import |
+| `/import/vault` | `import.vault.tsx` | Obsidian vault import |
 
 ## 9 Metric Categories
 
@@ -85,7 +98,10 @@ src/
   - `08_Cessation_Protocol.md` - 120-day FAAH timeline
   - `09_Targets_2026.md` - goals
 
-## Cessation Protocol Phases
+## Cessation Protocol
+
+- **Start date**: December 23, 2025
+- **Target**: FAAH-informed 120+ day protocol
 
 | Phase | Days | Focus |
 |-------|------|-------|
@@ -94,97 +110,41 @@ src/
 | Clearing | 61-120 | FAAH metabolic clearing |
 | Optimization | 121-150 | Tier 1 supplements only |
 
-## Porting From Existing Projects
-
-### From Dash (`/Users/mac/Code/Dash`)
-- `src/types/metrics/types.ts` → `src/types/metrics.ts`
-- `src/hooks/useMetrics.ts` → `src/hooks/useMetrics.ts`
-- `src/components/metrics/MetricCard.tsx` → `src/components/metrics/`
-- `src/utils/storage/` → `src/lib/storage/`
-
-### From Comp (`/Users/mac/Code/comp`)
-- `astro.config.mjs` pattern
-- `theme.ts` design tokens
-- `formatters.ts` number formatting
-
-### From Whoop (`/Users/mac/Code/Whoop`)
-- `src/constants.py` → cessation phases
-- JSON schema from results files
-
-## Spec-Kit Workflow
-
-```bash
-/speckit.constitution  # Project principles (done)
-/speckit.specify       # Feature requirements
-/speckit.plan          # Technical approach
-/speckit.tasks         # Task breakdown
-/speckit.implement     # Execute
-```
-
 ## Database (Neon + Drizzle)
 
-### Configuration
 - **Provider**: Neon Postgres (via Netlify extension)
 - **ORM**: Drizzle ORM
 - **Site**: zoetrop (Netlify ID: `0abb12f6-d11b-4f81-8a8d-86b44e99088f`)
 - **Repo**: github.com/negentropico/tracker
 
-### Schema Location
-```
-db/
-├── schema.ts        # Drizzle table definitions
-drizzle.config.ts    # Drizzle configuration
-migrations/          # Generated SQL migrations
-```
-
 ### Database Commands
 ```bash
+cd remix-app
 npm run db:generate  # Generate migrations from schema changes
 npm run db:migrate   # Apply migrations to Neon
-npm run db:studio    # Open Drizzle Studio (visual DB browser)
+npm run db:studio    # Open Drizzle Studio
 ```
-
-### Environment
-- `NETLIFY_DATABASE_URL` - Auto-injected in Netlify functions
-- For local dev: `netlify dev` provides the connection
-
-### Storage Strategy
-| Phase | Primary | Secondary |
-|-------|---------|-----------|
-| 1-4 | LocalStorage | - |
-| 5+ | Neon Postgres | LocalStorage (offline cache) |
 
 ## Development Commands
 
+All commands run from `remix-app/`:
+
 ```bash
 npm run dev          # Start dev server
-npm run build        # Production build
-npm run preview      # Preview build
-npm run check        # Type check only
-npm run ci           # Full CI (types + build)
-npm run db:generate  # Generate DB migrations
-npm run db:migrate   # Run DB migrations
-npm run db:studio    # Drizzle Studio UI
+npm run build        # Production build (react-router build)
+npm run typecheck    # Type generation + type check
+npm run start        # Serve production build
 ```
 
-## Mobile Workflow (Claude Code)
-
-### Quick Commands
+### Build Pipeline
 ```bash
-npm run check              # Type check only (~30s)
-npm run ci                 # Full CI check (types + build)
-git push origin dev        # Deploy to preview
-git checkout main && git merge dev && git push  # Deploy to production
+npx react-router typegen   # Generate route types (must run before tsc)
+npx tsc --noEmit           # Type check
+npx react-router build     # Production build
 ```
 
-### Workflow
-1. Test app at preview URL on phone
-2. Note issues/improvements in conversation
-3. Implement changes with Claude Code
-4. Push to `dev` branch → auto preview deploy
-5. When ready: merge `dev` → `main` → production
+## Deployment
 
-### URLs
 | Environment | URL |
 |-------------|-----|
 | Production | https://zoetrop.netlify.app |
@@ -194,19 +154,7 @@ git checkout main && git merge dev && git push  # Deploy to production
 ### CI/CD
 - **GitHub Actions**: Type check + build on push to `dev`/`main`
 - **Netlify**: Auto-deploys all branches with unique preview URLs
-- **Checks**: ~1-2 min (quick mode: types + build only)
 
 ---
 
-*Last Updated: January 3, 2026*
-
-## Active Technologies
-- TypeScript 5.x (strict mode enabled) + React 19, Astro 5, date-fns
-- Drizzle ORM + Neon Postgres (via Netlify extension)
-- LocalStorage (primary phases 1-4), Neon Postgres (phase 5+)
-- TypeScript 5.x (strict mode) + Astro 5, React 19, Tailwind CSS 4.x, Recharts (002-mvp-dashboard)
-- LocalStorage (Phase 1 adapter) + optional Neon Postgres sync (002-mvp-dashboard)
-
-## Recent Changes
-- 001-core-data-layer: Configured Neon Postgres database via Netlify, Drizzle ORM setup
-- 001-core-data-layer: Added TypeScript 5.x (strict mode enabled) + React 19, Astro 5, date-fns
+*Last Updated: February 5, 2026*

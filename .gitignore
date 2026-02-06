@@ -1,33 +1,38 @@
-# build output
-dist/
-# generated types
-.astro/
-
 # dependencies
 node_modules/
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# build output
+dist/
+build/
 
+# generated types
+.astro/
 
 # environment variables
 .env
 .env.production
+.env.local
 
-# macOS-specific files
+# macOS
 .DS_Store
 
-# jetbrains setting folder
+# IDEs
 .idea/
 
-# Local Netlify folder
+# Netlify
 .netlify
 
-# SQLite database files
+# database
 data/
 *.db
 *.db-wal
 *.db-shm
+
+# logs
+npm-debug.log*
+
+# archive (browsable but excluded from searches)
+.archive/
+
+# coverage
+coverage/
