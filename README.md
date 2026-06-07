@@ -1,6 +1,8 @@
-# Wellness Tracker
+# Zoetrop
 
 Comprehensive wellness tracking dashboard consolidating WHOOP biometrics, blood work, body composition, and protocol progress.
+
+> **Status:** n=1 personal instrument today (M0). The direction — growing into a multi-tenant functional-health operations platform — is in [`docs/PLATFORM.md`](docs/PLATFORM.md). `Zoetrop` is the internal codename; the public brand is deferred (see [`docs/NAMING.md`](docs/NAMING.md)).
 
 ## Tech Stack
 

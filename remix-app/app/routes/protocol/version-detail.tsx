@@ -42,10 +42,10 @@ export function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) {
-    return [{ title: "Version Not Found - Wellness Tracker" }];
+    return [{ title: "Version Not Found - Zoetrop" }];
   }
   return [
-    { title: `Protocol ${data.version.version} - Wellness Tracker` },
+    { title: `Protocol ${data.version.version} - Zoetrop` },
     { name: "description", content: data.version.notes || `Protocol version ${data.version.version}` },
   ];
 }

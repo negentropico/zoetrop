@@ -1,4 +1,4 @@
-# Wellness Tracker Constitution
+# Zoetrop Constitution
 
 ## Project Overview
 

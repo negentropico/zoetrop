@@ -10,7 +10,7 @@ import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../li
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Metrics - Wellness Tracker" },
+    { title: "Metrics - Zoetrop" },
     { name: "description", content: "View and manage wellness metrics" },
   ];
 }

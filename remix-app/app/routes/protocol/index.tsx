@@ -11,7 +11,7 @@ import { differenceInDays, parseISO, format } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Protocol Overview - Wellness Tracker" },
+    { title: "Protocol Overview - Zoetrop" },
     { name: "description", content: "Supplement protocol management overview" },
   ];
 }

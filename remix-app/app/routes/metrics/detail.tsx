@@ -57,10 +57,10 @@ export function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) {
-    return [{ title: "Metric Not Found - Wellness Tracker" }];
+    return [{ title: "Metric Not Found - Zoetrop" }];
   }
   return [
-    { title: `${data.metric.name} - Wellness Tracker` },
+    { title: `${data.metric.name} - Zoetrop` },
     { name: "description", content: `${data.metric.name} tracking data` },
   ];
 }

@@ -51,7 +51,7 @@ function Header() {
             to="/"
             className="text-lg font-semibold tracking-tight"
           >
-            Wellness Tracker
+            Zoetrop
           </NavLink>
           <nav className="flex items-center gap-6 text-sm">
             <NavLink

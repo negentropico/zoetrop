@@ -1,4 +1,4 @@
-# Wellness Tracker - CLAUDE.md
+# Zoetrop - CLAUDE.md
 
 ## Project Overview
 
@@ -23,45 +23,54 @@ The app lives in `remix-app/`. All build commands run from that directory.
 remix-app/
 ├── app/
 │   ├── components/
-│   │   ├── TrendChart.tsx     # Shared chart (TrendChart + TrendSparkline)
-│   │   ├── Header.tsx         # Navigation
-│   │   └── ...                # Metric cards, protocol components
+│   │   └── TrendChart.tsx     # Shared chart (exports TrendChart + TrendSparkline)
 │   ├── lib/
 │   │   ├── real-data.ts       # Real blood work, body comp, WHOOP data
-│   │   ├── protocol-data.ts   # Protocol versions, supplements, cessation
-│   │   └── seed-data.ts       # Seed data for correlations, genetics
-│   ├── routes/                # File-based routing (React Router 7)
+│   │   ├── protocol-data.ts   # Protocol versions (P0–P6), supplements, cessation
+│   │   ├── seed-data.ts       # Seed data for correlations, genetics
+│   │   └── db.server.ts       # Neon/Drizzle server-side client
+│   ├── routes/                # Config-based routing — see app/routes.ts
+│   │   ├── home.tsx
+│   │   ├── metrics/           # layout.tsx + index/category/detail
+│   │   ├── protocol/          # layout.tsx + index/versions/version-detail/supplements/cessation/compare
+│   │   ├── insights/          # layout.tsx + index/correlations/genetics
+│   │   └── import/            # layout.tsx + index/whoop/vault
+│   ├── routes.ts              # Explicit route table (RouteConfig), not file-name convention
 │   └── types/
 │       ├── metrics.ts         # 9 categories with CATEGORY_INFO
 │       └── protocol.ts        # Protocol types, CESSATION_PHASES, SUPPLEMENT_TIERS
 ├── db/
-│   └── schema.ts              # Drizzle table definitions (201 lines)
+│   └── schema.ts              # Drizzle table definitions (201 lines, 8 tables)
 ├── drizzle.config.ts          # Drizzle ORM configuration
 ├── vite.config.ts
 ├── tsconfig.json
 └── package.json
 ```
 
+> Routing is **explicit** via `app/routes.ts` (`@react-router/dev/routes` — `index`/`route`/`layout`), not the flat file-name convention. Each section folder has a `layout.tsx` wrapping its child routes.
+
 ## Route Structure
 
 | Route | File | Description |
 |-------|------|-------------|
-| `/` | `home.tsx` | Dashboard with cessation tracker |
-| `/metrics` | `metrics.tsx` | Metrics overview |
-| `/metrics/:category` | `metrics.$category.tsx` | Category detail |
-| `/metrics/:category/:metricId` | `metrics.$category.$metricId.tsx` | Metric detail |
-| `/protocol` | `protocol.tsx` | Protocol overview |
-| `/protocol/versions` | `protocol.versions.tsx` | Version history |
-| `/protocol/versions/:version` | `protocol.versions.$version.tsx` | Version detail |
-| `/protocol/supplements` | `protocol.supplements.tsx` | Supplement tiers |
-| `/protocol/cessation` | `protocol.cessation.tsx` | Cessation timeline |
-| `/protocol/compare` | `protocol.compare.tsx` | Version comparison |
-| `/insights` | `insights.tsx` | Insights overview |
-| `/insights/correlations` | `insights.correlations.tsx` | Metric correlations |
-| `/insights/genetics` | `insights.genetics.tsx` | Genetic variants |
-| `/import` | `import.tsx` | Import overview |
-| `/import/whoop` | `import.whoop.tsx` | WHOOP data import |
-| `/import/vault` | `import.vault.tsx` | Obsidian vault import |
+| `/` | `routes/home.tsx` | Dashboard with cessation tracker |
+| `/metrics` | `routes/metrics/index.tsx` | Metrics overview |
+| `/metrics/:category` | `routes/metrics/category.tsx` | Category detail |
+| `/metrics/:category/:metricId` | `routes/metrics/detail.tsx` | Metric detail |
+| `/protocol` | `routes/protocol/index.tsx` | Protocol overview |
+| `/protocol/versions` | `routes/protocol/versions.tsx` | Version history |
+| `/protocol/versions/:version` | `routes/protocol/version-detail.tsx` | Version detail |
+| `/protocol/supplements` | `routes/protocol/supplements.tsx` | Supplement tiers |
+| `/protocol/cessation` | `routes/protocol/cessation.tsx` | Cessation timeline |
+| `/protocol/compare` | `routes/protocol/compare.tsx` | Version comparison |
+| `/insights` | `routes/insights/index.tsx` | Insights overview |
+| `/insights/correlations` | `routes/insights/correlations.tsx` | Metric correlations |
+| `/insights/genetics` | `routes/insights/genetics.tsx` | Genetic variants |
+| `/import` | `routes/import/index.tsx` | Import overview |
+| `/import/whoop` | `routes/import/whoop.tsx` | WHOOP data import |
+| `/import/vault` | `routes/import/vault.tsx` | Obsidian vault import |
+
+Each section also has a `layout.tsx` (`metrics`/`protocol`/`insights`/`import`) that wraps its children.
 
 ## 9 Metric Categories
 
@@ -115,7 +124,7 @@ remix-app/
 - **Provider**: Neon Postgres (via Netlify extension)
 - **ORM**: Drizzle ORM
 - **Site**: zoetrop (Netlify ID: `0abb12f6-d11b-4f81-8a8d-86b44e99088f`)
-- **Repo**: github.com/negentropico/tracker
+- **Repo**: github.com/negentropico/zoetrop
 
 ### Database Commands
 ```bash
@@ -155,6 +164,20 @@ npx react-router build     # Production build
 - **GitHub Actions**: Type check + build on push to `dev`/`main`
 - **Netlify**: Auto-deploys all branches with unique preview URLs
 
+## Naming & Direction
+
+- **Codename**: `Zoetrop` (internal — matches `zoetrop.netlify.app`). Formalized 2026-05-20, replacing the old "Tracker"/"Wellness Tracker" name. The public brand is **deferred**; the venture-naming hunt is paused with clean survivors recorded in `docs/NAMING.md` (do not relitigate — Sanskrit/Eastern lean, MAGA-adjacency killed, any "Zoe-" name dead).
+- **Direction doc**: `docs/PLATFORM.md` — the product brief. Today = n=1 personal instrument (**M0, done**); the arc is M1 (single practitioner, multi-client + identity/tenancy + lab ingest + report gen) → M2 (client app) → M3 (multi-coach + productize). Engine-first inversion: the confidence-graded protocol-decision engine is the moat; coaching-ops is layered on top.
+- **Flagship**: commercialized via HIGHER (Tara Garrison) as the M1 proving tenant — see `ngtops/clients/higher/PLATFORM-FOR-HIGHER.md` (outside this repo).
+
+## Planning Workflow (spec-kit / GSD / superpowers)
+
+This repo currently uses **spec-kit** (`.specify/`): a `constitution.md` plus templates/scripts. Feature work has used `NNN-slug` branches (`001-core-data-layer`, `002-mvp-dashboard`, `003-remix-foundation` — current).
+
+- ⚠️ **`.specify/memory/constitution.md` is STALE** — it still names Astro 5 + LocalStorage-primary. The app migrated to **React Router 7 (Remix) + Neon Postgres** (Astro artifacts removed in `f1463ba`; old app archived in `.archive/astro/`). Treat the Tech Stack table above (not the constitution) as ground truth until the constitution is re-ratified.
+- **No GSD `.planning/` yet.** When converting the PLATFORM.md M1–M3 narrative into executable phases, run `/gsd:new-project` (or `/gsd:map-codebase` first) and reconcile spec-kit ↔ GSD at that point (PLATFORM.md §9).
+- **Roadmap source of truth**: `docs/PLATFORM.md` §6 (M0–M3) until a GSD roadmap supersedes it.
+
 ---
 
-*Last Updated: February 5, 2026*
+*Last Updated: June 7, 2026*

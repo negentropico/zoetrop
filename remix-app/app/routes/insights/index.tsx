@@ -9,7 +9,7 @@ import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES } from "../../types/genetics";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Insights Overview - Wellness Tracker" },
+    { title: "Insights Overview - Zoetrop" },
     { name: "description", content: "Data-driven insights from your wellness data" },
   ];
 }

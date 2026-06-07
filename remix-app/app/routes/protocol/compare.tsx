@@ -5,7 +5,7 @@ import { format, parseISO } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Compare Versions - Wellness Tracker" },
+    { title: "Compare Versions - Zoetrop" },
     { name: "description", content: "Compare protocol versions side by side" },
   ];
 }

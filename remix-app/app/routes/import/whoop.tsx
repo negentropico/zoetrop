@@ -4,7 +4,7 @@ import type { Route } from "./+types/whoop";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Import WHOOP - Wellness Tracker" },
+    { title: "Import WHOOP - Zoetrop" },
     { name: "description", content: "Import WHOOP analysis data" },
   ];
 }

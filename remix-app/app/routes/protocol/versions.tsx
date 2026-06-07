@@ -5,7 +5,7 @@ import { format, parseISO } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Protocol Versions - Wellness Tracker" },
+    { title: "Protocol Versions - Zoetrop" },
     { name: "description", content: "Track protocol evolution from P0 to P6" },
   ];
 }

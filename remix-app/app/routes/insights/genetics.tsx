@@ -11,7 +11,7 @@ import {
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Genetic Profile - Wellness Tracker" },
+    { title: "Genetic Profile - Zoetrop" },
     { name: "description", content: "Genetic variants informing supplement protocol" },
   ];
 }

@@ -9,7 +9,7 @@ import {
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Correlations - Wellness Tracker" },
+    { title: "Correlations - Zoetrop" },
     { name: "description", content: "Supplement-metric correlation analysis" },
   ];
 }

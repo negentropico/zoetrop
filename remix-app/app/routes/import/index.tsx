@@ -3,7 +3,7 @@ import type { Route } from "./+types/index";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Import Data - Wellness Tracker" },
+    { title: "Import Data - Zoetrop" },
     { name: "description", content: "Import wellness data from various sources" },
   ];
 }

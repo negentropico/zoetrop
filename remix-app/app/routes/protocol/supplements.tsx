@@ -6,7 +6,7 @@ import { SUPPLEMENT_TIERS, type SupplementTier, type Supplement } from "../../ty
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Supplements - Wellness Tracker" },
+    { title: "Supplements - Zoetrop" },
     { name: "description", content: "Manage supplement protocol" },
   ];
 }

@@ -1,4 +1,4 @@
-// Metric types - ported from Astro project /Users/mac/Code/Tracker/src/types/metrics.ts
+// Metric types - ported from Astro project /Users/mac/Code/zoetrop/src/types/metrics.ts
 
 export type MetricStatus = 'optimal' | 'borderline' | 'deficient' | 'excess';
 export type MetricTrend = 'improving' | 'stable' | 'declining';

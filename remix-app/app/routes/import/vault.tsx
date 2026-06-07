@@ -4,7 +4,7 @@ import type { Route } from "./+types/vault";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Import Vault - Wellness Tracker" },
+    { title: "Import Vault - Zoetrop" },
     { name: "description", content: "Import data from Obsidian vault" },
   ];
 }

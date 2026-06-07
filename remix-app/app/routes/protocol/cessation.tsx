@@ -5,7 +5,7 @@ import { differenceInDays, parseISO, format, addDays } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Cessation Tracker - Wellness Tracker" },
+    { title: "Cessation Tracker - Zoetrop" },
     { name: "description", content: "Track FAAH-based cessation protocol progress" },
   ];
 }

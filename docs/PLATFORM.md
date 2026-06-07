@@ -1,8 +1,8 @@
-# Tracker → Functional-Health Operations Platform
+# Zoetrop → Functional-Health Operations Platform
 
-**A platform definition / product brief.** Defines what Tracker becomes as it grows from a personal n=1 instrument into a multi-tenant operations platform for running full functional-health coaching practices. Architecture-deep; narrative (not a GSD/spec-kit milestone breakdown — that's a separate step).
+**A platform definition / product brief.** Defines what Zoetrop becomes as it grows from a personal n=1 instrument into a multi-tenant operations platform for running full functional-health coaching practices. Architecture-deep; narrative (not a GSD/spec-kit milestone breakdown — that's a separate step).
 
-- **Repo:** `/Users/mac/Code/Tracker` (github.com/negentropico/tracker) · **Live:** zoetrop.netlify.app
+- **Repo:** `/Users/mac/Code/zoetrop` (github.com/negentropico/zoetrop) · **Live:** zoetrop.netlify.app
 - **Author:** Mac Baker / Negentropico
 - **Date:** 2026-05-20
 - **Status:** Direction doc. The n=1 instrument ships today; the platform is being commercialized via its first flagship pilot — see the companion `ngtops/clients/higher/PLATFORM-FOR-HIGHER.md` (HIGHER / Tara Garrison).
@@ -12,13 +12,13 @@
 
 ## 1. Thesis
 
-Most coaching software is **CRM + workout-builder + payments**, and stays thin exactly where the value is: the **biometric/decision layer**. Tracker inverts the build order. It starts from the genuinely hard part — consolidating labs + wearables + genetics into **confidence-graded protocol decisions** — which already works for a real n=1 case, and adds the coaching-delivery layer (multi-client, intake → customized protocol → tracking → 4-week iteration → client app → practitioner monitoring) on top of an engine that already runs.
+Most coaching software is **CRM + workout-builder + payments**, and stays thin exactly where the value is: the **biometric/decision layer**. Zoetrop inverts the build order. It starts from the genuinely hard part — consolidating labs + wearables + genetics into **confidence-graded protocol decisions** — which already works for a real n=1 case, and adds the coaching-delivery layer (multi-client, intake → customized protocol → tracking → 4-week iteration → client app → practitioner monitoring) on top of an engine that already runs.
 
 **One line:** the protocol-decision engine first, the practice-operations layer second — the opposite of every coaching SaaS, and the reason the moat is real.
 
 ---
 
-## 2. What Tracker is today (the n=1 instrument)
+## 2. What Zoetrop is today (the n=1 instrument)
 
 A wellness dashboard that consolidates a serious self-quantifier's data — WHOOP biometrics, blood panels, body comp (DEXA), genetic variants, protocol/supplement progress — and turns it into *decisions*. What distinguishes it from a generic health dashboard is the layer consumer tools skip: it maps **genetic variants → protocol actions, confidence-graded K1–K4** (K1 = strong/clinical … K4 = speculative/single-study), so the UI says "the data points this way, here's how sure we are" instead of faking certainty.
 
@@ -43,7 +43,7 @@ The defensible asset is not a dashboard — it's the **confidence-graded protoco
 
 The platform runs a complete functional-health practice. The target shape (the "Higher" service model, decomposed) is **four delivery surfaces on a diagnostics substrate**, all sitting on top of the decision engine:
 
-- **Diagnostics substrate** — blood labs, gut microbiome, DUTCH hormones, hair-mineral analysis, DNA, CGM, body-comp scans, glucose/ketones, HRV. (Tracker already ingests several.)
+- **Diagnostics substrate** — blood labs, gut microbiome, DUTCH hormones, hair-mineral analysis, DNA, CGM, body-comp scans, glucose/ketones, HRV. (Zoetrop already ingests several.)
 - **Training** — neurotyping intake → goals/equipment/injuries → customized program → app access → video demos → progress tracking → new plan every 4 weeks.
 - **Nutrition** — comprehensive intake → goals → customized recs → flexible approach (macros / keto / food-as-healing), matched to the person.
 - **Modalities** — sauna, red-light/NIR/FIR, meditation, breathwork, grounding, cold immersion, supplement protocols, circadian reset, sleep optimization.
@@ -128,4 +128,4 @@ This is a credible **NGT venture seed**, not an extracurricular. It sits in Mac'
 
 **Flagship instantiation:** the platform is being commercialized through **HIGHER (Tara Garrison)** as the first tenant — NGT builds her practice ops on this platform (hybrid/flagship; NGT retains platform IP to productize) and uses her real practice as the M1 proving ground. Full mapping in `ngtops/clients/higher/PLATFORM-FOR-HIGHER.md`. HIGHER's Discovery → Build → App engagement phases line up with M1 → M1/M2 → M2/M3 here.
 
-**Toward a roadmap (separate step):** this brief is the definition. When ready, convert §4–§6 into a GSD `new-project` + `roadmap` (phases/milestones/success criteria) — likely run from the NGT ops repo or by initializing GSD in this repo. Tracker currently uses spec-kit (`.specify/`); reconcile spec-kit vs GSD at that point.
+**Toward a roadmap (separate step):** this brief is the definition. When ready, convert §4–§6 into a GSD `new-project` + `roadmap` (phases/milestones/success criteria) — likely run from the NGT ops repo or by initializing GSD in this repo. Zoetrop currently uses spec-kit (`.specify/`); reconcile spec-kit vs GSD at that point.

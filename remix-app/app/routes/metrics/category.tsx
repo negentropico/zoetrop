@@ -63,10 +63,10 @@ export function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) {
-    return [{ title: "Category Not Found - Wellness Tracker" }];
+    return [{ title: "Category Not Found - Zoetrop" }];
   }
   return [
-    { title: `${data.categoryInfo.label} - Wellness Tracker` },
+    { title: `${data.categoryInfo.label} - Zoetrop` },
     { name: "description", content: data.categoryInfo.description },
   ];
 }

@@ -20,7 +20,7 @@ import { differenceInDays, parseISO } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Wellness Tracker" },
+    { title: "Zoetrop" },
     { name: "description", content: "Comprehensive wellness tracking dashboard" },
   ];
 }
