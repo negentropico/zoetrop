@@ -2,11 +2,11 @@
 
 ## Overview
 
-M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platform that produces a confidence-graded lab→protocol report a real practitioner can hand a real client. The build order is constrained by hard dependencies: every phase unblocks the next. Phases 1–3 are enabling layers (no end-user vertical slice delivered until Phase 3 completes). Phases 4–6 deliver the functional stack: live DB reads, lab ingest pipeline, and the proof-slice report generation.
+M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platform that produces a confidence-graded lab→protocol report a real practitioner can hand a real client. The build order is constrained by hard dependencies: every phase unblocks the next. Phases 1–3 are enabling layers (no end-user vertical slice delivered until Phase 3 completes). Phases 4–6 deliver the functional stack: live DB reads, lab ingest pipeline, and the proof-slice report generation. Phase 4.1 (inserted) applies the Zoetrope design system after the data layer goes live, so the UI of Phases 5–6 ships in-brand rather than being reskinned afterward.
 
 ## Milestones
 
-- 🚧 **M1 — Engine-First Platform** — Phases 1–6 (in progress)
+- 🚧 **M1 — Engine-First Platform** — Phases 1–6 + inserted 4.1 (in progress)
 
 ## Phases
 
@@ -14,6 +14,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [ ] **Phase 2: PHI / BAA Compliance Gate** — Execute Neon + Netlify + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
 - [ ] **Phase 3: Identity + Tenancy Spine with RLS** — Ship Better-Auth org roles, `tenants`/`users`/`subjects` tables, add `tenantId`/`subjectId` to all 8 data tables, atomic RLS-enable+policies, SET LOCAL transaction wrapper, cross-tenant isolation tests
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
+- [ ] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
 - [ ] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports
 
@@ -87,10 +88,33 @@ Plans:
 
 **Plans**: TBD
 
+### Phase 04.1: Design System Adoption (INSERTED)
+
+**Goal**: The Zoetrope brand design system is a working, typed foundation in the app — tokens bridged into Tailwind `@theme`, signature components ported to TSX, the M0 screens retrofit in-brand, and a binding `UI-SPEC.md` committed — so every subsequent UI surface (Phases 5–6) is built in-brand from the first commit instead of being reskinned later
+**Depends on**: Phase 4 (reskin once, against the live-data screens — not the static ones)
+**Gate**: Blocked on a **claude.ai/design roundtrip** — the screens package (`docs/design-system/uploads/screens-package/`) is handed out, and revised screens + resolved design questions return before planning. Strategy, decisions, and integration architecture are recorded in `docs/DESIGN-SYSTEM-ADOPTION.md`.
+**Requirements**: UI-01
+**Success Criteria** (what must be TRUE):
+
+  1. The brand token set from `docs/design-system/tokens/` (warm neutral ramp, Energy/Vital/Focus families, type scale, Fibonacci spacing, warm ink-tinted shadows, frame radii, motion) is bridged into the app's Tailwind `@theme`; Inter is replaced by Space Grotesk / Hanken Grotesk / Space Mono; `base.css` helpers (`.zt-eyebrow`, `.zt-readout`, tabular numerals, warm focus ring) are available app-wide
+  2. The signature components are ported to typed TSX under `app/components/ui/` (MetricRing, Card, Stat, Badge, SegmentedControl) plus the gaps the brand DS lacks (DataTable, SegmentedPhaseBar, UploadDropzone); `tsc --noEmit` passes with zero errors and no `.jsx` / `_ds_bundle.js` runtime is shipped into the app
+  3. The 8 archetype screens (dashboard, metrics overview, metric category, metric detail, protocol overview, cessation, correlations, WHOOP import) render in-brand — no emoji icons (Lucide instead), no gradient progress bars (segmented/solid), periwinkle as the action color, warm Paper surfaces — verified by visual spot-check against the revised roundtrip designs
+  4. The two open design decisions are resolved in code and documented: the 9-category → 3-family color/icon system, and the 4-status palette (optimal/borderline/deficient/excess) mapped to brand tokens
+  5. A responsive nav system replaces the current non-collapsing header (which overflows to ~449px on mobile); touch targets ≥ 44px
+  6. `UI-SPEC.md` is committed (produced via `/gsd:ui-phase 04.1`) and is the binding design contract referenced by Phases 5 and 6
+
+**UI hint**: yes
+**Plans**: TBD — run `/gsd:ui-phase 04.1` after the roundtrip to produce `UI-SPEC.md`, then `/gsd:plan-phase 04.1`
+Likely plans:
+- [ ] Bridge tokens into Tailwind `@theme` + fonts + `base.css` helpers [UI-01]
+- [ ] Port signature components to typed TSX + new DataTable / SegmentedPhaseBar / UploadDropzone
+- [ ] Retrofit screens 01–07 to brand (class swaps + component substitution)
+- [ ] Resolve category color/icon system + 4-status palette in code
+
 ### Phase 5: Lab Ingest Pipeline
 
 **Goal**: A practitioner can upload a lab PDF, the system asynchronously extracts structured values with LLM assistance, those values are grounded and range-validated before review, the practitioner reviews fields side-by-side with the source document and approves or rejects each, and only approved metrics are written to the subject's record with full audit logging — consent is captured at intake
-**Depends on**: Phase 4 (live DB + tenant-scoped tables required); Phase 2 BAA gate (LLM provider BAA must be in place before PHI is sent to the model)
+**Depends on**: Phase 4 (live DB + tenant-scoped tables required); Phase 2 BAA gate (LLM provider BAA must be in place before PHI is sent to the model); Phase 4.1 (the upload/review UI is built against its `UI-SPEC.md`)
 **Requirements**: LAB-01, LAB-02, LAB-03, LAB-04, LAB-05, LAB-06
 **Risk note**: The LLM provider BAA is DECISION-02 from SUMMARY.md — it must be resolved and verified (Phase 2) before any extraction job sends PHI to an LLM API. If the provider BAA is not in place, Phase 5 is blocked.
 **Success Criteria** (what must be TRUE):
@@ -108,7 +132,7 @@ Plans:
 ### Phase 6: Engine Promotion + Confidence-Graded Reports
 
 **Goal**: Genetic variants and variant→protocol mappings are first-class schema with non-nullable K1–K4 confidence; the decision engine is a pure, dependency-free module; a practitioner can generate a confidence-graded lab→protocol report where every recommendation shows its K-level in the visible body — the proof slice that validates the whole M1 stack end-to-end
-**Depends on**: Phase 4 (live DB), Phase 5 (committed metrics available for report input)
+**Depends on**: Phase 4 (live DB), Phase 5 (committed metrics available for report input); Phase 4.1 (the report UI is built against its `UI-SPEC.md`)
 **Requirements**: ENG-01, ENG-02, ENG-03, RPT-01, RPT-02, RPT-03
 **Success Criteria** (what must be TRUE):
 
@@ -129,5 +153,6 @@ Plans:
 | 2. PHI / BAA Compliance Gate | 0/TBD | Not started | - |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
+| 4.1. Design System Adoption *(inserted)* | 0/TBD | Not planned (gated on roundtrip) | - |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |

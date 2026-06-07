@@ -56,6 +56,10 @@
 - [ ] **COMP-02**: PHI infrastructure is BAA-covered (Neon, Netlify, and the chosen LLM provider) before any client PHI is written — a release gate, not a feature
 - [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` configured (parameters off)
 
+### UI / Design System
+
+- [ ] **UI-01**: All product UI surfaces conform to the Zoetrope design system — brand tokens (color / type / spacing / shadow / radius), typed signature components, and the calm "quiet coach" voice — governed by a binding `UI-SPEC.md` that subsequent UI phases build against
+
 ## v2 Requirements
 
 Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
@@ -92,7 +96,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 ## Traceability
 
-**Coverage:** 28/28 v1 requirements mapped — 100%
+**Coverage:** 29/29 v1 requirements mapped — 100%
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -112,6 +116,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
 | DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
 | DATA-05 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
+| UI-01 | Phase 4.1 — Design System Adoption | Pending |
 | LAB-01 | Phase 5 — Lab Ingest Pipeline | Pending |
 | LAB-02 | Phase 5 — Lab Ingest Pipeline | Pending |
 | LAB-03 | Phase 5 — Lab Ingest Pipeline | Pending |
@@ -127,4 +132,4 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 ---
 *Requirements defined: 2026-06-07*
-*Last updated: 2026-06-07 — traceability populated after roadmap creation*
+*Last updated: 2026-06-07 — added UI-01 + Phase 4.1 (Design System Adoption) traceability*

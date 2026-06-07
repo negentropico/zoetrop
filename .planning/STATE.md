@@ -4,10 +4,10 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-06-07T22:57:41.400Z"
+last_updated: "2026-06-07T23:21:48.335Z"
 last_activity: 2026-06-07 -- Phase 1 planning complete
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 0
   total_plans: 5
   completed_plans: 0
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: 1 of 6 (Schema Baseline + Engine Tests + Auth Spike)
+Phase: 1 of 7 (Schema Baseline + Engine Tests + Auth Spike)
 Plan: 0 of TBD in current phase
 Status: Ready to execute
 Last activity: 2026-06-07 -- Phase 1 planning complete
@@ -51,6 +51,10 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 04.1 inserted after Phase 4: Design System Adoption — bridge Zoetrope brand tokens into Tailwind, port signature components to TSX, retrofit M0 screens, commit binding UI-SPEC.md; gated on a claude.ai/design roundtrip (see docs/DESIGN-SYSTEM-ADOPTION.md)
 
 ### Decisions
 
