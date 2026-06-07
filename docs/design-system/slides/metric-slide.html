@@ -1,0 +1,36 @@
+<!-- @dsCard group="Slides" viewport="1280x720" name="Metric slide" subtitle="Big stat, stepped notch layout" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  html,body{margin:0;height:100%}
+  body{display:flex;align-items:center;justify-content:center;background:#cfc9c7;font-family:var(--font-display)}
+  .slide{width:1280px;height:720px;flex:none;position:relative;overflow:hidden;background:var(--focus);color:#fff}
+  .pad{position:absolute;inset:0;padding:72px 84px;display:flex;flex-direction:column;justify-content:space-between}
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .wm{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:500;letter-spacing:-.02em;color:#fff}
+  .wm img{width:30px;height:30px;filter:brightness(0) invert(1)}
+  .eye{font-family:var(--font-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+  /* stepped notch block */
+  .notch{position:absolute;top:0;right:0;width:360px;height:188px;background:var(--ink)}
+  .notch:after{content:"";position:absolute;left:-86px;top:0;width:86px;height:96px;background:var(--ink)}
+  .big{display:flex;align-items:baseline;gap:24px}
+  .num{font-size:300px;font-weight:500;letter-spacing:-.05em;line-height:.8;font-variant-numeric:tabular-nums}
+  .unit{font-size:40px;font-weight:500;color:rgba(255,255,255,.82)}
+  .label{font-family:var(--font-text);font-size:26px;max-width:620px;line-height:1.35;color:rgba(255,255,255,.92)}
+  .foot{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+  .chip{background:var(--energy);color:var(--ink);padding:5px 12px;border-radius:999px;font-weight:700}
+</style></head><body>
+<div class="slide">
+  <div class="notch"></div>
+  <div class="pad">
+    <div class="top">
+      <div class="wm"><img src="../assets/mark-spiral.svg"><span>zoetrope.</span></div>
+      <div class="eye" style="margin-right:300px">Average wellness score</div>
+    </div>
+    <div>
+      <div class="big"><span class="num">82</span><span class="unit">/ 100</span></div>
+      <div class="label" style="margin-top:18px">Members improve their wellness score by an average of <strong>14 points</strong> in their first 90 days.</div>
+    </div>
+    <div class="foot"><span class="chip">↑ 21%</span><span>vs. industry baseline</span></div>
+  </div>
+</div>
+</body></html>

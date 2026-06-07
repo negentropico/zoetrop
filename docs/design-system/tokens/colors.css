@@ -1,0 +1,106 @@
+/* ============================================================
+   Zoetrope — Color tokens
+   Derived from the source brand board (warm grey / amber / teal /
+   periwinkle / charcoal), re-mapped to wellness metric families.
+   ============================================================ */
+
+:root {
+  /* ---- Brand metric families (base hues) ---------------- */
+  /* Energy  — activity, movement, calories (amber)          */
+  /* Vital   — heart, recovery, breath (teal)                */
+  /* Focus   — mind, sleep, calm (periwinkle)                */
+  /* Mist    — neutral warm grey surface                     */
+  /* Ink     — near-black charcoal                           */
+
+  --energy: #ffc53d;
+  --vital:  #11c29b;
+  --focus:  #8070ff;
+  --mist:   #dcd1d5;
+  --ink:    #272324;
+
+  /* ---- Energy (amber) ramp ------------------------------ */
+  --energy-50:  #fff7e4;
+  --energy-100: #ffedc0;
+  --energy-200: #ffdd88;
+  --energy-300: #ffc53d;  /* base */
+  --energy-400: #f0ac1f;
+  --energy-500: #c98910;
+  --energy-600: #97640b;
+
+  /* ---- Vital (teal) ramp -------------------------------- */
+  --vital-50:  #e0f7f1;
+  --vital-100: #b3ecdf;
+  --vital-200: #6dd9c2;
+  --vital-300: #11c29b;  /* base */
+  --vital-400: #0aa183;
+  --vital-500: #087d67;
+  --vital-600: #075a4b;
+
+  /* ---- Focus (periwinkle) ramp -------------------------- */
+  --focus-50:  #efecff;
+  --focus-100: #ddd6ff;
+  --focus-200: #b7aaff;
+  --focus-300: #8070ff;  /* base */
+  --focus-400: #6450f0;
+  --focus-500: #4a37cc;
+  --focus-600: #36289a;
+
+  /* ---- Warm neutral ramp (paper → ink) ------------------ */
+  /* Built around the warm-grey "Mist" so surfaces read warm,
+     never clinical blue-grey. */
+  --paper:   #f5f2f0;  /* app background */
+  --paper-2: #fbf9f8;  /* raised background */
+  --n-0:     #ffffff;
+  --n-50:    #f5f2f0;
+  --n-100:   #ece7e6;
+  --n-150:   #e2dbdc;  /* ~mist tint */
+  --n-200:   #dcd1d5;  /* Mist base */
+  --n-300:   #c3b8bb;
+  --n-400:   #9c9295;
+  --n-500:   #756d70;
+  --n-600:   #565052;
+  --n-700:   #3c3839;
+  --n-800:   #2f2b2c;
+  --n-900:   #272324;  /* Ink base */
+  --n-950:   #1b1819;
+
+  /* ---- Semantic: surfaces ------------------------------- */
+  --bg:            var(--paper);
+  --surface:       var(--n-0);
+  --surface-2:     var(--paper-2);
+  --surface-sunken: var(--n-100);
+  --surface-inverse: var(--ink);
+
+  /* ---- Semantic: text ----------------------------------- */
+  --text:          var(--n-900);
+  --text-secondary: var(--n-600);
+  --text-muted:    var(--n-500);
+  --text-faint:    var(--n-400);
+  --text-on-accent: var(--ink);     /* amber/teal are light → dark text */
+  --text-on-focus: #ffffff;          /* periwinkle is dark → light text */
+  --text-on-ink:   var(--n-50);
+  --text-inverse:  var(--n-0);
+
+  /* ---- Semantic: borders -------------------------------- */
+  --border:        var(--n-150);
+  --border-strong: var(--n-300);
+  --border-ink:    var(--ink);
+
+  /* ---- Semantic: accent (default brand action) ---------- */
+  --accent:        var(--focus-300);
+  --accent-hover:  var(--focus-400);
+  --accent-press:  var(--focus-500);
+  --accent-on:     #ffffff;
+
+  /* ---- Status ------------------------------------------- */
+  --success: var(--vital-400);
+  --warning: var(--energy-400);
+  --danger:  #e5484d;
+  --danger-bg: #fdecec;
+  --info:    var(--focus-300);
+
+  /* ---- Metric tint backgrounds (cards/rings) ------------ */
+  --energy-bg: var(--energy-50);
+  --vital-bg:  var(--vital-50);
+  --focus-bg:  var(--focus-50);
+}

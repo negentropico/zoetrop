@@ -1,0 +1,93 @@
+<!-- @dsCard group="Components" viewport="700x440" name="Core — Button, Badge, Avatar, Card" subtitle="Actions, status pills, avatars and surfaces" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; background: var(--paper); padding: 24px; font-family: var(--font-text); color: var(--text); }
+  .group { margin-bottom: 22px; }
+  .lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); margin-bottom: 11px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .lucide { width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { Button, IconButton, Badge, Avatar, Card } = window.ZoetropeDesignSystem_48aebc;
+const Ic = ({ n }) => <i data-lucide={n} className="lucide"></i>;
+
+function Demo() {
+  return (
+    <div>
+      <div className="group">
+        <div className="lbl">Button — variants</div>
+        <div className="row">
+          <Button variant="primary">Log entry</Button>
+          <Button variant="secondary">Today</Button>
+          <Button variant="ghost">Skip</Button>
+          <Button variant="ink" iconLeft={<Ic n="plus" />}>Add metric</Button>
+          <Button variant="danger">Delete</Button>
+          <Button variant="primary" disabled>Disabled</Button>
+        </div>
+      </div>
+      <div className="group">
+        <div className="lbl">Button — sizes</div>
+        <div className="row">
+          <Button size="sm">Small</Button>
+          <Button size="md">Medium</Button>
+          <Button size="lg" iconRight={<Ic n="arrow-right" />}>Large</Button>
+          <IconButton label="more" variant="soft"><Ic n="ellipsis" /></IconButton>
+          <IconButton label="add" variant="ink" round><Ic n="plus" /></IconButton>
+          <IconButton label="share" variant="outline"><Ic n="share-2" /></IconButton>
+        </div>
+      </div>
+      <div className="group">
+        <div className="lbl">Badge &amp; Avatar</div>
+        <div className="row">
+          <Badge tone="energy">Move goal</Badge>
+          <Badge tone="vital" variant="solid">Recovered</Badge>
+          <Badge tone="focus" variant="outline">Sleep</Badge>
+          <Badge tone="success">+12%</Badge>
+          <Badge tone="danger">High</Badge>
+          <span style={{ width: 8 }} />
+          <Avatar name="Maya Okafor" ring="vital" status="online" />
+          <Avatar name="Dev Rao" ring="energy" />
+          <Avatar name="So Park" />
+        </div>
+      </div>
+      <div className="group">
+        <div className="lbl">Card</div>
+        <div className="cards">
+          <Card accent="energy" elevation="sm" padding="md">
+            <div className="zt-eyebrow">Energy</div>
+            <div className="zt-readout" style={{ fontSize: 30, marginTop: 6 }}>6,418</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>steps today</div>
+          </Card>
+          <Card tone="focus" elevation="flat" padding="md" interactive>
+            <div className="zt-eyebrow">Focus</div>
+            <div className="zt-readout" style={{ fontSize: 30, marginTop: 6 }}>7:42</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>asleep</div>
+          </Card>
+          <Card accent="vital" elevation="md" padding="md">
+            <div className="zt-eyebrow">Vital</div>
+            <div className="zt-readout" style={{ fontSize: 30, marginTop: 6 }}>58</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>resting bpm</div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+setTimeout(() => window.lucide && window.lucide.createIcons(), 60);
+</script>
+</body>
+</html>

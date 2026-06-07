@@ -1,0 +1,94 @@
+<!-- @dsCard group="Zoetrope App" viewport="430x880" name="Zoetrope — mobile app" subtitle="Today, Move, Sleep, Trends · interactive" -->
+<!-- @startingPoint section="Zoetrope App" subtitle="Full wellness tracker — 4 screens, interactive" viewport="430x880" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zoetrope</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #e7e2e0;
+    background-image: radial-gradient(rgba(39,35,36,0.04) 1px, transparent 1px);
+    background-size: 7px 7px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 24px; box-sizing: border-box;
+    font-family: var(--font-text);
+  }
+  /* phone frame */
+  .phone {
+    width: 393px; height: 832px; position: relative; flex: none;
+    background: var(--ink); border-radius: 52px; padding: 11px;
+    box-shadow: 0 40px 90px rgba(39,35,36,0.34), 0 0 0 2px rgba(39,35,36,0.9);
+  }
+  .screen {
+    position: relative; width: 100%; height: 100%; overflow: hidden;
+    border-radius: 42px; background: var(--paper);
+  }
+  /* dynamic island */
+  .island {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 118px; height: 33px; background: var(--ink); border-radius: 20px; z-index: 50;
+  }
+  /* status bar */
+  .statusbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 50px; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 30px; pointer-events: none;
+  }
+  .statusbar .time { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+  .statusbar .icons { display: flex; gap: 6px; align-items: center; }
+  .statusbar .icons i { width: 17px; height: 17px; color: var(--ink); }
+  #root { height: 100%; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="icons">
+          <i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i>
+        </span>
+      </div>
+      <div id="root"></div>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="parts.jsx"></script>
+<script type="text/babel" src="TodayScreen.jsx"></script>
+<script type="text/babel" src="ActivityScreen.jsx"></script>
+<script type="text/babel" src="SleepScreen.jsx"></script>
+<script type="text/babel" src="TrendsScreen.jsx"></script>
+<script type="text/babel" src="App.jsx"></script>
+<script type="text/babel" data-presets="react">
+  let _tries = 0;
+  const ready = () => {
+    const ns = window.ZoetropeDesignSystem_48aebc;
+    return ns && ns.Button && ns.MetricRing && window.ZApp && window.ZApp.ZApp_Root
+      && window.ZApp.TodayScreen && window.ZApp.ZBarChart;
+  };
+  const mount = () => {
+    if (!ready()) {
+      if (_tries++ > 400) { // ~12s: bundle never arrived
+        document.getElementById('root').innerHTML =
+          '<div style="padding:80px 28px;font-family:var(--font-text);color:var(--text-muted);text-align:center">Loading Zoetrope\u2026<br><span style="font-size:12px">If this persists, the component bundle is still compiling \u2014 reload in a moment.</span></div>';
+        return;
+      }
+      setTimeout(mount, 30); return;
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(window.ZApp.ZApp_Root));
+    setTimeout(() => window.lucide && window.lucide.createIcons(), 50);
+  };
+  mount();
+</script>
+</body>
+</html>

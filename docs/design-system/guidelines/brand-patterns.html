@@ -1,0 +1,28 @@
+<!-- @dsCard group="Brand" viewport="700x520" name="Patterns & motifs" subtitle="The spiral & phyllotaxis motif system — growth, sequence, motion" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--paper);padding:22px;font-family:var(--font-mono)}
+  .sec{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin:0 0 10px}
+  .sec:nth-of-type(2){margin-top:20px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .tile{border-radius:var(--radius-lg);height:140px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .tile img{width:66%;max-height:78%}
+  .tile .t{position:absolute;left:11px;bottom:9px;font-size:9px;text-transform:uppercase;letter-spacing:.1em}
+  .inv{filter:brightness(0) invert(1)}
+  .on-light{color:var(--ink)}
+  .on-dark{color:#fff}
+</style></head><body>
+  <p class="sec">Spiral family — golden ratio, sequence, motion</p>
+  <div class="grid">
+    <div class="tile" style="background:var(--surface);border:1px solid var(--border)"><img src="../assets/pattern-spiral.svg"><span class="t on-light">Golden spiral</span></div>
+    <div class="tile" style="background:var(--focus)"><img class="inv" src="../assets/pattern-spiral-dots.svg"><span class="t on-dark">Spiral sequence</span></div>
+    <div class="tile" style="background:var(--energy)"><img src="../assets/pattern-spiral-twin.svg"><span class="t on-light">Twin spiral</span></div>
+  </div>
+
+  <p class="sec">Phyllotaxis family — natural growth, density fields</p>
+  <div class="grid">
+    <div class="tile" style="background:var(--vital)"><img src="../assets/pattern-phyllotaxis.svg"><span class="t on-light">Phyllotaxis</span></div>
+    <div class="tile" style="background:var(--ink)"><img class="inv" src="../assets/pattern-phyllotaxis-dense.svg"><span class="t on-dark">Dense field</span></div>
+    <div class="tile" style="background:var(--surface);border:1px solid var(--border)"><img src="../assets/pattern-spiral-arms.svg"><span class="t on-light">Spiral arms</span></div>
+  </div>
+</body></html>

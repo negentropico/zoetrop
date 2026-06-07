@@ -1,0 +1,18 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Status colors" subtitle="Success, warning, danger, info" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--paper);padding:20px;font-family:var(--font-text)}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .sw{border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border);background:var(--surface)}
+  .chip{height:56px}
+  .meta{padding:8px 10px}
+  .name{font-family:var(--font-display);font-weight:var(--fw-medium);font-size:var(--text-sm)}
+  .hex{font-family:var(--font-mono);font-size:var(--text-2xs);color:var(--text-muted);text-transform:uppercase}
+</style></head><body>
+<div class="row">
+  <div class="sw"><div class="chip" style="background:var(--success)"></div><div class="meta"><div class="name">Success</div><div class="hex">--success</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--warning)"></div><div class="meta"><div class="name">Warning</div><div class="hex">--warning</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--danger)"></div><div class="meta"><div class="name">Danger</div><div class="hex">--danger</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--info)"></div><div class="meta"><div class="name">Info</div><div class="hex">--info</div></div></div>
+</div>
+</body></html>

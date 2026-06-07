@@ -1,0 +1,72 @@
+/* ============================================================
+   Zoetrope — Spacing, radius, shadow, motion tokens
+   Spacing follows a Fibonacci-flavored progression — a nod to
+   the brand's mathematical/zoetrope motif.
+   ============================================================ */
+
+:root {
+  /* ---- Spacing (Fibonacci-derived, px-anchored) -------- */
+  --space-0:  0;
+  --space-1:  0.125rem; /* 2px  */
+  --space-2:  0.25rem;  /* 4px  */
+  --space-3:  0.5rem;   /* 8px  */
+  --space-4:  0.8125rem;/* 13px — Fib */
+  --space-5:  1.3125rem;/* 21px — Fib */
+  --space-6:  2.125rem; /* 34px — Fib */
+  --space-7:  3.4375rem;/* 55px — Fib */
+  --space-8:  5.5625rem;/* 89px — Fib */
+
+  /* Everyday even-step aliases (UI rhythm) --------------- */
+  --gap-xs: 0.25rem;  /* 4  */
+  --gap-sm: 0.5rem;   /* 8  */
+  --gap-md: 0.75rem;  /* 12 */
+  --gap-lg: 1rem;     /* 16 */
+  --gap-xl: 1.5rem;   /* 24 */
+  --gap-2xl: 2rem;    /* 32 */
+  --gap-3xl: 3rem;    /* 48 */
+
+  /* ---- Radii ------------------------------------------- */
+  /* Zoetrope mixes soft "frame" cards with hard geometric
+     edges. Default cards are gently rounded; pills/rings full. */
+  --radius-xs:  4px;
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-2xl: 36px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* ---- Borders ----------------------------------------- */
+  --border-width: 1px;
+  --border-width-strong: 1.5px;
+  --border-width-bold: 2px;
+
+  /* ---- Shadows ----------------------------------------
+     Soft, warm, low-contrast — light comes from above.
+     Shadows tinted with the ink hue (warm), never pure black. */
+  --shadow-xs: 0 1px 2px rgba(39, 35, 36, 0.06);
+  --shadow-sm: 0 1px 3px rgba(39, 35, 36, 0.08), 0 1px 2px rgba(39, 35, 36, 0.04);
+  --shadow-md: 0 4px 12px rgba(39, 35, 36, 0.08), 0 2px 4px rgba(39, 35, 36, 0.05);
+  --shadow-lg: 0 12px 28px rgba(39, 35, 36, 0.10), 0 4px 8px rgba(39, 35, 36, 0.05);
+  --shadow-xl: 0 24px 48px rgba(39, 35, 36, 0.14), 0 8px 16px rgba(39, 35, 36, 0.06);
+  --shadow-ring: 0 0 0 4px rgba(128, 112, 255, 0.18); /* focus ring (periwinkle) */
+
+  /* ---- Motion ----------------------------------------
+     Frame-by-frame zoetrope feel: brisk, eased, never bouncy.
+     Hover = subtle lift + warmth; press = scale-down. */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* @kind other */
+  --ease-frame:  cubic-bezier(0.83, 0, 0.17, 1); /* @kind other */ /* stepped, mechanical */
+  --dur-fast:   120ms; /* @kind other */
+  --dur-base:   200ms; /* @kind other */
+  --dur-slow:   320ms; /* @kind other */
+  --dur-ring:   900ms; /* @kind other */ /* metric ring sweep */
+
+  /* ---- Layout ----------------------------------------- */
+  --container-sm: 480px;
+  --container-md: 768px;
+  --container-lg: 1080px;
+  --container-xl: 1280px;
+  --app-width:    393px; /* mobile app frame */
+}

@@ -1,0 +1,35 @@
+<!-- @dsCard group="Brand" viewport="700x440" name="Logo & marks" subtitle="Wordmark + golden-spiral mark, with alternate directions" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--paper);padding:22px;font-family:var(--font-display)}
+  .row{display:flex;gap:16px;align-items:stretch}
+  .panel{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;gap:13px;padding:20px}
+  .panel.dark{background:var(--ink)}
+  .lock{display:flex;align-items:center;gap:12px}
+  .lock img{width:38px;height:38px}
+  .wm{font-size:26px;font-weight:var(--fw-medium);letter-spacing:-.02em;color:var(--ink)}
+  .wm .dot{color:var(--focus)}
+  .wm.light{color:#fff}
+  .sec{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin:20px 0 10px}
+  .alts{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .alt{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 8px 9px;display:flex;flex-direction:column;align-items:center;gap:9px}
+  .alt img{width:42px;height:42px}
+  .alt .n{font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .rec{position:relative}
+  .badge{position:absolute;top:8px;right:8px;font-family:var(--font-mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--focus);color:#fff;padding:2px 6px;border-radius:999px}
+</style></head><body>
+  <div class="row">
+    <div class="panel"><div class="lock"><img src="../assets/mark-spiral.svg"><div class="wm">zoetrope<span class="dot">.</span></div></div></div>
+    <div class="panel dark"><div class="lock"><img src="../assets/mark-spiral-light.svg"><div class="wm light">zoetrope<span class="dot" style="color:var(--energy)">.</span></div></div></div>
+    <div class="panel" style="flex:0 0 116px"><img src="../assets/mark-spiral-focus.svg" style="width:54px;height:54px"></div>
+  </div>
+
+  <p class="sec">Mark explorations — alternate directions</p>
+  <div class="alts">
+    <div class="alt rec"><span class="badge">Primary</span><img src="../assets/mark-spiral.svg"><span class="n">Spiral</span></div>
+    <div class="alt"><img src="../assets/mark-aperture.svg"><span class="n">Aperture</span></div>
+    <div class="alt"><img src="../assets/mark-drum.svg"><span class="n">Drum</span></div>
+    <div class="alt"><img src="../assets/mark-orbit.svg"><span class="n">Orbit</span></div>
+    <div class="alt"><img src="../assets/mark-pulsering.svg"><span class="n">Pulse-ring</span></div>
+  </div>
+</body></html>

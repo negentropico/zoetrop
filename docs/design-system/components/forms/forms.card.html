@@ -1,0 +1,63 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Forms — Input, Switch, Segmented" subtitle="Inputs, toggles and range switches" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; background: var(--paper); padding: 24px; font-family: var(--font-text); color: var(--text); }
+  .group { margin-bottom: 20px; }
+  .lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); margin-bottom: 11px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .lucide { width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { Input, Switch, SegmentedControl } = window.ZoetropeDesignSystem_48aebc;
+const Ic = ({ n }) => <i data-lucide={n} className="lucide"></i>;
+
+function Demo() {
+  const [range, setRange] = React.useState('Week');
+  const [a, setA] = React.useState(true);
+  const [b, setB] = React.useState(false);
+  return (
+    <div>
+      <div className="group">
+        <div className="lbl">Input</div>
+        <div className="grid2">
+          <Input label="Body weight" type="number" placeholder="kg" iconLeft={<Ic n="scale" />} />
+          <Input label="Bedtime goal" placeholder="22:30" iconLeft={<Ic n="moon" />} />
+          <Input label="Display name" value="Maya Okafor" onChange={()=>{}} />
+          <Input label="Email" error="Enter a valid email" value="maya@" onChange={()=>{}} />
+        </div>
+      </div>
+      <div className="group">
+        <div className="lbl">Switch</div>
+        <div className="row">
+          <Switch checked={a} onChange={setA} tone="focus" label="Wind-down reminder" />
+          <Switch checked={b} onChange={setB} tone="vital" label="Recovery alerts" />
+          <Switch checked={true} onChange={()=>{}} tone="energy" size="sm" label="Move nudge" />
+        </div>
+      </div>
+      <div className="group">
+        <div className="lbl">Segmented control</div>
+        <div className="row">
+          <SegmentedControl options={['Day','Week','Month','Year']} value={range} onChange={setRange} />
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+setTimeout(() => window.lucide && window.lucide.createIcons(), 60);
+</script>
+</body>
+</html>

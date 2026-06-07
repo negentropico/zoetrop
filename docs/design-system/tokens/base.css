@@ -1,0 +1,70 @@
+/* ============================================================
+   Zoetrope — base element styles & helpers
+   Lightweight resets + a few brand primitives used by cards
+   and components. Keep this minimal; tokens do the heavy lifting.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings default to display family, tight tracking */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  margin: 0;
+  color: var(--text);
+}
+
+/* Tabular numerals everywhere numbers matter */
+.zt-tnum, .zt-data { font-variant-numeric: tabular-nums; }
+
+/* ---- Reusable brand helpers ----------------------------- */
+
+/* All-caps micro label (used on metric cards, nav, posters) */
+.zt-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Large data readout */
+.zt-readout {
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  color: var(--text);
+}
+
+/* Warm paper texture: a faint dotted grain you can layer on bg */
+.zt-grain {
+  background-image: radial-gradient(rgba(39,35,36,0.035) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+/* Focus-visible ring, brand periwinkle */
+:where(button, a, input, select, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-ring);
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
