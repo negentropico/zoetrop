@@ -92,13 +92,39 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 ## Traceability
 
-*Populated during roadmap creation (gsd-roadmapper). Each v1 requirement maps to exactly one phase.*
+**Coverage:** 28/28 v1 requirements mapped — 100%
 
-**Coverage:**
-- v1 requirements: 28 total
-- Mapped to phases: (pending roadmap)
-- Unmapped: (pending roadmap)
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DATA-03 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Pending |
+| COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Pending |
+| COMP-02 | Phase 2 — PHI / BAA Compliance Gate | Pending |
+| COMP-03 | Phase 2 — PHI / BAA Compliance Gate | Pending |
+| AUTH-01 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| AUTH-02 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| AUTH-03 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| AUTH-04 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| TEN-01 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| TEN-02 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| TEN-03 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| TEN-04 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
+| DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
+| DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
+| DATA-05 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
+| LAB-01 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-02 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-03 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-04 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-05 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-06 | Phase 5 — Lab Ingest Pipeline | Pending |
+| ENG-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
+| ENG-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
+| ENG-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
+| RPT-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
+| RPT-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
+| RPT-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
 
 ---
 *Requirements defined: 2026-06-07*
-*Last updated: 2026-06-07 after initial definition*
+*Last updated: 2026-06-07 — traceability populated after roadmap creation*

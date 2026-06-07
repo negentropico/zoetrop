@@ -172,12 +172,27 @@ npx react-router build     # Production build
 
 ## Planning Workflow (GSD / superpowers)
 
-Planning is moving to **GSD**. The legacy **spec-kit** scaffolding is **retired** — `.specify/` and the `/speckit.*` commands are archived to `.archive/specify/` (browsable, gitignored). Feature work historically used `NNN-slug` branches (`001-core-data-layer`, `002-mvp-dashboard`, `003-remix-foundation` — current).
+Planning runs on **GSD**, initialized 2026-06-07. The legacy **spec-kit** scaffolding is retired (archived to `.archive/specify/`, gitignored). `.planning/` is the source of truth:
 
-- **Roadmap source of truth**: `docs/PLATFORM.md` §6 — **M0 (done, n=1 instrument) → M1 → M2 → M3** — until a GSD roadmap supersedes it.
-- **Durable build constraints**: `docs/PRINCIPLES.md` — engineering principles + data standards extracted from the retired constitution, corrected to the current stack and annotated for M1. **Fold this into `/gsd:new-project`.**
-- **Next step (no GSD `.planning/` exists yet)**: run `/gsd:map-codebase`, then `/gsd:new-project` to convert PLATFORM.md M1 into executable phases.
-- ⚠️ The archived constitution describes the **Astro/LocalStorage era** — do not treat it as current. Ground truth = the Tech Stack table above + `docs/PRINCIPLES.md`.
+- **`.planning/ROADMAP.md`** — the M1 roadmap (6 phases). **`.planning/STATE.md`** — current position. **`.planning/PROJECT.md`** — project context. **`.planning/REQUIREMENTS.md`** — 28 v1 requirements + traceability.
+- **`.planning/codebase/`** — 7-doc codebase map. **`.planning/research/`** — M1 stack/features/architecture/pitfalls + SUMMARY.
+- **Direction & constraints**: `docs/PLATFORM.md` (M0→M3 product brief) and `docs/PRINCIPLES.md` (engineering constraints) are the narrative companions to the GSD roadmap.
+- **Two open decisions before later phases**: LLM-provider PHI/BAA (lab-ingest, Phase 5) and the Better-Auth↔Neon-JWK seam (Phase-1 spike). See `.planning/research/SUMMARY.md`.
+- **Next step**: `/gsd:discuss-phase 1` (or `/gsd:plan-phase 1`) — Phase 1 = schema baseline + engine tests + auth spike.
+- ⚠️ The archived constitution describes the retired **Astro/LocalStorage era** — ground truth = the Tech Stack table above + `docs/PRINCIPLES.md`.
+
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
 
 ---
 
