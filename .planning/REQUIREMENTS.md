@@ -1,0 +1,104 @@
+# Requirements: Zoetrop M1
+
+**Defined:** 2026-06-07
+**Core Value:** The confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol, shown with honest uncertainty.
+
+**Milestone:** M1 — single practitioner, multi-client. Convert the shipped n=1 instrument into a multi-tenant, RLS-isolated platform that produces a confidence-graded lab→protocol report a real practitioner can hand a real client.
+
+## v1 Requirements
+
+### Identity & Access
+
+- [ ] **AUTH-01**: A user can sign in with email + password and stay signed in across sessions
+- [ ] **AUTH-02**: Each user has a role (owner / practitioner / client) that gates what they can access
+- [ ] **AUTH-03**: A practitioner can access only the subjects (clients) assigned to them within their tenant
+- [ ] **AUTH-04**: Authentication and access events are written to an immutable audit log
+
+### Multi-Tenancy & Isolation
+
+- [ ] **TEN-01**: Every health-data table is scoped by `tenantId` + `subjectId`
+- [ ] **TEN-02**: Postgres RLS prevents any query from returning another tenant's or subject's rows (proven by an automated cross-tenant isolation test)
+- [ ] **TEN-03**: Tenant/subject context is set per-request via `SET LOCAL` inside a transaction, with no leakage across pooled connections
+- [ ] **TEN-04**: Protocol version lineage (P0–P6) is per-subject, unique on `(tenantId, subjectId, version)`
+
+### Data Layer
+
+- [ ] **DATA-01**: All route loaders read live data from Neon at runtime (no static-TypeScript data as a runtime source)
+- [ ] **DATA-02**: The owner's existing M0 data is migrated into the real database tables
+- [ ] **DATA-03**: A committed Drizzle `migrations/` baseline exists; all schema changes go through migrations
+- [ ] **DATA-04**: No PHI is present in the client bundle or static source (verified against the build output)
+- [ ] **DATA-05**: Vestigial `syncStatus`/`syncVersion` columns and `subcategory: ... as any` casts are removed
+
+### Engine & Genetics
+
+- [ ] **ENG-01**: The protocol-decision engine is a pure, dependency-free module callable outside route loaders (no Drizzle/Remix imports)
+- [ ] **ENG-02**: Genetic variants and variant→protocol mappings are first-class tables with a non-nullable K1–K4 `confidence` field + evidence/citation
+- [ ] **ENG-03**: The engine derives a confidence-graded protocol for a subject from their metrics + variants
+
+### Lab Ingest
+
+- [ ] **LAB-01**: A practitioner can upload a lab document (PDF) for a subject
+- [ ] **LAB-02**: An asynchronous extraction job parses the document into structured candidate metrics (does not block the request)
+- [ ] **LAB-03**: Extracted values are validated (grounded to source text + physiological-range sanity + per-field confidence) before reaching review
+- [ ] **LAB-04**: A practitioner reviews extracted fields side-by-side with the source document and can approve, edit, or reject each
+- [ ] **LAB-05**: Only practitioner-approved metrics are written to the subject's record, each producing an audit-log entry
+- [ ] **LAB-06**: Client consent is captured at intake before any client PHI is stored
+
+### Reports
+
+- [ ] **RPT-01**: A practitioner can generate a confidence-graded lab→protocol report for a subject
+- [ ] **RPT-02**: Every recommendation in the report shows its K1–K4 confidence level in the visible body (not a tooltip)
+- [ ] **RPT-03**: Report language is hedged (evidence-suggesting, never imperative/prescriptive); K4 recommendations carry an explicit disclaimer
+
+### Compliance & Quality
+
+- [ ] **COMP-01**: Engine logic (status classification, cessation phase math with injectable `now`, Pearson correlation) has passing unit tests covering boundary cases
+- [ ] **COMP-02**: PHI infrastructure is BAA-covered (Neon, Netlify, and the chosen LLM provider) before any client PHI is written — a release gate, not a feature
+- [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` configured (parameters off)
+
+## v2 Requirements
+
+Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
+
+### Client App (M2)
+
+- **APP-01**: A client can view their protocol, program, and tracking in a branded app
+- **APP-02**: Practitioner↔client messaging
+- **APP-03**: 4-week iteration cadence surfaced to the client
+
+### Delivery Surfaces (M2+)
+
+- **DEL-01**: Training program builder (neurotype-keyed)
+- **DEL-02**: Nutrition plans
+- **DEL-03**: Modalities tracking (sauna/light/cold/breath/sleep/circadian)
+
+### Productization (M3)
+
+- **PROD-01**: Multiple practitioners within a tenant
+- **PROD-02**: Multi-tenant onboarding for other practices
+- **PROD-03**: Engine exposed as an extractable callable service/product
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| M2 client-facing app | Deferred until M1 proves with a paying tenant (over-build trap, PLATFORM §7) |
+| M3 multi-tenant productization / engine-as-product | Needs M1 traction first |
+| Training / Nutrition / Modalities / Life-coaching modules | M2+ delivery surfaces; not the engine moat |
+| External integrations beyond lab ingest (CGM, Trainerize, Kajabi, JotForm) | M2+; M1 is the core decision loop |
+| CRM / scheduling / billing / payments parity | Commodity; external tools or link-outs suffice — protect engine focus |
+| Public brand / rename | `Zoetrop` codename stands; brand deferred (docs/NAMING.md) |
+| Offline-first / local-first sync | Retired with the Astro app; platform is server-authoritative |
+
+## Traceability
+
+*Populated during roadmap creation (gsd-roadmapper). Each v1 requirement maps to exactly one phase.*
+
+**Coverage:**
+- v1 requirements: 28 total
+- Mapped to phases: (pending roadmap)
+- Unmapped: (pending roadmap)
+
+---
+*Requirements defined: 2026-06-07*
+*Last updated: 2026-06-07 after initial definition*
