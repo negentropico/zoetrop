@@ -51,7 +51,7 @@ Phase 1 is three isolated work streams that share no runtime code with each othe
 
 **Migrations baseline** is mechanically straightforward: `drizzle-kit generate` against `db/schema.ts` with `out: './migrations'` already configured in `drizzle.config.ts` — the directory just doesn't exist yet. Because the Neon database already has the 8 tables, the generated SQL will include full `CREATE TABLE` + `CREATE TYPE` DDL for all 8 tables and 7 enums. Running `drizzle-kit migrate` against the already-provisioned DB will fail with "relation already exists" unless the migration is marked as applied in the tracking table first. The correct protocol is: generate → inspect the SQL → manually mark the baseline migration as applied in `__drizzle_migrations` (or use `drizzle-kit migrate` on a clean Neon branch to verify the SQL is idempotent, then record it as applied on prod). No `drizzle-kit push` in any direction.
 
-**Engine test harness** requires exactly two refactors before tests can be written (D-06). The `getMetricStatus` function has three diverging inline implementations (confirmed in `home.tsx` line 28, `metrics/index.tsx` line 52, `metrics/category.tsx` line 131). The cessation functions in `protocol-data.ts` line 29–31 call `new Date()` internally. Vitest 4.1.8 installs clean on Vite 7.3.1 with a single `test:` block added to the existing `vite.config.ts` — no separate config file needed.
+**Engine test harness** requires exactly two refactors before tests can be written (D-06). The `getMetricStatus` function has FOUR diverging inline implementations (confirmed in `home.tsx` line 28, `metrics/index.tsx` line 52, `metrics/category.tsx` line 131, and `metrics/detail.tsx` line 309). The cessation functions in `protocol-data.ts` line 29–31 call `new Date()` internally. Vitest 4.1.8 installs clean on Vite 7.3.1 with a single `test:` block added to the existing `vite.config.ts` — no separate config file needed.
 
 **Auth spike** has one high-uncertainty seam: Better Auth uses opaque session tokens by default, not signed JWTs. The JWT plugin (`better-auth/plugins`) is a separate opt-in that adds a `/api/auth/jwks` JWKS endpoint and a `/api/auth/token` endpoint returning a signed JWT. That JWT can be passed to Neon's `pg_session_jwt` via `auth.jwt_session_init(token)` inside a transaction. The JWKS URL is configured at the Neon project level (dashboard or API, not PGOPTIONS in this path — PGOPTIONS is the libpq/connection-time approach). The JWK-native path is the first target; the `SET LOCAL request.jwt.claims` fallback (no signature validation) is the documented alternative.
 
@@ -138,7 +138,7 @@ Phase 1 Work Streams (parallel, no shared runtime code)
                                                     |
                                           verify SQL + mark applied on prod
 
-[app/lib/metrics.ts (new)]  <-- extract from --  [home.tsx | metrics/index.tsx | metrics/category.tsx]
+[app/lib/metrics.ts (new)]  <-- extract from --  [home.tsx | metrics/index.tsx | metrics/category.tsx | metrics/detail.tsx]
 [app/lib/protocol-data.ts]  <-- inject now: Date --  [getCessationDay / getCurrentCessationPhase]
 [app/lib/seed-data.ts]  (calculatePearsonCorrelation — already pure, no refactor)
         |                         |                             |
@@ -161,7 +161,7 @@ Phase 1 Work Streams (parallel, no shared runtime code)
 remix-app/
 ├── app/
 │   └── lib/
-│       ├── metrics.ts               # NEW: canonical getMetricStatus (extracted from 3 routes)
+│       ├── metrics.ts               # NEW: canonical getMetricStatus (extracted from 4 routes)
 │       ├── metrics.test.ts          # NEW: status classification tests
 │       ├── protocol-data.ts         # MODIFIED: getCessationDay(now?: Date) signature
 │       ├── protocol-data.test.ts    # NEW: cessation phase boundary tests
@@ -228,13 +228,14 @@ export default defineConfig({
 
 **Canonical implementation to extract (`app/lib/metrics.ts`):**
 
-Comparing the three inline copies:
+Comparing the four inline copies:
 
 - `home.tsx` (line 28–37): checks `optimalRange` first; if `referenceRange` is absent, falls through to `"optimal"`. Reads `metric.optimalRange` and `metric.referenceRange` directly.
 - `metrics/index.tsx` (line 52–72): identical logic, slightly more readable form.
 - `metrics/category.tsx` (line 131–145): identical logic.
+- `metrics/detail.tsx` (line 309–329): identical logic (the fourth copy — missed by the initial duplication scan; confirmed via `grep -rn "function getMetricStatus" app/routes/`).
 
-All three agree on the boundary semantics:
+All four agree on the boundary semantics:
 1. `optimalRange && value >= min && value <= max` → `"optimal"`
 2. `referenceRange && value < min` → `"deficient"`
 3. `referenceRange && value > max` → `"excess"`
@@ -299,6 +300,8 @@ export function getCessationDay(now: Date = new Date()): number {
 | clearing | 61 | 120 |
 | optimization | 121 | 150 |
 
+**IMPORTANT — phase identity field is `.phase`, NOT `.name`** (confirmed in `types/protocol.ts` `CESSATION_PHASES`; resolves Open Question 1 / Assumption A3). Every `getCurrentCessationPhase(...)` assertion in the test examples below uses `.phase`. `CessationPhase = 'acute' | 'stabilization' | 'clearing' | 'optimization'`.
+
 **Boundary test matrix (test each crossing in both directions):**
 
 | Injected day | Expected phase | Notes |
@@ -339,7 +342,7 @@ describe("getCessationDay", () => {
 
 describe("getCurrentCessationPhase", () => {
   it("returns acute on day 1", () => {
-    expect(getCurrentCessationPhase(1).name).toBe("acute");
+    expect(getCurrentCessationPhase(1).phase).toBe("acute"); // .phase, NOT .name
   });
   // etc.
 });
@@ -642,9 +645,9 @@ The deliverable is a short markdown file:
 
 ### Pitfall 3: `getMetricStatus` Behavioral Divergence During Extraction
 
-**What goes wrong:** The three inline copies have subtle differences that aren't immediately visible. Extracting one version and swapping all three imports may silently change behavior for some input shapes.
+**What goes wrong:** The four inline copies have subtle differences that aren't immediately visible. Extracting one version and swapping all four imports may silently change behavior for some input shapes.
 
-**How to avoid:** Write the status classification tests **against the inline version** first (import `getMetricStatus` from `home.tsx` test helper or copy the logic into the test). Verify tests pass. Then extract to `app/lib/metrics.ts`, swap imports, verify same tests still pass. This is a behavioral contract test, not just a refactor test.
+**How to avoid:** Write the status classification tests **against the inline version** first (import `getMetricStatus` from `home.tsx` test helper or copy the logic into the test). Verify tests pass. Then extract to `app/lib/metrics.ts`, swap all four imports, verify same tests still pass. This is a behavioral contract test, not just a refactor test.
 
 **Warning signs:** Any test that was green before the import swap goes red → behavioral divergence found; investigate before proceeding.
 
@@ -751,15 +754,16 @@ describe("getCessationDay with injected now", () => {
   it("day 151 (post-endpoint)", () => expect(getCessationDay(day(151))).toBe(151));
 });
 
+// NOTE: phase identity is `.phase` (NOT `.name`) — see Stream 2b and types/protocol.ts CESSATION_PHASES.
 describe("getCurrentCessationPhase", () => {
-  it("day 1 → acute", () => expect(getCurrentCessationPhase(1).name).toBe("acute"));
-  it("day 21 → acute", () => expect(getCurrentCessationPhase(21).name).toBe("acute"));
-  it("day 22 → stabilization", () => expect(getCurrentCessationPhase(22).name).toBe("stabilization"));
-  it("day 60 → stabilization", () => expect(getCurrentCessationPhase(60).name).toBe("stabilization"));
-  it("day 61 → clearing", () => expect(getCurrentCessationPhase(61).name).toBe("clearing"));
-  it("day 120 → clearing", () => expect(getCurrentCessationPhase(120).name).toBe("clearing"));
-  it("day 121 → optimization", () => expect(getCurrentCessationPhase(121).name).toBe("optimization"));
-  it("day 151 → optimization (post-endpoint fallback)", () => expect(getCurrentCessationPhase(151).name).toBe("optimization"));
+  it("day 1 → acute", () => expect(getCurrentCessationPhase(1).phase).toBe("acute"));
+  it("day 21 → acute", () => expect(getCurrentCessationPhase(21).phase).toBe("acute"));
+  it("day 22 → stabilization", () => expect(getCurrentCessationPhase(22).phase).toBe("stabilization"));
+  it("day 60 → stabilization", () => expect(getCurrentCessationPhase(60).phase).toBe("stabilization"));
+  it("day 61 → clearing", () => expect(getCurrentCessationPhase(61).phase).toBe("clearing"));
+  it("day 120 → clearing", () => expect(getCurrentCessationPhase(120).phase).toBe("clearing"));
+  it("day 121 → optimization", () => expect(getCurrentCessationPhase(121).phase).toBe("optimization"));
+  it("day 151 → optimization (post-endpoint fallback)", () => expect(getCurrentCessationPhase(151).phase).toBe("optimization"));
 });
 ```
 
@@ -839,34 +843,30 @@ The `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION` pattern is standard drizzle-ki
 |---|-------|---------|---------------|
 | A1 | `differenceInDays(addDays(START, N), START)` returns exactly `N` in date-fns 4.x (no rounding/DST issues when inputs are UTC midnight) | Stream 2b Cessation test matrix | Tests may be off by 1 on DST-transition dates; low risk since START is UTC |
 | A2 | `drizzle-kit generate` output for Postgres uses `DO $$ BEGIN ... EXCEPTION` blocks for enums (not bare `CREATE TYPE`) | Stream 3 command sequence | If it uses bare CREATE TYPE, the Neon branch test may fail differently; verify after generation |
-| A3 | `getCurrentCessationPhase` property name for phase identity is `name` (e.g., `phase.name === "acute"`) | Test examples | If the CESSATION_PHASES objects use a different key (e.g., `id` or `phase`), test assertions need adjustment; check `types/protocol.ts` `CESSATION_PHASES` definition |
+| A3 | RESOLVED: `getCurrentCessationPhase` returns an object whose phase identity field is `.phase` (NOT `.name`) — confirmed against `types/protocol.ts` CESSATION_PHASES and PATTERNS.md. All test examples in this doc use `.phase`. | Test examples | No risk — resolved; assertions corrected to `.phase` |
 | A4 | `category.tsx` does not import or re-export `getMetricStatus` from any shared location (confirmed the inline copy exists at line 131) | Stream 2a refactor | Confirmed by grep — no risk |
 | A5 | `pg_session_jwt` is pre-installed on all Neon Postgres instances (not a manual CREATE EXTENSION step) | Stream 4 spike | If it requires opt-in, the spike must run `CREATE EXTENSION pg_session_jwt` first; check Neon project settings |
 | A6 | The `test: {}` block with `environment: "node"` and `include: ["app/**/*.test.ts"]` in `vite.config.ts` is sufficient for running Vitest — no separate `vitest.config.ts` needed | Stream 1 config | If the `reactRouter()` plugin crashes Vitest (it runs in a Node context, not a browser), a separate config may be needed to exclude the plugin from the test run |
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `getCurrentCessationPhase` return an object with a `.name` property?**
-   - What we know: `protocol-data.ts` line 36–41 calls `CESSATION_PHASES.find(...)` and returns the phase object; `CESSATION_PHASES` is imported from `types/protocol.ts`.
-   - What's unclear: The exact shape of the `CESSATION_PHASES` entries (property names) was not read in this session.
-   - Recommendation: Read `app/types/protocol.ts` fully before writing the cessation phase tests. The test example above uses `.name` — update if the property is different.
+   - **RESOLVED:** No — the phase identity field is `.phase` (type `CessationPhase`), NOT `.name`. Confirmed against `app/types/protocol.ts` `CESSATION_PHASES` and `.planning/phases/01-.../01-PATTERNS.md`. All cessation phase test examples in this doc and in Plan 01-05 use `.phase`. (Resolves Assumption A3.)
+   - What we knew: `protocol-data.ts` line 36–41 calls `CESSATION_PHASES.find(...)` and returns the phase object; `CESSATION_PHASES` is imported from `types/protocol.ts`.
 
 2. **Does the `reactRouter()` Vite plugin interfere with Vitest in node environment?**
-   - What we know: Vitest reads `vite.config.ts` including all plugins. React Router's Vite plugin does server-side work (route type generation, HMR) that may not be compatible with the Vitest test runner context.
-   - What's unclear: Whether `reactRouter()` plugin causes errors when Vitest starts.
-   - Recommendation: If `vitest run` fails with plugin-related errors, create a separate `vitest.config.ts` that imports `tsconfigPaths()` only (not `reactRouter()` or `tailwindcss()`). This is a common pattern for RR7 + Vitest.
+   - **RESOLVED:** Handled via the fallback `vitest.config.ts` step in Plan 01 (Vitest setup). The primary path adds a `test:` block to the existing `vite.config.ts`; if `vitest run` fails with `reactRouter()`-plugin-related errors, Plan 01 falls back to a separate `vitest.config.ts` that imports `tsconfigPaths()` only (not `reactRouter()`/`tailwindcss()`). Either way the harness runs.
+   - What we knew: Vitest reads `vite.config.ts` including all plugins; React Router's plugin does server-side work that may not be Vitest-compatible.
 
 3. **Does `pg_session_jwt` require `CREATE EXTENSION` on the Neon project?**
-   - What we know: Neon's documentation says the extension is available; it is automatically configured when the Neon Data API is enabled.
-   - What's unclear: Whether using it with the WebSocket driver (Path B) requires explicit `CREATE EXTENSION IF NOT EXISTS pg_session_jwt` before calling `auth.jwt_session_init`.
-   - Recommendation: The spike's first step should run `CREATE EXTENSION IF NOT EXISTS pg_session_jwt` on the spike Neon branch and verify no error. If it succeeds (idempotent), proceed; if it fails with "permission denied," escalate to Neon support.
+   - **RESOLVED:** Addressed in Plan 03's spike setup — the spike's first step runs `CREATE EXTENSION IF NOT EXISTS pg_session_jwt` on the spike Neon branch and verifies no error (idempotent). If it fails with "permission denied," the spike escalates to Neon support per Plan 03. (Resolves Assumption A5 within the spike's own setup, on a throwaway branch.)
+   - What we knew: Neon docs say the extension is available; it is auto-configured when the Neon Data API is enabled.
 
 4. **Is `better-auth@1.6.14` the correct version to install for the spike, or should it be a devDependency slated for Phase 3?**
-   - What we know: The STACK.md recommends Better Auth 1.6.14 for the production auth layer in Phase 3.
-   - What's unclear: Whether installing it as a `devDependency` now (for the spike) conflicts with the Phase 3 plan to add it as a regular `dependency`.
-   - Recommendation: Install as `devDependency` for the spike (`npm install -D better-auth@^1.6`). Phase 3 will move it to `dependencies`. No conflict — npm handles this cleanly.
+   - **RESOLVED:** Install as a **devDependency** for the spike per Plan 01 (`npm install -D better-auth@^1.6`). Phase 3 will promote it to a regular `dependency` when the production auth layer lands. No conflict — npm handles the dev→prod promotion cleanly.
+   - What we knew: STACK.md recommends Better Auth 1.6.14 for the Phase 3 production auth layer.
 
 ---
 
@@ -921,7 +921,7 @@ The `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION` pattern is standard drizzle-ki
 
 ### Wave 0 Gaps
 
-- [ ] `remix-app/app/lib/metrics.ts` — canonical `getMetricStatus` util (extracted)
+- [ ] `remix-app/app/lib/metrics.ts` — canonical `getMetricStatus` util (extracted from all FOUR routes)
 - [ ] `remix-app/app/lib/metrics.test.ts` — status classification tests (11 cases)
 - [ ] `remix-app/app/lib/protocol-data.test.ts` — cessation phase boundary tests (17 cases)
 - [ ] `remix-app/app/lib/seed-data.test.ts` — Pearson correlation tests (7 cases)
@@ -961,7 +961,7 @@ The `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION` pattern is standard drizzle-ki
 ### Primary (HIGH confidence)
 
 - `remix-app/db/schema.ts` (read directly) — 8 tables, 7 enums, exact column definitions
-- `remix-app/app/routes/home.tsx`, `metrics/index.tsx`, `metrics/category.tsx` (read directly) — three inline `getMetricStatus` implementations confirmed identical
+- `remix-app/app/routes/home.tsx`, `metrics/index.tsx`, `metrics/category.tsx`, `metrics/detail.tsx` (read directly + `grep -rn "function getMetricStatus" app/routes/`) — FOUR inline `getMetricStatus` implementations confirmed identical
 - `remix-app/app/lib/protocol-data.ts` (read directly) — `getCessationDay` time-coupling confirmed at line 29–31
 - `remix-app/app/lib/seed-data.ts` lines 605–622 (read directly) — `calculatePearsonCorrelation` implementation
 - `remix-app/drizzle.config.ts` (read directly) — `out: './migrations'` already set
@@ -982,7 +982,7 @@ The `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION` pattern is standard drizzle-ki
 - GitHub issue #2815 (drizzle-orm) — `ER_TABLE_EXISTS_ERROR` when migrating against an existing DB [CITED]
 - `.planning/research/STACK.md` — Vitest 4.1.8 + Vite 7 compatibility confirmed, Better Auth 1.6.14 rationale [CITED]
 - `.planning/research/PITFALLS.md` — SET vs SET LOCAL pooler leak, migrations-baseline-first constraint, cessation time-coupling detail [CITED]
-- `.planning/codebase/CONCERNS.md` — zero-test baseline confirmed, three-way `getMetricStatus` duplication confirmed, cessation time-coupling confirmed [CITED]
+- `.planning/codebase/CONCERNS.md` — zero-test baseline confirmed, `getMetricStatus` duplication confirmed (note: original scan counted three; a fourth copy in `metrics/detail.tsx:309` was found during planning revision), cessation time-coupling confirmed [CITED]
 
 ### Tertiary (LOW confidence)
 
