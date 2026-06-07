@@ -170,13 +170,14 @@ npx react-router build     # Production build
 - **Direction doc**: `docs/PLATFORM.md` — the product brief. Today = n=1 personal instrument (**M0, done**); the arc is M1 (single practitioner, multi-client + identity/tenancy + lab ingest + report gen) → M2 (client app) → M3 (multi-coach + productize). Engine-first inversion: the confidence-graded protocol-decision engine is the moat; coaching-ops is layered on top.
 - **Flagship**: commercialized via HIGHER (Tara Garrison) as the M1 proving tenant — see `ngtops/clients/higher/PLATFORM-FOR-HIGHER.md` (outside this repo).
 
-## Planning Workflow (spec-kit / GSD / superpowers)
+## Planning Workflow (GSD / superpowers)
 
-This repo currently uses **spec-kit** (`.specify/`): a `constitution.md` plus templates/scripts. Feature work has used `NNN-slug` branches (`001-core-data-layer`, `002-mvp-dashboard`, `003-remix-foundation` — current).
+Planning is moving to **GSD**. The legacy **spec-kit** scaffolding is **retired** — `.specify/` and the `/speckit.*` commands are archived to `.archive/specify/` (browsable, gitignored). Feature work historically used `NNN-slug` branches (`001-core-data-layer`, `002-mvp-dashboard`, `003-remix-foundation` — current).
 
-- ⚠️ **`.specify/memory/constitution.md` is STALE** — it still names Astro 5 + LocalStorage-primary. The app migrated to **React Router 7 (Remix) + Neon Postgres** (Astro artifacts removed in `f1463ba`; old app archived in `.archive/astro/`). Treat the Tech Stack table above (not the constitution) as ground truth until the constitution is re-ratified.
-- **No GSD `.planning/` yet.** When converting the PLATFORM.md M1–M3 narrative into executable phases, run `/gsd:new-project` (or `/gsd:map-codebase` first) and reconcile spec-kit ↔ GSD at that point (PLATFORM.md §9).
-- **Roadmap source of truth**: `docs/PLATFORM.md` §6 (M0–M3) until a GSD roadmap supersedes it.
+- **Roadmap source of truth**: `docs/PLATFORM.md` §6 — **M0 (done, n=1 instrument) → M1 → M2 → M3** — until a GSD roadmap supersedes it.
+- **Durable build constraints**: `docs/PRINCIPLES.md` — engineering principles + data standards extracted from the retired constitution, corrected to the current stack and annotated for M1. **Fold this into `/gsd:new-project`.**
+- **Next step (no GSD `.planning/` exists yet)**: run `/gsd:map-codebase`, then `/gsd:new-project` to convert PLATFORM.md M1 into executable phases.
+- ⚠️ The archived constitution describes the **Astro/LocalStorage era** — do not treat it as current. Ground truth = the Tech Stack table above + `docs/PRINCIPLES.md`.
 
 ---
 
