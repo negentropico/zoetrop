@@ -460,28 +460,36 @@ h1, h2, h3, h4 {
    ================================================================ */
 .zt-grid-4 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--gap-lg);
 }
 .zt-grid-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap-lg);
 }
 .zt-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--gap-lg);
 }
 
+/* Grid children must be allowed to shrink below their min-content size, so
+   non-shrinkable content (whitespace:nowrap, ellipsis, long tokens) can never
+   push a track past its minmax(0,1fr) share and blow the grid wider than the
+   container. Pairs with the minmax(0,1fr) tracks above (UI-01 regression fix). */
+.zt-grid-2 > *,
+.zt-grid-3 > *,
+.zt-grid-4 > * { min-width: 0; }
+
 @media (max-width: 980px) {
-  .zt-grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .zt-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
-  .zt-grid-4 { grid-template-columns: repeat(2, 1fr); gap: var(--gap-md); }
-  .zt-grid-3, .zt-grid-2 { grid-template-columns: 1fr; }
+  .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-md); }
+  .zt-grid-3, .zt-grid-2 { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ================================================================
