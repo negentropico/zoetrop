@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { Form, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/vault";
+import { Card } from "../../components/ui/Card";
+import { Button } from "../../components/ui/Button";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Dropzone } from "../../components/ui/Dropzone";
+import { Check, X } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -160,181 +164,408 @@ function groupByCategory(
 }
 
 export default function VaultImport() {
-  const actionData = useActionData<typeof action>();
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === "submitting";
+  // Client-only state — no server upload in Phase 4.1 (T-04.1-12)
+  const [file, setFile] = useState<File | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [parsed, setParsed] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [parsedMetrics, setParsedMetrics] = useState<
+    Array<{
+      id: string;
+      name: string;
+      value: number;
+      unit: string;
+      category: string;
+    }>
+  >([]);
+  const [categoryCount, setCategoryCount] = useState<Record<string, number>>({});
 
-  const [inputMode, setInputMode] = useState<"file" | "paste">("file");
-  const [pastedContent, setPastedContent] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const handleFile = (f: File) => {
+    setFile(f);
+    setParsed(false);
+    setParseError(null);
+    setParsedMetrics([]);
+    setCategoryCount({});
+  };
+
+  const handleRemove = () => {
+    setFile(null);
+    setParsed(false);
+    setParseError(null);
+    setParsedMetrics([]);
+    setCategoryCount({});
+  };
+
+  const handleParse = async () => {
+    if (!file) return;
+    setParsing(true);
+    setParseError(null);
+    try {
+      const text = await file.text();
+      const metrics = parseVaultMarkdown(text);
+      setParsedMetrics(metrics);
+      setCategoryCount(groupByCategory(metrics));
+      setParsed(true);
+    } catch {
+      setParseError(
+        "Something went wrong reading your file. Check the format and try again."
+      );
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const handleDiscard = () => {
+    setFile(null);
+    setParsed(false);
+    setParseError(null);
+    setParsedMetrics([]);
+    setCategoryCount({});
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-2">Obsidian Vault Import</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Import bloodwork and metric data from Obsidian vault markdown files containing tables.
-        </p>
+    <div>
+      <PageHeader
+        eyebrow="IMPORT"
+        title="Import data"
+        sub="Bring in your signals from WHOOP, bloodwork, and vault files."
+      />
 
-        {/* Input mode toggle */}
-        <div className="flex gap-2 mb-4">
-          <button
-            type="button"
-            onClick={() => setInputMode("file")}
-            className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-              inputMode === "file"
-                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-            }`}
-          >
-            Upload File
-          </button>
-          <button
-            type="button"
-            onClick={() => setInputMode("paste")}
-            className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-              inputMode === "paste"
-                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-            }`}
-          >
-            Paste Content
-          </button>
-        </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.4fr 1fr",
+          gap: "var(--gap-xl)",
+          alignItems: "start",
+        }}
+      >
+        {/* Left: upload + results */}
+        <div>
+          <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
+              Obsidian vault import
+            </div>
+            <p
+              style={{
+                marginTop: 0,
+                color: "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
+                marginBottom: 20,
+              }}
+            >
+              Import bloodwork and metric data from vault markdown files
+              containing tables.
+            </p>
 
-        <Form method="post" encType="multipart/form-data">
-          {inputMode === "file" ? (
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Select markdown file
-                </span>
-                <input
-                  type="file"
-                  name="file"
-                  accept=".md"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 dark:file:bg-gray-800 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-200 dark:hover:file:bg-gray-700"
-                />
-              </label>
-              {selectedFile && (
-                <p className="text-sm text-gray-500">
-                  Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                </p>
-              )}
+            {/* Dropzone — client-only (T-04.1-12) */}
+            {!file && (
+              <Dropzone
+                accept=".md,text/markdown,text/plain"
+                onFile={handleFile}
+                label="Drag and drop your vault markdown file here"
+              />
+            )}
+
+            {/* File card */}
+            {file && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: 16,
+                  background: "var(--surface-2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-lg)",
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {file.name}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "var(--text-xs)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    {file.size
+                      ? (file.size / 1024).toFixed(1) + " KB"
+                      : "ready"}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Remove file"
+                  onClick={handleRemove}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 6,
+                    borderRadius: "var(--radius-sm)",
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            )}
+
+            {/* Parse button */}
+            <div style={{ marginTop: 18 }}>
+              <Button
+                variant="primary"
+                fullWidth
+                disabled={!file || parsing || parsed}
+                onClick={handleParse}
+              >
+                {parsing ? "Parsing…" : parsed ? "Parsed" : "Parse vault data"}
+              </Button>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <label className="block">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Paste markdown content with tables
-                </span>
-                <textarea
-                  name="markdownContent"
-                  value={pastedContent}
-                  onChange={(e) => setPastedContent(e.target.value)}
-                  rows={10}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-mono"
-                  placeholder={`| Marker | Value | Unit | Date |
-|--------|-------|------|------|
-| Vitamin D | 65 | ng/mL | 2025-01-15 |
-| B12 | 550 | pg/mL | 2025-01-15 |`}
-                />
-              </label>
-            </div>
+          </Card>
+
+          {/* Parse error */}
+          {parseError && (
+            <Card padding="lg" accent="energy" style={{ marginBottom: "var(--gap-lg)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-secondary)",
+                  margin: 0,
+                }}
+              >
+                {parseError}
+              </p>
+            </Card>
           )}
 
-          <button
-            type="submit"
-            disabled={
-              (inputMode === "file" && !selectedFile) ||
-              (inputMode === "paste" && !pastedContent.trim()) ||
-              isSubmitting
-            }
-            className="mt-4 w-full px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isSubmitting ? "Parsing..." : "Parse Vault Data"}
-          </button>
-        </Form>
-      </div>
-
-      {/* Error display */}
-      {actionData?.error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 p-4">
-          <p className="text-sm text-red-600 dark:text-red-400">{actionData.error}</p>
-        </div>
-      )}
-
-      {/* Success display */}
-      {actionData?.success && actionData.summary && (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20 p-4">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-              Successfully parsed {actionData.summary.totalMetrics} metrics from {actionData.summary.tables} tables
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-            <h3 className="font-medium mb-3">Import Summary by Category</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              {Object.entries(actionData.summary.categories).map(([category, count]) => (
-                <div key={category} className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400 capitalize">{category}</span>
-                  <span className="font-medium">{count as number}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-              <button
-                type="button"
-                className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+          {/* Success card */}
+          {parsed && parsedMetrics.length > 0 && (
+            <Card accent="vital" padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 8,
+                }}
               >
-                Save to Database
-              </button>
-            </div>
-          </div>
+                <span
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "var(--vital)",
+                    color: "#fff",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Check size={16} strokeWidth={2.6} />
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 600,
+                    fontSize: "var(--text-lg)",
+                  }}
+                >
+                  {parsedMetrics.length} metrics read from your frame
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: "0 0 18px",
+                  color: "var(--text-secondary)",
+                  fontSize: "var(--text-sm)",
+                }}
+              >
+                Review the preview below, then save to your tracker.
+              </p>
 
-          {/* Preview metrics */}
-          {actionData.metrics && actionData.metrics.length > 0 && (
-            <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-              <h3 className="font-medium mb-3">Preview (First 10)</h3>
-              <div className="space-y-2">
-                {actionData.metrics.slice(0, 10).map((metric: any) => (
+              {/* Categories */}
+              {Object.keys(categoryCount).length > 0 && (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 8,
+                    marginBottom: 18,
+                  }}
+                >
+                  {Object.entries(categoryCount).map(([cat, count]) => (
+                    <div
+                      key={cat}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "8px 12px",
+                        background: "var(--surface-2)",
+                        borderRadius: "var(--radius-md)",
+                        border: "1px solid var(--border)",
+                        fontSize: "var(--text-sm)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: "var(--text-secondary)",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {cat}
+                      </span>
+                      <span
+                        className="zt-tnum"
+                        style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}
+                      >
+                        {count as number}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Preview */}
+              <div
+                style={{
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  overflow: "hidden",
+                  marginBottom: 18,
+                }}
+              >
+                {parsedMetrics.slice(0, 10).map((m, i) => (
                   <div
-                    key={metric.id}
-                    className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 text-sm"
+                    key={m.id}
+                    className="zt-trow"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "11px 14px",
+                      borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                    }}
                   >
                     <div>
-                      <span className="text-gray-900 dark:text-gray-100">{metric.name}</span>
-                      <span className="ml-2 text-xs text-gray-500 capitalize">({metric.category})</span>
+                      <span style={{ fontSize: "var(--text-sm)" }}>{m.name}</span>
+                      <span
+                        style={{
+                          marginLeft: 8,
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "var(--text-2xs)",
+                          color: "var(--text-muted)",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        ({m.category})
+                      </span>
                     </div>
-                    <span className="font-medium">
-                      {metric.value} {metric.unit}
+                    <span
+                      className="zt-tnum"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontWeight: 600,
+                        fontSize: "var(--text-sm)",
+                      }}
+                    >
+                      {m.value} {m.unit}
                     </span>
                   </div>
                 ))}
               </div>
-            </div>
+
+              {/* CTAs */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <Button variant="primary">Save to tracker</Button>
+                <Button variant="ghost" onClick={handleDiscard}>
+                  Discard import
+                </Button>
+              </div>
+            </Card>
           )}
         </div>
-      )}
 
-      {/* Instructions */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h3 className="font-medium mb-3">Supported Table Formats</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-          The parser looks for markdown tables with columns like:
-        </p>
-        <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400 list-disc list-inside">
-          <li><strong>Marker/Test/Name:</strong> The metric name</li>
-          <li><strong>Value/Result:</strong> The numeric value</li>
-          <li><strong>Unit:</strong> The measurement unit (optional)</li>
-          <li><strong>Date:</strong> The measurement date (optional)</li>
-        </ul>
-        <p className="mt-3 text-xs text-gray-500">
-          Default vault path: <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">/Users/mac/vaults/#Bwell/602/</code>
-        </p>
+        {/* Right: instructions */}
+        <div>
+          <Card padding="lg">
+            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
+              Supported table formats
+            </div>
+            <p
+              style={{
+                fontSize: "var(--text-sm)",
+                color: "var(--text-secondary)",
+                margin: "0 0 16px",
+              }}
+            >
+              The parser looks for markdown tables with columns like:
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[
+                ["Marker / Test / Name", "The metric name"],
+                ["Value / Result", "The numeric value"],
+                ["Unit", "The measurement unit (optional)"],
+                ["Date", "The measurement date (optional)"],
+              ].map(([col, desc]) => (
+                <div
+                  key={col}
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    fontSize: "var(--text-sm)",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontWeight: 700,
+                      color: "var(--text)",
+                      flexShrink: 0,
+                      minWidth: 140,
+                    }}
+                  >
+                    {col}
+                  </span>
+                  <span>{desc}</span>
+                </div>
+              ))}
+            </div>
+            <div
+              style={{
+                marginTop: 16,
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-xs)",
+                color: "var(--text-muted)",
+              }}
+            >
+              Default vault path{" "}
+              <span
+                style={{
+                  background: "var(--surface-sunken)",
+                  padding: "3px 7px",
+                  borderRadius: 6,
+                  color: "var(--text-secondary)",
+                }}
+              >
+                /Users/mac/vaults/#Bwell/602/
+              </span>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

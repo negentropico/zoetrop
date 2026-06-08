@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { Form, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/whoop";
+import { Card } from "../../components/ui/Card";
+import { Button } from "../../components/ui/Button";
+import { Badge } from "../../components/ui/Badge";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Dropzone } from "../../components/ui/Dropzone";
+import { FileJson, Check, X } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -226,185 +231,508 @@ function parseWhoopReport(data: WhoopAnalysisReport) {
 }
 
 export default function WhoopImport() {
-  const actionData = useActionData<typeof action>();
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === "submitting";
+  // Client-only state — no server upload in Phase 4.1 (T-04.1-12)
+  const [file, setFile] = useState<File | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [parsed, setParsed] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [parsedMetrics, setParsedMetrics] = useState<
+    Array<{ id: string; name: string; value: number; unit: string }>
+  >([]);
 
-  const [dragActive, setDragActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const handleFile = (f: File) => {
+    setFile(f);
+    setParsed(false);
+    setParseError(null);
+    setParsedMetrics([]);
+  };
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
+  const handleRemove = () => {
+    setFile(null);
+    setParsed(false);
+    setParseError(null);
+    setParsedMetrics([]);
+  };
+
+  const handleParse = async () => {
+    if (!file) return;
+    setParsing(true);
+    setParseError(null);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text) as WhoopAnalysisReport;
+      const metrics = parseWhoopReport(data);
+      setParsedMetrics(metrics);
+      setParsed(true);
+    } catch {
+      setParseError(
+        "Something went wrong reading your file. Check the format and try again."
+      );
+    } finally {
+      setParsing(false);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSelectedFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
+  const handleDiscard = () => {
+    setFile(null);
+    setParsed(false);
+    setParseError(null);
+    setParsedMetrics([]);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-2">WHOOP Analyzer Export</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Upload your <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">whoop_analysis_report.json</code> file
-          from the WHOOP Analyzer tool.
-        </p>
+    <div>
+      <PageHeader
+        eyebrow="IMPORT"
+        title="Import data"
+        sub="Bring in your signals from WHOOP, bloodwork, and vault files."
+      />
 
-        <Form method="post" encType="multipart/form-data">
-          {/* Drag and drop zone */}
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                : "border-gray-300 dark:border-gray-700"
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            {selectedFile ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">{selectedFile.name}</p>
-                <p className="text-xs text-gray-500">
-                  {(selectedFile.size / 1024).toFixed(1)} KB
-                </p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.4fr 1fr",
+          gap: "var(--gap-xl)",
+          alignItems: "start",
+        }}
+      >
+        {/* Left: upload + results */}
+        <div>
+          <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
+              WHOOP analyzer export
+            </div>
+            <p
+              style={{
+                marginTop: 0,
+                color: "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
+                marginBottom: 20,
+              }}
+            >
+              Upload your{" "}
+              <code
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.85em",
+                  background: "var(--surface-sunken)",
+                  padding: "2px 7px",
+                  borderRadius: 6,
+                }}
+              >
+                whoop_analysis_report.json
+              </code>{" "}
+              and we'll read the latest frame.
+            </p>
+
+            {/* Dropzone — client-only (T-04.1-12) */}
+            {!file && (
+              <Dropzone
+                accept=".json,application/json"
+                onFile={handleFile}
+                label="Drag and drop your WHOOP JSON here"
+              />
+            )}
+
+            {/* File card */}
+            {file && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: 16,
+                  background: "var(--surface-2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-lg)",
+                }}
+              >
+                <span
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--focus-50)",
+                    color: "var(--accent)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <FileJson size={22} strokeWidth={1.8} />
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {file.name}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "var(--text-xs)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    {file.size
+                      ? (file.size / 1024).toFixed(1) + " KB"
+                      : "ready"}
+                  </div>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setSelectedFile(null)}
-                  className="text-sm text-red-500 hover:text-red-600"
+                  aria-label="Remove file"
+                  onClick={handleRemove}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 6,
+                    borderRadius: "var(--radius-sm)",
+                  }}
                 >
-                  Remove
+                  <X size={18} />
                 </button>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Drag and drop your WHOOP JSON file here, or
-                </p>
-                <label className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                  Browse files
-                  <input
-                    type="file"
-                    name="file"
-                    accept=".json"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </label>
-              </div>
             )}
-          </div>
 
-          <button
-            type="submit"
-            disabled={!selectedFile || isSubmitting}
-            className="mt-4 w-full px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isSubmitting ? "Parsing..." : "Parse WHOOP Data"}
-          </button>
-        </Form>
-      </div>
-
-      {/* Error display */}
-      {actionData?.error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 p-4">
-          <p className="text-sm text-red-600 dark:text-red-400">{actionData.error}</p>
-        </div>
-      )}
-
-      {/* Success display */}
-      {actionData?.success && actionData.summary && (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20 p-4">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-              Successfully parsed {actionData.summary.totalMetrics} metrics
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-            <h3 className="font-medium mb-3">Import Summary</h3>
-            <dl className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <dt className="text-gray-500">Total Metrics</dt>
-                <dd className="font-medium">{actionData.summary.totalMetrics}</dd>
-              </div>
-              <div>
-                <dt className="text-gray-500">HRV Readings</dt>
-                <dd className="font-medium">{actionData.summary.categories.hrv}</dd>
-              </div>
-              <div>
-                <dt className="text-gray-500">Recovery Scores</dt>
-                <dd className="font-medium">{actionData.summary.categories.recovery}</dd>
-              </div>
-              <div>
-                <dt className="text-gray-500">Sleep Performance</dt>
-                <dd className="font-medium">{actionData.summary.categories.sleep}</dd>
-              </div>
-            </dl>
-
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-              <button
-                type="button"
-                className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+            {/* Parse button */}
+            <div style={{ marginTop: 18 }}>
+              <Button
+                variant="primary"
+                fullWidth
+                disabled={!file || parsing || parsed}
+                onClick={handleParse}
               >
-                Save to Database
-              </button>
+                {parsing ? "Parsing…" : parsed ? "Parsed" : "Parse WHOOP data"}
+              </Button>
             </div>
-          </div>
+          </Card>
 
-          {/* Preview metrics */}
-          {actionData.metrics && actionData.metrics.length > 0 && (
-            <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-              <h3 className="font-medium mb-3">Preview (First 10)</h3>
-              <div className="space-y-2">
-                {actionData.metrics.slice(0, 10).map((metric: any) => (
+          {/* Parse error */}
+          {parseError && (
+            <Card padding="lg" accent="energy" style={{ marginBottom: "var(--gap-lg)" }}>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: 0 }}>
+                {parseError}
+              </p>
+            </Card>
+          )}
+
+          {/* Success card */}
+          {parsed && parsedMetrics.length > 0 && (
+            <Card accent="vital" padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 8,
+                }}
+              >
+                <span
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "var(--vital)",
+                    color: "#fff",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Check size={16} strokeWidth={2.6} />
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 600,
+                    fontSize: "var(--text-lg)",
+                  }}
+                >
+                  {parsedMetrics.length} metrics read from your frame
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: "0 0 18px",
+                  color: "var(--text-secondary)",
+                  fontSize: "var(--text-sm)",
+                }}
+              >
+                Review the preview below, then save to your tracker.
+              </p>
+
+              {/* Mini stats */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                  marginBottom: 18,
+                }}
+              >
+                {[
+                  { v: parsedMetrics.length, l: "metrics" },
+                  {
+                    v: parsedMetrics.filter((m) =>
+                      m.name.toLowerCase().includes("hrv") ||
+                      m.name.toLowerCase().includes("recovery") ||
+                      m.name.toLowerCase().includes("heart rate") ||
+                      m.name.toLowerCase().includes("sleep")
+                    ).length,
+                    l: "autonomic",
+                  },
+                  { v: 0, l: "flagged" },
+                ].map(({ v, l }) => (
                   <div
-                    key={metric.id}
-                    className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 text-sm"
+                    key={l}
+                    style={{
+                      flex: 1,
+                      minWidth: 90,
+                      padding: "12px 14px",
+                      background: "var(--surface-2)",
+                      borderRadius: "var(--radius-md)",
+                      border: "1px solid var(--border)",
+                    }}
                   >
-                    <span className="text-gray-600 dark:text-gray-400">{metric.name}</span>
-                    <span className="font-medium">
-                      {metric.value} {metric.unit}
+                    <span
+                      className="zt-readout"
+                      style={{ fontSize: "var(--text-xl)", display: "block" }}
+                    >
+                      {v}
+                    </span>
+                    <div
+                      className="zt-eyebrow"
+                      style={{ marginTop: 2 }}
+                    >
+                      {l}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Metric preview list */}
+              <div
+                style={{
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  overflow: "hidden",
+                  marginBottom: 18,
+                }}
+              >
+                {parsedMetrics.slice(0, 10).map((m, i) => (
+                  <div
+                    key={m.id}
+                    className="zt-trow"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "11px 14px",
+                      borderTop:
+                        i > 0 ? "1px solid var(--border)" : "none",
+                    }}
+                  >
+                    <span style={{ fontSize: "var(--text-sm)" }}>{m.name}</span>
+                    <span
+                      className="zt-tnum"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontWeight: 600,
+                        fontSize: "var(--text-sm)",
+                      }}
+                    >
+                      {m.value} {m.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTAs */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <Button variant="primary">Save to tracker</Button>
+                <Button variant="ghost" onClick={handleDiscard}>
+                  Discard import
+                </Button>
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {/* Right: instructions + Phase 5 forward-look */}
+        <div>
+          <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
+              How to export from WHOOP
+            </div>
+            <ol
+              style={{
+                margin: 0,
+                paddingLeft: 20,
+                color: "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
+                lineHeight: "var(--leading-relaxed)",
+              }}
+            >
+              <li>Run the WHOOP Analyzer on your data export.</li>
+              <li>
+                Locate the generated{" "}
+                <code
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "0.85em",
+                  }}
+                >
+                  whoop_analysis_report.json
+                </code>
+                .
+              </li>
+              <li>Upload it using the form.</li>
+              <li>Review the parsed metrics and save.</li>
+            </ol>
+            <div
+              style={{
+                marginTop: 16,
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-xs)",
+                color: "var(--text-muted)",
+              }}
+            >
+              Default path{" "}
+              <span
+                style={{
+                  background: "var(--surface-sunken)",
+                  padding: "3px 7px",
+                  borderRadius: 6,
+                  color: "var(--text-secondary)",
+                }}
+              >
+                ~/Code/Whoop/results/
+              </span>
+            </div>
+          </Card>
+
+          {/* Phase 5 forward-look */}
+          <Card padding="lg" tone="focus">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <Badge tone="focus" variant="solid">
+                Phase 5
+              </Badge>
+              <span
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 600,
+                }}
+              >
+                Lab ingest review
+              </span>
+            </div>
+            <p
+              style={{
+                margin: "0 0 16px",
+                color: "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              The same upload → parse → review → commit flow, scaled to lab
+              PDFs: source on the left, extracted fields to approve on the
+              right.
+            </p>
+            {/* Faux skeleton */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "0.9fr 1.1fr",
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  padding: 12,
+                  minHeight: 120,
+                }}
+              >
+                <div
+                  className="zt-eyebrow"
+                  style={{ color: "var(--text-faint)", marginBottom: 8 }}
+                >
+                  labcorp_2026.pdf
+                </div>
+                {[70, 92, 60, 84].map((w, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: 6,
+                      width: w + "%",
+                      background: "var(--surface-sunken)",
+                      borderRadius: 3,
+                      margin: "7px 0",
+                    }}
+                  />
+                ))}
+              </div>
+              <div
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "4px 14px",
+                }}
+              >
+                {[
+                  { name: "hs-CRP", value: "0.8 mg/L" },
+                  { name: "Homocysteine", value: "9.4 µmol/L" },
+                ].map((f, i) => (
+                  <div
+                    key={f.name}
+                    style={{
+                      padding: "12px 0",
+                      borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                    }}
+                  >
+                    <div
+                      className="zt-eyebrow"
+                      style={{ color: "var(--text-muted)", marginBottom: 4 }}
+                    >
+                      {f.name}
+                    </div>
+                    <span
+                      className="zt-tnum"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontWeight: 700,
+                        fontSize: "var(--text-base)",
+                      }}
+                    >
+                      {f.value}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
-          )}
+          </Card>
         </div>
-      )}
-
-      {/* Instructions */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h3 className="font-medium mb-3">How to export from WHOOP</h3>
-        <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-400 list-decimal list-inside">
-          <li>Run the WHOOP Analyzer tool on your WHOOP data export</li>
-          <li>Locate the generated <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">whoop_analysis_report.json</code> file</li>
-          <li>Upload the file using the form above</li>
-          <li>Review the parsed metrics and save to your tracker</li>
-        </ol>
-        <p className="mt-3 text-xs text-gray-500">
-          Default path: <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">/Users/mac/Code/Whoop/results/</code>
-        </p>
       </div>
     </div>
   );

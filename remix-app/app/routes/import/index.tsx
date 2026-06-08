@@ -1,9 +1,13 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/index";
+import { Card } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Button } from "../../components/ui/Button";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Import Data - Zoetrop" },
+    { title: "Import data - Zoetrop" },
     { name: "description", content: "Import wellness data from various sources" },
   ];
 }
@@ -12,88 +16,124 @@ const importSources = [
   {
     id: "whoop",
     name: "WHOOP",
-    description: "Import HRV, recovery, sleep, and strain data from WHOOP Analyzer JSON exports",
-    icon: "heart-pulse",
-    color: "text-pink-500",
+    description:
+      "Import HRV, recovery, sleep, and strain data from WHOOP Analyzer JSON exports",
     href: "/import/whoop",
     formats: ["JSON (whoop_analysis_report.json)"],
     metrics: ["HRV (RMSSD)", "Recovery Score", "Resting Heart Rate", "Sleep Performance", "TDEE"],
+    available: true,
   },
   {
     id: "vault",
     name: "Obsidian Vault",
-    description: "Import bloodwork and protocol data from vault markdown files",
-    icon: "file-text",
-    color: "text-purple-500",
+    description:
+      "Import bloodwork and protocol data from vault markdown files",
     href: "/import/vault",
     formats: ["Markdown (.md)", "Tables"],
     metrics: ["Bloodwork results", "Supplement protocols", "Historical data"],
+    available: true,
   },
   {
     id: "csv",
-    name: "CSV Import",
-    description: "Import data from CSV files with custom column mapping",
-    icon: "table",
-    color: "text-blue-500",
+    name: "CSV",
+    description:
+      "Import data from CSV files with custom column mapping",
     href: "/import/csv",
     formats: ["CSV", "TSV"],
     metrics: ["Custom metrics"],
-    disabled: true,
+    available: false,
   },
 ];
 
 export default function ImportIndex() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <PageHeader
+        eyebrow="IMPORT"
+        title="Import data"
+        sub="Bring in your signals from WHOOP, bloodwork, and vault files."
+      />
+
+      {/* Source cards */}
+      <div className="zt-grid-2" style={{ marginBottom: "var(--gap-xl)" }}>
         {importSources.map((source) => (
-          <div
+          <Card
             key={source.id}
-            className={`rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 ${
-              source.disabled ? "opacity-50" : ""
-            }`}
+            padding="lg"
+            elevation="sm"
+            style={{ opacity: source.available ? 1 : 0.5 }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <span className={`text-2xl ${source.color}`}>{source.icon}</span>
-                <div>
-                  <h3 className="font-medium">{source.name}</h3>
-                  {source.disabled && (
-                    <span className="text-xs text-gray-500">Coming soon</span>
-                  )}
-                </div>
-              </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <div className="zt-eyebrow">{source.name}</div>
+              {!source.available && (
+                <Badge tone="neutral">Coming soon</Badge>
+              )}
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p
+              style={{
+                fontSize: "var(--text-sm)",
+                color: "var(--text-secondary)",
+                margin: "0 0 16px",
+              }}
+            >
               {source.description}
             </p>
-            <div className="space-y-2 mb-4">
-              <div className="text-xs text-gray-500">
-                <span className="font-medium">Formats:</span> {source.formats.join(", ")}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Formats:</span>{" "}
+                {source.formats.join(", ")}
               </div>
-              <div className="text-xs text-gray-500">
-                <span className="font-medium">Metrics:</span> {source.metrics.join(", ")}
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Metrics:</span>{" "}
+                {source.metrics.join(", ")}
               </div>
             </div>
-            {!source.disabled && (
-              <Link
-                to={source.href}
-                className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-              >
-                Import from {source.name}
+            {source.available && (
+              <Link to={source.href}>
+                <Button variant="primary" size="sm">
+                  Import from {source.name}
+                </Button>
               </Link>
             )}
-          </div>
+          </Card>
         ))}
       </div>
 
       {/* Recent imports */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-4">Recent Imports</h2>
-        <div className="text-sm text-gray-500 text-center py-8">
-          No imports yet. Choose a data source above to get started.
+      <Card padding="lg">
+        <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-lg)" }}>
+          Recent imports
         </div>
-      </div>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "var(--gap-3xl) 0",
+            color: "var(--text-muted)",
+            fontSize: "var(--text-sm)",
+          }}
+        >
+          Nothing logged yet. Your first frame starts when you begin.
+        </div>
+      </Card>
     </div>
   );
 }
