@@ -58,7 +58,20 @@ Plans:
   4. pgAudit is enabled on the Neon project; a test query confirms audit entries record `{user, table, operation, timestamp}` and explicitly do NOT record bind-parameter values (i.e., `log_parameter = off` confirmed)
   5. Netlify→Vercel migration is complete: React Router 7 Vercel preset configured, Netlify adapter/`netlify.toml` removed, `DATABASE_URL`(+unpooled) and auth secrets set in Vercel project env (the app already falls back `NETLIFY_DATABASE_URL || DATABASE_URL`), a successful production deploy on Vercel, and CLAUDE.md / `docs/PLATFORM.md` updated to reflect Vercel (URLs, no Netlify site id)
 
-**Plans**: TBD
+**Plans**: 4 plans in 3 waves
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Track A: Vercel preset cutover + Netlify removal + drizzle unpooled URL (build/shell Wave-0 asserts) [COMP-02]
+- [ ] 02-02-PLAN.md — Track A: scaffold docs/COMPLIANCE-RUNBOOK.md + update CLAUDE.md/docs/PLATFORM.md to Vercel [COMP-02, COMP-03]
+
+**Wave 2** *(blocked on 02-02 — records into the runbook)*
+
+- [ ] 02-03-PLAN.md — Track B: Neon Scale+HIPAA+BAA, Vercel HIPAA add-on+BAA+env vars, Anthropic BAA kickoff (long pole) [COMP-02]
+
+**Wave 3** *(blocked on 02-01/02-02/02-03)*
+
+- [ ] 02-04-PLAN.md — Track B: production Vercel deploy + DB connectivity, pgAudit sample via Neon Support, final gate review [COMP-02, COMP-03]
 
 ### Phase 3: Identity + Tenancy Spine with RLS
 
