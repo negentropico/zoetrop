@@ -2,7 +2,6 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -10,7 +9,11 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { AppShell } from "./components/shell/AppShell";
 
+// Replace Inter with the three Zoetrope brand fonts (D-11).
+// Weights: Space Grotesk 400/500/600/700 + Hanken Grotesk 300–800 + Space Mono 400/700.
+// Do NOT also import tokens/fonts.css in app.css — that would load fonts twice.
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -20,20 +23,30 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap",
   },
 ];
 
+// No-flash theme script (static literal — T-04.1-02: no interpolation of any
+// user/runtime value, reads only its own localStorage + matchMedia, writes only
+// data-theme; XSS-safe by construction).
+const NO_FLASH_SCRIPT = `(function(){try{var t=localStorage.getItem('zt-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the inline no-flash script sets data-theme on
+    // <html> before paint. The server renders without data-theme; React would
+    // warn about the mismatch. suppressHydrationWarning silences it (one level).
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* No-flash script BEFORE <Meta /> / <Links /> — must run before any CSS loads */}
+        <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <body className="bg-paper text-ink min-h-screen font-text">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -42,84 +55,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
-      <div className="container mx-auto px-4">
-        <div className="flex h-14 items-center justify-between">
-          <NavLink
-            to="/"
-            className="text-lg font-semibold tracking-tight"
-          >
-            Zoetrop
-          </NavLink>
-          <nav className="flex items-center gap-6 text-sm">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                isActive
-                  ? "text-gray-900 dark:text-gray-100 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              }
-            >
-              Dashboard
-            </NavLink>
-            <NavLink
-              to="/metrics"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-gray-900 dark:text-gray-100 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              }
-            >
-              Metrics
-            </NavLink>
-            <NavLink
-              to="/protocol"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-gray-900 dark:text-gray-100 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              }
-            >
-              Protocol
-            </NavLink>
-            <NavLink
-              to="/insights"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-gray-900 dark:text-gray-100 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              }
-            >
-              Insights
-            </NavLink>
-            <NavLink
-              to="/import"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-gray-900 dark:text-gray-100 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              }
-            >
-              Import
-            </NavLink>
-          </nav>
-        </div>
-      </div>
-    </header>
-  );
-}
-
+// All 16 routes render inside AppShell (TopNav + main + footer + BottomTab).
+// The inline Header function is deleted; TopNav (in AppShell) replaces it (D-07).
 export default function App() {
   return (
-    <>
-      <Header />
-      <main className="container mx-auto px-4 py-6">
-        <Outlet />
-      </main>
-    </>
+    <AppShell>
+      <Outlet />
+    </AppShell>
   );
 }
 
