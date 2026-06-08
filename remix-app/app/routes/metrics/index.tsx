@@ -7,6 +7,7 @@ import {
   type Metric,
 } from "../../types/metrics";
 import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
+import { getMetricStatus } from "~/lib/metrics";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -47,28 +48,6 @@ export function loader() {
   );
 
   return { metrics, byCategory };
-}
-
-function getMetricStatus(metric: Metric): MetricStatus {
-  const { value, optimalRange, referenceRange } = metric;
-
-  if (optimalRange) {
-    if (value >= optimalRange.min && value <= optimalRange.max) {
-      return "optimal";
-    }
-  }
-
-  if (referenceRange) {
-    if (value < referenceRange.min) {
-      return "deficient";
-    }
-    if (value > referenceRange.max) {
-      return "excess";
-    }
-    return "borderline";
-  }
-
-  return "optimal";
 }
 
 function StatusDot({ status }: { status: MetricStatus }) {

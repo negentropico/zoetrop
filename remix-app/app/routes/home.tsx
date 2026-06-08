@@ -16,6 +16,7 @@ import {
   getCurrentCessationPhase,
 } from "../lib/protocol-data";
 import { getLatestRealMetrics } from "../lib/real-data";
+import { getMetricStatus } from "~/lib/metrics";
 import { differenceInDays, parseISO } from "date-fns";
 
 export function meta({}: Route.MetaArgs) {
@@ -23,17 +24,6 @@ export function meta({}: Route.MetaArgs) {
     { title: "Zoetrop" },
     { name: "description", content: "Comprehensive wellness tracking dashboard" },
   ];
-}
-
-function getMetricStatus(metric: Metric): MetricStatus {
-  const { value, optimalRange, referenceRange } = metric;
-  if (optimalRange && value >= optimalRange.min && value <= optimalRange.max) return "optimal";
-  if (referenceRange) {
-    if (value < referenceRange.min) return "deficient";
-    if (value > referenceRange.max) return "excess";
-    return "borderline";
-  }
-  return "optimal";
 }
 
 export function loader() {
