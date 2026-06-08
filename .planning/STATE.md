@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: "Phase 04.1 (Design System Adoption) complete (8/8) — pulled forward out-of-sequence; resume Phase 1 (plan 2 of 5)"
-last_updated: 2026-06-08T04:51:23.955Z
+status: ready_to_plan
+stopped_at: "Phase 1 complete (concurrent session) + Phase 04.1 complete (this session, out-of-sequence). Phase 2 (PHI/BAA gate) context gathered — ready to plan Phase 2. NOTE: a 04.1 UI gap-closure plan (04.1-09) is queued for `/gsd:execute-phase 04.1 --gaps-only`."
+last_updated: 2026-06-08T05:30:00.000Z
 last_activity: 2026-06-08
 progress:
   total_phases: 7
-  completed_phases: 1
-  total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_phases: 2
+  total_plans: 13
+  completed_plans: 13
+  percent: 29
 ---
 
 # Project State
@@ -21,18 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 01 — schema-baseline-engine-tests-auth-spike
+**Current focus:** Phase 2 — PHI / BAA Compliance Gate + Vercel Cutover (context gathered; ready to plan)
 
-> Note: Phase 04.1 (Design System Adoption) was completed out-of-sequence on 2026-06-08 (its roundtrip gate was satisfied). The engine-first critical path resumes at Phase 1.
+> Note: Phase 1 was completed + verified by a concurrent session (same author) on 2026-06-08. Phase 04.1 (Design System Adoption) was completed out-of-sequence this session (roundtrip gate satisfied). The engine-first critical path resumes at Phase 2.
+> ⚠ Open follow-up: a UI regression on `/protocol` (CSS-grid blowout — right column clipped; uneven 4-up stat row) is queued as **04.1-09** gap-closure. Run `/gsd:execute-phase 04.1 --gaps-only` to address it.
 
 ## Current Position
 
-Phase: 01 (schema-baseline-engine-tests-auth-spike) — EXECUTING
-Plan: 2 of 5
-Status: Ready to execute
+Phase: 2 (phi-baa-compliance-gate) — READY TO PLAN (CONTEXT.md exists)
+Plan: not yet planned
+Status: Ready to plan
 Last activity: 2026-06-08
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 29%
 
 ## Performance Metrics
 
