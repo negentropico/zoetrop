@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/genetics";
 import { seedGeneticVariants } from "../../lib/seed-data";
@@ -8,6 +9,10 @@ import {
   type VariantCategory,
   type GeneticVariant,
 } from "../../types/genetics";
+import { Badge } from "../../components/ui/Badge";
+import { Card } from "../../components/ui/Card";
+import { DataTable } from "../../components/ui/DataTable";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -52,91 +57,6 @@ export function loader() {
   };
 }
 
-function ConfidenceBadge({ confidence }: { confidence: ConfidenceLevel }) {
-  const info = CONFIDENCE_LEVELS[confidence];
-  return (
-    <span
-      className={`px-2 py-0.5 text-xs font-medium rounded ${info.color} bg-current/10`}
-      title={info.description}
-    >
-      {info.label}
-    </span>
-  );
-}
-
-function ImpactBadge({ impact }: { impact: string }) {
-  const colors: Record<string, string> = {
-    high: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    moderate: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-    low: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    informational: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
-  };
-
-  return (
-    <span className={`px-2 py-0.5 text-xs font-medium rounded ${colors[impact]}`}>
-      {impact}
-    </span>
-  );
-}
-
-function CategoryIcon({ category }: { category: VariantCategory }) {
-  const icons: Record<VariantCategory, string> = {
-    methylation: "🧬",
-    detoxification: "🔄",
-    neurotransmitter: "🧠",
-    nutritional: "🥗",
-    cardiovascular: "❤️",
-    inflammation: "🔥",
-    metabolism: "⚡",
-  };
-  return <span className="text-lg">{icons[category]}</span>;
-}
-
-function VariantCard({ variant }: { variant: GeneticVariant }) {
-  return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-colors">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg">{variant.gene}</span>
-            <ConfidenceBadge confidence={variant.confidence} />
-          </div>
-          {variant.rsid && (
-            <span className="text-xs text-gray-500 font-mono">{variant.rsid}</span>
-          )}
-        </div>
-        <span className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-          {variant.genotype}
-        </span>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <ImpactBadge impact={variant.impact} />
-          <span className="text-xs text-gray-500">
-            {VARIANT_CATEGORIES[variant.category].label}
-          </span>
-        </div>
-
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {variant.clinicalImplication}
-        </p>
-
-        <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-          <div className="text-xs font-medium text-gray-500 mb-1">Protocol Action</div>
-          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-            {variant.protocolAction}
-          </p>
-        </div>
-
-        {variant.notes && (
-          <p className="text-xs text-gray-500 italic">{variant.notes}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function Genetics({ loaderData }: Route.ComponentProps) {
   const { variants, byCategory, stats } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -160,43 +80,127 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
   const categories = Object.keys(VARIANT_CATEGORIES) as VariantCategory[];
   const confidenceLevels = Object.keys(CONFIDENCE_LEVELS) as ConfidenceLevel[];
 
+  // DataTable columns
+  type VRow = {
+    id: string;
+    gene: string;
+    rsid?: string | null;
+    genotype: string;
+    confidence: ConfidenceLevel;
+    impact: string;
+    category: VariantCategory;
+    clinicalImplication: string;
+    protocolAction: string;
+  };
+
+  const columns = [
+    {
+      key: "gene" as keyof VRow & string,
+      label: "Gene",
+      render: (v: VRow) => (
+        <div>
+          <span style={{ fontWeight: 600 }}>{v.gene}</span>
+          {v.rsid && (
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-2xs)",
+                color: "var(--text-muted)",
+                marginTop: 2,
+              }}
+            >
+              {v.rsid}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "genotype" as keyof VRow & string,
+      label: "Genotype",
+      mono: true,
+    },
+    {
+      key: "confidence" as keyof VRow & string,
+      label: "Confidence",
+      render: (v: VRow) => (
+        <Badge tone={v.confidence === "K1" ? "vital" : v.confidence === "K2" ? "focus" : "energy"}>
+          {CONFIDENCE_LEVELS[v.confidence].label}
+        </Badge>
+      ),
+    },
+    {
+      key: "category" as keyof VRow & string,
+      label: "Category",
+      render: (v: VRow) => (
+        <span style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+          {VARIANT_CATEGORIES[v.category].label}
+        </span>
+      ),
+    },
+    {
+      key: "clinicalImplication" as keyof VRow & string,
+      label: "Implication",
+      wrap: true,
+      render: (v: VRow) => (
+        <span style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+          {v.clinicalImplication}
+        </span>
+      ),
+    },
+    {
+      key: "protocolAction" as keyof VRow & string,
+      label: "Protocol action",
+      wrap: true,
+      render: (v: VRow) => (
+        <span style={{ fontWeight: 500, fontSize: "var(--text-sm)" }}>
+          {v.protocolAction}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div>
+      <PageHeader
+        eyebrow="GENETIC INSIGHTS"
+        title="Genetic profile"
+        sub="Genetic variants informing supplement protocol — methylation, detox, and metabolic pathways."
+      />
+
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center">
-          <div className="text-2xl font-bold">{stats.total}</div>
-          <div className="text-xs text-gray-500">Total Variants</div>
-        </div>
-        <div className="rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {stats.k1Confirmed}
-          </div>
-          <div className="text-xs text-gray-500">K1 Confirmed</div>
-        </div>
-        <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {stats.byConfidence["K2"] || 0}
-          </div>
-          <div className="text-xs text-gray-500">K2 High Confidence</div>
-        </div>
-        <div className="rounded-lg border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-            {stats.byConfidence["K3"] || 0}
-          </div>
-          <div className="text-xs text-gray-500">K3 Inferred</div>
-        </div>
-        <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-            {stats.highImpact}
-          </div>
-          <div className="text-xs text-gray-500">High Impact</div>
-        </div>
+      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-xl)" }}>
+        {[
+          { label: "TOTAL VARIANTS", value: stats.total },
+          { label: "K1 CONFIRMED", value: stats.k1Confirmed },
+          { label: "K2 HIGH", value: stats.byConfidence["K2"] || 0 },
+          { label: "K3 INFERRED", value: stats.byConfidence["K3"] || 0 },
+        ].map(({ label, value }) => (
+          <Card key={label} padding="md" style={{ textAlign: "center" }}>
+            <span
+              className="zt-readout"
+              style={{ fontSize: "var(--text-2xl)", display: "block" }}
+            >
+              {value}
+            </span>
+            <span className="zt-eyebrow" style={{ display: "block", marginTop: 6 }}>
+              {label}
+            </span>
+          </Card>
+        ))}
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4">
-        {/* Category filter */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: "var(--gap-lg)",
+        }}
+      >
+        {/* Category select */}
         <select
           value={filterCategory || ""}
           onChange={(e) => {
@@ -208,9 +212,25 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
             }
             setSearchParams(newParams);
           }}
-          className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
+          style={{
+            appearance: "none",
+            WebkitAppearance: "none",
+            fontFamily: "var(--font-text)",
+            fontSize: "var(--text-sm)",
+            fontWeight: 600,
+            padding: "9px 36px 9px 14px",
+            borderRadius: "var(--radius-pill)",
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
+            color: "var(--text)",
+            cursor: "pointer",
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23756d70' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 12px center",
+          }}
         >
-          <option value="">All Categories</option>
+          <option value="">All categories</option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
               {VARIANT_CATEGORIES[cat].label}
@@ -218,9 +238,11 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
           ))}
         </select>
 
-        {/* Confidence filter */}
-        <div className="flex gap-2">
-          {["all", ...confidenceLevels].map((conf) => (
+        {/* Confidence pills */}
+        {["all", ...confidenceLevels].map((conf) => {
+          const on =
+            conf === "all" ? !filterConfidence : filterConfidence === conf;
+          return (
             <button
               key={conf}
               onClick={() => {
@@ -232,136 +254,155 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
                 }
                 setSearchParams(newParams);
               }}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                (conf === "all" && !filterConfidence) || filterConfidence === conf
-                  ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
+              style={{
+                padding: "8px 14px",
+                borderRadius: "var(--radius-pill)",
+                cursor: "pointer",
+                fontFamily: "var(--font-text)",
+                fontWeight: 600,
+                fontSize: "var(--text-sm)",
+                border: `1px solid ${on ? "var(--ink)" : "var(--border)"}`,
+                background: on ? "var(--ink)" : "var(--surface)",
+                color: on ? "var(--n-50)" : "var(--text-secondary)",
+                transition:
+                  "background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out)",
+              }}
             >
-              {conf === "all" ? "All" : CONFIDENCE_LEVELS[conf as ConfidenceLevel].label}
+              {conf === "all"
+                ? "All"
+                : CONFIDENCE_LEVELS[conf as ConfidenceLevel].label}
             </button>
-          ))}
-        </div>
+          );
+        })}
 
-        {/* Impact filter */}
-        <select
-          value={filterImpact || ""}
-          onChange={(e) => {
-            const newParams = new URLSearchParams(searchParams);
-            if (e.target.value) {
-              newParams.set("impact", e.target.value);
-            } else {
-              newParams.delete("impact");
-            }
-            setSearchParams(newParams);
-          }}
-          className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
-        >
-          <option value="">All Impacts</option>
-          <option value="high">High Impact</option>
-          <option value="moderate">Moderate Impact</option>
-          <option value="low">Low Impact</option>
-          <option value="informational">Informational</option>
-        </select>
-
-        {/* Clear filters */}
+        {/* Clear */}
         {(filterCategory || filterConfidence || filterImpact) && (
           <button
             onClick={() => setSearchParams(new URLSearchParams())}
-            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            style={{
+              fontSize: "var(--text-sm)",
+              color: "var(--accent)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
           >
             Clear filters
           </button>
         )}
       </div>
 
-      {/* Results count */}
-      <div className="text-sm text-gray-500">
-        Showing {filtered.length} of {stats.total} variants
+      {/* Count */}
+      <div
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "var(--text-xs)",
+          color: "var(--text-muted)",
+          marginBottom: "var(--gap-md)",
+        }}
+      >
+        {filtered.length} of {stats.total} variants
       </div>
 
-      {/* Variant grid */}
-      {filterCategory ? (
-        // Single category view
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((variant) => (
-            <VariantCard key={variant.id} variant={variant} />
-          ))}
-        </div>
-      ) : (
-        // Grouped by category view
-        <div className="space-y-8">
-          {categories.map((category) => {
-            const categoryVariants = filtered.filter((v) => v.category === category);
-            if (categoryVariants.length === 0) return null;
-
-            return (
-              <div key={category}>
-                <div className="flex items-center gap-2 mb-4">
-                  <CategoryIcon category={category} />
-                  <h2 className="text-lg font-medium">
-                    {VARIANT_CATEGORIES[category].label}
-                  </h2>
-                  <span className="text-sm text-gray-500">
-                    ({categoryVariants.length})
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categoryVariants.map((variant) => (
-                    <VariantCard key={variant.id} variant={variant} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* DataTable */}
+      <Card padding="md">
+        <DataTable<VRow>
+          columns={columns}
+          rows={filtered as VRow[]}
+          rowKey={(r) => r.id}
+        />
+      </Card>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <Card padding="lg" style={{ textAlign: "center", color: "var(--text-muted)", marginTop: "var(--gap-md)" }}>
           No variants found matching the current filters.
-        </div>
+        </Card>
       )}
 
       {/* Confidence guide */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h3 className="font-medium mb-3">Confidence Level Guide</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <Card padding="lg" style={{ marginTop: "var(--gap-lg)" }}>
+        <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>
+          Confidence level guide
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           {confidenceLevels.map((level) => {
             const info = CONFIDENCE_LEVELS[level];
             return (
-              <div key={level} className="flex items-start gap-3">
-                <ConfidenceBadge confidence={level} />
+              <div
+                key={level}
+                style={{ display: "flex", alignItems: "flex-start", gap: 12 }}
+              >
+                <Badge
+                  tone={
+                    level === "K1" ? "vital" : level === "K2" ? "focus" : "energy"
+                  }
+                >
+                  {info.label}
+                </Badge>
                 <div>
-                  <div className="font-medium">{info.label}</div>
-                  <div className="text-gray-500">{info.description}</div>
+                  <div style={{ fontWeight: 500, fontSize: "var(--text-sm)" }}>
+                    {info.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "var(--text-sm)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    {info.description}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </Card>
 
-      {/* Verification prompt */}
-      <div className="rounded-lg border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-900/20 p-4">
-        <h3 className="font-medium text-yellow-900 dark:text-yellow-100 mb-2">
-          K3 Verification Needed
-        </h3>
-        <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
-          The following variants are K3 (inferred from protocol) and should be verified
-          through SelfDecode or genetic testing:
+      {/* K3 verification prompt */}
+      <Card
+        padding="lg"
+        accent="energy"
+        style={{ marginTop: "var(--gap-lg)" }}
+      >
+        <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
+          K3 verification needed
+        </div>
+        <p
+          style={{
+            fontSize: "var(--text-sm)",
+            color: "var(--text-secondary)",
+            margin: "0 0 12px",
+          }}
+        >
+          The following variants are K3 (inferred from protocol) and should be
+          verified through SelfDecode or genetic testing:
         </p>
-        <ul className="space-y-1 text-sm text-yellow-800 dark:text-yellow-200">
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {variants
             .filter((v) => v.confidence === "K3")
             .map((v) => (
-              <li key={v.id} className="flex items-center gap-2">
-                <span className="text-yellow-500">•</span>
-                <strong>{v.gene}</strong> - {v.clinicalImplication}
-              </li>
+              <div
+                key={v.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <span
+                  style={{ color: "var(--energy)", flexShrink: 0 }}
+                >
+                  ·
+                </span>
+                <strong style={{ color: "var(--text)" }}>{v.gene}</strong>
+                <span>— {v.clinicalImplication}</span>
+              </div>
             ))}
-        </ul>
-      </div>
+        </div>
+      </Card>
     </div>
   );
 }
