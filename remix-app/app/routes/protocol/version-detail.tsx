@@ -7,6 +7,11 @@ import {
   realSupplements,
 } from "../../lib/protocol-data";
 import { format, parseISO } from "date-fns";
+import { Card } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Crumb } from "../../components/ui/Crumb";
+import { Button } from "../../components/ui/Button";
 
 export function loader({ params }: Route.LoaderArgs) {
   const { version: versionParam } = params;
@@ -50,28 +55,46 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
+// Change type badge — brand tokens, no raw grays
 function ChangeTypeBadge({ type }: { type: string }) {
-  const styles: Record<string, string> = {
-    added: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    removed: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    dosage_changed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-    timing_changed: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-    frequency_changed: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+  const toneMap: Record<string, "vital" | "danger" | "focus" | "energy" | "neutral"> = {
+    added: "vital",
+    removed: "danger",
+    dosage_changed: "focus",
+    timing_changed: "energy",
+    frequency_changed: "neutral",
   };
 
   const labels: Record<string, string> = {
     added: "Added",
     removed: "Removed",
-    dosage_changed: "Dosage Changed",
-    timing_changed: "Timing Changed",
-    frequency_changed: "Frequency Changed",
+    dosage_changed: "Dosage changed",
+    timing_changed: "Timing changed",
+    frequency_changed: "Frequency changed",
   };
 
   return (
-    <span className={`px-2 py-0.5 text-xs font-medium rounded ${styles[type] || "bg-gray-100 text-gray-800"}`}>
+    <Badge tone={toneMap[type] || "neutral"}>
       {labels[type] || type}
-    </span>
+    </Badge>
   );
+}
+
+// Supplement tier badge
+function TierBadge({ tier }: { tier: string }) {
+  const toneMap: Record<string, "vital" | "focus" | "energy" | "neutral"> = {
+    tier1: "vital",
+    tier2: "focus",
+    tier3: "energy",
+    as_needed: "neutral",
+  };
+  const labels: Record<string, string> = {
+    tier1: "Tier 1",
+    tier2: "Tier 2",
+    tier3: "Tier 3",
+    as_needed: "As needed",
+  };
+  return <Badge tone={toneMap[tier] || "neutral"}>{labels[tier] || tier}</Badge>;
 }
 
 export default function VersionDetail({ loaderData }: Route.ComponentProps) {
@@ -79,112 +102,123 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
     loaderData;
 
   return (
-    <div className="space-y-6">
-      {/* Header with navigation */}
-      <div className="flex items-center justify-between">
-        <div>
-          <nav className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-            <Link to="/protocol/versions" className="hover:text-gray-900 dark:hover:text-gray-100">
-              Versions
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900 dark:text-gray-100">{version.version}</span>
-          </nav>
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">Protocol {version.version}</h2>
-            {isLatest && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">
-                Current
-              </span>
+    <div>
+      {/* Breadcrumb + header */}
+      <Crumb
+        items={[
+          { label: "Protocol", to: "/protocol" },
+          { label: "Versions", to: "/protocol/versions" },
+          { label: version.version },
+        ]}
+      />
+
+      <PageHeader
+        eyebrow="PROTOCOL VERSION"
+        title={`Protocol ${version.version}`}
+        sub={`Effective ${format(parseISO(version.effectiveDate), "MMMM d, yyyy")}`}
+        right={
+          <div style={{ display: "flex", gap: 8 }}>
+            {isLatest && <Badge tone="success">Current</Badge>}
+            {previousVersion && (
+              <Link to={`/protocol/versions/${previousVersion.version}`}>
+                <Button variant="secondary">
+                  {previousVersion.version}
+                </Button>
+              </Link>
+            )}
+            {nextVersion && (
+              <Link to={`/protocol/versions/${nextVersion.version}`}>
+                <Button variant="secondary">
+                  {nextVersion.version}
+                </Button>
+              </Link>
             )}
           </div>
-          <p className="text-gray-500 mt-1">
-            Effective {format(parseISO(version.effectiveDate), "MMMM d, yyyy")}
-          </p>
-        </div>
-
-        {/* Version navigation */}
-        <div className="flex gap-2">
-          {previousVersion && (
-            <Link
-              to={`/protocol/versions/${previousVersion.version}`}
-              className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              ← {previousVersion.version}
-            </Link>
-          )}
-          {nextVersion && (
-            <Link
-              to={`/protocol/versions/${nextVersion.version}`}
-              className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              {nextVersion.version} →
-            </Link>
-          )}
-        </div>
-      </div>
+        }
+      />
 
       {/* Notes */}
       {version.notes && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <h3 className="font-medium mb-2">Notes</h3>
-          <p className="text-gray-600 dark:text-gray-400">{version.notes}</p>
-        </div>
+        <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
+          <div className="zt-eyebrow" style={{ marginBottom: 8 }}>Notes</div>
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: 0 }}>
+            {version.notes}
+          </p>
+        </Card>
       )}
 
       {/* Changes */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h3 className="font-medium mb-4">Changes in this Version</h3>
+      <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
+        <div className="zt-eyebrow" style={{ marginBottom: 16 }}>Changes in this version</div>
         {changes.length === 0 ? (
-          <p className="text-gray-500 text-sm">Initial version - no changes from previous.</p>
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+            Initial version — no changes from previous.
+          </p>
         ) : (
-          <div className="space-y-4">
-            {changes.map((change) => (
+          <div>
+            {changes.map((change, i) => (
               <div
                 key={change.id}
-                className="flex items-start gap-4 pb-4 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0"
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 16,
+                  padding: "14px 0",
+                  borderBottom: i < changes.length - 1 ? "1px solid var(--border)" : "none",
+                }}
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
                     <ChangeTypeBadge type={change.changeType} />
-                    <span className="font-medium">{change.supplementName}</span>
+                    <span style={{ fontWeight: 500, color: "var(--ink)" }}>{change.supplementName}</span>
                   </div>
                   {(change.oldDosage || change.newDosage) && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
                       {change.oldDosage && (
-                        <span className="line-through text-gray-400">{change.oldDosage}</span>
+                        <span style={{ textDecoration: "line-through", color: "var(--text-faint)" }}>{change.oldDosage}</span>
                       )}
-                      {change.oldDosage && change.newDosage && <span className="mx-2">→</span>}
-                      {change.newDosage && <span className="font-medium">{change.newDosage}</span>}
+                      {change.oldDosage && change.newDosage && <span style={{ margin: "0 6px", color: "var(--text-muted)" }}>→</span>}
+                      {change.newDosage && <span style={{ fontWeight: 500, color: "var(--ink)" }}>{change.newDosage}</span>}
                     </div>
                   )}
                   {change.rationale && (
-                    <p className="text-sm text-gray-500 mt-1">{change.rationale}</p>
+                    <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", margin: "4px 0 0" }}>
+                      {change.rationale}
+                    </p>
                   )}
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Milestones */}
       {milestones.length > 0 && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <h3 className="font-medium mb-4">Milestones</h3>
-          <div className="space-y-3">
-            {milestones.map((milestone) => (
-              <div key={milestone.id} className="flex items-start gap-4">
-                <div className="text-sm text-gray-500 whitespace-nowrap">
+        <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
+          <div className="zt-eyebrow" style={{ marginBottom: 16 }}>Milestones</div>
+          <div>
+            {milestones.map((milestone, i) => (
+              <div
+                key={milestone.id}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 16,
+                  padding: "14px 0",
+                  borderBottom: i < milestones.length - 1 ? "1px solid var(--border)" : "none",
+                }}
+              >
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", whiteSpace: "nowrap", paddingTop: 2 }}>
                   {format(parseISO(milestone.date), "MMM d, yyyy")}
                 </div>
-                <div className="flex-1">
-                  <p className="text-gray-900 dark:text-gray-100">{milestone.description}</p>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: 0, color: "var(--ink)", fontSize: "var(--text-sm)" }}>{milestone.description}</p>
                   {milestone.biometricSnapshot && (
-                    <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                    <div style={{ display: "flex", gap: 16, marginTop: 8, flexWrap: "wrap" }}>
                       {Object.entries(milestone.biometricSnapshot).map(([key, value]) => (
-                        <span key={key}>
-                          {key}: <span className="font-medium">{value}</span>
+                        <span key={key} style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+                          {key}: <span style={{ fontWeight: 600, color: "var(--ink)" }}>{value}</span>
                         </span>
                       ))}
                     </div>
@@ -193,55 +227,56 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Supplements (for current version) */}
       {supplements.length > 0 && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium">Active Supplements</h3>
+        <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <div className="zt-eyebrow">Active supplements</div>
             <Link
               to="/protocol/supplements"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
             >
-              Manage all
+              Manage all →
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="zt-grid-2">
             {supplements.slice(0, 6).map((supplement) => (
               <div
                 key={supplement.id}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 12, background: "var(--surface-2)", borderRadius: "var(--radius-md)" }}
               >
                 <div>
-                  <div className="font-medium">{supplement.name}</div>
-                  <div className="text-sm text-gray-500">
-                    {supplement.dosage} {supplement.unit} • {supplement.frequency}
+                  <div style={{ fontWeight: 500, color: "var(--ink)", fontSize: "var(--text-sm)" }}>
+                    {supplement.name}
+                  </div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }}>
+                    {supplement.dosage} {supplement.unit} · {supplement.frequency}
                   </div>
                 </div>
-                <span className="text-xs px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded capitalize">
-                  {supplement.tier.replace("_", " ")}
-                </span>
+                <TierBadge tier={supplement.tier} />
               </div>
             ))}
           </div>
           {supplements.length > 6 && (
-            <p className="text-sm text-gray-500 mt-3">
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 12 }}>
               +{supplements.length - 6} more supplements
             </p>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Compare link */}
       {previousVersion && (
-        <div className="text-center">
+        <div style={{ textAlign: "center", marginTop: "var(--gap-lg)" }}>
           <Link
             to={`/protocol/compare?from=${previousVersion.version}&to=${version.version}`}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
-            Compare with {previousVersion.version}
+            <Button variant="secondary">
+              Compare with {previousVersion.version}
+            </Button>
           </Link>
         </div>
       )}
