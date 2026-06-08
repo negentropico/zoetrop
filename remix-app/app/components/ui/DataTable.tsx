@@ -34,6 +34,11 @@ export function DataTable<T extends Record<string, unknown>>({
       style={{
         overflowX: "auto",
         WebkitOverflowScrolling: "touch",
+        // min-width:0 lets this scroll container shrink below the table's
+        // minWidth (640) inside any grid/flex/block parent, so the table
+        // scrolls WITHIN its card instead of pushing the page wide at mobile
+        // (04.1-09 R2: page-overflow on /insights/genetics + /metrics detail).
+        minWidth: 0,
       }}
     >
       <table

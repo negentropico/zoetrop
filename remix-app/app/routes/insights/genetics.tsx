@@ -305,8 +305,10 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
         {filtered.length} of {stats.total} variants
       </div>
 
-      {/* DataTable */}
-      <Card padding="md">
+      {/* DataTable — minWidth:0 lets the inner scroll container shrink so the
+          640px-min table scrolls within the card instead of widening the page
+          at mobile (04.1-09 R2). */}
+      <Card padding="md" style={{ minWidth: 0 }}>
         <DataTable<VRow>
           columns={columns}
           rows={filtered as VRow[]}

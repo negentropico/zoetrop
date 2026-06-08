@@ -461,9 +461,13 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
 
       {/* Responsive: stack grid on mobile */}
       <style>{`
+        /* min-width:0 on grid children lets the DataTable scroll container
+           shrink instead of forcing the cell (and the page) wider than the
+           viewport at mobile (04.1-09 R2). */
+        .measurements-grid > * { min-width: 0; }
         @media (max-width: 760px) {
           .measurements-grid {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: minmax(0, 1fr) !important;
           }
         }
       `}</style>
