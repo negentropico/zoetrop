@@ -2,7 +2,7 @@
 
 **A platform definition / product brief.** Defines what Zoetrop becomes as it grows from a personal n=1 instrument into a multi-tenant operations platform for running full functional-health coaching practices. Architecture-deep; narrative (not a GSD/spec-kit milestone breakdown — that's a separate step).
 
-- **Repo:** `/Users/mac/Code/zoetrop` (github.com/negentropico/zoetrop) · **Live:** zoetrop.netlify.app
+- **Repo:** `/Users/mac/Code/zoetrop` (github.com/negentropico/zoetrop) · **Live:** zoetrop.vercel.app
 - **Author:** Mac Baker / Negentropico
 - **Date:** 2026-05-20
 - **Status:** Direction doc. The n=1 instrument ships today; the platform is being commercialized via its first flagship pilot — see the companion `ngtops/clients/higher/PLATFORM-FOR-HIGHER.md` (HIGHER / Tara Garrison).
@@ -27,7 +27,7 @@ A wellness dashboard that consolidates a serious self-quantifier's data — WHOO
 - **Protocol engine** — versioned protocols (P0–P6) with full change history, supplement tiers (`tier1/2/3/as_needed`), version comparison, and a FAAH-informed **120+ day cessation protocol** across four phases (`acute → stabilization → clearing → optimization`).
 - **Insights** — supplement↔metric correlations (Pearson + lag + p-value) and a genetic-variant profile surface.
 - **Imports** — WHOOP JSON + an Obsidian-vault importer (~7,480 metrics from the `#Bwell` vault). `dataSourceEnum`: manual/whoop/dexa/bloodwork/csv/vault.
-- **Stack** — React Router 7 (Remix), TS5 strict, React 19, Tailwind 4, Recharts, Neon Postgres + Drizzle, Netlify CI/CD.
+- **Stack** — React Router 7 (Remix), TS5 strict, React 19, Tailwind 4, Recharts, Neon Postgres + Drizzle, Vercel CI/CD.
 
 **The design heart:** confidence-display-under-genuine-uncertainty — the data points one way, the protocol still has to commit, and the interface has to make the gap legible without making it scary. This is the hard problem most tools refuse to take on.
 
@@ -89,7 +89,7 @@ Each surface becomes a scoped module on the spine:
 Carve the protocol-decision engine (variants + labs + metrics → confidence-graded protocol) into a **callable service/module** with a clear interface, separable from the dashboard UI, so it can serve: the practitioner console, the client app, the report generator, and (later) other tenants. This is the unit that productizes.
 
 ### 5.7 PHI / security posture
-Per-client diagnostics = **PHI**. The platform needs tenant+subject isolation (RLS), encryption at rest/in transit, access control by role, an audit trail, consent capture at intake, and BAA-readiness with vendors. New territory to gate carefully — anchored by Mac's regulated-data lineage (Basis medical-device-adjacent, LGS legal, Chorus healthcare/EHR).
+Per-client diagnostics = **PHI**. The platform needs tenant+subject isolation (RLS), encryption at rest/in transit, access control by role, an audit trail, consent capture at intake, and executed BAAs with all PHI-touching vendors. BAAs with Neon (Scale plan + HIPAA mode), Vercel (Pro + HIPAA add-on), and Anthropic (HIPAA-Ready API org) are tracked in `docs/COMPLIANCE-RUNBOOK.md` — that doc is the auditable proof-of-gate for Phases 3 and 5. New territory to gate carefully — anchored by Mac's regulated-data lineage (Basis medical-device-adjacent, LGS legal, Chorus healthcare/EHR).
 
 ### 5.8 Tech evolution
 Stay on Remix + Neon + Drizzle; add: an auth/identity layer with roles; RLS or a tenancy guard; background jobs for ingest + report-gen + correlation recompute; LLM routing for lab parsing + protocol drafting **with human review** (never model-only). Keep the engine deterministic where it can be; use the model for extraction and drafting, not final clinical judgment.
