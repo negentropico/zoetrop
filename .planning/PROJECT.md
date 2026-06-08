@@ -31,8 +31,8 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 - [ ] Promote the engine to first-class schema: `geneticVariants` + `variantProtocolMap` with `confidence` (K1–K4) + evidence/citation field
 - [ ] Lab-ingest pipeline: upload panel → LLM-assisted parse → **human review** → structured `metrics`
 - [ ] Confidence-graded lab→protocol report generation (the proof slice)
-- [ ] Wire the app to Neon at runtime (replace the static-TypeScript data layer; commit a Drizzle migrations baseline)
-- [ ] Test harness (Vitest) covering the engine (status classification, cessation phase math, Pearson) and the ingest parsers
+- [ ] Wire the app to Neon at runtime (replace the static-TypeScript data layer; commit a Drizzle migrations baseline) — *Phase 1 ✓: migrations baseline committed (DATA-03) + schema applied to Neon; runtime wiring (replace static data) remains for Phase 4*
+- [ ] Test harness (Vitest) covering the engine (status classification, cessation phase math, Pearson) and the ingest parsers — *Phase 1 ✓: engine harness done (COMP-01, 39 tests); ingest-parser tests deferred to Phase 5*
 - [ ] PHI security posture: encryption at rest/in transit, RBAC, audit trail, consent capture at intake
 
 ### Out of Scope
@@ -72,6 +72,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 | Retire spec-kit, adopt GSD | spec-kit constitution went stale (Astro-era); GSD drives phased execution | — Pending |
 | `Zoetrop` internal codename, public brand deferred | functional-health naming space is saturated; ship now, brand later | — Pending |
 | HIGHER as first M1 tenant | real practice as the proving ground; diagnostic-pilot pattern, traction before generalization | — Pending |
+| Tenancy via SET LOCAL `request.jwt.claims` + RLS (not JWK-native) | Phase 1 spike: pg_session_jwt v0.5.0 is available but the JWK-native path needs Neon's Authorize feature; SET LOCAL under a NOBYPASSRLS role is proven, role-agnostic, sufficient for M1 (D-04) | Phase 1 ✓ — drives Phase 3 |
 
 ## Evolution
 
@@ -91,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-07 after initialization*
+*Last updated: 2026-06-08 after Phase 1 (schema baseline + engine tests + auth spike) complete*
