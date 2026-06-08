@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zoetrope — redesign</title>
+<script>
+  /* Set theme before first paint to avoid a flash. */
+  (function () {
+    try {
+      var t = localStorage.getItem('zt-theme');
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+<link rel="stylesheet" href="_ds/zoetrope-design-system-48aebcac-8daa-4a26-b920-7e9f98bafa40/styles.css" />
+<style>
+  :root {
+    /* Q2: 4th status colour — deep bronze, separable from amber borderline */
+    --excess: #c98910;
+    --excess-bg: #f7edd8;
+    /* Reduced radii — crisper, more geometric frames across the redesign */
+    --radius-xs:  2px;
+    --radius-sm:  4px;
+    --radius-md:  7px;
+    --radius-lg:  10px;
+    --radius-xl:  14px;
+    --radius-2xl: 18px;
+  }
+  html, body { background: var(--paper); }
+  body { color: var(--text); }
+  html { color-scheme: light; }
+
+  /* ============================================================
+     Dark theme — remaps the warm neutral ramp + metric tints.
+     Semantic tokens (surface/text/border…) reference these, so
+     the whole app and every DS component flip automatically.
+     ============================================================ */
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    /* warm neutral ramp, inverted but kept warm (never blue-grey) */
+    --paper:   #15110f;
+    --paper-2: #1e1917;
+    --n-0:     #221d1b;  /* card surface — lifts off paper */
+    --n-50:    #15110f;
+    --n-100:   #2a2421;
+    --n-150:   #332c29;
+    --n-200:   #3e3633;
+    --n-300:   #554b47;
+    --n-400:   #7a6f6a;
+    --n-500:   #9a8e89;
+    --n-600:   #b7aba6;
+    --n-700:   #ccc1bc;
+    --n-800:   #e2d8d4;
+    --n-900:   #f2ece9;  /* = --text, warm near-white */
+    --n-950:   #fbf7f5;
+    /* --ink is a literal token (not derived from the ramp) — flip it too,
+       so active nav, the wordmark, chart lines and value ticks read light */
+    --ink:  #f2ece9;
+    --mist: #3e3633;
+
+    /* metric soft tints darkened so they sit on dark cards */
+    --energy-50:  #2c2310;
+    --energy-100: #3c2e13;
+    --vital-50:   #0d2823;
+    --vital-100:  #123a32;
+    --focus-50:   #1f1c36;
+    --focus-100:  #29254b;
+
+    --danger-bg: #3a1d1f;
+    --excess: #e0a92a;
+    --excess-bg: #362c14;
+
+    /* deeper shadows read on dark surfaces */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 28px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+    --shadow-xl: 0 24px 48px rgba(0,0,0,0.55), 0 8px 16px rgba(0,0,0,0.35);
+  }
+  html, body, .zt-topnav, .zt-bottomtab, .zt-theme-toggle {
+    transition: background-color var(--dur-base, 200ms) var(--ease-out, ease),
+                border-color var(--dur-base, 200ms) var(--ease-out, ease);
+  }
+  a { color: inherit; }
+  ::selection { background: var(--focus-100); }
+
+  /* ---- shell ---- */
+  .zt-topnav {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: saturate(1.2) blur(10px);
+    -webkit-backdrop-filter: saturate(1.2) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .zt-topnav-inner {
+    max-width: 1280px; margin: 0 auto; height: 68px; padding: 0 var(--gap-2xl);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--gap-xl);
+  }
+  .zt-topnav-links { display: flex; align-items: center; gap: var(--gap-2xl); }
+  .zt-topnav-right { display: flex; align-items: center; gap: var(--gap-2xl); }
+  .zt-theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; flex: 0 0 auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-secondary); cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+                border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .zt-theme-toggle:hover { color: var(--ink); border-color: var(--border-strong); }
+  .zt-theme-toggle:active { transform: scale(0.92); }
+  .zt-navlink {
+    position: relative; font-family: var(--font-text); font-size: var(--text-base);
+    padding: 4px 0; transition: color var(--dur-fast) var(--ease-out);
+  }
+  .zt-navlink:hover { color: var(--ink) !important; }
+
+  .zt-main { margin: 0 auto; padding: var(--gap-3xl) var(--gap-2xl) 80px; }
+
+  .zt-bottomtab { display: none; }
+  .zt-bottompad { display: none; }
+
+  /* ---- grids ---- */
+  .zt-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-lg); }
+  .zt-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-lg); }
+  .zt-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-lg); }
+
+  /* ---- table rows ---- */
+  .zt-trow { transition: background var(--dur-fast) var(--ease-out); }
+  .zt-trow:hover { background: var(--surface-sunken); }
+
+  /* metric list row hover */
+  .zt-mrow { transition: background var(--dur-fast) var(--ease-out); border-radius: var(--radius-md); }
+  .zt-mrow:hover { background: var(--surface-sunken); }
+  .zt-navrow:hover { background: var(--surface-sunken) !important; }
+
+  /* ---- responsive: collapse to app ---- */
+  @media (max-width: 980px) {
+    .zt-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .zt-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .zt-hide-mobile { display: none !important; }
+    .zt-topnav-links { display: none; }
+    .zt-codename { display: none; }
+    .zt-topnav-inner { height: 60px; padding: 0 var(--gap-lg); }
+    .zt-main { padding: var(--gap-xl) var(--gap-lg) 40px; }
+    .zt-grid-4 { grid-template-columns: repeat(2, 1fr); gap: var(--gap-md); }
+    .zt-grid-3 { grid-template-columns: 1fr; }
+    .zt-grid-2 { grid-template-columns: 1fr; }
+    .zt-bottomtab {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -4px 16px rgba(39,35,36,0.05);
+    }
+    .zt-tabitem {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      min-height: 48px; justify-content: center; text-decoration: none;
+      transition: color var(--dur-fast) var(--ease-out);
+    }
+    .zt-bottompad { display: block; height: 76px; }
+  }
+
+  /* hide focus ring on mouse, keep for keyboard (handled by base.css :focus-visible) */
+  a:focus { outline: none; }
+
+  /* trend line sweep — base/end state is fully drawn (dashoffset 0) */
+  .zt-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .zt-draw { animation: ztDraw 900ms var(--ease-out, ease) both; }
+  }
+  @keyframes ztDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React (pinned) -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<!-- Lucide icons -->
+<script src="https://unpkg.com/lucide@0.544.0/dist/umd/lucide.min.js"></script>
+<!-- Zoetrope design system bundle (plain JS) -->
+<script src="_ds/zoetrope-design-system-48aebcac-8daa-4a26-b920-7e9f98bafa40/_ds_bundle.js"></script>
+<!-- dataset (plain JS) -->
+<script src="app/data.js"></script>
+<!-- Babel for JSX -->
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="app/lib.jsx"></script>
+<script type="text/babel" src="app/screen-dashboard.jsx"></script>
+<script type="text/babel" src="app/screen-metrics.jsx"></script>
+<script type="text/babel" src="app/screen-detail.jsx"></script>
+<script type="text/babel" src="app/screen-protocol.jsx"></script>
+<script type="text/babel" src="app/screen-correlations.jsx"></script>
+<script type="text/babel" src="app/screen-import.jsx"></script>
+<script type="text/babel" src="app/screen-about.jsx"></script>
+<script type="text/babel" src="app/main.jsx"></script>
+</body>
+</html>
