@@ -41,7 +41,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-04-PLAN.md — Extract shared getMetricStatus into app/lib/metrics.ts + status-classification boundary tests [COMP-01]
+- [x] 01-04-PLAN.md — Extract shared getMetricStatus into app/lib/metrics.ts + status-classification boundary tests [COMP-01]
 - [ ] 01-05-PLAN.md — Inject now into getCessationDay + cessation boundary tests + Pearson correlation tests [COMP-01]
 
 ### Phase 2: PHI / BAA Compliance Gate
@@ -149,7 +149,7 @@ Likely plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Schema Baseline + Engine Tests + Auth Spike | 2/5 | In Progress|  |
+| 1. Schema Baseline + Engine Tests + Auth Spike | 3/5 | In Progress|  |
 | 2. PHI / BAA Compliance Gate | 0/TBD | Not started | - |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
