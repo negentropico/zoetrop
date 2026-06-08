@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 2 context gathered
-last_updated: "2026-06-08T19:45:41.194Z"
-last_activity: 2026-06-08 -- Phase 02 planning complete
+last_updated: "2026-06-08T19:57:31.343Z"
+last_activity: 2026-06-08
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 18
-  completed_plans: 13
+  completed_plans: 14
   percent: 14
 ---
 
@@ -21,19 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 2 — PHI / BAA Compliance Gate + Vercel Cutover (context gathered; ready to plan)
+**Current focus:** Phase 02 — phi-baa-compliance-gate-vercel-cutover
 
 > Note: Phase 1 was completed + verified by a concurrent session (same author) on 2026-06-08. Phase 04.1 (Design System Adoption) was completed out-of-sequence this session (roundtrip gate satisfied). The engine-first critical path resumes at Phase 2.
 > ⚠ Open follow-up: a UI regression on `/protocol` (CSS-grid blowout — right column clipped; uneven 4-up stat row) is queued as **04.1-09** gap-closure. Run `/gsd:execute-phase 04.1 --gaps-only` to address it.
 
 ## Current Position
 
-Phase: 2 (phi-baa-compliance-gate) — READY TO PLAN (CONTEXT.md exists)
-Plan: not yet planned
+Phase: 02 (phi-baa-compliance-gate-vercel-cutover) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-06-08 -- Phase 02 planning complete
+Last activity: 2026-06-08
 
-Progress: [███░░░░░░░] 29%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [███░░░░░░░] 29%
 | Phase 04.1 P06 | 338 | 3 tasks | 7 files |
 | Phase 04.1 P07 | 7m | 3 tasks | 8 files |
 | Phase 04.1-design-system-adoption P08 | 1m | 1 tasks | 1 files |
+| Phase 02 P02-02 | 133 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions affecting current work:
 - [Phase ?]: SC3 complete: protocol overview (archetype 05) + cessation (archetype 06) render in-brand with MetricRing/PhaseBar/Card/Badge
 - [Phase ?]: D-10: all 8 insights + import routes retrofit in-brand (no half-branded section)
 - [Phase ?]: D3 defer-dark superseded by D-09; warm-dark theme shipped in Phase 04.1; adoption doc updated
+- [Phase 02-02]: D-10/D-11: docs/COMPLIANCE-RUNBOOK.md scaffolded — per-vendor BAA registers (Neon/Vercel/Anthropic) + pgAudit status + Phase 3 carry-forward; no secrets
+- [Phase 02-02]: D-04: zoetrop.vercel.app is canonical deploy URL — propagated to CLAUDE.md Deployment/Naming/Database + PLATFORM.md §5.7; no netlify.app URLs remain
+- [Phase 02-02]: D-12/D-13: pgAudit auto-configured by Neon (all,-misc, log_parameter=off, superset of D-12 baseline); SELECT logging deferred to Phase 3 — carry-forward recorded in runbook (T-02-06 mitigated)
 
 ### Pending Todos
 
@@ -100,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-08T04:49:48.169Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-phi-baa-compliance-gate-vercel-cutover/02-CONTEXT.md
+Last session: 2026-06-08T19:57:31.337Z
+Stopped at: Phase 02 Plan 02 complete — compliance runbook scaffold + Netlify-to-Vercel doc updates
+Resume file: None
