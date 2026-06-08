@@ -52,7 +52,7 @@
 
 ### Compliance & Quality
 
-- [ ] **COMP-01**: Engine logic (status classification, cessation phase math with injectable `now`, Pearson correlation) has passing unit tests covering boundary cases
+- [x] **COMP-01**: Engine logic (status classification, cessation phase math with injectable `now`, Pearson correlation) has passing unit tests covering boundary cases
 - [ ] **COMP-02**: PHI infrastructure is BAA-covered (Neon, Netlify, and the chosen LLM provider) before any client PHI is written — a release gate, not a feature
 - [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` configured (parameters off)
 
@@ -101,7 +101,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DATA-03 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
-| COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Pending |
+| COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
 | COMP-02 | Phase 2 — PHI / BAA Compliance Gate | Pending |
 | COMP-03 | Phase 2 — PHI / BAA Compliance Gate | Pending |
 | AUTH-01 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
