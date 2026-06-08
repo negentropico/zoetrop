@@ -11,7 +11,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 ## Phases
 
 - [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08)
-- [ ] **Phase 2: PHI / BAA Compliance Gate** — Execute Neon + Netlify + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
+- [ ] **Phase 2: PHI / BAA Compliance Gate + Vercel Cutover** — Migrate the deploy target Netlify→Vercel, execute Neon + Vercel + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
 - [ ] **Phase 3: Identity + Tenancy Spine with RLS** — Ship Better-Auth org roles, `tenants`/`users`/`subjects` tables, add `tenantId`/`subjectId` to all 8 data tables, atomic RLS-enable+policies, SET LOCAL transaction wrapper, cross-tenant isolation tests
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
 - [ ] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip
@@ -44,18 +44,19 @@ Plans:
 - [x] 01-04-PLAN.md — Extract shared getMetricStatus into app/lib/metrics.ts + status-classification boundary tests [COMP-01]
 - [x] 01-05-PLAN.md — Inject now into getCessationDay + cessation boundary tests + Pearson correlation tests [COMP-01]
 
-### Phase 2: PHI / BAA Compliance Gate
+### Phase 2: PHI / BAA Compliance Gate + Vercel Cutover
 
-**Goal**: All BAA-required agreements are executed and verified before any client PHI enters the system — this is a hard release gate, not a feature
+**Goal**: The deploy target is migrated from Netlify to Vercel, and all BAA-required agreements are executed and verified before any client PHI enters the system — this is a hard release gate, not a feature
 **Depends on**: Phase 1
 **Requirements**: COMP-02, COMP-03
-**Risk note**: The LLM provider BAA is an open decision (see SUMMARY.md DECISION-02). OpenAI has a BAA; confirm the API tier in use is covered, or select an alternative provider with a signed BAA, before Phase 5 begins. This gate applies to the LLM provider as much as to Neon and Netlify.
+**Risk note**: The LLM provider BAA is an open decision (see SUMMARY.md DECISION-02). OpenAI has a BAA; confirm the API tier in use is covered, or select an alternative provider with a signed BAA, before Phase 5 begins. This gate applies to the LLM provider as much as to Neon and the hosting platform (Vercel). Vercel HIPAA/BAA typically requires the Enterprise tier — confirm the paid plan covers it (decision folded in 2026-06-08 when the deploy target moved Netlify→Vercel).
 **Success Criteria** (what must be TRUE):
 
   1. Neon project is on the Scale plan with HIPAA mode enabled (verified by checking project settings); a signed Neon BAA with execution date is recorded in an ops runbook
-  2. Netlify Enterprise plan is active and a signed Netlify BAA with execution date is recorded in the same runbook
+  2. The app is deployed on Vercel (Netlify retired); the Vercel plan that supports HIPAA/BAA is active and a signed Vercel BAA with execution date is recorded in the same runbook
   3. The chosen LLM provider (Phase 5 prerequisite) has a signed BAA recorded in the runbook; the provider and tier are confirmed to cover the PHI-bearing extraction use case
   4. pgAudit is enabled on the Neon project; a test query confirms audit entries record `{user, table, operation, timestamp}` and explicitly do NOT record bind-parameter values (i.e., `log_parameter = off` confirmed)
+  5. Netlify→Vercel migration is complete: React Router 7 Vercel preset configured, Netlify adapter/`netlify.toml` removed, `DATABASE_URL`(+unpooled) and auth secrets set in Vercel project env (the app already falls back `NETLIFY_DATABASE_URL || DATABASE_URL`), a successful production deploy on Vercel, and CLAUDE.md / `docs/PLATFORM.md` updated to reflect Vercel (URLs, no Netlify site id)
 
 **Plans**: TBD
 
