@@ -172,6 +172,6 @@ Likely plans:
 | 2. PHI / BAA Compliance Gate | 2/4 | In Progress|  |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
-| 4.1. Design System Adoption *(inserted)* | 8/8 | Complete   | 2026-06-08 |
+| 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
