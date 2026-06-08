@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04.1-05-PLAN.md
-last_updated: "2026-06-08T04:16:24.379Z"
+stopped_at: Completed 04.1-06-PLAN.md
+last_updated: "2026-06-08T04:25:14.352Z"
 last_activity: 2026-06-08
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 14
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 04.1 (design-system-adoption) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-06-08
 
-Progress: [████████░░] 77%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [████████░░] 77%
 | Phase 04.1 P02 | 8min | 3 tasks | 11 files |
 | Phase 04.1 P03 | 384 | 3 tasks | 16 files |
 | Phase 04.1 P05 | 356 | 3 tasks | 5 files |
+| Phase 04.1 P06 | 338 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,8 @@ Recent decisions affecting current work:
 - [Roadmap init]: DECISION-01 (Better-Auth↔Neon-JWK seam) resolved by Phase 1 spike — spike outcome gates Phase 3 build
 - [Roadmap init]: DECISION-02 (LLM provider BAA) is open — must be resolved and recorded in ops runbook during Phase 2 before Phase 5 is unblocked
 - [Phase ?]: D-10 delivered: dashboard + metrics section (archetypes 01-04) fully in-brand
+- [Phase ?]: D-10 delivered: all 7 protocol routes fully in-brand (layout, overview, cessation, versions, version-detail, supplements, compare)
+- [Phase ?]: SC3 complete: protocol overview (archetype 05) + cessation (archetype 06) render in-brand with MetricRing/PhaseBar/Card/Badge
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-08T04:16:24.375Z
-Stopped at: Completed 04.1-05-PLAN.md
+Last session: 2026-06-08T04:25:14.347Z
+Stopped at: Completed 04.1-06-PLAN.md
 Resume file: None
