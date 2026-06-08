@@ -7,6 +7,11 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   test: {
+    // Default environment: "node" — keeps engine tests (Phase 1) running in Node.
+    // Component tests (Wave 2 onward) opt into jsdom per-file via the file-level
+    // pragma:  // @vitest-environment jsdom
+    // Vitest checks the pragma before spawning the environment, so adding the
+    // pragma to a single test file is sufficient — no global default change needed.
     environment: "node",
     include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
     // Vitest 4.x exits 1 when no test files match (CI guard). The harness is
