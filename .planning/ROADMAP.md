@@ -13,7 +13,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 ## Phases
 
 - [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08, concurrent session)
-- [ ] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7)
+- [x] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7) (completed 2026-06-08)
 - [ ] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
@@ -70,11 +70,11 @@ Plans:
 
 **Wave 2** *(blocked on 02-02)*
 
-- [ ] 02-03-PLAN.md — Pilot deploy baseline: set the 4 standard Vercel env vars on the standard Pro plan + standard-tier Neon (no HIPAA add-on)
+- [x] 02-03-PLAN.md — Pilot deploy baseline: set the 4 standard Vercel env vars on the standard Pro plan + standard-tier Neon (no HIPAA add-on)
 
 **Wave 3** *(blocked on 02-01/02-02/02-03)*
 
-- [ ] 02-04-PLAN.md — Production deploy + DB connectivity check; record the Phase-7 hardening deferral; final baseline SC re-check
+- [x] 02-04-PLAN.md — Production deploy + DB connectivity check; record the Phase-7 hardening deferral; final baseline SC re-check
 
 ### Phase 3: Identity + Tenancy Scoping
 
@@ -189,7 +189,7 @@ Likely plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
-| 2. Vercel Cutover + Pilot Deploy Baseline | 2/4 | In Progress|  |
+| 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |

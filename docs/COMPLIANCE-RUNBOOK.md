@@ -21,12 +21,13 @@
 
 > Lightweight, standard-tier records for the single-user pilot. No HIPAA add-on, no BAAs (those are the Phase 7 registers below). NO SECRETS — record only that env vars are SET.
 
-- **Vercel plan:** Pro (standard — no HIPAA add-on)
-- **Neon plan:** standard (no HIPAA mode)
-- **LLM API:** standard subscription / API (no-training default)
-- **Env vars SET (Production + Preview):** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` — set: [date]
-- **Production deploy:** [date] — URL https://zoetrop.vercel.app — HTTP 200: [y/n]
-- **DB connectivity (deployed app → existing Neon project):** [confirmed [date] / pending]
+- **Vercel project:** `zoetrop` (id `prj_vmXuyOyn3sItL3BdjHZ8jtOHVjSA`) on team **negentropico** (NGT), **Pro plan — no HIPAA add-on**
+- **Neon project (verified, existing):** `orange-paper-97068012` — branch `main`, db `neondb`, role `neondb_owner` — **standard plan, no HIPAA mode** (matches the live `DATABASE_URL`)
+- **LLM API:** standard subscription / API (no-training default) — not wired until Phase 5
+- **Env vars SET (Production + Preview):** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` — set **2026-06-08** (values in Vercel env only; never in repo)
+- **Production deploy:** **2026-06-08** — URL https://zoetrop.vercel.app (alias of `zoetrop-qrxm75l1s-negentropico.vercel.app`) — **HTTP 200: y**, built with the `@vercel/react-router` preset
+- **DB connectivity (→ existing Neon project):** **confirmed 2026-06-08** — `SELECT` against `DATABASE_URL_UNPOOLED` returns **8 public tables** (M0 schema); `metrics` rows = 0 (data migration is Phase 4)
+- **Note:** the local `.env` template placeholders were filled with the real Neon connection strings + a generated `BETTER_AUTH_SECRET` (gitignored, not committed).
 
 ---
 

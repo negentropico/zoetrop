@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 02 re-scoped (pilot-first) — "Vercel Cutover + Pilot Deploy Baseline"; PHI hardening deferred to new Phase 7. Plans 02-01/02-02 done; 02-03/02-04 re-scoped to the deploy baseline (user action)
-last_updated: "2026-06-08T20:28:51.661Z"
+status: ready_to_plan
+stopped_at: Phase 02 complete (4/4) — pilot live at zoetrop.vercel.app; engine path resumes at Phase 3 (Identity + Tenancy Scoping)
+last_updated: 2026-06-08T23:13:52.522Z
 last_activity: 2026-06-08
 progress:
   total_phases: 8
-  completed_phases: 1
+  completed_phases: 3
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 18
+  percent: 38
 ---
 
 # Project State
@@ -21,25 +21,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 02 — Vercel Cutover + Pilot Deploy Baseline (re-scoped 2026-06-08; PHI hardening → Phase 7). Plans 02-01/02-02 ✓; 02-03/02-04 await the lightweight deploy (user action).
+**Current focus:** Phase 3 — Identity + Tenancy Scoping (engine path resumes here; Phase 2 complete, pilot live at https://zoetrop.vercel.app)
 
-> Note: Phase 1 was completed + verified by a concurrent session (same author) on 2026-06-08. Phase 04.1 (Design System Adoption) was completed out-of-sequence this session (roundtrip gate satisfied). The engine-first critical path resumes at Phase 2 (still mid-execution, plan 3 of 4).
-> ✓ Resolved: the `/protocol` CSS-grid blowout regression (right column clipped; uneven 4-up stat row) was fixed in **04.1-09** gap-closure — `.zt-grid-*` helpers hardened to `minmax(0,1fr)` + `min-width:0`, all 16 routes swept, `UI-01-n` ds-audit guard added. All automated gates green. **Pending:** orchestrator browser visual pass (1280px/390px × light/dark, no page overflow) — see 04.1-09-SUMMARY.
+> Note: Phases 1, 2, and 4.1 are complete. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
+> ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 02 (phi-baa-compliance-gate-vercel-cutover) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
+Phase: 3 (identity-tenancy-scoping) — NEXT (engine path)
+Plan: Not started
+Status: Ready to discuss/plan
 Last activity: 2026-06-08
 
-Progress: [█████████░] 89%
+Progress: [████░░░░░░] 38% (phases 1, 2, 4.1 complete of 8)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 16
+- Total plans completed: 20
 - Average duration: —
 - Total execution time: —
 
@@ -49,6 +49,7 @@ Progress: [█████████░] 89%
 |-------|-------|-------|----------|
 | 01 | 5 | - | - |
 | 04.1 | 9 | - | - |
+| 02 | 4 | - | - |
 
 **Recent Trend:** No data yet
 
@@ -108,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-08T20:27:37Z
-Stopped at: Phase 04.1 Plan 09 complete — grid-blowout gap-closure (3 tasks, 14 files, all automated gates green; browser visual pass pending). Phase 02 resumes at plan 3 of 4.
+Last session: 2026-06-08T23:13:52Z
+Stopped at: Phase 02 complete (4/4) — re-scoped to pilot deploy baseline; live at https://zoetrop.vercel.app on Neon orange-paper-97068012. 04.1-09 browser-verified. Engine path resumes at Phase 3.
 Resume file: None
