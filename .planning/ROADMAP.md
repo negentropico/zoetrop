@@ -36,7 +36,7 @@ Plans:
 **Wave 1**
 
 - [x] 01-01-PLAN.md — Install + configure the Vitest harness (deps, scripts, vite.config test block; empty run exits 0; package legitimacy gate)
-- [ ] 01-02-PLAN.md — Drizzle migrations baseline (as-is snapshot of 8 tables/7 enums; migrate --dry-run; prod tracking record) [DATA-03]
+- [x] 01-02-PLAN.md — Drizzle migrations baseline (as-is snapshot of 8 tables/7 enums; migrate --dry-run; prod tracking record) [DATA-03]
 - [ ] 01-03-PLAN.md — Better-Auth↔Neon-JWK / RLS spike on a disposable branch (SET LOCAL vs SET leak; verdict in 01-SPIKE-FINDINGS.md)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -149,7 +149,7 @@ Likely plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Schema Baseline + Engine Tests + Auth Spike | 1/5 | In Progress|  |
+| 1. Schema Baseline + Engine Tests + Auth Spike | 2/5 | In Progress|  |
 | 2. PHI / BAA Compliance Gate | 0/TBD | Not started | - |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |

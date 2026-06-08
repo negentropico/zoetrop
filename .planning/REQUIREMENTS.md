@@ -25,7 +25,7 @@
 
 - [ ] **DATA-01**: All route loaders read live data from Neon at runtime (no static-TypeScript data as a runtime source)
 - [ ] **DATA-02**: The owner's existing M0 data is migrated into the real database tables
-- [ ] **DATA-03**: A committed Drizzle `migrations/` baseline exists; all schema changes go through migrations
+- [x] **DATA-03**: A committed Drizzle `migrations/` baseline exists; all schema changes go through migrations
 - [ ] **DATA-04**: No PHI is present in the client bundle or static source (verified against the build output)
 - [ ] **DATA-05**: Vestigial `syncStatus`/`syncVersion` columns and `subcategory: ... as any` casts are removed
 
@@ -100,7 +100,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-03 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Pending |
+| DATA-03 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
 | COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Pending |
 | COMP-02 | Phase 2 — PHI / BAA Compliance Gate | Pending |
 | COMP-03 | Phase 2 — PHI / BAA Compliance Gate | Pending |
