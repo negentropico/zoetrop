@@ -4,12 +4,11 @@
 > `docs/PRINCIPLES.md`). How the generated **Zoetrope** brand design system
 > (`docs/design-system/`) lands in the product and binds future UI work.
 >
-> **Status:** strategy locked · incorporated into the roadmap as **Phase 4.1**
-> (inserted, gated) · **awaiting a design roundtrip** (claude.ai/design) before any
-> in-app build. This doc is deliberately **revision-tolerant** — it records the
-> *approach* and *sequence*, not pixel-level specs that the roundtrip will change.
+> **Status:** Phase 04.1 **complete** · design roundtrip delivered · brand shipped
+> in-app · binding contract in `04.1-UI-SPEC.md` · warm-dark theme live ·
+> all 16 routes retrofit. D3 "defer dark" superseded by D-09 (see §2 and §8).
 
-*Created 2026-06-07.*
+*Created 2026-06-07. Last updated 2026-06-08 (Phase 04.1 complete).*
 
 ---
 
@@ -30,7 +29,7 @@ This doc plans that application **without derailing the engine-first roadmap**.
 | D1 | Roadmap placement | **Contract now, build later.** Codify the brand as a binding UI contract; defer the build. Keeps DS adoption off the engine-first critical path. |
 | D1b | Roundtrip gate | The contract is **finalized only after** a claude.ai/design roundtrip revises the key screens. Build follows revisions. |
 | D2 | Fidelity | **Foundations + signature parts.** Adopt all tokens + the high-value signature components (MetricRing, Card, Stat, Badge, SegmentedControl); re-skin incrementally rather than a wholesale UI-kit clone. |
-| D3 | Dark mode | **Light-first; dark deferred.** The brand ships no dark tokens. Keep the dark toggle as a later task; design light faithfully without foreclosing a future warm-dark theme. |
+| D3 | Dark mode | ~~**Light-first; dark deferred.** The brand ships no dark tokens. Keep the dark toggle as a later task; design light faithfully without foreclosing a future warm-dark theme.~~ **SUPERSEDED by D-09 (Phase 04.1, 2026-06-08).** The claude.ai/design roundtrip delivered a full warm-dark token remap; dark mode was shipped in Phase 04.1 — `html[data-theme]` attribute, no-flash inline theme script, warm-dark `@theme` token block, and `ThemeToggle`. Do not relitigate. See CONTEXT D-09 and UI-SPEC § Dark Theme. |
 
 ## 3. Sequence
 
@@ -76,41 +75,49 @@ the **open design questions** the roundtrip must resolve (below).
 5. **Wordmark.** "Zoetrop" (app) vs "zoetrope." (brand). Internal codename;
    public brand deferred — flag, don't relitigate.
 
-## 6. Integration architecture (engineering recommendation)
+## 6. Integration architecture (as-built — Phase 04.1)
+
+> *This section was originally a recommendation; it now records what shipped.*
 
 The DS ships **raw CSS-variable tokens** + **inline-style `.jsx` components**.
-The app is **React Router 7 + TS strict + Tailwind 4 (`@theme`)**. Recommended
-path:
+The app is **React Router 7 + TS strict + Tailwind 4 (`@theme`)**. Implemented
+path (D-01, D-02, D-03 from CONTEXT):
 
-**Token bridge into Tailwind `@theme` + port the signature components to typed TSX.**
+**Token bridge into Tailwind `@theme` inline + signature components ported to typed TSX.**
 
-- Import the DS token files (`tokens/colors.css`, `typography.css`,
-  `spacing.css`, `base.css`) and **map them into Tailwind's `@theme`** so the
-  app keeps writing utilities (`bg-paper`, `text-ink`, `font-display`,
-  `shadow-warm-md`, `rounded-frame`, `text-vital`) that now resolve to brand
-  tokens. This preserves the app's existing utility-class paradigm — re-skinning
-  becomes class swaps, not a rewrite.
-- **Port** the signature components (MetricRing, Card, Stat, Badge,
-  SegmentedControl) from inline-style `.jsx` to **typed Tailwind TSX** under
-  `app/components/ui/`. Don't ship the `.jsx`/`_ds_bundle.js` runtime into a
-  TS-strict app.
-- Keep `docs/design-system/` as the **source of truth**; the app consumes a
-  bridged subset. Document the token→Tailwind mapping so drift is visible.
+- DS token files (`tokens/colors.css`, `typography.css`, `spacing.css`,
+  `base.css`) are **mapped into Tailwind's `@theme inline`** in `app/app.css`.
+  The app writes utilities (`bg-paper`, `text-ink`, `font-display`,
+  `shadow-warm-md`, `rounded-frame`, `text-vital`) that resolve to brand tokens.
+  Re-skinning = class swaps, not a rewrite. (D-01)
+- Signature components (MetricRing, Card, Stat, Badge, SegmentedControl,
+  DataTable, PhaseBar, UploadDropzone) are **ported to typed Tailwind TSX** under
+  `app/components/ui/` and shell components (TopNav, BottomTab, MobileNavDrawer)
+  under `app/components/shell/`. The `.jsx`/`_ds_bundle.js` runtime was not
+  shipped into the TS-strict app. (D-02)
+- **No shadcn** — tooling = Tailwind `@theme` + hand-ported TSX only. (D-03)
+  `docs/design-system/` stays the source of truth; the app consumes a bridged
+  subset. Token→Tailwind mapping is documented in `app/app.css` comments so
+  drift is visible.
+- **All 16 routes** retrofitted — no half-branded app. (D-10)
+- **Warm-dark theme shipped** — `html[data-theme]` attribute, no-flash inline
+  script (reads `localStorage` `zt-theme`, falls back to `prefers-color-scheme`),
+  warm-dark `@theme` token block, `ThemeToggle`. (D-09; see §8 note.)
 
-*Rejected:* shipping `styles.css` + the `.jsx` components as-is (paradigm clash
-with Tailwind, `.jsx` in TS-strict, two styling systems coexisting).
+*Rejected at planning:* shipping `styles.css` + the `.jsx` components as-is
+(paradigm clash with Tailwind, `.jsx` in TS-strict, two styling systems
+coexisting). This rejection held and shaped the implementation.
 
-### Foundations pass — what's safe to land vs defer
-- **Safe now (stable brand tokens, roundtrip-independent):** fonts
-  (Inter → Space Grotesk/Hanken/Space Mono), warm neutral ramp (Paper/Mist/Ink),
-  the 3 family ramps, spacing/radii/shadows/motion, `base.css` helpers
-  (`.zt-eyebrow`, `.zt-readout`, tabular nums, warm focus ring).
-- **Defer to post-roundtrip (the open questions):** the 4-status palette
-  wiring, the category color/icon system, the responsive nav pattern.
-
-Recommendation: land foundations and retrofit **together** in one coherent GSD
-phase after the roundtrip, to avoid touching screens twice — unless early visual
-momentum is wanted, in which case the "safe now" subset can ship independently.
+### Foundations — as landed
+- **Landed (Phase 04.1):** fonts (Inter → Space Grotesk/Hanken/Space Mono),
+  warm neutral ramp (Paper/Mist/Ink), 3 family ramps, spacing/radii/shadows/
+  motion, `base.css` helpers (`.zt-eyebrow`, `.zt-readout`, tabular nums, warm
+  focus ring), 4-status palette (optimal/borderline/deficient/excess + excess
+  token D-06), category icon system (Lucide, D-05), responsive nav (TopNav +
+  BottomTab at ~760px breakpoint, D-07), warm-dark theme (D-09).
+- **Still deferred:** replacing substitution-flagged Google-Font stand-ins with
+  licensed grotesque; swapping placeholder clinical reference ranges for real
+  assay ranges (data task); Lucide → licensed icon set.
 
 ## 7. How this plugs into `.planning` / the roadmap
 
@@ -156,7 +163,10 @@ revisions return.
 
 ## 8. Out of scope / deferred
 
-- Warm **dark theme** (no brand tokens yet) — later task (D3).
+- ~~Warm **dark theme** (no brand tokens yet) — later task (D3).~~ **SHIPPED in
+  Phase 04.1** — the claude.ai/design roundtrip delivered full warm-dark tokens
+  and the `ThemeToggle`; D3 "defer dark" is superseded (see D-09 in CONTEXT and
+  the updated D3 row in §2 above). Dark mode is live.
 - Marketing/poster surfaces, slides, the mobile-app 393px kit as a *product*
   direction (vs responsive endpoint) — pending Q3/Q4 resolution.
 - The public **brand/wordmark** decision — deferred per project naming policy.
