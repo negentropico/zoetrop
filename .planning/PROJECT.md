@@ -33,7 +33,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 - [ ] Confidence-graded lab→protocol report generation (the proof slice)
 - [ ] Wire the app to Neon at runtime (replace the static-TypeScript data layer; commit a Drizzle migrations baseline) — *Phase 1 ✓: migrations baseline committed (DATA-03) + schema applied to Neon; runtime wiring (replace static data) remains for Phase 4*
 - [ ] Test harness (Vitest) covering the engine (status classification, cessation phase math, Pearson) and the ingest parsers — *Phase 1 ✓: engine harness done (COMP-01, 39 tests); ingest-parser tests deferred to Phase 5*
-- [ ] PHI security posture: encryption at rest/in transit, RBAC, audit trail, consent capture at intake
+- [ ] PHI security posture: encryption at rest/in transit, RBAC, audit trail, consent capture at intake — *full hardening + BAAs deferred to Phase 7 (pre-client gate); single-user pilot uses standard-tier infra (2026-06-08 re-scope)*
 
 ### Out of Scope
 
@@ -57,7 +57,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 
 - **Tech stack**: React Router 7 (Remix) + Neon Postgres + Drizzle + Netlify, TS strict — locked. Add on top: auth/identity, RLS or tenancy guard, background jobs (ingest/report/correlation), LLM routing. (PRINCIPLES)
 - **Type safety**: strict mode, no `any` — non-negotiable. (PRINCIPLES III)
-- **Security / PHI**: per-client diagnostics are PHI → tenant+subject isolation via RLS, encryption, RBAC, audit trail, consent, BAA-readiness. Gate explicitly; do not hand-wave. (PLATFORM §5.7)
+- **Security / PHI**: per-client diagnostics are PHI → tenant+subject isolation via RLS, encryption, RBAC, audit trail, consent, BAA. **Pilot-first (2026-06-08):** the single-user pilot runs on standard-tier infra + the subscription API; full hardening (RLS enforcement + Neon/Vercel/LLM BAAs + pgAudit verification) is gated at **Phase 7 — before the first external client's PHI**. Gate explicitly; do not hand-wave. (PLATFORM §5.7)
 - **LLM usage**: extraction + drafting only, never final clinical judgment; human review in the loop always.
 - **Engine integrity**: confidence-under-uncertainty (K1–K4) stays a first-class, visible concept in schema and UI.
 - **Single-operator**: must be buildable solo + AI-augmented; named subcontractors only when needed.
@@ -73,6 +73,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 | `Zoetrop` internal codename, public brand deferred | functional-health naming space is saturated; ship now, brand later | — Pending |
 | HIGHER as first M1 tenant | real practice as the proving ground; diagnostic-pilot pattern, traction before generalization | — Pending |
 | Tenancy via SET LOCAL `request.jwt.claims` + RLS (not JWK-native) | Phase 1 spike: pg_session_jwt v0.5.0 is available but the JWK-native path needs Neon's Authorize feature; SET LOCAL under a NOBYPASSRLS role is proven, role-agnostic, sufficient for M1 (D-04) | Phase 1 ✓ — drives Phase 3 |
+| Pilot-first: defer PHI hardening to a pre-client gate (Phase 7) | Initial work is single-user pilot on the owner's own data (n=1); HIPAA/BAA obligations attach to *others'* PHI. Build Phases 2–6 on standard-tier infra + the subscription API; add tenant/subject columns in Phase 3 so the RLS retrofit is non-breaking | 2026-06-08 — re-scoped Phase 2 → "Vercel Cutover + Pilot Deploy Baseline", decoupled the gate from Phases 3/5, added Phase 7 |
 
 ## Evolution
 

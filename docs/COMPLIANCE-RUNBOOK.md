@@ -6,6 +6,30 @@
 
 ---
 
+## ⏸ Deferral Decision (2026-06-08) — READ FIRST
+
+**The PHI compliance hardening below is DEFERRED.** Per the pilot-first re-scope, initial work is a single-user pilot / prototyping on the **owner's own** data (n=1). HIPAA/BAA obligations attach when processing *other people's* identifiable health data — not yet the case.
+
+- **Current posture (pilot):** standard-tier Neon + standard Vercel **Pro** (no HIPAA add-on) + the **standard subscription LLM API** (no-training default, limited retention). App-level hygiene: secrets in env, server-only DB access (`*.server.ts`), parameterized Drizzle queries, HTTPS + auth.
+- **What is deferred:** Neon Scale + HIPAA-mode (irreversible) + Neon BAA · Vercel HIPAA add-on + Vercel BAA · LLM-provider HIPAA-Ready/BAA · pgAudit verification · RLS enable+policies + cross-tenant isolation · PHI read-access (SELECT) logging.
+- **Gate (when it becomes required):** **before the first external client's PHI** is stored/processed (multi-client / HIGHER production launch) → tracked as **Phase 7 (PHI Compliance Hardening — Pre-Client Gate)** in `.planning/ROADMAP.md`.
+- **How to use this file:** the per-vendor registers below are the **execution checklist for Phase 7** — fill them in *then*, not now. (Not legal advice — confirm the exact trigger with counsel before any multi-client launch.)
+
+---
+
+## Pilot Deploy Baseline (Phase 2 — active)
+
+> Lightweight, standard-tier records for the single-user pilot. No HIPAA add-on, no BAAs (those are the Phase 7 registers below). NO SECRETS — record only that env vars are SET.
+
+- **Vercel plan:** Pro (standard — no HIPAA add-on)
+- **Neon plan:** standard (no HIPAA mode)
+- **LLM API:** standard subscription / API (no-training default)
+- **Env vars SET (Production + Preview):** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` — set: [date]
+- **Production deploy:** [date] — URL https://zoetrop.vercel.app — HTTP 200: [y/n]
+- **DB connectivity (deployed app → existing Neon project):** [confirmed [date] / pending]
+
+---
+
 ## Neon BAA
 
 - **Plan:** Scale
@@ -64,7 +88,7 @@
 >
 > **D-03 compliance:** The Messages API provides zero-data-retention (ZDR-eligible) and a contractual no-training-on-customer-data guarantee. HIPAA readiness is an alternative to ZDR; both satisfy D-03.
 >
-> **Phase 5 gate:** Phase 5 (lab ingest / LLM extraction) is BLOCKED until this BAA is signed and recorded here.
+> **Gate:** This BAA is part of **Phase 7** (pre-client hardening). Single-user/owner lab extraction may use the standard subscription API; extraction of any *external client's* PHI is BLOCKED until this BAA is signed and recorded here.
 
 ---
 
@@ -104,12 +128,11 @@
 
 ---
 
-## Phase 3 Carry-Forward
+## Phase 3 Carry-Forward → now Phase 7
 
-- **PHI read-access (SELECT) audit logging:** Deferred to Phase 3 (D-13)
-- **Rationale:** No client PHI tables exist until Phase 3 introduces the `tenantId`/`subjectId` schema and RLS retrofit. Configuring object-level SELECT logging before those tables exist adds noise without auditing anything meaningful. Baseline WRITE/DDL logging (configured by Neon HIPAA auto-setup above) is sufficient for Phase 2.
-- **Required action in Phase 3:** Configure object-level pgAudit for SELECT on PHI tables after the RLS retrofit (`tenantId`/`subjectId` columns added to `metrics`, `protocolVersions`, `protocolChanges`, `milestones`, `supplements`, `supplementLog`, `correlations`, `cessationLog`). This requires a Neon Support request to enable object-level audit logging on specific tables.
-- **Phase 3 gate:** The Phase 3 RLS/tenancy sprint should include a task: "Enable SELECT audit logging on PHI tables via Neon Support (carry-forward from Phase 2 D-13)."
+- **PHI read-access (SELECT) audit logging:** Deferred to **Phase 7** (was D-13 / Phase 3; moved with the RLS retrofit in the 2026-06-08 pilot-first re-scope)
+- **Rationale:** Phase 3 adds the `tenantId`/`subjectId` *columns* but not RLS; no external-client PHI exists until the pre-client gate. Object-level SELECT logging belongs with the Phase 7 RLS enable, not before.
+- **Required action (Phase 7):** Configure object-level pgAudit for SELECT on PHI tables alongside the RLS retrofit (`tenantId`/`subjectId` on `metrics`, `protocolVersions`, `protocolChanges`, `milestones`, `supplements`, `supplementLog`, `correlations`, `cessationLog`) — a Neon Support request enables object-level audit logging on specific tables.
 
 > **This carry-forward is recorded here to prevent it from being silently dropped (D-13, T-02-06 mitigation).**
 

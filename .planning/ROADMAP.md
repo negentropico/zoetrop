@@ -4,19 +4,22 @@
 
 M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platform that produces a confidence-graded lab→protocol report a real practitioner can hand a real client. The build order is constrained by hard dependencies: every phase unblocks the next. Phases 1–3 are enabling layers (no end-user vertical slice delivered until Phase 3 completes). Phases 4–6 deliver the functional stack: live DB reads, lab ingest pipeline, and the proof-slice report generation. Phase 4.1 (inserted) applies the Zoetrope design system after the data layer goes live, so the UI of Phases 5–6 ships in-brand rather than being reskinned afterward.
 
+**Pilot-first re-scope (2026-06-08):** Initial work is single-user pilot / prototyping on the owner's own data (n=1). PHI compliance *hardening* — HIPAA-mode + Neon/Vercel/LLM BAAs, pgAudit verification, and RLS enforcement/isolation — is deferred to **Phase 7 (PHI Compliance Hardening — Pre-Client Gate)**, which triggers before the first external client's PHI (multi-client / HIGHER launch). Phases 2–6 build and run on standard-tier infra + the standard subscription API; the tenancy *schema* (tenant/subject columns) is added in Phase 3 so the later RLS retrofit is non-breaking.
+
 ## Milestones
 
-- 🚧 **M1 — Engine-First Platform** — Phases 1–6 + inserted 4.1 (in progress)
+- 🚧 **M1 — Engine-First Platform** — Phases 1–6 + inserted 4.1, gated for multi-client by Phase 7 (in progress)
 
 ## Phases
 
 - [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08, concurrent session)
-- [ ] **Phase 2: PHI / BAA Compliance Gate + Vercel Cutover** — Migrate the deploy target Netlify→Vercel, execute Neon + Vercel + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
-- [ ] **Phase 3: Identity + Tenancy Spine with RLS** — Ship Better-Auth org roles, `tenants`/`users`/`subjects` tables, add `tenantId`/`subjectId` to all 8 data tables, atomic RLS-enable+policies, SET LOCAL transaction wrapper, cross-tenant isolation tests
+- [ ] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7)
+- [ ] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
 - [ ] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports
+- [ ] **Phase 7: PHI Compliance Hardening — Pre-Client Gate** *(deferred hardening)* — Before the first external client's PHI: Neon HIPAA-mode + BAA, Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit verification, atomic RLS enable+policies + SET LOCAL wrapper + cross-tenant isolation tests, and PHI read-access (SELECT) logging — the hard release gate for multi-client launch
 
 ## Phase Details
 
@@ -44,58 +47,57 @@ Plans:
 - [x] 01-04-PLAN.md — Extract shared getMetricStatus into app/lib/metrics.ts + status-classification boundary tests [COMP-01]
 - [x] 01-05-PLAN.md — Inject now into getCessationDay + cessation boundary tests + Pearson correlation tests [COMP-01]
 
-### Phase 2: PHI / BAA Compliance Gate + Vercel Cutover
+### Phase 2: Vercel Cutover + Pilot Deploy Baseline
 
-**Goal**: The deploy target is migrated from Netlify to Vercel, and all BAA-required agreements are executed and verified before any client PHI enters the system — this is a hard release gate, not a feature
+**Goal**: The deploy target is migrated Netlify→Vercel and a live single-user production deploy is running on standard-tier infra — the pilot/prototyping baseline. Full PHI/BAA/HIPAA hardening is intentionally deferred to **Phase 7** (the pre-client gate), since the only data in scope is the owner's own (n=1).
 **Depends on**: Phase 1
-**Requirements**: COMP-02, COMP-03
-**Risk note**: The LLM provider BAA is an open decision (see SUMMARY.md DECISION-02). OpenAI has a BAA; confirm the API tier in use is covered, or select an alternative provider with a signed BAA, before Phase 5 begins. This gate applies to the LLM provider as much as to Neon and the hosting platform (Vercel). Vercel HIPAA/BAA typically requires the Enterprise tier — confirm the paid plan covers it (decision folded in 2026-06-08 when the deploy target moved Netlify→Vercel).
+**Requirements**: (infra/ops — no v1 requirement closes here; COMP-02/COMP-03 hardening moved to Phase 7)
+**Re-scope note (2026-06-08)**: Originally a hard PHI/BAA gate. Re-scoped to a lightweight Vercel cutover + pilot deploy baseline; the heavy compliance work (Neon HIPAA-mode, Neon/Vercel/LLM BAAs, pgAudit verification) is deferred to Phase 7 and triggers before the first external client's PHI. When that gate arrives, Vercel HIPAA is a self-serve **Pro add-on** (not Enterprise).
 **Success Criteria** (what must be TRUE):
 
-  1. Neon project is on the Scale plan with HIPAA mode enabled (verified by checking project settings); a signed Neon BAA with execution date is recorded in an ops runbook
-  2. The app is deployed on Vercel (Netlify retired); the Vercel plan that supports HIPAA/BAA is active and a signed Vercel BAA with execution date is recorded in the same runbook
-  3. The chosen LLM provider (Phase 5 prerequisite) has a signed BAA recorded in the runbook; the provider and tier are confirmed to cover the PHI-bearing extraction use case
-  4. pgAudit is enabled on the Neon project; a test query confirms audit entries record `{user, table, operation, timestamp}` and explicitly do NOT record bind-parameter values (i.e., `log_parameter = off` confirmed)
-  5. Netlify→Vercel migration is complete: React Router 7 Vercel preset configured, Netlify adapter/`netlify.toml` removed, `DATABASE_URL`(+unpooled) and auth secrets set in Vercel project env (the app already falls back `NETLIFY_DATABASE_URL || DATABASE_URL`), a successful production deploy on Vercel, and CLAUDE.md / `docs/PLATFORM.md` updated to reflect Vercel (URLs, no Netlify site id)
+  1. ✓ React Router 7 Vercel preset configured, `netlify.toml` removed, `drizzle-kit` prefers the unpooled Neon URL; `npm run build` + `npm test` green (done — 02-01)
+  2. ✓ `CLAUDE.md` + `docs/PLATFORM.md` updated to Vercel; `docs/COMPLIANCE-RUNBOOK.md` scaffolded as the Phase-7 hardening checklist (done — 02-02)
+  3. Standard env vars (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`) set in the Vercel project on the **standard Pro plan** (no HIPAA add-on yet), pointing at the existing standard-tier Neon project
+  4. A successful production deploy returns HTTP 200 at `https://zoetrop.vercel.app` with confirmed DB connectivity to the existing Neon project; Netlify is retired
+  5. The deferral of PHI/BAA/HIPAA hardening to Phase 7 (trigger: before the first external client's PHI) is recorded in `docs/COMPLIANCE-RUNBOOK.md`
 
 **Plans**: 4 plans in 3 waves
 Plans:
 **Wave 1**
 
-- [x] 02-01-PLAN.md — Track A: Vercel preset cutover + Netlify removal + drizzle unpooled URL (build/shell Wave-0 asserts) [COMP-02]
-- [x] 02-02-PLAN.md — Track A: scaffold docs/COMPLIANCE-RUNBOOK.md + update CLAUDE.md/docs/PLATFORM.md to Vercel [COMP-02, COMP-03]
+- [x] 02-01-PLAN.md — Track A: Vercel preset cutover + Netlify removal + drizzle unpooled URL (build/shell Wave-0 asserts)
+- [x] 02-02-PLAN.md — Track A: scaffold docs/COMPLIANCE-RUNBOOK.md + update CLAUDE.md/docs/PLATFORM.md to Vercel
 
-**Wave 2** *(blocked on 02-02 — records into the runbook)*
+**Wave 2** *(blocked on 02-02)*
 
-- [ ] 02-03-PLAN.md — Track B: Neon Scale+HIPAA+BAA, Vercel HIPAA add-on+BAA+env vars, Anthropic BAA kickoff (long pole) [COMP-02]
+- [ ] 02-03-PLAN.md — Pilot deploy baseline: set the 4 standard Vercel env vars on the standard Pro plan + standard-tier Neon (no HIPAA add-on)
 
 **Wave 3** *(blocked on 02-01/02-02/02-03)*
 
-- [ ] 02-04-PLAN.md — Track B: production Vercel deploy + DB connectivity, pgAudit sample via Neon Support, final gate review [COMP-02, COMP-03]
+- [ ] 02-04-PLAN.md — Production deploy + DB connectivity check; record the Phase-7 hardening deferral; final baseline SC re-check
 
-### Phase 3: Identity + Tenancy Spine with RLS
+### Phase 3: Identity + Tenancy Scoping
 
-**Goal**: The platform has a working identity layer (Better-Auth org roles), tenant/subject scoping on all data tables, atomic RLS policies enforced via SET LOCAL, and automated proof that cross-tenant isolation holds — the load-bearing security contract for all subsequent phases
-**Depends on**: Phase 2 (PHI gate must be verified before writing any multi-subject data to Neon)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, TEN-01, TEN-02, TEN-03, TEN-04
+**Goal**: The platform has a working identity layer (Better-Auth email/password + `owner`/`practitioner`/`client` roles) and a tenancy data model — `tenantId`/`subjectId` columns on all 8 tables (backfilled with the owner's IDs), a composite index, and per-subject protocol-version uniqueness. The schema is multi-tenant-ready; **RLS enforcement and cross-tenant isolation proofs are deferred to Phase 7** so the single-user pilot is not blocked.
+**Depends on**: Phase 2 (live Vercel deploy baseline)
+**Requirements**: AUTH-01, AUTH-02, TEN-01, TEN-04
+**Deferred to Phase 7**: atomic RLS enable+policies, the `withTenantDb` SET LOCAL transaction wrapper + pool-leak test, the cross-tenant isolation test (TEN-02, TEN-03), practitioner subject-scoping (AUTH-03), and the immutable auth/access audit log (AUTH-04). Until then, data is scoped at the application layer (owner = sole tenant).
 **Success Criteria** (what must be TRUE):
 
   1. A user can sign in with email + password via Better-Auth and stay signed in across browser sessions; their role (`owner` / `practitioner` / `client`) is readable from the session and gates route access
   2. All 8 existing data tables (`metrics`, `protocolVersions`, `protocolChanges`, `milestones`, `supplements`, `supplementLog`, `correlations`, `cessationLog`) have non-nullable `tenantId` and `subjectId` columns, backfilled with the owner's IDs, with a composite index on `(tenant_id, subject_id)` confirmed via `\d+ table_name`
-  3. Cross-tenant isolation test passes: a script authenticating as Tenant A writes a row to `metrics`, then authenticates as Tenant B and confirms zero rows returned — the test is committed to the test suite and runs in CI
-  4. Every DB interaction that touches tenant-scoped data runs inside `withTenantDb(ctx, fn)` which issues `SET LOCAL app.tenant_id` and `SET LOCAL app.subject_id` as the first statements in a `db.transaction()` wrapper; a pool-reuse integration test confirms no context leaks across sequential requests
-  5. Protocol version lineage is unique on `(tenantId, subjectId, version)` — the old global `UNIQUE(version)` constraint is replaced; `pg_indexes` confirms the new constraint
+  3. Protocol version lineage is unique on `(tenantId, subjectId, version)` — the old global `UNIQUE(version)` constraint is replaced; `pg_indexes` confirms the new constraint
 
 **Plans**: TBD
 
 ### Phase 4: Static-to-DB Data Layer Migration
 
 **Goal**: All route loaders read live data from Neon; the owner's M0 data is in the real tables; no PHI exists in TypeScript source files or the client bundle; schema is clean of vestiges
-**Depends on**: Phase 3 (tenancy spine + RLS must be in place before any data is migrated into tenant-scoped tables)
+**Depends on**: Phase 3 (tenancy columns + identity must be in place before data migrates into tenant-scoped tables). RLS enforcement lands in Phase 7 — in the interim Phase 4 scopes reads at the application layer (`WHERE tenant_id/subject_id`).
 **Requirements**: DATA-01, DATA-02, DATA-04, DATA-05
 **Success Criteria** (what must be TRUE):
 
-  1. Every route loader in the app calls `withTenantDb(ctx, fn)` — no route reads from `real-data.ts`, `protocol-data.ts`, or `seed-data.ts` at runtime; a CI lint rule blocks direct imports of `*-data.ts` from non-seed contexts
+  1. Every route loader reads live data from Neon scoped to the owner's tenant/subject (application-level `WHERE` in the interim; wrapped by `withTenantDb` once RLS lands in Phase 7) — no route reads from `real-data.ts`, `protocol-data.ts`, or `seed-data.ts` at runtime; a CI lint rule blocks direct imports of `*-data.ts` from non-seed contexts
   2. The owner's M0 metrics, protocol versions, supplements, cessation log, and correlations are present as rows in Neon under the owner's `tenantId`/`subjectId`; the dashboard renders the same data as M0 (visual spot-check passes)
   3. `grep -r "real-data\|protocol-data\|seed-data" remix-app/app/routes/` returns no matches; the Netlify function bundle output contains no PHI strings (verified via `grep` against the build artifact)
   4. Vestigial `syncStatus`/`syncVersion` columns are absent from all tables (confirmed via schema introspection); all `subcategory: ... as any` casts are replaced with typed alternatives; `tsc --noEmit` passes with zero errors
@@ -133,9 +135,9 @@ Likely plans:
 ### Phase 5: Lab Ingest Pipeline
 
 **Goal**: A practitioner can upload a lab PDF, the system asynchronously extracts structured values with LLM assistance, those values are grounded and range-validated before review, the practitioner reviews fields side-by-side with the source document and approves or rejects each, and only approved metrics are written to the subject's record with full audit logging — consent is captured at intake
-**Depends on**: Phase 4 (live DB + tenant-scoped tables required); Phase 2 BAA gate (LLM provider BAA must be in place before PHI is sent to the model); Phase 4.1 (the upload/review UI is built against its `UI-SPEC.md`)
+**Depends on**: Phase 4 (live DB + tenant-scoped tables required); Phase 4.1 (the upload/review UI is built against its `UI-SPEC.md`). NOTE: client-PHI extraction via the LLM is gated by the **Phase 7** LLM BAA; single-user/owner lab extraction may run on the standard subscription API in the interim.
 **Requirements**: LAB-01, LAB-02, LAB-03, LAB-04, LAB-05, LAB-06
-**Risk note**: The LLM provider BAA is DECISION-02 from SUMMARY.md — it must be resolved and verified (Phase 2) before any extraction job sends PHI to an LLM API. If the provider BAA is not in place, Phase 5 is blocked.
+**Risk note**: The LLM provider BAA (DECISION-02) is deferred to **Phase 7** (pre-client gate). Single-user/owner lab extraction may use the standard subscription API (no-training default); extraction of any *external client's* PHI is blocked until the Phase 7 LLM BAA is signed and recorded.
 **Success Criteria** (what must be TRUE):
 
   1. A practitioner can upload a lab PDF via `/ingest/upload`; the action immediately returns a `processing` state (the upload does not block on LLM extraction); a `labDocuments` row with `status = 'uploaded'` is committed within 2 seconds of the POST completing
@@ -164,14 +166,33 @@ Likely plans:
 **UI hint**: yes
 **Plans**: TBD
 
+### Phase 7: PHI Compliance Hardening — Pre-Client Gate (DEFERRED HARDENING)
+
+**Goal**: Before the first external client's identifiable health data enters the system, the full PHI compliance envelope is executed and proven: HIPAA-mode + signed BAAs across every subprocessor (Neon, Vercel, LLM provider), pgAudit verification, atomic RLS enable+policies with SET LOCAL enforcement + a cross-tenant isolation proof, and PHI read-access (SELECT) logging. A hard release gate for multi-client / HIGHER production — not a feature.
+**Gate / Trigger**: Activated before onboarding the first non-owner client (multi-client production launch). Phases 2–6 and the single-user pilot run on standard-tier infra without it. (Re-scope 2026-06-08 — see PROJECT.md Key Decisions; confirm the exact legal trigger with counsel.)
+**Depends on**: Phases 3 (tenancy columns + identity), 4 (live DB), 5 (lab ingest), 6 (reports) — the feature stack is built single-user first, then hardened for external clients here.
+**Requirements**: COMP-02, COMP-03, TEN-02, TEN-03, AUTH-03, AUTH-04
+**Success Criteria** (what must be TRUE):
+
+  1. Neon on the Scale plan with HIPAA mode enabled on the EXISTING project (verified project ID matches the live `DATABASE_URL`); a signed Neon BAA with date recorded in `docs/COMPLIANCE-RUNBOOK.md`
+  2. Vercel HIPAA add-on (self-serve Pro add-on) active + a signed Vercel BAA recorded
+  3. The chosen LLM provider has a signed HIPAA-Ready/BAA covering the extraction use case (ZDR + no-training, D-03), recorded; client-PHI extraction unblocked
+  4. pgAudit verified: a Neon Support sample proves entries record `{user, table, operation, timestamp}` and NOT bind parameters (`log_parameter = off`), recorded in the runbook
+  5. Atomic RLS enable+policies on all 8 tenant-scoped tables; every tenant-scoped DB interaction runs inside `withTenantDb(ctx, fn)` issuing `SET LOCAL app.tenant_id` / `app.subject_id`; a pool-reuse test confirms no context leak; a committed cross-tenant isolation test (Tenant A writes, Tenant B reads zero) runs in CI
+  6. PHI read-access (SELECT) object-level audit logging enabled on PHI tables via Neon Support (the Phase-3-carry-forward recorded in the runbook)
+  7. A practitioner can access only the subjects assigned to them within their tenant (AUTH-03); auth/access events are written to an immutable audit log (AUTH-04)
+
+**Plans**: TBD — plan when approaching multi-client launch
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
-| 2. PHI / BAA Compliance Gate | 2/4 | In Progress|  |
-| 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
+| 2. Vercel Cutover + Pilot Deploy Baseline | 2/4 | In Progress|  |
+| 3. Identity + Tenancy Scoping | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
+| 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |

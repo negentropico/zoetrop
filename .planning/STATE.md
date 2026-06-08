@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 04.1 Plan 09 complete — grid-blowout gap-closure (CSS/markup-only); Phase 02 still mid-execution (plan 3 of 4)
+stopped_at: Phase 02 re-scoped (pilot-first) — "Vercel Cutover + Pilot Deploy Baseline"; PHI hardening deferred to new Phase 7. Plans 02-01/02-02 done; 02-03/02-04 re-scoped to the deploy baseline (user action)
 last_updated: "2026-06-08T20:28:51.661Z"
 last_activity: 2026-06-08
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 1
   total_plans: 18
   completed_plans: 16
@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 02 — phi-baa-compliance-gate-vercel-cutover
+**Current focus:** Phase 02 — Vercel Cutover + Pilot Deploy Baseline (re-scoped 2026-06-08; PHI hardening → Phase 7). Plans 02-01/02-02 ✓; 02-03/02-04 await the lightweight deploy (user action).
 
 > Note: Phase 1 was completed + verified by a concurrent session (same author) on 2026-06-08. Phase 04.1 (Design System Adoption) was completed out-of-sequence this session (roundtrip gate satisfied). The engine-first critical path resumes at Phase 2 (still mid-execution, plan 3 of 4).
 > ✓ Resolved: the `/protocol` CSS-grid blowout regression (right column clipped; uneven 4-up stat row) was fixed in **04.1-09** gap-closure — `.zt-grid-*` helpers hardened to `minmax(0,1fr)` + `min-width:0`, all 16 routes swept, `UI-01-n` ds-audit guard added. All automated gates green. **Pending:** orchestrator browser visual pass (1280px/390px × light/dark, no page overflow) — see 04.1-09-SUMMARY.
@@ -75,9 +75,10 @@ Progress: [█████████░] 89%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Roadmap init]: Hard dependency chain confirmed — each phase is a gate for the next; Phase 2 (BAA) must complete before Phase 3 (RLS retrofit) and Phase 5 (lab ingest) can write client PHI
+- [2026-06-08 RE-SCOPE]: Pilot-first — PHI hardening (Neon HIPAA + Neon/Vercel/LLM BAAs + pgAudit verification + RLS enforcement/isolation) deferred to new **Phase 7 (Pre-Client Gate)**, triggered before the first external client's PHI. SUPERSEDES the "Phase 2 BAA gate blocks Phase 3/5" chain.
+- [Roadmap init][SUPERSEDED]: ~~Phase 2 (BAA) must complete before Phase 3 (RLS) and Phase 5~~ → Phases 2–6 now build single-user on standard-tier infra; the BAA/HIPAA gate is Phase 7.
 - [Roadmap init]: DECISION-01 (Better-Auth↔Neon-JWK seam) resolved by Phase 1 spike — spike outcome gates Phase 3 build
-- [Roadmap init]: DECISION-02 (LLM provider BAA) is open — must be resolved and recorded in ops runbook during Phase 2 before Phase 5 is unblocked
+- [2026-06-08 RE-SCOPE]: DECISION-02 (LLM provider BAA) deferred to Phase 7 — single-user/owner extraction may use the standard subscription API; external-client PHI extraction is blocked until the Phase 7 LLM BAA.
 - [Phase ?]: D-10 delivered: dashboard + metrics section (archetypes 01-04) fully in-brand
 - [Phase ?]: D-10 delivered: all 7 protocol routes fully in-brand (layout, overview, cessation, versions, version-detail, supplements, compare)
 - [Phase ?]: SC3 complete: protocol overview (archetype 05) + cessation (archetype 06) render in-brand with MetricRing/PhaseBar/Card/Badge
@@ -94,8 +95,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 2 gate]: LLM provider BAA is an open decision. OpenAI has a BAA for API customers — confirm the account tier is covered. Alternative: Anthropic Claude API. Must be resolved before Phase 5 can send PHI to any model.
-- [Phase 3 risk]: RLS retrofit on 8 live tables is the highest-risk migration. Use a Neon branch to rehearse before applying to production. RLS-enable and policies must be in the same atomic migration (Pitfall 2).
+- [Phase 7 gate]: LLM provider BAA + Neon/Vercel BAAs + Neon HIPAA-mode + pgAudit verification — deferred to Phase 7 (pre-client gate). NOT a blocker for the single-user pilot (standard-tier infra + subscription API). Required before any external client's PHI.
+- [Phase 7 risk]: RLS retrofit on 8 live tables is the highest-risk migration (now Phase 7). Rehearse on a Neon branch; RLS-enable + policies in one atomic migration (Pitfall 2). Phase 3 adds the tenant/subject columns up front so this retrofit is non-breaking.
 
 ## Deferred Items
 

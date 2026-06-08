@@ -53,8 +53,8 @@
 ### Compliance & Quality
 
 - [x] **COMP-01**: Engine logic (status classification, cessation phase math with injectable `now`, Pearson correlation) has passing unit tests covering boundary cases
-- [x] **COMP-02**: PHI infrastructure is BAA-covered (Neon, Netlify, and the chosen LLM provider) before any client PHI is written — a release gate, not a feature
-- [x] **COMP-03**: PHI access is audit-logged with `pgAudit` configured (parameters off)
+- [ ] **COMP-02**: PHI infrastructure is BAA-covered (Neon, Vercel, and the chosen LLM provider) before any **external client's** PHI is written — the pre-client hardening gate (Phase 7), not the single-user pilot
+- [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` verified (parameters off) — Phase 7 (pgAudit baseline auto-configures on Neon HIPAA enable; verification is the gate)
 
 ### UI / Design System
 
@@ -102,16 +102,16 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 |-------------|-------|--------|
 | DATA-03 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
 | COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
-| COMP-02 | Phase 2 — PHI / BAA Compliance Gate | Complete |
-| COMP-03 | Phase 2 — PHI / BAA Compliance Gate | Complete |
-| AUTH-01 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| AUTH-02 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| AUTH-03 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| AUTH-04 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| TEN-01 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| TEN-02 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| TEN-03 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
-| TEN-04 | Phase 3 — Identity + Tenancy Spine with RLS | Pending |
+| COMP-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| COMP-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| AUTH-01 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| AUTH-02 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| AUTH-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| AUTH-04 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| TEN-01 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| TEN-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| TEN-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| TEN-04 | Phase 3 — Identity + Tenancy Scoping | Pending |
 | DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
 | DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
 | DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
@@ -132,4 +132,4 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 ---
 *Requirements defined: 2026-06-07*
-*Last updated: 2026-06-07 — added UI-01 + Phase 4.1 (Design System Adoption) traceability*
+*Last updated: 2026-06-08 — pilot-first re-scope: COMP-02/COMP-03 (BAAs/pgAudit), TEN-02/TEN-03 (RLS/isolation), AUTH-03/AUTH-04 (subject-scoping/audit-log) deferred from Phases 2–3 to Phase 7 (PHI Compliance Hardening — Pre-Client Gate). Phase 3 retains AUTH-01/02 + TEN-01/04 (tenancy scoping). Coverage still 29/29 mapped.*
