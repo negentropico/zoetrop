@@ -267,18 +267,18 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
                   className="zt-mrow"
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "18px minmax(120px,1.4fr) 80px minmax(120px,1.6fr) 140px",
+                    gridTemplateColumns: "18px minmax(0,1.4fr) 80px minmax(0,1.6fr) 140px",
                     alignItems: "center",
                     gap: 16,
                     padding: "12px 12px",
                   }}
                 >
                   <StatusDot status={status} />
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: "var(--text-base)", color: "var(--ink)" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: "var(--text-base)", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {metric.name}
                     </div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {format(parseISO(metric.timestamp), "MMM d, yyyy")}
                     </div>
                   </div>

@@ -337,7 +337,7 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.3fr 1fr",
+          gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)",
           gap: "var(--gap-lg)",
         }}
         className="measurements-grid"

@@ -71,7 +71,7 @@ function ProtoStat({
   to?: string;
 }) {
   const inner = (
-    <Card padding="md" interactive={!!to} style={{ minHeight: 116, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+    <Card padding="md" interactive={!!to} style={{ height: "100%", minHeight: 116, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
       <div className="zt-eyebrow">{label}</div>
       <div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
@@ -92,7 +92,7 @@ function ProtoStat({
       </div>
     </Card>
   );
-  return to ? <Link to={to} style={{ textDecoration: "none" }}>{inner}</Link> : inner;
+  return to ? <Link to={to} style={{ textDecoration: "none", display: "block", height: "100%" }}>{inner}</Link> : inner;
 }
 
 // Build PhaseBar phases from CESSATION_PHASES + current day

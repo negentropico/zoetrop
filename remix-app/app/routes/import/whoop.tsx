@@ -291,7 +291,7 @@ export default function WhoopImport() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.4fr 1fr",
+          gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)",
           gap: "var(--gap-xl)",
           alignItems: "start",
         }}
@@ -660,7 +660,7 @@ export default function WhoopImport() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "0.9fr 1.1fr",
+                gridTemplateColumns: "minmax(0, 0.9fr) minmax(0, 1.1fr)",
                 gap: 12,
               }}
             >

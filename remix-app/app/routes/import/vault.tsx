@@ -234,7 +234,7 @@ export default function VaultImport() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.4fr 1fr",
+          gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)",
           gap: "var(--gap-xl)",
           alignItems: "start",
         }}
@@ -401,7 +401,7 @@ export default function VaultImport() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
                     gap: 8,
                     marginBottom: 18,
                   }}

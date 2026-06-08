@@ -161,7 +161,7 @@ function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
         className="zt-mrow"
         style={{
           display: "grid",
-          gridTemplateColumns: "18px minmax(120px,1.4fr) minmax(120px,1.6fr) 132px",
+          gridTemplateColumns: "18px minmax(0,1.4fr) minmax(0,1.6fr) 132px",
           alignItems: "center",
           gap: 16,
           padding: "12px 12px",

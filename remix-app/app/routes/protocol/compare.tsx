@@ -166,7 +166,7 @@ export default function Compare({ loaderData }: Route.ComponentProps) {
 
       {/* Change summary tiles */}
       {fromVersion && toVersion && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--gap-lg)", marginBottom: "var(--gap-xl)" }}>
+        <div className="zt-grid-3" style={{ marginBottom: "var(--gap-xl)" }}>
           <Card padding="md" tone="vital" style={{ textAlign: "center" }}>
             <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--vital)" }}>
               {added.length}

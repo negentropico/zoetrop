@@ -107,7 +107,7 @@ export default function MetricsLayout() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "232px 1fr",
+          gridTemplateColumns: "232px minmax(0, 1fr)",
           gap: "var(--gap-2xl)",
           alignItems: "start",
         }}

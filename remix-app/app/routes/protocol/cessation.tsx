@@ -359,7 +359,7 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* Timeline + Why 150 days */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: "var(--gap-lg)", marginBottom: "var(--gap-lg)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", gap: "var(--gap-lg)", marginBottom: "var(--gap-lg)" }}>
         <Card padding="lg">
           <div className="zt-eyebrow" style={{ marginBottom: 12 }}>FAAH CESSATION TIMELINE</div>
           {[
