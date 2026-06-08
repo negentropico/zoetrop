@@ -26,8 +26,8 @@ export const CESSATION_START_DATE = "2025-12-23T00:00:00.000Z";
 /**
  * Calculate current cessation day from the real start date
  */
-export function getCessationDay(): number {
-  return differenceInDays(new Date(), parseISO(CESSATION_START_DATE));
+export function getCessationDay(now: Date = new Date()): number {
+  return differenceInDays(now, parseISO(CESSATION_START_DATE));
 }
 
 /**
