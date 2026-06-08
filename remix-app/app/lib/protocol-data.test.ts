@@ -20,6 +20,8 @@ describe("getCessationDay (injectable now)", () => {
 
 describe("getCurrentCessationPhase (.phase, not .name)", () => {
   const cases: Array<[number, string]> = [
+    [-5, "acute"], // pre-start → clamp to first phase
+    [0, "acute"], // the cessation start date (getCessationDay === 0) → acute, not optimization
     [1, "acute"],
     [21, "acute"],
     [22, "stabilization"],

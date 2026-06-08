@@ -37,7 +37,13 @@ export function getCurrentCessationPhase(day: number): typeof CESSATION_PHASES[0
   const phase = CESSATION_PHASES.find(
     (p) => day >= p.dayRange.start && day <= p.dayRange.end
   );
-  return phase || CESSATION_PHASES[CESSATION_PHASES.length - 1];
+  if (phase) return phase;
+  // No exact match: before the first phase begins (day 0 / the start date, or any
+  // pre-start day) clamp to the first phase (acute); past the final range, clamp
+  // to the last. Returning the last phase for day 0 was the inverse of correct.
+  return day < CESSATION_PHASES[0].dayRange.start
+    ? CESSATION_PHASES[0]
+    : CESSATION_PHASES[CESSATION_PHASES.length - 1];
 }
 
 /**

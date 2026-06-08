@@ -174,7 +174,7 @@ function CessationProgress({
   cessationPhase: (typeof CESSATION_PHASES)[0];
   targetDay: number;
 }) {
-  const progressPercent = Math.min((currentDay / targetDay) * 100, 100);
+  const progressPercent = Math.max(Math.min((currentDay / targetDay) * 100, 100), 0);
 
   return (
     <Link
