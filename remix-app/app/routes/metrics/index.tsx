@@ -8,6 +8,37 @@ import {
 } from "../../types/metrics";
 import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
+import {
+  Pill,
+  Gem,
+  Flame,
+  Zap,
+  FlaskConical,
+  HeartPulse,
+  Dumbbell,
+  Droplet,
+  Dna,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Card } from "../../components/ui/Card";
+import { CatChip } from "../../components/ui/CatChip";
+import { StatusDot } from "../../components/ui/StatusDot";
+import { Sparkline } from "../../components/ui/Sparkline";
+import { RangeBar } from "../../components/ui/RangeBar";
+import type { MetricWithRange } from "../../components/ui/RangeBar";
+import { PageHeader } from "../../components/ui/PageHeader";
+
+const LUCIDE_MAP: Record<string, LucideIcon> = {
+  pill: Pill,
+  gem: Gem,
+  flame: Flame,
+  zap: Zap,
+  "flask-conical": FlaskConical,
+  "heart-pulse": HeartPulse,
+  dumbbell: Dumbbell,
+  droplet: Droplet,
+  dna: Dna,
+};
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -50,113 +81,125 @@ export function loader() {
   return { metrics, byCategory };
 }
 
-function StatusDot({ status }: { status: MetricStatus }) {
-  const colors: Record<MetricStatus, string> = {
-    optimal: "bg-green-500",
-    borderline: "bg-yellow-500",
-    deficient: "bg-red-500",
-    excess: "bg-orange-500",
+// Build a MetricWithRange from a Metric for the RangeBar
+function toRangeBarMetric(m: Metric): MetricWithRange | null {
+  if (!m.referenceRange) return null;
+  const ref = m.referenceRange;
+  const opt = m.optimalRange ?? ref;
+  const padding = (ref.max - ref.min) * 0.2;
+  return {
+    min: ref.min - padding,
+    max: ref.max + padding,
+    ref: [ref.min, ref.max],
+    opt: [opt.min, opt.max],
+    value: m.value,
+    status: getMetricStatus(m),
+    unit: m.unit,
   };
-
-  return <span className={`w-2 h-2 rounded-full flex-shrink-0 ${colors[status]}`} />;
 }
 
-function MiniRangeBar({ metric }: { metric: Metric }) {
-  const { value, referenceRange, optimalRange } = metric;
-
-  if (!referenceRange) return null;
-
-  // Normalize to 0-100% scale where reference range spans ~70% of bar
-  // This ensures consistent visual representation across different metrics
-  const refRange = referenceRange.max - referenceRange.min;
-  const padding = refRange * 0.2;
-  const displayMin = referenceRange.min - padding;
-  const displayMax = referenceRange.max + padding;
-  const displayRange = displayMax - displayMin;
-
-  // Clamp value to display range for positioning
-  const clampedValue = Math.max(displayMin, Math.min(displayMax, value));
-
-  const toPercent = (v: number) => ((v - displayMin) / displayRange) * 100;
-
-  const refMinPct = toPercent(referenceRange.min);
-  const refMaxPct = toPercent(referenceRange.max);
-  const valuePct = toPercent(clampedValue);
-
-  let optMinPct = refMinPct;
-  let optMaxPct = refMaxPct;
-  if (optimalRange) {
-    optMinPct = toPercent(optimalRange.min);
-    optMaxPct = toPercent(optimalRange.max);
-  }
-
-  // Determine if value is outside display range
-  const isOutOfRange = value < displayMin || value > displayMax;
-
-  return (
-    <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-      {/* Reference range (yellow) */}
-      <div
-        className="absolute top-0 bottom-0 bg-yellow-300/60 dark:bg-yellow-600/40"
-        style={{
-          left: `${refMinPct}%`,
-          width: `${refMaxPct - refMinPct}%`,
-        }}
-      />
-      {/* Optimal range (green) */}
-      {optimalRange && (
-        <div
-          className="absolute top-0 bottom-0 bg-green-400 dark:bg-green-500"
-          style={{
-            left: `${optMinPct}%`,
-            width: `${optMaxPct - optMinPct}%`,
-          }}
-        />
-      )}
-      {/* Value marker */}
-      <div
-        className={`absolute top-0 bottom-0 w-0.5 ${
-          isOutOfRange ? "bg-red-500" : "bg-gray-800 dark:bg-white"
-        }`}
-        style={{ left: `${valuePct}%` }}
-      />
-    </div>
-  );
+// Derive simple sparkline from no history (single value gives no line — skip)
+function getSparkData(m: MetricWithChartInfo): number[] | null {
+  // We only have current value in the overview — return null to skip sparkline
+  return null;
 }
 
-function ChartIndicator({ metric }: { metric: MetricWithChartInfo }) {
-  if (metric.historyCount <= 1 && !metric.hasProjections) return null;
+function FilterPill({
+  active,
+  label,
+  count,
+  status,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  count: number;
+  status?: MetricStatus;
+  onClick: () => void;
+}) {
   return (
-    <span
-      className="flex-shrink-0 text-blue-500 dark:text-blue-400"
-      title={`${metric.historyCount} data points${metric.hasProjections ? " + projections" : ""}`}
+    <button
+      onClick={onClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 14px",
+        borderRadius: "var(--radius-pill)",
+        cursor: "pointer",
+        fontFamily: "var(--font-text)",
+        fontSize: "var(--text-sm)",
+        fontWeight: 600,
+        background: active ? "var(--ink)" : "var(--surface)",
+        color: active ? "var(--n-50)" : "var(--text-secondary)",
+        border: `1px solid ${active ? "var(--ink)" : "var(--border)"}`,
+        transition: "all var(--dur-fast) var(--ease-out)",
+      }}
     >
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-      </svg>
-    </span>
+      {status && <StatusDot status={status} size={8} />}
+      {label}
+      <span
+        className="zt-tnum"
+        style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", opacity: active ? 0.85 : 0.6 }}
+      >
+        {count}
+      </span>
+    </button>
   );
 }
 
 function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
   const status = getMetricStatus(metric);
+  const rangeM = toRangeBarMetric(metric);
 
   return (
     <Link
       to={`/metrics/${metric.category}/${metric.id}`}
-      className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+      style={{ textDecoration: "none" }}
     >
-      <StatusDot status={status} />
-      <span className="font-medium text-sm flex-1 min-w-0 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1.5">
-        {metric.name}
-        <ChartIndicator metric={metric} />
-      </span>
-      <div className="w-24 flex-shrink-0">
-        <MiniRangeBar metric={metric} />
-      </div>
-      <div className="w-20 text-right flex-shrink-0">
-        <span className="font-mono text-sm font-medium">{metric.value.toFixed(1)}</span>
-        <span className="text-xs text-gray-500 ml-1">{metric.unit}</span>
+      <div
+        className="zt-mrow"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "18px minmax(120px,1.4fr) minmax(120px,1.6fr) 132px",
+          alignItems: "center",
+          gap: 16,
+          padding: "12px 12px",
+        }}
+      >
+        <StatusDot status={status} />
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: "var(--text-base)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            color: "var(--ink)",
+          }}
+        >
+          {metric.name}
+        </span>
+        {rangeM ? <RangeBar m={rangeM} height={6} /> : <div />}
+        <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+          <span
+            className="zt-tnum"
+            style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-base)" }}
+          >
+            {metric.value.toFixed(1)}
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-2xs)",
+              color: "var(--text-muted)",
+              marginLeft: 6,
+              textTransform: "uppercase",
+            }}
+          >
+            {metric.unit}
+          </span>
+        </span>
       </div>
     </Link>
   );
@@ -170,10 +213,9 @@ function CategorySection({
   metrics: MetricWithChartInfo[];
 }) {
   const info = CATEGORY_INFO[category];
-
+  const icon = LUCIDE_MAP[info.icon];
   if (metrics.length === 0) return null;
 
-  // Calculate status summary
   const statusCounts = metrics.reduce(
     (acc, m) => {
       const status = getMetricStatus(m);
@@ -184,44 +226,53 @@ function CategorySection({
   );
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+    <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
       {/* Category header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{info.icon}</span>
-          <h2 className="font-semibold">{info.label}</h2>
-          <span className="text-sm text-gray-500">({metrics.length})</span>
-        </div>
-        <div className="flex gap-1">
-          {statusCounts.optimal > 0 && (
-            <span className="px-1.5 py-0.5 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-              {statusCounts.optimal}
-            </span>
-          )}
-          {statusCounts.borderline > 0 && (
-            <span className="px-1.5 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
-              {statusCounts.borderline}
-            </span>
-          )}
-          {statusCounts.deficient > 0 && (
-            <span className="px-1.5 py-0.5 text-xs rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-              {statusCounts.deficient}
-            </span>
-          )}
-          {statusCounts.excess > 0 && (
-            <span className="px-1.5 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-              {statusCounts.excess}
-            </span>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "4px 8px 16px",
+          borderBottom: "1px solid var(--border)",
+          marginBottom: 8,
+        }}
+      >
+        {icon && <CatChip icon={icon} family={info.family} size={34} />}
+        <Link
+          to={`/metrics/${category}`}
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 500,
+            fontSize: "var(--text-lg)",
+            color: "var(--ink)",
+            textDecoration: "none",
+          }}
+        >
+          {info.label}
+        </Link>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>
+          {metrics.length}
+        </span>
+        {/* Status count dots */}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          {(["optimal", "borderline", "deficient", "excess"] as MetricStatus[]).map((s) =>
+            (statusCounts[s] || 0) > 0 ? (
+              <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <StatusDot status={s} size={8} />
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
+                  {statusCounts[s]}
+                </span>
+              </span>
+            ) : null
           )}
         </div>
       </div>
-      {/* Metrics list */}
-      <div className="divide-y divide-gray-100 dark:divide-gray-800">
-        {metrics.map((metric) => (
-          <MetricRow key={metric.id} metric={metric} />
-        ))}
-      </div>
-    </div>
+      {/* Metric rows */}
+      {metrics.map((metric) => (
+        <MetricRow key={metric.id} metric={metric} />
+      ))}
+    </Card>
   );
 }
 
@@ -257,77 +308,60 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
     : metrics.length;
 
   const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
+  const statusOrder: MetricStatus[] = ["optimal", "borderline", "deficient", "excess"];
+  const STATUS_LABEL: Record<MetricStatus, string> = {
+    optimal: "Optimal",
+    borderline: "Borderline",
+    deficient: "Deficient",
+    excess: "Excess",
+  };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">All Metrics</h1>
-          <p className="text-sm text-gray-500">
-            {filterStatus ? `${filteredCount} ${filterStatus}` : `${metrics.length} metrics`} across{" "}
-            {categories.length} categories
-          </p>
-        </div>
-      </div>
+    <div>
+      <PageHeader
+        eyebrow="YOUR LAST LAB FRAME"
+        title="All metrics"
+        sub={`${metrics.length} metrics across ${categories.length} categories.`}
+      />
 
-      {/* Status filter bar */}
-      <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-800">
-        <span className="text-sm text-gray-500">Filter:</span>
-        <button
+      {/* Status filter pills */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "var(--gap-xl)" }}>
+        <FilterPill
+          active={!filterStatus}
+          label="All"
+          count={metrics.length}
           onClick={() => {
-            const newParams = new URLSearchParams(searchParams);
-            newParams.delete("status");
-            setSearchParams(newParams);
+            const p = new URLSearchParams(searchParams);
+            p.delete("status");
+            setSearchParams(p);
           }}
-          className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
-            !filterStatus
-              ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-              : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-          }`}
-        >
-          All ({metrics.length})
-        </button>
-        {(["optimal", "borderline", "deficient", "excess"] as MetricStatus[]).map((status) => {
-          const count = statusCounts[status] || 0;
+        />
+        {statusOrder.map((s) => {
+          const count = statusCounts[s] || 0;
           if (count === 0) return null;
-          const isActive = filterStatus === status;
-          const baseColors: Record<MetricStatus, string> = {
-            optimal: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-            borderline: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-            deficient: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-            excess: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-          };
-          const activeColors: Record<MetricStatus, string> = {
-            optimal: "bg-green-500 text-white",
-            borderline: "bg-yellow-500 text-white",
-            deficient: "bg-red-500 text-white",
-            excess: "bg-orange-500 text-white",
-          };
           return (
-            <button
-              key={status}
+            <FilterPill
+              key={s}
+              active={filterStatus === s}
+              label={STATUS_LABEL[s]}
+              status={s}
+              count={count}
               onClick={() => {
-                const newParams = new URLSearchParams(searchParams);
-                if (isActive) {
-                  newParams.delete("status");
+                const p = new URLSearchParams(searchParams);
+                if (filterStatus === s) {
+                  p.delete("status");
                 } else {
-                  newParams.set("status", status);
+                  p.set("status", s);
                 }
-                setSearchParams(newParams);
+                setSearchParams(p);
               }}
-              className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
-                isActive ? activeColors[status] : baseColors[status]
-              }`}
-            >
-              {count} {status}
-            </button>
+            />
           );
         })}
       </div>
 
       {/* Category sections */}
-      <div className="space-y-4">
+      <div>
         {categories.map((category) => (
           <CategorySection
             key={category}
@@ -338,31 +372,46 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
       </div>
 
       {filteredCount === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No metrics match the current filter.
+        <div
+          style={{
+            textAlign: "center",
+            padding: "var(--gap-3xl) 0",
+            color: "var(--text-muted)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-sm)",
+          }}
+        >
+          Nothing logged yet. Your first frame starts when you begin.
         </div>
       )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-500">
-        <span className="font-medium">Range bar:</span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-4 h-1.5 bg-green-400 dark:bg-green-500 rounded-full" />
+      {/* Range legend */}
+      <div
+        style={{
+          display: "flex",
+          gap: 24,
+          flexWrap: "wrap",
+          alignItems: "center",
+          marginTop: "var(--gap-lg)",
+          padding: "0 8px",
+          fontFamily: "var(--font-mono)",
+          fontSize: "var(--text-2xs)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          color: "var(--text-muted)",
+        }}
+      >
+        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 16, height: 8, background: "var(--vital-100)", borderRadius: "var(--radius-xs)" }} />
           Optimal
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-4 h-1.5 bg-yellow-300/60 dark:bg-yellow-600/40 rounded-full" />
+        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 16, height: 8, background: "var(--n-150)", borderRadius: "var(--radius-xs)" }} />
           Reference
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-0.5 h-3 bg-gray-800 dark:bg-white rounded-sm" />
+        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 3, height: 12, background: "var(--ink)", borderRadius: 2 }} />
           Value
-        </span>
-        <span className="flex items-center gap-1.5">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
-          Trend chart
         </span>
       </div>
     </div>
