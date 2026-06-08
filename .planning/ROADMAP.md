@@ -106,10 +106,15 @@ Plans:
 **UI hint**: yes
 **Plans**: TBD — run `/gsd:ui-phase 04.1` after the roundtrip to produce `UI-SPEC.md`, then `/gsd:plan-phase 04.1`
 Likely plans:
+
 - [ ] Bridge tokens into Tailwind `@theme` + fonts + `base.css` helpers [UI-01]
 - [ ] Port signature components to typed TSX + new DataTable / SegmentedPhaseBar / UploadDropzone
 - [ ] Retrofit screens 01–07 to brand (class swaps + component substitution)
 - [ ] Resolve category color/icon system + 4-status palette in code
+
+**Cross-cutting constraints:**
+
+- Every loader, route, and data value is preserved — only markup/classes/components change
 
 ### Phase 5: Lab Ingest Pipeline
 
