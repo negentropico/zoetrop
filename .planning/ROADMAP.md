@@ -62,7 +62,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Track A: Vercel preset cutover + Netlify removal + drizzle unpooled URL (build/shell Wave-0 asserts) [COMP-02]
+- [x] 02-01-PLAN.md — Track A: Vercel preset cutover + Netlify removal + drizzle unpooled URL (build/shell Wave-0 asserts) [COMP-02]
 - [x] 02-02-PLAN.md — Track A: scaffold docs/COMPLIANCE-RUNBOOK.md + update CLAUDE.md/docs/PLATFORM.md to Vercel [COMP-02, COMP-03]
 
 **Wave 2** *(blocked on 02-02 — records into the runbook)*
@@ -169,7 +169,7 @@ Likely plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
-| 2. PHI / BAA Compliance Gate | 1/4 | In Progress|  |
+| 2. PHI / BAA Compliance Gate | 2/4 | In Progress|  |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 8/8 | Complete   | 2026-06-08 |
