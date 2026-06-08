@@ -10,7 +10,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 
 ## Phases
 
-- [ ] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam
+- [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08)
 - [ ] **Phase 2: PHI / BAA Compliance Gate** — Execute Neon + Netlify + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
 - [ ] **Phase 3: Identity + Tenancy Spine with RLS** — Ship Better-Auth org roles, `tenants`/`users`/`subjects` tables, add `tenantId`/`subjectId` to all 8 data tables, atomic RLS-enable+policies, SET LOCAL transaction wrapper, cross-tenant isolation tests
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
@@ -37,7 +37,7 @@ Plans:
 
 - [x] 01-01-PLAN.md — Install + configure the Vitest harness (deps, scripts, vite.config test block; empty run exits 0; package legitimacy gate)
 - [x] 01-02-PLAN.md — Drizzle migrations baseline (as-is snapshot of 8 tables/7 enums; migrate --dry-run; prod tracking record) [DATA-03]
-- [ ] 01-03-PLAN.md — Better-Auth↔Neon-JWK / RLS spike on a disposable branch (SET LOCAL vs SET leak; verdict in 01-SPIKE-FINDINGS.md)
+- [x] 01-03-PLAN.md — Better-Auth↔Neon-JWK / RLS spike on a disposable branch (SET LOCAL vs SET leak; verdict in 01-SPIKE-FINDINGS.md)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -149,7 +149,7 @@ Likely plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Schema Baseline + Engine Tests + Auth Spike | 4/5 | In Progress|  |
+| 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. PHI / BAA Compliance Gate | 0/TBD | Not started | - |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
