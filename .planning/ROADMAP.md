@@ -14,7 +14,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [ ] **Phase 2: PHI / BAA Compliance Gate + Vercel Cutover** — Migrate the deploy target Netlify→Vercel, execute Neon + Vercel + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
 - [ ] **Phase 3: Identity + Tenancy Spine with RLS** — Ship Better-Auth org roles, `tenants`/`users`/`subjects` tables, add `tenantId`/`subjectId` to all 8 data tables, atomic RLS-enable+policies, SET LOCAL transaction wrapper, cross-tenant isolation tests
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
-- [ ] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip
+- [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
 - [ ] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports
 
@@ -159,6 +159,6 @@ Likely plans:
 | 2. PHI / BAA Compliance Gate | 0/TBD | Not started | - |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
-| 4.1. Design System Adoption *(inserted)* | 7/8 | In Progress|  |
+| 4.1. Design System Adoption *(inserted)* | 8/8 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
