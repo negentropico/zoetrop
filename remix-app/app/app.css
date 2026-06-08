@@ -474,13 +474,25 @@ h1, h2, h3, h4 {
   gap: var(--gap-lg);
 }
 
+/* Asymmetric primary/secondary split (e.g. import pages: upload + instructions).
+   Preserves the 1.4/1 ratio on desktop but collapses to a single column at the
+   760px breakpoint so the narrow secondary column can never force a long token
+   (mono path, code filename, fixed-min label) past a mobile viewport (04.1-09 R2). */
+.zt-grid-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--gap-xl);
+  align-items: start;
+}
+
 /* Grid children must be allowed to shrink below their min-content size, so
    non-shrinkable content (whitespace:nowrap, ellipsis, long tokens) can never
    push a track past its minmax(0,1fr) share and blow the grid wider than the
    container. Pairs with the minmax(0,1fr) tracks above (UI-01 regression fix). */
 .zt-grid-2 > *,
 .zt-grid-3 > *,
-.zt-grid-4 > * { min-width: 0; }
+.zt-grid-4 > *,
+.zt-grid-split > * { min-width: 0; }
 
 @media (max-width: 980px) {
   .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -489,7 +501,7 @@ h1, h2, h3, h4 {
 
 @media (max-width: 760px) {
   .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-md); }
-  .zt-grid-3, .zt-grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .zt-grid-3, .zt-grid-2, .zt-grid-split { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ================================================================

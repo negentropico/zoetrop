@@ -288,14 +288,7 @@ export default function WhoopImport() {
         sub="Bring in your signals from WHOOP, bloodwork, and vault files."
       />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)",
-          gap: "var(--gap-xl)",
-          alignItems: "start",
-        }}
-      >
+      <div className="zt-grid-split">
         {/* Left: upload + results */}
         <div>
           <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
@@ -318,6 +311,8 @@ export default function WhoopImport() {
                   background: "var(--surface-sunken)",
                   padding: "2px 7px",
                   borderRadius: 6,
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-all",
                 }}
               >
                 whoop_analysis_report.json
@@ -592,6 +587,8 @@ export default function WhoopImport() {
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: "0.85em",
+                    overflowWrap: "anywhere",
+                    wordBreak: "break-all",
                   }}
                 >
                   whoop_analysis_report.json

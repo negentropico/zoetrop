@@ -327,7 +327,7 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
         <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>
           Confidence level guide
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 16 }}>
+        <div className="zt-grid-2">
           {confidenceLevels.map((level) => {
             const info = CONFIDENCE_LEVELS[level];
             return (
@@ -342,7 +342,7 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
                 >
                   {info.label}
                 </Badge>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontWeight: 500, fontSize: "var(--text-sm)" }}>
                     {info.label}
                   </div>
