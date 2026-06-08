@@ -616,6 +616,10 @@ export default function WhoopImport() {
                   padding: "3px 7px",
                   borderRadius: 6,
                   color: "var(--text-secondary)",
+                  // Let the long mono path wrap instead of forcing the row
+                  // wider than a 390px mobile viewport (04.1-09 R2 #3).
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-all",
                 }}
               >
                 ~/Code/Whoop/results/
