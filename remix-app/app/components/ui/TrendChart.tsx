@@ -1,3 +1,14 @@
+// TrendChart — brand-tokened Recharts chart (relocated from app/components/TrendChart.tsx)
+// All clinical hex colors replaced with CSS var token strings (dark cascade works)
+// Preserves: data shape, projection math, axis domains, reference-band meaning
+// Changes: colors + stroke treatments only → brand language for Phase 6
+//
+// Wave 4 note: two routes import from the old path (../../components/TrendChart):
+//   - app/routes/metrics/category.tsx
+//   - app/routes/metrics/detail.tsx
+// These will be repointed in Wave 4. Both TrendChart and TrendSparkline exported
+// here so the repoint is a single import-path change.
+
 import {
   LineChart,
   Line,
@@ -55,7 +66,10 @@ export function TrendChart({
 }: TrendChartProps) {
   if (data.length === 0 && projections.length === 0) {
     return (
-      <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+      <div
+        className="flex items-center justify-center h-32 font-mono text-xs"
+        style={{ color: "var(--text-muted)" }}
+      >
         No historical data available
       </div>
     );
@@ -82,10 +96,8 @@ export function TrendChart({
       projectedValue: d.value,
     }));
 
-  // Combine data - actual values and projections
-  // For the projection line, we need to connect the last actual point to projections
-  const lastActual = sortedData[sortedData.length - 1];
-
+  // Combine data — actual values and projections
+  // For the projection line, connect the last actual point to projections
   const combinedData = [
     ...sortedData.map((d, i) => ({
       ...d,
@@ -101,7 +113,7 @@ export function TrendChart({
     })),
   ];
 
-  // Calculate Y-axis domain - include optimal range to show target zone
+  // Calculate Y-axis domain — include optimal range to show target zone
   const allValues = [
     ...sortedData.map((d) => d.value),
     ...sortedProjections.map((d) => d.value),
@@ -109,7 +121,6 @@ export function TrendChart({
   const minValue = Math.min(...allValues);
   const maxValue = Math.max(...allValues);
 
-  // Start with data range
   let domainMin = minValue;
   let domainMax = maxValue;
 
@@ -125,29 +136,64 @@ export function TrendChart({
   const yMin = Math.max(0, domainMin - padding);
   const yMax = domainMax + padding;
 
-  // Custom tooltip
+  // Custom tooltip — brand-tokened (no hardcoded Tailwind dark: classes)
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      const value = data.value ?? data.projectedValue;
-      const isProjection = data.isProjection;
+      const d = payload[0].payload;
+      const value = d.value ?? d.projectedValue;
+      const isProjection = d.isProjection;
 
       return (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-2 text-sm">
-          <div className="font-medium flex items-center gap-2">
-            {data.date}
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "var(--shadow-md)",
+            padding: "8px 12px",
+            fontFamily: "var(--font-text)",
+            fontSize: "var(--text-sm)",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              color: "var(--ink)",
+            }}
+          >
+            {d.date}
             {isProjection && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+              <span
+                style={{
+                  fontSize: "var(--text-2xs)",
+                  padding: "2px 6px",
+                  borderRadius: "var(--radius-pill)",
+                  background: "var(--energy-50)",
+                  color: "var(--energy-400)",
+                  fontFamily: "var(--font-mono)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                }}
+              >
                 Target
               </span>
             )}
           </div>
-          <div className="text-gray-600 dark:text-gray-400">
+          <div style={{ color: "var(--text-secondary)", marginTop: 2 }}>
             {value?.toFixed(2)} {unit}
           </div>
-          {data.label && isProjection && (
-            <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-              {data.label}
+          {d.label && isProjection && (
+            <div
+              style={{
+                color: "var(--energy-400)",
+                fontSize: "var(--text-xs)",
+                marginTop: 4,
+              }}
+            >
+              {d.label}
             </div>
           )}
         </div>
@@ -157,47 +203,48 @@ export function TrendChart({
   };
 
   return (
+    // Concrete numeric height per Pitfall 7 (ResponsiveContainer needs explicit height)
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={combinedData} margin={{ top: 25, right: 10, left: 0, bottom: 0 }}>
-        {/* Optimal range band (green area) - render behind data */}
+        {/* Optimal range band — var(--vital-50) fill, brand teal wash */}
         {optimalRange && (
           <ReferenceArea
             y1={Math.max(yMin, optimalRange.min)}
             y2={Math.min(yMax, optimalRange.max)}
-            fill="#22c55e"
-            fillOpacity={0.2}
+            fill="var(--vital-50)"
+            fillOpacity={1}
             stroke="none"
-            label={{ value: "Optimal", position: "insideTopRight", fill: "#16a34a", fontSize: 10 }}
+            label={{ value: "Optimal", position: "insideTopRight", fill: "var(--vital-400)", fontSize: 10 }}
           />
         )}
 
-        {/* Reference range lines (yellow dashed) */}
+        {/* Reference range lines — var(--n-200) dashed outline */}
         {referenceRange && (
           <ReferenceLine
             y={referenceRange.min}
-            stroke="#eab308"
-            strokeDasharray="2 2"
-            strokeOpacity={0.5}
+            stroke="var(--n-200)"
+            strokeDasharray="3 4"
+            strokeOpacity={0.8}
           />
         )}
         {referenceRange && (
           <ReferenceLine
             y={referenceRange.max}
-            stroke="#eab308"
-            strokeDasharray="2 2"
-            strokeOpacity={0.5}
+            stroke="var(--n-200)"
+            strokeDasharray="3 4"
+            strokeOpacity={0.8}
           />
         )}
 
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 11, fill: "#6b7280" }}
+          tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
           tickLine={false}
-          axisLine={{ stroke: "#e5e7eb" }}
+          axisLine={{ stroke: "var(--border)" }}
         />
         <YAxis
           domain={[yMin, yMax]}
-          tick={{ fontSize: 11, fill: "#6b7280" }}
+          tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
           tickLine={false}
           axisLine={false}
           width={45}
@@ -205,63 +252,79 @@ export function TrendChart({
         />
         <Tooltip content={<CustomTooltip />} />
 
-        {/* Actual data line */}
+        {/* Actual data line — var(--ink) stroke 2.25, surface-fill/ink-stroke dots */}
         <Line
           type="monotone"
           dataKey="value"
-          stroke="#3b82f6"
-          strokeWidth={2}
+          stroke="var(--ink)"
+          strokeWidth={2.25}
           dot={(props: any) => {
             const { cx, cy, payload } = props;
             if (payload.value === undefined) return null;
             return (
               <g key={`dot-${cx}-${cy}`}>
-                <circle cx={cx} cy={cy} r={5} fill="#3b82f6" stroke="#fff" strokeWidth={2} />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={5}
+                  fill="var(--surface)"
+                  stroke="var(--ink)"
+                  strokeWidth={2}
+                />
                 <text
                   x={cx}
                   y={cy - 12}
                   textAnchor="middle"
-                  fill="#3b82f6"
+                  fill="var(--ink)"
                   fontSize={11}
                   fontWeight={600}
+                  fontFamily="var(--font-mono)"
                 >
                   {payload.value.toFixed(1)}
                 </text>
               </g>
             );
           }}
-          activeDot={{ r: 7, fill: "#2563eb" }}
+          activeDot={{ r: 7, fill: "var(--ink)" }}
           connectNulls={false}
         />
 
-        {/* Projection line (dashed, purple) */}
+        {/* Projection line — var(--energy-400) dashed 4 4 */}
         {sortedProjections.length > 0 && (
           <Line
             type="monotone"
             dataKey="projectedValue"
-            stroke="#a855f7"
+            stroke="var(--energy-400)"
             strokeWidth={2}
-            strokeDasharray="5 5"
+            strokeDasharray="4 4"
             dot={(props: any) => {
               const { cx, cy, payload } = props;
               if (payload.projectedValue === undefined || !payload.isProjection) return null;
               return (
                 <g key={`proj-${cx}-${cy}`}>
-                  <circle cx={cx} cy={cy} r={5} fill="#a855f7" stroke="#fff" strokeWidth={2} />
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill="var(--surface)"
+                    stroke="var(--energy-400)"
+                    strokeWidth={2}
+                  />
                   <text
                     x={cx}
                     y={cy - 12}
                     textAnchor="middle"
-                    fill="#a855f7"
+                    fill="var(--energy-400)"
                     fontSize={11}
                     fontWeight={600}
+                    fontFamily="var(--font-mono)"
                   >
                     {payload.projectedValue.toFixed(1)}
                   </text>
                 </g>
               );
             }}
-            activeDot={{ r: 7, fill: "#9333ea" }}
+            activeDot={{ r: 7, fill: "var(--energy-400)" }}
             connectNulls
           />
         )}
@@ -270,7 +333,8 @@ export function TrendChart({
   );
 }
 
-// Compact sparkline version for category overview
+// TrendSparkline — compact inline sparkline for category overview
+// Brand style: always var(--ink) at opacity ~0.7 (not status-colored)
 interface SparklineProps {
   data: DataPoint[];
   width?: number;
@@ -278,9 +342,9 @@ interface SparklineProps {
   improvement?: "higher" | "lower" | "target";
 }
 
-export function TrendSparkline({ data, width = 80, height = 24, improvement }: SparklineProps) {
+export function TrendSparkline({ data, width = 80, height = 24 }: SparklineProps) {
   if (data.length < 2) {
-    return <div className="w-20 h-6" />;
+    return <div style={{ width, height }} />;
   }
 
   const sortedData = [...data].sort(
@@ -292,31 +356,17 @@ export function TrendSparkline({ data, width = 80, height = 24, improvement }: S
   const max = Math.max(...values);
   const padding = (max - min) * 0.1 || 1;
 
-  // Determine trend direction for color
-  const firstValue = values[0];
-  const lastValue = values[values.length - 1];
-  const trendUp = lastValue > firstValue;
-
-  // Color based on improvement direction
-  let trendColor: string;
-  if (improvement === "higher") {
-    trendColor = trendUp ? "#22c55e" : "#ef4444"; // Green if up, red if down
-  } else if (improvement === "lower") {
-    trendColor = trendUp ? "#ef4444" : "#22c55e"; // Red if up, green if down
-  } else {
-    // Default: just show direction
-    trendColor = trendUp ? "#22c55e" : "#ef4444";
-  }
-
   return (
+    // Concrete numeric height per Pitfall 7
     <ResponsiveContainer width={width} height={height}>
       <LineChart data={sortedData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
         <YAxis domain={[min - padding, max + padding]} hide />
         <Line
           type="monotone"
           dataKey="value"
-          stroke={trendColor}
+          stroke="var(--ink)"
           strokeWidth={1.5}
+          strokeOpacity={0.7}
           dot={false}
         />
       </LineChart>

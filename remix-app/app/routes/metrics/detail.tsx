@@ -8,7 +8,7 @@ import {
 } from "../../types/metrics";
 import { getRealMetrics, getProjections, getMetricTargets, MILESTONES } from "../../lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
-import { TrendChart } from "../../components/TrendChart";
+import { TrendChart } from "../../components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
 
 function isValidCategory(category: string): category is MetricCategory {

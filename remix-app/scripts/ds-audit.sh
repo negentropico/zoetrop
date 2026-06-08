@@ -11,10 +11,7 @@
 #
 # Exits 0 if both gates pass. Exits 1 if either gate fails.
 #
-# Wave exclusions (removed once Wave 3 retrofits these files):
-#   app/components/TrendChart.tsx — M0 legacy file; banned hexes are known and
-#     scheduled for replacement in Wave 3 (DS adoption Phase 04.1 Plan 03).
-#     Excluded from UI-01-i until the Recharts brand-token port lands.
+# Wave 3 exclusions cleared — TrendChart brand-token port completed in Phase 04.1 Plan 03.
 
 set -euo pipefail
 
@@ -42,23 +39,9 @@ echo "[ds-audit] UI-01-i: checking for banned semantic hexes in ${COMPONENTS_DIR
 
 BANNED_HEXES="#22c55e|#3b82f6|#a855f7|#eab308|#ef4444|#f97316"
 
-# Wave 3 exclusion list — legacy M0 files with known violations scheduled for replacement.
-# Remove each entry from this list when the file is ported to brand tokens.
-WAVE3_EXCLUSIONS=(
-  "app/components/TrendChart.tsx"
-)
-
-# Build the exclude flags for grep
-EXCLUDE_FLAGS=()
-for excl in "${WAVE3_EXCLUSIONS[@]}"; do
-  EXCLUDE_FLAGS+=(--exclude="${excl##*/}")
-done
-
-# Find all .ts/.tsx files in components (excluding wave3 files), strip comment lines,
-# then grep for banned hexes.
+# Find all .ts/.tsx files in components, strip comment lines, then grep for banned hexes.
 HEX_MATCHES=$(
-  find "${COMPONENTS_DIR}" -type f \( -name '*.ts' -o -name '*.tsx' \) \
-    $(printf -- "! -name %s " "${WAVE3_EXCLUSIONS[@]##*/}") 2>/dev/null |
+  find "${COMPONENTS_DIR}" -type f \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null |
   xargs grep -n "" 2>/dev/null |
   grep -v '^[^:]*:[0-9]*:[[:space:]]*[/*]' |
   grep -v '^[^:]*:[0-9]*:[[:space:]]*//' |
@@ -71,12 +54,6 @@ if [ -n "${HEX_MATCHES}" ]; then
   FAILED=1
 else
   echo "[ds-audit] PASS UI-01-i: no banned semantic hexes in ${COMPONENTS_DIR}"
-  if [ ${#WAVE3_EXCLUSIONS[@]} -gt 0 ]; then
-    echo "[ds-audit] NOTE: ${#WAVE3_EXCLUSIONS[@]} file(s) excluded (Wave 3 scheduled retrofit):"
-    for excl in "${WAVE3_EXCLUSIONS[@]}"; do
-      echo "  ${excl}"
-    done
-  fi
 fi
 
 # ── Result ────────────────────────────────────────────────────────────────────

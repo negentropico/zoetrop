@@ -8,7 +8,7 @@ import {
 } from "../../types/metrics";
 import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
-import { TrendSparkline, TrendChart } from "../../components/TrendChart";
+import { TrendSparkline, TrendChart } from "../../components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
 
 // Validate category param
