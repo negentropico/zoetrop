@@ -8,6 +8,10 @@ import {
 } from "../../lib/protocol-data";
 import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "../../types/protocol";
 import { differenceInDays, parseISO, format } from "date-fns";
+import { Card } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { PhaseBar } from "../../components/ui/PhaseBar";
+import type { Phase } from "../../components/ui/PhaseBar";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -52,6 +56,61 @@ export function loader() {
   };
 }
 
+// Stat tile — Card + .zt-eyebrow + .zt-readout (ProtoStat pattern from screen-protocol.jsx)
+function ProtoStat({
+  label,
+  value,
+  unit,
+  sub,
+  to,
+}: {
+  label: string;
+  value: string | number;
+  unit?: string;
+  sub?: string;
+  to?: string;
+}) {
+  const inner = (
+    <Card padding="md" interactive={!!to} style={{ minHeight: 116, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div className="zt-eyebrow">{label}</div>
+      <div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
+            {value}
+          </span>
+          {unit && (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              {unit}
+            </span>
+          )}
+        </div>
+        {sub && (
+          <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 4 }}>
+            {sub}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+  return to ? <Link to={to} style={{ textDecoration: "none" }}>{inner}</Link> : inner;
+}
+
+// Build PhaseBar phases from CESSATION_PHASES + current day
+function buildPhaseBarPhases(cessationDay: number): Phase[] {
+  return CESSATION_PHASES.map((p) => {
+    const days = p.dayRange.end - p.dayRange.start + 1;
+    let state: Phase["state"];
+    if (cessationDay > p.dayRange.end) {
+      state = "completed";
+    } else if (cessationDay >= p.dayRange.start && cessationDay <= p.dayRange.end) {
+      state = "current";
+    } else {
+      state = "upcoming";
+    }
+    return { id: p.phase, name: p.label, days, state };
+  });
+}
+
 export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
   const {
     currentVersion,
@@ -66,178 +125,138 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
   } = loaderData;
 
   const targetDay = 150;
-  const progressPercent = Math.min((cessationDay / targetDay) * 100, 100);
+  const phaseBarPhases = buildPhaseBarPhases(cessationDay);
 
   return (
-    <div className="space-y-6">
-      {/* Status cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Current Version */}
-        <Link
+    <div>
+      {/* Stat tiles — 4-up grid */}
+      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-2xl)" }}>
+        <ProtoStat
+          label="Current protocol"
+          value={currentVersion?.version || "—"}
+          unit={`${totalVersions} versions`}
+          sub={`Active since ${currentVersion ? format(parseISO(currentVersion.effectiveDate), "MMM d") : "—"}`}
           to="/protocol/versions"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className="text-sm text-gray-500 dark:text-gray-500 mb-1">
-            Current Protocol
-          </div>
-          <div className="text-2xl font-bold">{currentVersion?.version || "—"}</div>
-          <div className="text-xs text-gray-500 mt-1">
-            {totalVersions} versions tracked
-          </div>
-        </Link>
-
-        {/* Active Supplements */}
-        <Link
+        />
+        <ProtoStat
+          label="Active supplements"
+          value={activeSupplementCount}
+          sub={`${supplementsByTier.tier1 || 0} Tier 1 · ${supplementsByTier.tier2 || 0} Tier 2`}
           to="/protocol/supplements"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className="text-sm text-gray-500 dark:text-gray-500 mb-1">
-            Active Supplements
-          </div>
-          <div className="text-2xl font-bold">{activeSupplementCount}</div>
-          <div className="text-xs text-gray-500 mt-1">
-            {supplementsByTier.tier1 || 0} Tier 1, {supplementsByTier.tier2 || 0} Tier 2
-          </div>
-        </Link>
-
-        {/* Cessation Day */}
-        <Link
+        />
+        <ProtoStat
+          label="Cessation"
+          value={`Day ${cessationDay}`}
+          sub={`${cessationPhase.label} phase`}
           to="/protocol/cessation"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className="text-sm text-gray-500 dark:text-gray-500 mb-1">
-            Cessation Progress
-          </div>
-          <div className="text-2xl font-bold">Day {cessationDay}</div>
-          <div className="text-xs text-gray-500 mt-1">
-            {cessationPhase.label} phase
-          </div>
-        </Link>
-
-        {/* Latest Milestone */}
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="text-sm text-gray-500 dark:text-gray-500 mb-1">
-            Latest Milestone
-          </div>
-          <div className="text-lg font-medium truncate">
-            {latestMilestone?.description.slice(0, 30) || "—"}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            {latestMilestone ? format(parseISO(latestMilestone.date), "MMM d, yyyy") : "—"}
-          </div>
-        </div>
+        />
+        <ProtoStat
+          label="Latest milestone"
+          value={latestMilestone?.description.slice(0, 20) || "—"}
+          sub={latestMilestone ? format(parseISO(latestMilestone.date), "MMM d, yyyy") : "—"}
+        />
       </div>
 
-      {/* Cessation progress bar */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-medium">FAAH Cessation Timeline</h2>
-          <span className="text-sm text-gray-500">
-            {cessationDay} / {targetDay} days
+      {/* FAAH Cessation Timeline card */}
+      <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <div className="zt-eyebrow">FAAH CESSATION TIMELINE</div>
+          <Link
+            to="/protocol/cessation"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
+          >
+            View tracker →
+          </Link>
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 18 }}>
+          <span className="zt-readout" style={{ fontSize: "var(--text-xl)" }}>{cessationDay}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+            / {targetDay} days
           </span>
         </div>
+        <PhaseBar phases={phaseBarPhases} />
+      </Card>
 
-        {/* Phase markers */}
-        <div className="relative mb-2">
-          <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full transition-all duration-500"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          {/* Phase markers */}
-          <div className="absolute inset-0 flex">
-            {CESSATION_PHASES.map((phase, i) => (
-              <div
-                key={phase.phase}
-                className="flex-1 border-r border-gray-300 dark:border-gray-600 last:border-0"
-                style={{
-                  width: `${((phase.dayRange.end - phase.dayRange.start + 1) / targetDay) * 100}%`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Phase labels */}
-        <div className="flex text-xs text-gray-500">
-          {CESSATION_PHASES.map((phase) => (
-            <div
-              key={phase.phase}
-              className={`text-center ${
-                cessationPhase.phase === phase.phase ? "text-gray-900 dark:text-white font-medium" : ""
-              }`}
-              style={{
-                width: `${((phase.dayRange.end - phase.dayRange.start + 1) / targetDay) * 100}%`,
-              }}
-            >
-              {phase.label}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Version history + Supplements by tier */}
+      <div className="zt-grid-2">
         {/* Version history */}
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium">Version History</h2>
-            <Link
-              to="/protocol/versions"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              View all
-            </Link>
-          </div>
-          <div className="space-y-2">
-            {protocolVersions.slice().reverse().slice(0, 5).map((version) => (
+        <Card padding="md">
+          <div style={{ padding: "4px 8px 8px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div className="zt-eyebrow">VERSION HISTORY</div>
               <Link
-                key={version.id}
-                to={`/protocol/versions/${version.version}`}
-                className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 -mx-2 px-2 rounded transition-colors"
+                to="/protocol/versions"
+                style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
               >
-                <div>
-                  <span className="font-medium">{version.version}</span>
-                  {version.version === currentVersion?.version && (
-                    <span className="ml-2 text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded">
-                      Current
-                    </span>
-                  )}
-                </div>
-                <span className="text-sm text-gray-500">
+                All →
+              </Link>
+            </div>
+          </div>
+          {protocolVersions.slice().reverse().slice(0, 4).map((version, i) => (
+            <Link
+              key={version.id}
+              to={`/protocol/versions/${version.version}`}
+              style={{ textDecoration: "none" }}
+            >
+              <div
+                className="zt-trow"
+                style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 12px", borderTop: i ? "1px solid var(--border)" : "none" }}
+              >
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", width: 38, color: "var(--ink)" }}>
+                  {version.version}
+                </span>
+                <span style={{ flex: 1, minWidth: 0, fontSize: "var(--text-sm)", color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {version.notes || "—"}
+                </span>
+                {version.version === currentVersion?.version && (
+                  <Badge tone="success">Current</Badge>
+                )}
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
                   {format(parseISO(version.effectiveDate), "MMM yyyy")}
                 </span>
-              </Link>
-            ))}
-          </div>
-        </div>
+              </div>
+            </Link>
+          ))}
+        </Card>
 
         {/* Supplements by tier */}
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium">Supplements by Tier</h2>
-            <Link
-              to="/protocol/supplements"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Manage
-            </Link>
+        <Card padding="md">
+          <div style={{ padding: "4px 8px 8px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div className="zt-eyebrow">SUPPLEMENTS BY TIER</div>
+              <Link
+                to="/protocol/supplements"
+                style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
+              >
+                Manage →
+              </Link>
+            </div>
           </div>
-          <div className="space-y-3">
-            {Object.entries(SUPPLEMENT_TIERS).map(([tier, info]) => {
-              const count = supplementsByTier[tier] || 0;
-              return (
-                <div key={tier} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-medium ${info.color}`}>{info.label}</span>
-                  </div>
-                  <span className="text-sm text-gray-500">{count} supplements</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+          {Object.entries(SUPPLEMENT_TIERS).map(([tier, info], i) => {
+            const count = supplementsByTier[tier] || 0;
+            const toneMap: Record<string, "vital" | "focus" | "energy" | "neutral"> = {
+              tier1: "vital",
+              tier2: "focus",
+              tier3: "energy",
+              as_needed: "neutral",
+            };
+            return (
+              <div
+                key={tier}
+                className="zt-trow"
+                style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 12px", borderTop: i ? "1px solid var(--border)" : "none" }}
+              >
+                <Badge tone={toneMap[tier] || "neutral"}>{info.label}</Badge>
+                <span style={{ flex: 1, fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+                  {info.description.slice(0, 40)}
+                </span>
+                <span className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-md)", color: "var(--ink)" }}>
+                  {count}
+                </span>
+              </div>
+            );
+          })}
+        </Card>
       </div>
     </div>
   );

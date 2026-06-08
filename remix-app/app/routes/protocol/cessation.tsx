@@ -1,11 +1,20 @@
+import { Link } from "react-router";
+import { Check, Play, Circle, Info, ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/cessation";
-import { realCessationLog, CESSATION_START_DATE } from "../../lib/protocol-data";
+import { realCessationLog } from "../../lib/protocol-data";
 import { CESSATION_PHASES, type CessationPhase } from "../../types/protocol";
 import { differenceInDays, parseISO, format, addDays } from "date-fns";
+import { Card } from "../../components/ui/Card";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { MetricRing } from "../../components/ui/MetricRing";
+import { PhaseBar } from "../../components/ui/PhaseBar";
+import { ProgressBar } from "../../components/ui/ProgressBar";
+import { Button } from "../../components/ui/Button";
+import type { Phase } from "../../components/ui/PhaseBar";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Cessation Tracker - Zoetrop" },
+    { title: "Cessation tracker - Zoetrop" },
     { name: "description", content: "Track FAAH-based cessation protocol progress" },
   ];
 }
@@ -99,66 +108,124 @@ export function loader() {
   };
 }
 
+// Family tints per phase (per UI-SPEC cessation phase families)
+const PHASE_FAMILY: Record<CessationPhase, "energy" | "vital" | "focus" | null> = {
+  acute: "energy",
+  stabilization: "vital",
+  clearing: "vital",
+  optimization: "focus",
+};
+
+// Build PhaseBar phases from CESSATION_PHASES + current day
+function buildPhaseBarPhases(currentDay: number): Phase[] {
+  return CESSATION_PHASES.map((p) => {
+    const days = p.dayRange.end - p.dayRange.start + 1;
+    let state: Phase["state"];
+    if (currentDay > p.dayRange.end) {
+      state = "completed";
+    } else if (currentDay >= p.dayRange.start && currentDay <= p.dayRange.end) {
+      state = "current";
+    } else {
+      state = "upcoming";
+    }
+    return { id: p.phase, name: p.label, days, state };
+  });
+}
+
+// Phase card — family-tinted, calm "you" voice
 function PhaseCard({
   phase,
   status,
   progress,
-  isCurrent,
 }: {
   phase: (typeof CESSATION_PHASES)[0];
   status: "completed" | "current" | "upcoming";
   progress: number;
-  isCurrent: boolean;
 }) {
-  const statusColors = {
-    completed: "border-green-500 bg-green-50 dark:bg-green-900/20",
-    current: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
-    upcoming: "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900",
-  };
+  const family = PHASE_FAMILY[phase.phase];
+  const isCurrent = status === "current";
+  const isCompleted = status === "completed";
 
   return (
-    <div
-      className={`rounded-lg border-2 p-4 transition-all ${statusColors[status]} ${
-        isCurrent ? "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-950" : ""
-      }`}
+    <Card
+      padding="lg"
+      tone={family ?? undefined}
+      style={{
+        border: isCurrent ? "2px solid var(--ink)" : "1px solid var(--border)",
+        background: isCurrent ? "var(--focus-50)" : undefined,
+      }}
     >
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="font-semibold">{phase.label}</h3>
-        <span className="text-sm text-gray-500">
-          Days {phase.dayRange.start}-{phase.dayRange.end}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: "50%",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: isCompleted ? "var(--vital)" : isCurrent ? "var(--ink)" : "var(--n-150)",
+              color: isCompleted ? "#fff" : isCurrent ? "var(--n-50)" : "var(--text-muted)",
+              flexShrink: 0,
+            }}
+          >
+            {isCompleted ? (
+              <Check size={15} strokeWidth={2.4} />
+            ) : isCurrent ? (
+              <Play size={15} strokeWidth={2.4} />
+            ) : (
+              <Circle size={15} strokeWidth={2.4} />
+            )}
+          </span>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", color: "var(--ink)" }}>
+            {phase.label}
+          </span>
+        </div>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+          Days {phase.dayRange.start}–{phase.dayRange.end}
         </span>
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{phase.focus}</p>
+      <p style={{ margin: "12px 0 14px", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+        {phase.focus}
+      </p>
 
-      {/* Progress bar */}
-      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${
-            status === "completed"
-              ? "bg-green-500"
-              : status === "current"
-              ? "bg-blue-500"
-              : "bg-gray-300 dark:bg-gray-600"
-          }`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      <ProgressBar
+        value={progress}
+        max={100}
+        tone={family ?? "focus"}
+        height={7}
+      />
 
-      <div className="flex justify-between text-xs text-gray-500 mt-1">
-        <span>
-          {status === "completed"
-            ? "Completed"
-            : status === "current"
-            ? `${progress}%`
-            : "Upcoming"}
-        </span>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)" }}>
+        <span>{isCompleted ? "Completed" : isCurrent ? "In progress" : "Upcoming"}</span>
         <span>{phase.dayRange.end - phase.dayRange.start + 1} days</span>
       </div>
 
-      {/* Phase description */}
-      <p className="text-xs text-gray-500 mt-3">{phase.description}</p>
-    </div>
+      <p style={{ margin: "14px 0 0", color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+        {phase.description}
+      </p>
+    </Card>
+  );
+}
+
+// Stat tile — same ProtoStat pattern as overview
+function ProtoStat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+  return (
+    <Card padding="md" style={{ minHeight: 104, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div className="zt-eyebrow">{label}</div>
+      <div>
+        <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
+          {value}
+        </span>
+        {sub && (
+          <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 4 }}>
+            {sub}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }
 
@@ -179,157 +246,158 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
 
   if (!active) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center">
-          <h2 className="text-xl font-semibold mb-2">No Active Cessation Protocol</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Start tracking your FAAH-based cessation protocol to monitor progress through all four
-            phases.
+      <div>
+        <PageHeader
+          eyebrow="PROTOCOL · CESSATION"
+          title="Cessation tracker"
+          sub="Your FAAH-informed 150-day protocol, one phase at a time."
+        />
+        <Card padding="lg" style={{ textAlign: "center", marginBottom: "var(--gap-xl)" }}>
+          <p style={{ color: "var(--text-secondary)", marginBottom: 16 }}>
+            Nothing logged yet. Your first frame starts when you begin.
           </p>
-          <button className="px-4 py-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors">
-            Start Cessation Protocol
-          </button>
-        </div>
+        </Card>
 
         {/* Phase overview */}
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <h3 className="font-medium mb-4">FAAH-Based Protocol Phases</h3>
-          <div className="space-y-4">
-            {CESSATION_PHASES.map((phase) => (
-              <div key={phase.phase} className="flex gap-4">
-                <div className="w-24 text-sm font-medium">{phase.label}</div>
-                <div className="flex-1">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Days {phase.dayRange.start}-{phase.dayRange.end}: {phase.focus}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">{phase.description}</div>
-                </div>
+        <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>PHASES</div>
+        <div className="zt-grid-2">
+          {CESSATION_PHASES.map((phase) => (
+            <Card key={phase.phase} padding="lg">
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", color: "var(--ink)", marginBottom: 8 }}>
+                {phase.label}
               </div>
-            ))}
-          </div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginBottom: 10 }}>
+                DAYS {phase.dayRange.start}–{phase.dayRange.end}
+              </div>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>{phase.focus}</p>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: 8 }}>{phase.description}</p>
+            </Card>
+          ))}
         </div>
       </div>
     );
   }
 
   const overallProgress = Math.min((currentDay / targetDay) * 100, 100);
+  const phaseBarPhases = buildPhaseBarPhases(currentDay);
 
   return (
-    <div className="space-y-6">
-      {/* Main progress */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold">Day {currentDay}</h2>
-            <p className="text-gray-500">
-              {currentPhase.label} Phase • {daysInPhase} days in
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500">Target</div>
-            <div className="text-xl font-semibold">{targetDay} days</div>
-          </div>
-        </div>
+    <div>
+      <PageHeader
+        eyebrow="PROTOCOL · CESSATION"
+        title="Cessation tracker"
+        sub="Your FAAH-informed 150-day protocol, one phase at a time."
+        right={
+          <Link to="/protocol">
+            <Button variant="secondary" iconLeft={<ArrowLeft size={16} />}>
+              Protocol
+            </Button>
+          </Link>
+        }
+      />
 
-        {/* Overall progress bar */}
-        <div className="relative mb-4">
-          <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full transition-all duration-1000"
-              style={{ width: `${overallProgress}%` }}
-            />
-          </div>
-          {/* Phase markers */}
-          <div className="absolute inset-0 flex pointer-events-none">
-            {CESSATION_PHASES.slice(0, -1).map((phase) => (
-              <div
-                key={phase.phase}
-                className="border-r-2 border-white dark:border-gray-950"
-                style={{
-                  width: `${((phase.dayRange.end + 1) / targetDay) * 100}%`,
-                }}
-              />
-            ))}
+      {/* Hero card — MetricRing + PhaseBar */}
+      <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
+        <div style={{ display: "flex", gap: 32, alignItems: "center", flexWrap: "wrap" }}>
+          <MetricRing
+            value={overallProgress}
+            max={100}
+            tone="vital"
+            size={150}
+            thickness={15}
+            label={`${Math.round(overallProgress)}%`}
+            sublabel="complete"
+          />
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+              <span className="zt-readout" style={{ fontSize: "var(--text-3xl)", color: "var(--ink)" }}>
+                Day {currentDay}
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+                {currentPhase.label} phase · {daysInPhase} days in · target {targetDay}
+              </span>
+            </div>
+            <div style={{ marginTop: 22 }}>
+              <PhaseBar phases={phaseBarPhases} height={16} />
+            </div>
           </div>
         </div>
+      </Card>
 
-        {/* Key stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-2xl font-bold">{currentDay}</div>
-            <div className="text-xs text-gray-500">Current Day</div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-2xl font-bold">{targetDay - currentDay}</div>
-            <div className="text-xs text-gray-500">Days Remaining</div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-2xl font-bold">{daysUntilNextPhase || "—"}</div>
-            <div className="text-xs text-gray-500">Until Next Phase</div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-2xl font-bold">{Math.round(overallProgress)}%</div>
-            <div className="text-xs text-gray-500">Complete</div>
-          </div>
-        </div>
+      {/* Stat tiles */}
+      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-2xl)" }}>
+        <ProtoStat label="Current day" value={currentDay} />
+        <ProtoStat
+          label="Days remaining"
+          value={Math.max(0, targetDay - currentDay)}
+          sub={currentDay >= targetDay ? "Past target" : undefined}
+        />
+        <ProtoStat
+          label="Until next phase"
+          value={daysUntilNextPhase || "—"}
+        />
+        <ProtoStat
+          label="Complete"
+          value={`${Math.round(overallProgress)}%`}
+        />
       </div>
 
       {/* Phase cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>PHASES</div>
+      <div className="zt-grid-2" style={{ marginBottom: "var(--gap-2xl)" }}>
         {CESSATION_PHASES.map((phase) => {
-          const progress = phaseProgress.find((p) => p.phase === phase.phase);
+          const pp = phaseProgress.find((p) => p.phase === phase.phase);
           return (
             <PhaseCard
               key={phase.phase}
               phase={phase}
-              status={progress?.status || "upcoming"}
-              progress={progress?.progress || 0}
-              isCurrent={phase.phase === currentPhase.phase}
+              status={pp?.status || "upcoming"}
+              progress={pp?.progress || 0}
             />
           );
         })}
       </div>
 
-      {/* Timeline */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h3 className="font-medium mb-4">Timeline</h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Started</span>
-            <span className="font-medium">{startDate ? format(parseISO(startDate), "MMMM d, yyyy") : "—"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Current Phase End</span>
-            <span className="font-medium">
-              {startDate ? format(addDays(parseISO(startDate), currentPhase.dayRange.end), "MMMM d, yyyy") : "—"}
+      {/* Timeline + Why 150 days */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: "var(--gap-lg)", marginBottom: "var(--gap-lg)" }}>
+        <Card padding="lg">
+          <div className="zt-eyebrow" style={{ marginBottom: 12 }}>FAAH CESSATION TIMELINE</div>
+          {[
+            { label: "Started", value: startDate ? format(parseISO(startDate), "MMMM d, yyyy") : "—", tone: null },
+            { label: "Phase end", value: startDate ? format(addDays(parseISO(startDate), currentPhase.dayRange.end), "MMMM d, yyyy") : "—", tone: null },
+            { label: "Projected completion", value: projectedCompletion ? format(parseISO(projectedCompletion), "MMMM d, yyyy") : "—", tone: "vital" as const },
+          ].map((r, i, arr) => (
+            <div
+              key={r.label}
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none" }}
+            >
+              <span style={{ color: "var(--text-secondary)" }}>{r.label}</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "var(--text-sm)", color: r.tone === "vital" ? "var(--vital)" : "var(--ink)" }}>
+                {r.value}
+              </span>
+            </div>
+          ))}
+          {cessation?.notes && (
+            <div style={{ marginTop: 16, padding: 14, background: "var(--surface-sunken)", borderRadius: "var(--radius-md)", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+              {cessation.notes}
+            </div>
+          )}
+        </Card>
+
+        <Card tone="focus" padding="lg">
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <Info size={20} color="var(--focus-500, var(--focus))" />
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", color: "var(--ink)" }}>
+              Why 150 days?
             </span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Projected Completion</span>
-            <span className="font-medium text-green-600 dark:text-green-400">
-              {projectedCompletion ? format(parseISO(projectedCompletion), "MMMM d, yyyy") : "—"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Notes */}
-      {cessation?.notes && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <h3 className="font-medium mb-2">Notes</h3>
-          <p className="text-gray-600 dark:text-gray-400">{cessation.notes}</p>
-        </div>
-      )}
-
-      {/* FAAH explanation */}
-      <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 p-4">
-        <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Why 150 Days?</h3>
-        <p className="text-sm text-blue-800 dark:text-blue-200">
-          Lower FAAH activity (K3 inferred from SelfDecode) means slower anandamide breakdown. This
-          extends the metabolic clearing timeline beyond the typical 30-60 day window. The previous
-          76-day attempt was insufficient. A minimum of 120 days is required, with 150 days
-          recommended for full metabolic normalization.
-        </p>
+          <p style={{ margin: 0, color: "var(--text-secondary)", lineHeight: "var(--leading-relaxed)" }}>
+            Lower FAAH activity (K3 inferred from SelfDecode) means slower anandamide breakdown. This
+            extends the metabolic clearing timeline beyond the typical 30–60 day window. The previous
+            76-day attempt was insufficient. A minimum of 120 days is required, with 150 days
+            recommended for full metabolic normalization.
+          </p>
+        </Card>
       </div>
     </div>
   );

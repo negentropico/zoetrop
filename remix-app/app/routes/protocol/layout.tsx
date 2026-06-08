@@ -1,78 +1,50 @@
 import { NavLink, Outlet } from "react-router";
 
+// Sub-nav links for the protocol section.
+// Underline tab strip — Ink active underline 2px, weight 600, inactive weight 500 text-muted.
+const TABS = [
+  { to: "/protocol", label: "Overview", end: true },
+  { to: "/protocol/versions", label: "Versions", end: false },
+  { to: "/protocol/supplements", label: "Supplements", end: false },
+  { to: "/protocol/cessation", label: "Cessation", end: false },
+  { to: "/protocol/compare", label: "Compare", end: false },
+];
+
 export default function ProtocolLayout() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight mb-2">Protocol</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Manage supplement protocols, track version evolution, and monitor cessation progress
-        </p>
-      </div>
-
-      {/* Protocol navigation tabs */}
-      <nav className="flex gap-2 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-        <NavLink
-          to="/protocol"
-          end
-          className={({ isActive }) =>
-            `px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-              isActive
-                ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            }`
-          }
-        >
-          Overview
-        </NavLink>
-        <NavLink
-          to="/protocol/versions"
-          className={({ isActive }) =>
-            `px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-              isActive
-                ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            }`
-          }
-        >
-          Versions
-        </NavLink>
-        <NavLink
-          to="/protocol/supplements"
-          className={({ isActive }) =>
-            `px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-              isActive
-                ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            }`
-          }
-        >
-          Supplements
-        </NavLink>
-        <NavLink
-          to="/protocol/cessation"
-          className={({ isActive }) =>
-            `px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-              isActive
-                ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            }`
-          }
-        >
-          Cessation
-        </NavLink>
-        <NavLink
-          to="/protocol/compare"
-          className={({ isActive }) =>
-            `px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-              isActive
-                ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            }`
-          }
-        >
-          Compare
-        </NavLink>
+    <div>
+      {/* Underline tab strip */}
+      <nav
+        style={{
+          display: "flex",
+          gap: 4,
+          borderBottom: "1px solid var(--border)",
+          marginBottom: "var(--gap-2xl)",
+          overflowX: "auto",
+        }}
+      >
+        {TABS.map((tab) => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            end={tab.end}
+            style={({ isActive }) => ({
+              display: "inline-block",
+              padding: "12px 16px",
+              fontFamily: "var(--font-text)",
+              fontWeight: isActive ? 600 : 500,
+              fontSize: "var(--text-base)",
+              color: isActive ? "var(--ink)" : "var(--text-muted)",
+              whiteSpace: "nowrap",
+              borderBottom: `2px solid ${isActive ? "var(--ink)" : "transparent"}`,
+              marginBottom: -1,
+              textDecoration: "none",
+              transition: "color var(--dur-fast) var(--ease-out)",
+            })}
+          >
+            {tab.label}
+          </NavLink>
+        ))}
       </nav>
 
       <Outlet />
