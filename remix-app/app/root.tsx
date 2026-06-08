@@ -27,6 +27,33 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+// THROWAWAY pilot gate (Phase 2 stopgap, 2026-06-08): HTTP Basic-Auth on the
+// public Vercel deploy until Phase 3 real auth (Better-Auth) ships. Active only
+// when PILOT_BASIC_AUTH ("user:pass") is set in the environment — so local dev
+// (no such env var) is ungated. REMOVE this loader when Phase 3 auth lands.
+export async function loader({ request }: Route.LoaderArgs) {
+  const expected = process.env.PILOT_BASIC_AUTH;
+  if (expected) {
+    const header = request.headers.get("authorization") ?? "";
+    const [scheme, encoded] = header.split(" ");
+    let provided = "";
+    if (scheme === "Basic" && encoded) {
+      try {
+        provided = atob(encoded);
+      } catch {
+        provided = "";
+      }
+    }
+    if (provided !== expected) {
+      throw new Response("Authentication required", {
+        status: 401,
+        headers: { "WWW-Authenticate": 'Basic realm="Zoetrop pilot", charset="UTF-8"' },
+      });
+    }
+  }
+  return null;
+}
+
 // No-flash theme script (static literal — T-04.1-02: no interpolation of any
 // user/runtime value, reads only its own localStorage + matchMedia, writes only
 // data-theme; XSS-safe by construction).
