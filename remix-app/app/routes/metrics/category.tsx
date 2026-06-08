@@ -8,8 +8,39 @@ import {
 } from "../../types/metrics";
 import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
-import { TrendSparkline, TrendChart } from "../../components/ui/TrendChart";
+import { TrendSparkline } from "../../components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
+import {
+  Pill,
+  Gem,
+  Flame,
+  Zap,
+  FlaskConical,
+  HeartPulse,
+  Dumbbell,
+  Droplet,
+  Dna,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Card } from "../../components/ui/Card";
+import { CatChip } from "../../components/ui/CatChip";
+import { StatusBadge } from "../../components/ui/StatusBadge";
+import { StatusDot } from "../../components/ui/StatusDot";
+import { RangeBar } from "../../components/ui/RangeBar";
+import type { MetricWithRange } from "../../components/ui/RangeBar";
+import { Crumb } from "../../components/ui/Crumb";
+
+const LUCIDE_MAP: Record<string, LucideIcon> = {
+  pill: Pill,
+  gem: Gem,
+  flame: Flame,
+  zap: Zap,
+  "flask-conical": FlaskConical,
+  "heart-pulse": HeartPulse,
+  dumbbell: Dumbbell,
+  droplet: Droplet,
+  dna: Dna,
+};
 
 // Validate category param
 function isValidCategory(category: string): category is MetricCategory {
@@ -72,58 +103,75 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-// Status badge component
-function StatusBadge({ status }: { status: MetricStatus }) {
-  const styles: Record<MetricStatus, string> = {
-    optimal: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    borderline: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    deficient: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    excess: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+// Build a MetricWithRange from a Metric for the RangeBar
+function toRangeBarMetric(m: Metric): MetricWithRange | null {
+  if (!m.referenceRange) return null;
+  const ref = m.referenceRange;
+  const opt = m.optimalRange ?? ref;
+  const padding = (ref.max - ref.min) * 0.2;
+  return {
+    min: ref.min - padding,
+    max: ref.max + padding,
+    ref: [ref.min, ref.max],
+    opt: [opt.min, opt.max],
+    value: m.value,
+    status: getMetricStatus(m),
+    unit: m.unit,
   };
-
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>
-      {status}
-    </span>
-  );
 }
 
-// Filter controls
+// Filter controls using brand FilterPill style
 function FilterControls() {
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFilter = searchParams.get("status") || "all";
 
-  const statuses: Array<{ value: string; label: string }> = [
+  const statuses: Array<{ value: string; label: string; status?: MetricStatus }> = [
     { value: "all", label: "All" },
-    { value: "optimal", label: "Optimal" },
-    { value: "borderline", label: "Borderline" },
-    { value: "deficient", label: "Deficient" },
-    { value: "excess", label: "Excess" },
+    { value: "optimal", label: "Optimal", status: "optimal" },
+    { value: "borderline", label: "Borderline", status: "borderline" },
+    { value: "deficient", label: "Deficient", status: "deficient" },
+    { value: "excess", label: "Excess", status: "excess" },
   ];
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {statuses.map(({ value, label }) => (
-        <button
-          key={value}
-          onClick={() => {
-            const newParams = new URLSearchParams(searchParams);
-            if (value === "all") {
-              newParams.delete("status");
-            } else {
-              newParams.set("status", value);
-            }
-            setSearchParams(newParams);
-          }}
-          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-            statusFilter === value || (value === "all" && !searchParams.has("status"))
-              ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-          }`}
-        >
-          {label}
-        </button>
-      ))}
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "var(--gap-lg)" }}>
+      {statuses.map(({ value, label, status }) => {
+        const isActive = statusFilter === value || (value === "all" && !searchParams.has("status"));
+        return (
+          <button
+            key={value}
+            onClick={() => {
+              const newParams = new URLSearchParams(searchParams);
+              if (value === "all") {
+                newParams.delete("status");
+              } else {
+                newParams.set("status", value);
+              }
+              setSearchParams(newParams);
+            }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 14px",
+              borderRadius: "var(--radius-pill)",
+              cursor: "pointer",
+              fontFamily: "var(--font-text)",
+              fontSize: "var(--text-sm)",
+              fontWeight: 600,
+              background: isActive ? "var(--ink)" : "var(--surface)",
+              color: isActive ? "var(--n-50)" : "var(--text-secondary)",
+              border: `1px solid ${isActive ? "var(--ink)" : "var(--border)"}`,
+              transition: "all var(--dur-fast) var(--ease-out)",
+            }}
+          >
+            {status && (
+              <StatusDot status={status} size={8} />
+            )}
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -152,101 +200,153 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get("status");
 
+  const icon = LUCIDE_MAP[categoryInfo.icon];
+
   // Filter metrics by status if filter is applied
   const filteredMetrics = statusFilter
     ? metrics.filter((m: MetricWithHistory) => getMetricStatus(m) === statusFilter)
     : metrics;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">{categoryInfo.icon}</span>
-          <h1 className="text-2xl font-bold tracking-tight">{categoryInfo.label}</h1>
+    <div>
+      {/* Breadcrumb */}
+      <Crumb items={[{ label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]} />
+
+      {/* Category header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: "var(--gap-xl)" }}>
+        {icon && <CatChip icon={icon} family={categoryInfo.family} size={52} />}
+        <div>
+          <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 600 }}>{categoryInfo.label}</h1>
+          <p style={{ margin: "4px 0 0", color: "var(--text-secondary)" }}>{categoryInfo.description}</p>
         </div>
-        <p className="text-gray-600 dark:text-gray-400">
-          {categoryInfo.description} - {totalCount} metrics tracked
-        </p>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 18 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-xs)",
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
+            {totalCount} tracked
+          </span>
+        </div>
       </div>
 
       <FilterControls />
 
-      <div className="space-y-3">
+      {/* Metric list */}
+      <Card padding="md">
         {filteredMetrics.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-500">
-            No metrics found {statusFilter ? `with status "${statusFilter}"` : ""}
+          <div
+            style={{
+              textAlign: "center",
+              padding: "var(--gap-3xl) 0",
+              color: "var(--text-muted)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-sm)",
+            }}
+          >
+            Nothing logged yet.
+            {statusFilter ? ` No ${statusFilter} metrics in this category.` : ""}
           </div>
         ) : (
           filteredMetrics.map((metric: MetricWithHistory) => {
             const status = getMetricStatus(metric);
-            const trend = getTrendInfo(metric.history);
+            const rangeM = toRangeBarMetric(metric);
+            const sparkData = metric.history.map((h) => h.value);
 
             return (
               <Link
                 key={metric.id}
                 to={`/metrics/${category}/${metric.id}`}
-                className="block rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-all"
+                style={{ textDecoration: "none", display: "block" }}
               >
-                <div className="flex items-center gap-4">
-                  {/* Main info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium truncate">{metric.name}</h3>
-                      <StatusBadge status={status} />
-                      {(metric.history.length > 1 || metric.hasProjections) && (
-                        <span
-                          className="flex-shrink-0 text-blue-500 dark:text-blue-400"
-                          title={`${metric.history.length} data points${metric.hasProjections ? " + projections" : ""}`}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                          </svg>
-                        </span>
-                      )}
+                <div
+                  className="zt-mrow"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "18px minmax(120px,1.4fr) 80px minmax(120px,1.6fr) 140px",
+                    alignItems: "center",
+                    gap: 16,
+                    padding: "12px 12px",
+                  }}
+                >
+                  <StatusDot status={status} />
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "var(--text-base)", color: "var(--ink)" }}>
+                      {metric.name}
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }}>
                       {format(parseISO(metric.timestamp), "MMM d, yyyy")}
-                      {metric.history.length > 1 && (
-                        <span className="ml-2 text-gray-400">
-                          ({metric.history.length} measurements)
-                        </span>
-                      )}
-                    </p>
+                    </div>
                   </div>
-
-                  {/* Trend sparkline */}
-                  {metric.history.length > 1 && (
-                    <div className="flex-shrink-0">
-                      <TrendSparkline data={metric.history} width={80} height={32} />
-                    </div>
+                  {/* Sparkline */}
+                  {metric.history.length > 1 ? (
+                    <TrendSparkline data={metric.history} width={80} height={32} />
+                  ) : (
+                    <div />
                   )}
-
-                  {/* Current value and trend */}
-                  <div className="text-right flex-shrink-0 w-28">
-                    <div className="text-lg font-semibold">{metric.value.toFixed(1)}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-500 flex items-center justify-end gap-1">
-                      {metric.unit}
-                      {trend && (
-                        <span
-                          className={`text-xs ${
-                            trend.direction === "up"
-                              ? "text-green-600"
-                              : trend.direction === "down"
-                              ? "text-red-600"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {trend.direction === "up" ? "+" : ""}
-                          {trend.change.toFixed(0)}%
-                        </span>
-                      )}
+                  {/* RangeBar */}
+                  {rangeM ? <RangeBar m={rangeM} height={6} /> : <div />}
+                  {/* Value + status badge */}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                      <span
+                        className="zt-tnum"
+                        style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-base)" }}
+                      >
+                        {metric.value.toFixed(1)}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "var(--text-2xs)",
+                          color: "var(--text-muted)",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {metric.unit}
+                      </span>
                     </div>
+                    <StatusBadge status={status} />
                   </div>
                 </div>
               </Link>
             );
           })
         )}
+      </Card>
+
+      {/* Range legend */}
+      <div
+        style={{
+          marginTop: "var(--gap-lg)",
+          padding: "0 8px",
+          display: "flex",
+          gap: 20,
+          flexWrap: "wrap",
+          alignItems: "center",
+          fontFamily: "var(--font-mono)",
+          fontSize: "var(--text-2xs)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          color: "var(--text-muted)",
+        }}
+      >
+        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 16, height: 8, background: "var(--vital-100)", borderRadius: "var(--radius-xs)" }} />
+          Optimal
+        </span>
+        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 16, height: 8, background: "var(--n-150)", borderRadius: "var(--radius-xs)" }} />
+          Reference
+        </span>
+        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <span style={{ width: 3, height: 12, background: "var(--ink)", borderRadius: 2 }} />
+          Value
+        </span>
       </div>
     </div>
   );

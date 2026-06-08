@@ -10,6 +10,13 @@ import { getRealMetrics, getProjections, getMetricTargets, MILESTONES } from "..
 import { getMetricStatus } from "~/lib/metrics";
 import { TrendChart } from "../../components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
+import { Card } from "../../components/ui/Card";
+import { StatusBadge } from "../../components/ui/StatusBadge";
+import { RangeBar } from "../../components/ui/RangeBar";
+import type { MetricWithRange } from "../../components/ui/RangeBar";
+import { DataTable } from "../../components/ui/DataTable";
+import { Crumb } from "../../components/ui/Crumb";
+import { Badge } from "../../components/ui/Badge";
 
 function isValidCategory(category: string): category is MetricCategory {
   return category in CATEGORY_INFO;
@@ -66,144 +73,158 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-function StatusBadge({ status }: { status: MetricStatus }) {
-  const styles: Record<MetricStatus, string> = {
-    optimal: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    borderline: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    deficient: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    excess: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+// Build a MetricWithRange from a Metric for the RangeBar
+function toRangeBarMetric(m: Metric): MetricWithRange | null {
+  if (!m.referenceRange) return null;
+  const ref = m.referenceRange;
+  const opt = m.optimalRange ?? ref;
+  const padding = (ref.max - ref.min) * 0.1;
+  return {
+    min: ref.min - padding,
+    max: ref.max + padding,
+    ref: [ref.min, ref.max],
+    opt: [opt.min, opt.max],
+    value: m.value,
+    status: getMetricStatus(m),
+    unit: m.unit,
   };
-
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>
-      {status}
-    </span>
-  );
 }
 
-function RangeIndicator({ metric }: { metric: Metric }) {
-  const { value, referenceRange, optimalRange } = metric;
+const DIRECTION_LABELS: Record<string, string> = {
+  "higher is better": "Higher is better",
+  "lower is better": "Lower is better",
+  "target range": "Target range",
+};
 
-  if (!referenceRange) return null;
-
-  const range = referenceRange.max - referenceRange.min;
-  const padding = range * 0.1;
-  const minDisplay = referenceRange.min - padding;
-  const maxDisplay = referenceRange.max + padding;
-  const totalRange = maxDisplay - minDisplay;
-
-  const valuePercent = ((value - minDisplay) / totalRange) * 100;
-  const refMinPercent = ((referenceRange.min - minDisplay) / totalRange) * 100;
-  const refMaxPercent = ((referenceRange.max - minDisplay) / totalRange) * 100;
-
-  let optMinPercent = 0;
-  let optMaxPercent = 100;
-  if (optimalRange) {
-    optMinPercent = ((optimalRange.min - minDisplay) / totalRange) * 100;
-    optMaxPercent = ((optimalRange.max - minDisplay) / totalRange) * 100;
-  }
-
-  return (
-    <div className="space-y-2">
-      <div className="relative h-8 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-        {/* Reference range */}
-        <div
-          className="absolute top-0 bottom-0 bg-yellow-200 dark:bg-yellow-900/30"
-          style={{
-            left: `${refMinPercent}%`,
-            width: `${refMaxPercent - refMinPercent}%`,
-          }}
-        />
-        {/* Optimal range */}
-        {optimalRange && (
-          <div
-            className="absolute top-0 bottom-0 bg-green-200 dark:bg-green-900/30"
-            style={{
-              left: `${optMinPercent}%`,
-              width: `${optMaxPercent - optMinPercent}%`,
-            }}
-          />
-        )}
-        {/* Value marker */}
-        <div
-          className="absolute top-0 bottom-0 w-1 bg-gray-900 dark:bg-white"
-          style={{ left: `${Math.max(0, Math.min(100, valuePercent))}%` }}
-        />
-      </div>
-      <div className="flex justify-between text-xs text-gray-500">
-        <span>{referenceRange.min} {metric.unit}</span>
-        <span>{referenceRange.max} {metric.unit}</span>
-      </div>
-      <div className="flex gap-4 text-xs">
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 bg-green-200 dark:bg-green-900/30 rounded" />
-          Optimal
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 bg-yellow-200 dark:bg-yellow-900/30 rounded" />
-          Reference
-        </span>
-      </div>
-    </div>
-  );
-}
+type HistoryEntry = { timestamp: string; value: number };
 
 export default function MetricDetail({ loaderData }: Route.ComponentProps) {
   const { category, categoryInfo, metric, history, projections, targets } = loaderData;
   const status = getMetricStatus(metric);
+  const rangeM = toRangeBarMetric(metric);
+
+  // Ring percentage for the optional MetricRing (not rendered in detail view per spec — just big readout)
+  const dirLabel = DIRECTION_LABELS[metric.improvement] ?? "Target range";
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500">
-        <Link to="/metrics" className="hover:text-gray-900 dark:hover:text-gray-100">
-          Metrics
-        </Link>
-        <span>/</span>
-        <Link
-          to={`/metrics/${category}`}
-          className="hover:text-gray-900 dark:hover:text-gray-100"
-        >
-          {categoryInfo.label}
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">{metric.name}</span>
-      </nav>
+      <Crumb
+        items={[
+          { label: "Metrics", to: "/metrics" },
+          { label: categoryInfo.label, to: `/metrics/${category}` },
+          { label: metric.name },
+        ]}
+      />
 
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold tracking-tight">{metric.name}</h1>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 24,
+          flexWrap: "wrap",
+          marginBottom: "var(--gap-2xl)",
+        }}
+      >
+        <div style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 600, lineHeight: 1.1, whiteSpace: "nowrap" }}>
+              {metric.name}
+            </h1>
             <StatusBadge status={status} />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Last updated: {format(parseISO(metric.timestamp), "MMMM d, yyyy 'at' h:mm a")}
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-xs)",
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
+            Last updated {format(parseISO(metric.timestamp), "MMM d, yyyy")}
+            {metric.source ? ` · ${metric.source}` : ""}
           </p>
         </div>
-        <div className="text-right">
-          <div className="text-3xl font-bold">{metric.value.toFixed(2)}</div>
-          <div className="text-gray-500 dark:text-gray-500">{metric.unit}</div>
+        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+          <span className="zt-readout" style={{ fontSize: "var(--text-3xl)" }}>
+            {metric.value.toFixed(2)}
+          </span>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-sm)",
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              marginTop: 2,
+            }}
+          >
+            {metric.unit}
+          </div>
         </div>
       </div>
 
-      {/* Range visualization */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-4">Range Status</h2>
-        <RangeIndicator metric={metric} />
-      </div>
+      {/* Range status */}
+      <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+        <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>
+          Range status
+        </div>
+        {rangeM ? (
+          <div style={{ padding: "14px 4px 4px" }}>
+            <RangeBar m={rangeM} height={14} showEndpoints />
+          </div>
+        ) : (
+          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+            No reference range available.
+          </p>
+        )}
+        {/* Range legend */}
+        <div
+          style={{
+            marginTop: 18,
+            display: "flex",
+            gap: 20,
+            flexWrap: "wrap",
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-2xs)",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "var(--text-muted)",
+          }}
+        >
+          <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+            <span style={{ width: 16, height: 9, background: "var(--vital-100)", border: "1px solid var(--vital-200, var(--vital-100))", borderRadius: 2 }} />
+            Optimal band
+          </span>
+          <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+            <span style={{ width: 16, height: 9, background: "var(--n-150)", borderRadius: 2 }} />
+            Reference
+          </span>
+          <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+            <span style={{ width: 3, height: 12, background: "var(--ink)", borderRadius: 2 }} />
+            Value
+          </span>
+        </div>
+      </Card>
 
-      {/* Trend Chart with Projections */}
+      {/* Trend over time */}
       {history.length > 0 && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-medium">
-              {history.length > 1 ? "Trend Over Time" : "Current vs Target"}
-            </h2>
+        <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "var(--gap-md)",
+            }}
+          >
+            <div className="zt-eyebrow">Trend over time</div>
             {projections.length > 0 && (
-              <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                With 2026 Targets
-              </span>
+              <Badge tone="focus">With 2026 targets</Badge>
             )}
           </div>
           <TrendChart
@@ -214,96 +235,238 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
             referenceRange={metric.referenceRange}
             height={280}
           />
-          <div className="flex flex-wrap gap-4 mt-4 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-blue-500" />
+          {/* Chart legend */}
+          <div
+            style={{
+              display: "flex",
+              gap: 20,
+              flexWrap: "wrap",
+              marginTop: 12,
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-2xs)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "var(--text-muted)",
+            }}
+          >
+            <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+              <span style={{ width: 16, height: 2.5, background: "var(--ink)", borderRadius: 2 }} />
               Actual
             </span>
             {projections.length > 0 && (
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-0.5 bg-purple-500" style={{ borderTop: "2px dashed #a855f7" }} />
+              <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+                <span style={{ width: 16, height: 0, borderTop: "2.5px dashed var(--energy-400, var(--energy))" }} />
                 Target
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-green-500 opacity-50" />
-              Optimal
+            <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+              <span style={{ width: 16, height: 9, background: "var(--vital-50)", border: "1px solid var(--vital-200, var(--vital-100))", borderRadius: 2 }} />
+              Optimal band
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-yellow-500 opacity-50" />
+            <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+              <span style={{ width: 16, height: 9, border: "1px dashed var(--n-200)", borderRadius: 2 }} />
               Reference
             </span>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* 2026 Targets */}
       {targets && (
-        <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-4">
-          <h2 className="font-medium mb-3 text-purple-900 dark:text-purple-100">2026 Targets</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <Card tone="focus" padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+          <div
+            className="zt-eyebrow"
+            style={{ color: "var(--focus-500, var(--focus))", marginBottom: 16 }}
+          >
+            2026 targets
+          </div>
+          <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
             <div>
-              <div className="text-purple-600 dark:text-purple-400 text-xs mb-1">Q1 Target (Apr)</div>
-              <div className="font-semibold text-purple-900 dark:text-purple-100">
-                {targets.q1Target} {targets.unit}
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--focus-500, var(--focus))",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Q1 target · Apr
+              </div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", marginTop: 6 }}>
+                {targets.q1Target}{" "}
+                <span style={{ fontSize: "var(--text-md)", color: "var(--text-muted)" }}>{targets.unit}</span>
               </div>
             </div>
             <div>
-              <div className="text-purple-600 dark:text-purple-400 text-xs mb-1">Q2 Stretch (Jul)</div>
-              <div className="font-semibold text-purple-900 dark:text-purple-100">
-                {targets.q2Stretch} {targets.unit}
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--focus-500, var(--focus))",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Q2 stretch · Jul
+              </div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", marginTop: 6 }}>
+                {targets.q2Stretch}{" "}
+                <span style={{ fontSize: "var(--text-md)", color: "var(--text-muted)" }}>{targets.unit}</span>
               </div>
             </div>
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--focus-500, var(--focus))",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Direction
+              </div>
+              <div style={{ marginTop: 10, fontWeight: 600 }}>{targets.direction}</div>
+            </div>
           </div>
-          <div className="mt-3 text-xs text-purple-600 dark:text-purple-400">
-            Direction: {targets.direction === "higher" ? "Higher is better" : targets.direction === "lower" ? "Lower is better" : "Target range"}
-          </div>
-        </div>
+        </Card>
       )}
 
-      {/* History Table */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-4">Measurements ({history.length})</h2>
-        <div className="space-y-2">
-          {history.map((entry, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0"
-            >
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {format(parseISO(entry.timestamp), "MMM d, yyyy")}
-              </span>
-              <span className="font-medium">
-                {entry.value.toFixed(2)} {metric.unit}
+      {/* Measurements + Details */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.3fr 1fr",
+          gap: "var(--gap-lg)",
+        }}
+        className="measurements-grid"
+      >
+        {/* Measurements table */}
+        <Card padding="md">
+          <div style={{ padding: "4px 8px 14px" }}>
+            <div className="zt-eyebrow">
+              Measurements{" "}
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-faint)",
+                  marginLeft: 6,
+                }}
+              >
+                {history.length}
               </span>
             </div>
-          ))}
-        </div>
+          </div>
+          <DataTable<HistoryEntry>
+            columns={[
+              {
+                key: "timestamp",
+                label: "Date",
+                render: (r) => format(parseISO(r.timestamp), "MMM d, yyyy"),
+              },
+              {
+                key: "value",
+                label: metric.unit,
+                align: "right",
+                mono: true,
+                render: (r) => `${r.value.toFixed(2)} ${metric.unit}`,
+              },
+            ]}
+            rows={history}
+            rowKey={(r) => r.timestamp}
+          />
+        </Card>
+
+        {/* Details card */}
+        <Card padding="lg">
+          <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-lg)" }}>Details</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Source
+              </div>
+              <div style={{ fontWeight: 600, marginTop: 4, textTransform: "capitalize" }}>
+                {metric.source}
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Improvement direction
+              </div>
+              <div style={{ fontWeight: 600, marginTop: 4 }}>{dirLabel}</div>
+            </div>
+            {metric.referenceRange && (
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  Reference range
+                </div>
+                <div
+                  className="zt-tnum"
+                  style={{ fontFamily: "var(--font-mono)", fontWeight: 600, marginTop: 4 }}
+                >
+                  {metric.referenceRange.min}–{metric.referenceRange.max} {metric.unit}
+                  {metric.optimalRange && (
+                    <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>
+                      {" · "}optimal {metric.optimalRange.min}–{metric.optimalRange.max}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Sync status
+              </div>
+              <div style={{ fontWeight: 600, marginTop: 4, textTransform: "capitalize" }}>
+                {metric.syncStatus}
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      {/* Metadata */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h2 className="font-medium mb-4">Details</h2>
-        <dl className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <dt className="text-gray-500 dark:text-gray-500">Source</dt>
-            <dd className="font-medium capitalize">{metric.source}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500 dark:text-gray-500">Improvement Direction</dt>
-            <dd className="font-medium capitalize">{metric.improvement}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500 dark:text-gray-500">Sync Status</dt>
-            <dd className="font-medium capitalize">{metric.syncStatus}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500 dark:text-gray-500">Version</dt>
-            <dd className="font-medium">{metric.syncVersion}</dd>
-          </div>
-        </dl>
-      </div>
+      {/* Responsive: stack grid on mobile */}
+      <style>{`
+        @media (max-width: 760px) {
+          .measurements-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
-
