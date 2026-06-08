@@ -141,12 +141,15 @@ export interface StoredMetrics {
 }
 
 // Category metadata
+// icon: Lucide icon name (D-05) — replaces emoji; used with CatChip via dynamic icon lookup
+// family: metric family for CatChip tint (D-04) — 'vital' | 'energy' | null
+// color field removed: color is now status-driven via CatChip/StatusBadge
 export interface CategoryInfo {
   id: MetricCategory;
   label: string;
   description: string;
-  icon: string; // Lucide icon name
-  color: string; // Tailwind color class
+  icon: string; // Lucide icon name (e.g. 'pill', 'heart-pulse', 'dna')
+  family: 'vital' | 'energy' | null; // metric family for CatChip tint
 }
 
 export const CATEGORY_INFO: Record<MetricCategory, CategoryInfo> = {
@@ -154,63 +157,63 @@ export const CATEGORY_INFO: Record<MetricCategory, CategoryInfo> = {
     id: 'vitamins',
     label: 'Vitamins',
     description: 'B-vitamins and fat-soluble vitamins',
-    icon: '💊',
-    color: 'text-amber-500',
+    icon: 'pill',
+    family: null,
   },
   minerals: {
     id: 'minerals',
     label: 'Minerals',
     description: 'Essential and trace minerals',
-    icon: '💎',
-    color: 'text-slate-500',
+    icon: 'gem',
+    family: null,
   },
   inflammatory: {
     id: 'inflammatory',
     label: 'Inflammatory',
     description: 'Inflammation markers',
-    icon: '🔥',
-    color: 'text-red-500',
+    icon: 'flame',
+    family: null,
   },
   metabolic: {
     id: 'metabolic',
     label: 'Metabolic',
     description: 'Glucose, kidney, electrolytes',
-    icon: '⚡',
-    color: 'text-yellow-500',
+    icon: 'zap',
+    family: null,
   },
   hormones: {
     id: 'hormones',
     label: 'Hormones',
     description: 'Sex, thyroid, cortisol',
-    icon: '🧪',
-    color: 'text-purple-500',
+    icon: 'flask-conical',
+    family: null,
   },
   autonomic: {
     id: 'autonomic',
     label: 'Autonomic',
     description: 'HRV, recovery, sleep (WHOOP)',
-    icon: '💓',
-    color: 'text-pink-500',
+    icon: 'heart-pulse',
+    family: 'vital',
   },
   bodyComposition: {
     id: 'bodyComposition',
     label: 'Body Composition',
     description: 'DEXA, lean mass, body fat',
-    icon: '🏋️',
-    color: 'text-blue-500',
+    icon: 'dumbbell',
+    family: 'energy',
   },
   lipids: {
     id: 'lipids',
     label: 'Lipids',
     description: 'Cholesterol, triglycerides',
-    icon: '🩸',
-    color: 'text-orange-500',
+    icon: 'droplet',
+    family: null,
   },
   hematology: {
     id: 'hematology',
     label: 'Hematology',
     description: 'CBC, hemoglobin, WBC',
-    icon: '🧬',
-    color: 'text-rose-500',
+    icon: 'dna',
+    family: null,
   },
 };

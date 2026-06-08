@@ -40,7 +40,7 @@ export default function MetricsLayout() {
                     }`
                   }
                 >
-                  <span className={info.color}>{info.icon}</span>
+                  <span className="text-ink">{info.icon}</span>
                   {info.label}
                 </NavLink>
               );
