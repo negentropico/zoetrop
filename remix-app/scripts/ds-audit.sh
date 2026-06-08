@@ -6,6 +6,9 @@
 #   UI-01-i  No banned semantic hexes hardcoded in app/components/ sources
 #   UI-01-n  No bare-1fr multi-column grid tracks in app/app.css .zt-grid-*
 #            helpers (grid-blowout regression guard — must use minmax(0,1fr))
+#   UI-01-o  No raw <table> in app/routes/ — tabular UI must use the DataTable
+#            component (its overflow-x-auto + min-width:0 wrapper prevents the
+#            mobile page-overflow class found in 04.1-09 round 2)
 #
 # Usage:
 #   bash scripts/ds-audit.sh      (from remix-app/)
@@ -86,6 +89,28 @@ if [ -n "${GRID_VIOLATIONS}" ]; then
   FAILED=1
 else
   echo "[ds-audit] PASS UI-01-n: no bare-1fr multi-column grid tracks in ${CSS_FILE}"
+fi
+
+# ── Gate 4: No raw <table> in app/routes/ ─────────────────────────────────────
+# Table-overflow regression guard (UI-01-o). A raw <table> in a route renders at
+# its intrinsic (often >640px) width and, without an overflow-x-auto + min-width:0
+# scroll wrapper, pushes the whole page wider than a mobile viewport. The shared
+# DataTable component already bakes that wrapper in, so all tabular UI must go
+# through it. This gate FAILS on any literal `<table` opening tag in app/routes/.
+ROUTES_DIR="app/routes"
+echo "[ds-audit] UI-01-o: checking for raw <table> elements in ${ROUTES_DIR}..."
+
+RAW_TABLES=$(
+  find "${ROUTES_DIR}" -type f \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null |
+  xargs grep -nE "<table[ >/]" 2>/dev/null || true
+)
+
+if [ -n "${RAW_TABLES}" ]; then
+  echo "[ds-audit] FAIL UI-01-o: raw <table> found in routes (use the DataTable component):"
+  echo "${RAW_TABLES}" | sed 's/^/  /'
+  FAILED=1
+else
+  echo "[ds-audit] PASS UI-01-o: no raw <table> in ${ROUTES_DIR} (tabular UI uses DataTable)"
 fi
 
 # ── Result ────────────────────────────────────────────────────────────────────
