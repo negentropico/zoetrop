@@ -4,12 +4,14 @@
 # Gates:
 #   UI-01-b  No .jsx files shipped into app/components/ (must be .tsx only)
 #   UI-01-i  No banned semantic hexes hardcoded in app/components/ sources
+#   UI-01-n  No bare-1fr multi-column grid tracks in app/app.css .zt-grid-*
+#            helpers (grid-blowout regression guard — must use minmax(0,1fr))
 #
 # Usage:
 #   bash scripts/ds-audit.sh      (from remix-app/)
 #   npm run ds:audit
 #
-# Exits 0 if both gates pass. Exits 1 if either gate fails.
+# Exits 0 if all gates pass. Exits 1 if any gate fails.
 #
 # Wave 3 exclusions cleared — TrendChart brand-token port completed in Phase 04.1 Plan 03.
 
@@ -54,6 +56,36 @@ if [ -n "${HEX_MATCHES}" ]; then
   FAILED=1
 else
   echo "[ds-audit] PASS UI-01-i: no banned semantic hexes in ${COMPONENTS_DIR}"
+fi
+
+# ── Gate 3: No bare-1fr multi-column grid tracks in app/app.css ───────────────
+# Grid-blowout regression guard (UI-01-n). In CSS Grid a bare `1fr` track is
+# `minmax(auto, 1fr)` — its `auto` floor is the column min-content, so a
+# non-shrinkable child pushes the track past its 1fr share and blows the grid
+# wider than its container (clips later columns). Multi-column .zt-grid-* tracks
+# must use `minmax(0, 1fr)` instead. This gate FAILS on any multi-column
+# grid-template-columns in app/app.css that still uses a bare `1fr` track.
+CSS_FILE="app/app.css"
+echo "[ds-audit] UI-01-n: checking for bare-1fr multi-column grid tracks in ${CSS_FILE}..."
+
+# Match grid-template-columns declarations that contain a bare-1fr MULTI-column
+# track and do NOT use minmax(0:
+#   repeat(<n>, 1fr)   — repeat form
+#   1fr 1fr (1fr ...)  — explicit multi-column form
+# Single-column `1fr` (e.g. mobile collapse `grid-template-columns: 1fr;`) and
+# minmax(0, 1fr) forms PASS.
+GRID_VIOLATIONS=$(
+  grep -nE "grid-template-columns:" "${CSS_FILE}" 2>/dev/null |
+  grep -v "minmax(0" |
+  grep -E "repeat\([0-9]+,[[:space:]]*1fr\)|1fr[[:space:]]+1fr" || true
+)
+
+if [ -n "${GRID_VIOLATIONS}" ]; then
+  echo "[ds-audit] FAIL UI-01-n: bare-1fr multi-column grid tracks found (use minmax(0,1fr)):"
+  echo "${GRID_VIOLATIONS}" | sed 's/^/  /'
+  FAILED=1
+else
+  echo "[ds-audit] PASS UI-01-n: no bare-1fr multi-column grid tracks in ${CSS_FILE}"
 fi
 
 # ── Result ────────────────────────────────────────────────────────────────────
