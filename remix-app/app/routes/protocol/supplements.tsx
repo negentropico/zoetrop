@@ -3,6 +3,9 @@ import { useSearchParams } from "react-router";
 import type { Route } from "./+types/supplements";
 import { realSupplements } from "../../lib/protocol-data";
 import { SUPPLEMENT_TIERS, type SupplementTier, type Supplement } from "../../types/protocol";
+import { Card } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -38,75 +41,95 @@ export function loader() {
   };
 }
 
+// Tier badge using brand tones
 function TierBadge({ tier }: { tier: SupplementTier }) {
+  const toneMap: Record<SupplementTier, "vital" | "focus" | "energy" | "neutral"> = {
+    tier1: "vital",
+    tier2: "focus",
+    tier3: "energy",
+    as_needed: "neutral",
+  };
   const info = SUPPLEMENT_TIERS[tier];
-  return (
-    <span className={`px-2 py-0.5 text-xs font-medium rounded ${info.color} bg-current/10`}>
-      {info.label}
-    </span>
-  );
+  return <Badge tone={toneMap[tier] || "neutral"}>{info.label}</Badge>;
 }
 
 function SupplementCard({ supplement }: { supplement: Supplement }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div
-      className={`rounded-lg border bg-white dark:bg-gray-900 p-4 transition-all ${
-        supplement.isActive
-          ? "border-gray-200 dark:border-gray-800"
-          : "border-gray-100 dark:border-gray-900 opacity-60"
-      }`}
+    <Card
+      padding="md"
+      style={{ opacity: supplement.isActive ? 1 : 0.6 }}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-medium">{supplement.name}</h3>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+            <span style={{ fontWeight: 500, color: "var(--ink)", fontSize: "var(--text-sm)" }}>
+              {supplement.name}
+            </span>
             <TierBadge tier={supplement.tier} />
             {!supplement.isActive && (
-              <span className="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 rounded">
-                Inactive
-              </span>
+              <Badge tone="neutral">Inactive</Badge>
             )}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {supplement.dosage} {supplement.unit} • {supplement.frequency}
-            {supplement.timing && ` • ${supplement.timing}`}
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+            {supplement.dosage} {supplement.unit} · {supplement.frequency}
+            {supplement.timing && ` · ${supplement.timing}`}
           </div>
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "var(--radius-sm)",
+            border: "1px solid var(--border)",
+            background: "var(--surface-2)",
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-base)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            marginLeft: 8,
+          }}
+          aria-label={expanded ? "Collapse" : "Expand"}
         >
           {expanded ? "−" : "+"}
         </button>
       </div>
 
       {expanded && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2 text-sm">
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
           {supplement.geneticBasis && (
-            <div>
-              <span className="text-gray-500">Genetic basis:</span>{" "}
-              <span className="text-gray-900 dark:text-gray-100">{supplement.geneticBasis}</span>
+            <div style={{ marginBottom: 8, fontSize: "var(--text-sm)" }}>
+              <span style={{ color: "var(--text-muted)" }}>Genetic basis: </span>
+              <span style={{ color: "var(--ink)" }}>{supplement.geneticBasis}</span>
             </div>
           )}
           {supplement.notes && (
-            <div>
-              <span className="text-gray-500">Notes:</span>{" "}
-              <span className="text-gray-900 dark:text-gray-100">{supplement.notes}</span>
+            <div style={{ marginBottom: 8, fontSize: "var(--text-sm)" }}>
+              <span style={{ color: "var(--text-muted)" }}>Notes: </span>
+              <span style={{ color: "var(--ink)" }}>{supplement.notes}</span>
             </div>
           )}
-          <div className="flex gap-2 pt-2">
-            <button className="px-3 py-1 text-xs rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
+          <div style={{ display: "flex", gap: 8, paddingTop: 8 }}>
+            <button
+              style={{ padding: "6px 12px", fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", background: "var(--surface-2)", color: "var(--text-secondary)", cursor: "pointer" }}
+            >
               Edit
             </button>
-            <button className="px-3 py-1 text-xs rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button
+              style={{ padding: "6px 12px", fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", background: "var(--surface-2)", color: "var(--text-secondary)", cursor: "pointer" }}
+            >
               {supplement.isActive ? "Deactivate" : "Activate"}
             </button>
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -129,47 +152,58 @@ export default function Supplements({ loaderData }: Route.ComponentProps) {
   const tiers = Object.keys(SUPPLEMENT_TIERS) as SupplementTier[];
 
   return (
-    <div className="space-y-6">
+    <div>
+      <PageHeader
+        eyebrow="SUPPLEMENTS BY TIER"
+        title="Supplements"
+        sub="Your active supplement stack, organized by tier."
+      />
+
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="text-2xl font-bold">{stats.active}</div>
-          <div className="text-sm text-gray-500">Active Supplements</div>
-        </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="text-2xl font-bold">{stats.dailyCount}</div>
-          <div className="text-sm text-gray-500">Daily Items</div>
-        </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="text-2xl font-bold">{stats.withGenetic}</div>
-          <div className="text-sm text-gray-500">Genetic-Based</div>
-        </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="text-2xl font-bold">{byTier.tier1?.length || 0}</div>
-          <div className="text-sm text-gray-500">Tier 1 (Essential)</div>
-        </div>
+      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-xl)" }}>
+        {[
+          { label: "Active", value: stats.active },
+          { label: "Daily items", value: stats.dailyCount },
+          { label: "Genetic-based", value: stats.withGenetic },
+          { label: "Tier 1", value: byTier.tier1?.length || 0 },
+        ].map(({ label, value }) => (
+          <Card key={label} padding="md" style={{ minHeight: 90, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div className="zt-eyebrow">{label}</div>
+            <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
+              {value}
+            </span>
+          </Card>
+        ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex gap-2">
+      {/* Tier filter pills */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: "var(--gap-xl)" }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <button
             onClick={() => {
               const newParams = new URLSearchParams(searchParams);
               newParams.delete("tier");
               setSearchParams(newParams);
             }}
-            className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-              !tierFilter
-                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
+            style={{
+              padding: "9px 14px",
+              borderRadius: "var(--radius-pill)",
+              border: `1px solid ${!tierFilter ? "var(--ink)" : "var(--border)"}`,
+              background: !tierFilter ? "var(--ink)" : "var(--surface)",
+              color: !tierFilter ? "var(--n-50)" : "var(--text-secondary)",
+              fontFamily: "var(--font-text)",
+              fontSize: "var(--text-sm)",
+              fontWeight: !tierFilter ? 600 : 500,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
           >
-            All Tiers
+            All tiers
           </button>
           {tiers.map((tier) => {
             const info = SUPPLEMENT_TIERS[tier];
             const count = byTier[tier]?.filter((s) => showInactive || s.isActive).length || 0;
+            const isActive = tierFilter === tier;
             return (
               <button
                 key={tier}
@@ -178,11 +212,18 @@ export default function Supplements({ loaderData }: Route.ComponentProps) {
                   newParams.set("tier", tier);
                   setSearchParams(newParams);
                 }}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                  tierFilter === tier
-                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
+                style={{
+                  padding: "9px 14px",
+                  borderRadius: "var(--radius-pill)",
+                  border: `1px solid ${isActive ? "var(--ink)" : "var(--border)"}`,
+                  background: isActive ? "var(--ink)" : "var(--surface)",
+                  color: isActive ? "var(--n-50)" : "var(--text-secondary)",
+                  fontFamily: "var(--font-text)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: isActive ? 600 : 500,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
               >
                 {info.label} ({count})
               </button>
@@ -190,7 +231,7 @@ export default function Supplements({ loaderData }: Route.ComponentProps) {
           })}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", color: "var(--text-secondary)", cursor: "pointer" }}>
           <input
             type="checkbox"
             checked={showInactive}
@@ -203,40 +244,43 @@ export default function Supplements({ loaderData }: Route.ComponentProps) {
               }
               setSearchParams(newParams);
             }}
-            className="rounded"
           />
           Show inactive
         </label>
       </div>
 
       {/* Supplement grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="zt-grid-2" style={{ marginBottom: "var(--gap-xl)" }}>
         {filtered.map((supplement) => (
           <SupplementCard key={supplement.id} supplement={supplement} />
         ))}
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No supplements found matching the current filters.
+        <div style={{ textAlign: "center", padding: "var(--gap-3xl) 0", color: "var(--text-muted)", fontFamily: "var(--font-text)" }}>
+          No supplements match the current filters.
         </div>
       )}
 
-      {/* Tier descriptions */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-        <h3 className="font-medium mb-4">Tier Definitions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Tier definitions */}
+      <Card padding="lg">
+        <div className="zt-eyebrow" style={{ marginBottom: 16 }}>TIER DEFINITIONS</div>
+        <div className="zt-grid-2">
           {tiers.map((tier) => {
             const info = SUPPLEMENT_TIERS[tier];
             return (
               <div key={tier}>
-                <div className={`font-medium ${info.color}`}>{info.label}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{info.description}</p>
+                <div style={{ marginBottom: 6 }}>
+                  <TierBadge tier={tier} />
+                </div>
+                <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: 0 }}>
+                  {info.description}
+                </p>
               </div>
             );
           })}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

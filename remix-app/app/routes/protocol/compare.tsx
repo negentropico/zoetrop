@@ -2,6 +2,10 @@ import { useSearchParams } from "react-router";
 import type { Route } from "./+types/compare";
 import { realProtocolVersions, realProtocolChanges } from "../../lib/protocol-data";
 import { format, parseISO } from "date-fns";
+import { Card } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Button } from "../../components/ui/Button";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -66,13 +70,26 @@ function VersionSelector({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 500, color: "var(--text-secondary)", marginBottom: 6 }}>
         {label}
       </label>
       <select
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
-        className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
+        style={{
+          display: "block",
+          width: "100%",
+          borderRadius: "var(--radius-pill)",
+          border: "1px solid var(--border)",
+          background: "var(--surface)",
+          color: "var(--ink)",
+          padding: "9px 14px",
+          fontSize: "var(--text-sm)",
+          fontFamily: "var(--font-text)",
+          cursor: "pointer",
+          appearance: "none",
+          outline: "none",
+        }}
       >
         {versions
           .filter((v) => v.version !== excludeVersion)
@@ -97,196 +114,207 @@ export default function Compare({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Version selectors */}
-      <div className="grid grid-cols-2 gap-4">
-        <VersionSelector
-          label="From Version"
-          value={fromVersion?.version}
-          versions={versions}
-          onChange={(v) => updateVersion("from", v)}
-          excludeVersion={toVersion?.version}
-        />
-        <VersionSelector
-          label="To Version"
-          value={toVersion?.version}
-          versions={versions}
-          onChange={(v) => updateVersion("to", v)}
-          excludeVersion={fromVersion?.version}
-        />
-      </div>
+    <div>
+      <PageHeader
+        eyebrow="VERSION COMPARISON"
+        title="Compare versions"
+        sub="Pick two protocol versions to see what changed — dose deltas, added and retired supplements, and the metrics that moved across the window between them."
+      />
 
-      {/* Comparison header */}
-      {fromVersion && toVersion && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-center gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold">{fromVersion.version}</div>
-              <div className="text-sm text-gray-500">
+      {/* Version selectors */}
+      <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
+        <div className="zt-grid-2" style={{ marginBottom: "var(--gap-lg)" }}>
+          <VersionSelector
+            label="From version"
+            value={fromVersion?.version}
+            versions={versions}
+            onChange={(v) => updateVersion("from", v)}
+            excludeVersion={toVersion?.version}
+          />
+          <VersionSelector
+            label="To version"
+            value={toVersion?.version}
+            versions={versions}
+            onChange={(v) => updateVersion("to", v)}
+            excludeVersion={fromVersion?.version}
+          />
+        </div>
+
+        {/* Comparison header */}
+        {fromVersion && toVersion && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+            <div style={{ textAlign: "center" }}>
+              <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
+                {fromVersion.version}
+              </div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
                 {format(parseISO(fromVersion.effectiveDate), "MMM yyyy")}
               </div>
             </div>
-            <div className="text-2xl text-gray-400">→</div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <span style={{ color: "var(--text-faint)", fontSize: "var(--text-xl)" }}>→</span>
+            <div style={{ textAlign: "center" }}>
+              <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--vital)" }}>
                 {toVersion.version}
               </div>
-              <div className="text-sm text-gray-500">
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
                 {format(parseISO(toVersion.effectiveDate), "MMM yyyy")}
               </div>
             </div>
           </div>
+        )}
+      </Card>
+
+      {/* Change summary tiles */}
+      {fromVersion && toVersion && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--gap-lg)", marginBottom: "var(--gap-xl)" }}>
+          <Card padding="md" tone="vital" style={{ textAlign: "center" }}>
+            <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--vital)" }}>
+              {added.length}
+            </div>
+            <div className="zt-eyebrow" style={{ marginTop: 4 }}>Added</div>
+          </Card>
+          <Card padding="md" tone={removed.length > 0 ? undefined : undefined} style={{ textAlign: "center" }}>
+            <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: removed.length > 0 ? "var(--danger)" : "var(--ink)" }}>
+              {removed.length}
+            </div>
+            <div className="zt-eyebrow" style={{ marginTop: 4 }}>Removed</div>
+          </Card>
+          <Card padding="md" tone="focus" style={{ textAlign: "center" }}>
+            <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--focus)" }}>
+              {modified.length}
+            </div>
+            <div className="zt-eyebrow" style={{ marginTop: 4 }}>Modified</div>
+          </Card>
         </div>
       )}
 
-      {/* Change summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {added.length}
-          </div>
-          <div className="text-sm text-green-700 dark:text-green-300">Added</div>
-        </div>
-        <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-red-600 dark:text-red-400">{removed.length}</div>
-          <div className="text-sm text-red-700 dark:text-red-300">Removed</div>
-        </div>
-        <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {modified.length}
-          </div>
-          <div className="text-sm text-blue-700 dark:text-blue-300">Modified</div>
-        </div>
-      </div>
-
       {/* Detailed changes */}
       {changes.length > 0 ? (
-        <div className="space-y-4">
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap-lg)" }}>
           {/* Added */}
           {added.length > 0 && (
-            <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-              <h3 className="font-medium text-green-600 dark:text-green-400 mb-3">
-                Added Supplements
-              </h3>
-              <div className="space-y-3">
-                {added.map((change) => (
+            <Card padding="md">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <div className="zt-eyebrow">Added supplements</div>
+                <Badge tone="vital">{added.length}</Badge>
+              </div>
+              <div>
+                {added.map((change, i) => (
                   <div
                     key={change.id}
-                    className="flex items-start justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
+                    style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "12px 0", borderBottom: i < added.length - 1 ? "1px solid var(--border)" : "none" }}
                   >
                     <div>
-                      <div className="font-medium">{change.supplementName}</div>
+                      <div style={{ fontWeight: 500, color: "var(--ink)", marginBottom: 4 }}>{change.supplementName}</div>
                       {change.newDosage && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
                           {change.newDosage}
                         </div>
                       )}
                       {change.rationale && (
-                        <div className="text-sm text-gray-500 mt-1">{change.rationale}</div>
+                        <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: "4px 0 0" }}>{change.rationale}</p>
                       )}
                     </div>
-                    <span className="text-green-600 dark:text-green-400 text-xl">+</span>
+                    <span style={{ color: "var(--vital)", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-lg)", marginLeft: 16 }}>+</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Removed */}
           {removed.length > 0 && (
-            <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-              <h3 className="font-medium text-red-600 dark:text-red-400 mb-3">
-                Removed Supplements
-              </h3>
-              <div className="space-y-3">
-                {removed.map((change) => (
+            <Card padding="md">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <div className="zt-eyebrow">Removed supplements</div>
+                <Badge tone="danger">{removed.length}</Badge>
+              </div>
+              <div>
+                {removed.map((change, i) => (
                   <div
                     key={change.id}
-                    className="flex items-start justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg"
+                    style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "12px 0", borderBottom: i < removed.length - 1 ? "1px solid var(--border)" : "none" }}
                   >
                     <div>
-                      <div className="font-medium line-through text-gray-500">
-                        {change.supplementName}
-                      </div>
+                      <div style={{ fontWeight: 500, color: "var(--text-faint)", textDecoration: "line-through", marginBottom: 4 }}>{change.supplementName}</div>
                       {change.oldDosage && (
-                        <div className="text-sm text-gray-400 line-through">{change.oldDosage}</div>
-                      )}
-                      {change.rationale && (
-                        <div className="text-sm text-red-600 dark:text-red-400 mt-1">
-                          {change.rationale}
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)", textDecoration: "line-through" }}>
+                          {change.oldDosage}
                         </div>
                       )}
+                      {change.rationale && (
+                        <p style={{ fontSize: "var(--text-sm)", color: "var(--danger)", margin: "4px 0 0" }}>{change.rationale}</p>
+                      )}
                     </div>
-                    <span className="text-red-600 dark:text-red-400 text-xl">−</span>
+                    <span style={{ color: "var(--danger)", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-lg)", marginLeft: 16 }}>−</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Modified */}
           {modified.length > 0 && (
-            <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-              <h3 className="font-medium text-blue-600 dark:text-blue-400 mb-3">
-                Modified Supplements
-              </h3>
-              <div className="space-y-3">
-                {modified.map((change) => (
+            <Card padding="md">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <div className="zt-eyebrow">Modified supplements</div>
+                <Badge tone="focus">{modified.length}</Badge>
+              </div>
+              <div>
+                {modified.map((change, i) => (
                   <div
                     key={change.id}
-                    className="flex items-start justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+                    style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "12px 0", borderBottom: i < modified.length - 1 ? "1px solid var(--border)" : "none" }}
                   >
-                    <div>
-                      <div className="font-medium">{change.supplementName}</div>
-                      <div className="flex items-center gap-2 text-sm mt-1">
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 500, color: "var(--ink)", marginBottom: 4 }}>{change.supplementName}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)" }}>
                         {change.oldDosage && (
-                          <span className="text-gray-400 line-through">{change.oldDosage}</span>
+                          <span style={{ textDecoration: "line-through", color: "var(--text-faint)" }}>{change.oldDosage}</span>
                         )}
                         {change.oldDosage && change.newDosage && (
-                          <span className="text-gray-400">→</span>
+                          <span style={{ color: "var(--text-muted)" }}>→</span>
                         )}
                         {change.newDosage && (
-                          <span className="font-medium text-blue-600 dark:text-blue-400">
-                            {change.newDosage}
-                          </span>
+                          <span style={{ fontWeight: 600, color: "var(--focus)" }}>{change.newDosage}</span>
                         )}
                       </div>
                       {change.rationale && (
-                        <div className="text-sm text-gray-500 mt-1">{change.rationale}</div>
+                        <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: "4px 0 0" }}>{change.rationale}</p>
                       )}
                     </div>
-                    <span className="text-blue-600 dark:text-blue-400 text-xl">~</span>
+                    <span style={{ color: "var(--focus)", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-lg)", marginLeft: 16 }}>~</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center">
-          <p className="text-gray-500">
+        <Card padding="lg" style={{ textAlign: "center" }}>
+          <p style={{ color: "var(--text-muted)" }}>
             {fromVersion && toVersion
               ? "No changes recorded between these versions."
               : "Select two versions to compare."}
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Version notes comparison */}
       {fromVersion && toVersion && (fromVersion.notes || toVersion.notes) && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-            <h3 className="font-medium mb-2">{fromVersion.version} Notes</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="zt-grid-2" style={{ marginTop: "var(--gap-xl)" }}>
+          <Card padding="md">
+            <div className="zt-eyebrow" style={{ marginBottom: 10 }}>{fromVersion.version} notes</div>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: 0 }}>
               {fromVersion.notes || "No notes for this version."}
             </p>
-          </div>
-          <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-            <h3 className="font-medium mb-2">{toVersion.version} Notes</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+          </Card>
+          <Card padding="md">
+            <div className="zt-eyebrow" style={{ marginBottom: 10 }}>{toVersion.version} notes</div>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: 0 }}>
               {toVersion.notes || "No notes for this version."}
             </p>
-          </div>
+          </Card>
         </div>
       )}
     </div>
