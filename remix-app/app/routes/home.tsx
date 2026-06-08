@@ -18,11 +18,44 @@ import {
 import { getLatestRealMetrics } from "../lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
 import { differenceInDays, parseISO } from "date-fns";
+import {
+  Pill,
+  Gem,
+  Flame,
+  Zap,
+  FlaskConical,
+  HeartPulse,
+  Dumbbell,
+  Droplet,
+  Dna,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Card } from "../components/ui/Card";
+import { PageHeader } from "../components/ui/PageHeader";
+import { CatChip } from "../components/ui/CatChip";
+import { StatusBadge } from "../components/ui/StatusBadge";
+import { StatusDot } from "../components/ui/StatusDot";
+import { PhaseBar } from "../components/ui/PhaseBar";
+import { MetricRing } from "../components/ui/MetricRing";
+import type { Phase } from "../components/ui/PhaseBar";
+
+// Lucide icon map by category icon name
+const LUCIDE_MAP: Record<string, LucideIcon> = {
+  pill: Pill,
+  gem: Gem,
+  flame: Flame,
+  zap: Zap,
+  "flask-conical": FlaskConical,
+  "heart-pulse": HeartPulse,
+  dumbbell: Dumbbell,
+  droplet: Droplet,
+  dna: Dna,
+};
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Zoetrop" },
-    { name: "description", content: "Comprehensive wellness tracking dashboard" },
+    { name: "description", content: "Your signals, one frame at a time." },
   ];
 }
 
@@ -91,17 +124,142 @@ export function loader() {
   };
 }
 
-function StatusDot({ status }: { status: MetricStatus }) {
-  const colors: Record<MetricStatus, string> = {
-    optimal: "bg-green-500",
-    borderline: "bg-yellow-500",
-    deficient: "bg-red-500",
-    excess: "bg-orange-500",
-  };
-  return <span className={`w-1.5 h-1.5 rounded-full ${colors[status]}`} />;
+// Build PhaseBar phases from CESSATION_PHASES + current day
+function buildPhaseBarPhases(cessationDay: number, targetDay: number): Phase[] {
+  return CESSATION_PHASES.map((p) => {
+    const days = p.dayRange.end - p.dayRange.start + 1;
+    let state: Phase["state"];
+    if (cessationDay > p.dayRange.end) {
+      state = "completed";
+    } else if (cessationDay >= p.dayRange.start && cessationDay <= p.dayRange.end) {
+      state = "current";
+    } else {
+      state = "upcoming";
+    }
+    return { id: p.phase, name: p.label, days, state };
+  });
 }
 
-function CategoryCard({
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+function StatTile({
+  label,
+  value,
+  unit,
+  hint,
+  to,
+}: {
+  label: string;
+  value: string | number;
+  unit?: string;
+  hint?: React.ReactNode;
+  to: string;
+}) {
+  return (
+    <Link to={to}>
+      <Card padding="md" interactive style={{ minHeight: 104, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className="zt-eyebrow">{label}</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 10 }}>
+          <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
+            {value}
+          </span>
+          {unit && (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {unit}
+            </span>
+          )}
+          {hint && <span style={{ marginLeft: "auto", alignSelf: "center" }}>{hint}</span>}
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+function CorrRow({ c, last }: { c: typeof seedCorrelations[0]; last: boolean }) {
+  const neg = c.correlation < 0;
+  const col = neg ? "var(--danger)" : "var(--vital-500, var(--vital))";
+  const sign = c.correlation >= 0 ? "+" : "";
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        padding: "14px 0",
+        borderBottom: last ? "none" : "1px solid var(--border)",
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: "var(--text-base)" }}>{c.supplementName}</div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 3 }}>
+          {c.metricName} · {c.lagDays}d lag
+        </div>
+      </div>
+      <span className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)", fontWeight: 700, color: col }}>
+        {sign}{c.correlation.toFixed(2)}
+      </span>
+    </div>
+  );
+}
+
+function GeneRow({ g, last }: { g: typeof seedGeneticVariants[0]; last: boolean }) {
+  const conf = g.confidence === "K1" ? "vital" : "energy";
+  const confLabel = g.confidence;
+  const confColor = conf === "vital" ? "var(--vital)" : "var(--energy)";
+  const confBg = conf === "vital" ? "var(--vital-50)" : "var(--energy-50)";
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        gap: 16,
+        padding: "14px 0",
+        borderBottom: last ? "none" : "1px solid var(--border)",
+      }}
+    >
+      <div style={{ flex: "1 1 auto", minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{g.gene}</span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-2xs)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              padding: "3px 8px",
+              borderRadius: "var(--radius-pill)",
+              color: confColor,
+              background: confBg,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {confLabel}
+          </span>
+        </div>
+        <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 4 }}>
+          {g.protocolAction}
+        </div>
+      </div>
+      <span
+        style={{
+          flex: "0 0 auto",
+          fontFamily: "var(--font-mono)",
+          fontSize: "var(--text-xs)",
+          color: "var(--text-muted)",
+          whiteSpace: "nowrap",
+          textAlign: "right",
+          paddingTop: 2,
+        }}
+      >
+        {g.genotype}
+      </span>
+    </div>
+  );
+}
+
+function CategoryCardItem({
   category,
   metrics,
 }: {
@@ -109,6 +267,7 @@ function CategoryCard({
   metrics: Metric[];
 }) {
   const info = CATEGORY_INFO[category];
+  const icon = LUCIDE_MAP[info.icon];
 
   const statusCounts = metrics.reduce(
     (acc, m) => {
@@ -119,230 +278,53 @@ function CategoryCard({
     {} as Record<MetricStatus, number>
   );
 
-  return (
-    <Link
-      to={`/metrics/${category}`}
-      className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-colors group"
-    >
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-lg">{info.icon}</span>
-        <h3 className="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
-          {info.label}
-        </h3>
-      </div>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-        {info.description}
-      </p>
-      {metrics.length > 0 ? (
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-gray-500">{metrics.length} tracked</span>
-          <span className="text-gray-300 dark:text-gray-700">|</span>
-          {statusCounts.optimal > 0 && (
-            <span className="flex items-center gap-1">
-              <StatusDot status="optimal" />
-              <span className="text-gray-500">{statusCounts.optimal}</span>
-            </span>
-          )}
-          {statusCounts.borderline > 0 && (
-            <span className="flex items-center gap-1">
-              <StatusDot status="borderline" />
-              <span className="text-gray-500">{statusCounts.borderline}</span>
-            </span>
-          )}
-          {(statusCounts.deficient > 0 || statusCounts.excess > 0) && (
-            <span className="flex items-center gap-1">
-              <StatusDot status={statusCounts.deficient > 0 ? "deficient" : "excess"} />
-              <span className="text-gray-500">
-                {(statusCounts.deficient || 0) + (statusCounts.excess || 0)}
-              </span>
-            </span>
-          )}
-        </div>
-      ) : (
-        <div className="text-xs text-gray-400">No data yet</div>
-      )}
-    </Link>
-  );
-}
-
-function CessationProgress({
-  currentDay,
-  cessationPhase,
-  targetDay,
-}: {
-  currentDay: number;
-  cessationPhase: (typeof CESSATION_PHASES)[0];
-  targetDay: number;
-}) {
-  const progressPercent = Math.max(Math.min((currentDay / targetDay) * 100, 100), 0);
+  const statuses: MetricStatus[] = ["optimal", "borderline", "deficient", "excess"];
 
   return (
-    <Link
-      to="/protocol/cessation"
-      className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-gray-300 dark:hover:border-gray-700 transition-colors block"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium">Cessation Protocol</h3>
-        <span className="text-xs text-blue-600 dark:text-blue-400">
-          View details
-        </span>
-      </div>
-
-      {/* Big day counter */}
-      <div className="flex items-baseline gap-2 mb-3">
-        <span className="text-3xl font-bold">Day {currentDay}</span>
-        <span className="text-sm text-gray-500">of {targetDay}</span>
-      </div>
-
-      {/* Current phase */}
-      <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-        {cessationPhase.label} phase — {cessationPhase.focus}
-      </div>
-
-      {/* Progress bar with phase markers */}
-      <div className="relative mb-2">
-        <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full transition-all duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <div className="absolute inset-0 flex">
-          {CESSATION_PHASES.map((phase) => (
-            <div
-              key={phase.phase}
-              className="border-r border-white/60 dark:border-gray-950/60 last:border-0"
-              style={{
-                width: `${((phase.dayRange.end - phase.dayRange.start + 1) / targetDay) * 100}%`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Phase labels */}
-      <div className="flex text-xs text-gray-400">
-        {CESSATION_PHASES.map((phase) => (
-          <div
-            key={phase.phase}
-            className={`text-center ${
-              cessationPhase.phase === phase.phase ? "text-gray-900 dark:text-white font-medium" : ""
-            }`}
-            style={{
-              width: `${((phase.dayRange.end - phase.dayRange.start + 1) / targetDay) * 100}%`,
-            }}
-          >
-            {phase.label}
+    <Link to={`/metrics/${category}`} style={{ height: "100%", display: "block" }}>
+      <Card interactive padding="lg" style={{ height: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 14 }}>
+          {icon && <CatChip icon={icon} family={info.family} size={42} />}
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "var(--text-lg)", letterSpacing: "-0.01em" }}>
+            {info.label}
           </div>
-        ))}
-      </div>
-    </Link>
-  );
-}
-
-function TopCorrelations({
-  correlations,
-  stats,
-}: {
-  correlations: typeof seedCorrelations;
-  stats: { totalCorrelations: number; strongCorrelations: number };
-}) {
-  return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium">Top Correlations</h3>
-        <Link
-          to="/insights/correlations"
-          className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+        </div>
+        <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "var(--text-sm)", minHeight: 40 }}>
+          {info.description}
+        </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 16,
+            paddingTop: 14,
+            borderTop: "1px solid var(--border)",
+          }}
         >
-          View all ({stats.totalCorrelations})
-        </Link>
-      </div>
-      <div className="space-y-3">
-        {correlations.map((corr) => {
-          const colorClass = getCorrelationColor(corr.significance);
-          const sign = corr.correlation >= 0 ? "+" : "";
-          return (
-            <div
-              key={corr.id}
-              className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0"
-            >
-              <div>
-                <div className="font-medium text-sm">{corr.supplementName}</div>
-                <div className="text-xs text-gray-500">
-                  → {corr.metricName} ({corr.lagDays}d lag)
-                </div>
-              </div>
-              <span className={`font-mono font-medium ${colorClass}`}>
-                {sign}
-                {corr.correlation.toFixed(2)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500">
-        {stats.strongCorrelations} strong correlations (|r| ≥ 0.7)
-      </div>
-    </div>
-  );
-}
-
-function GeneticInsights({
-  highImpact,
-  k3Variants,
-  stats,
-}: {
-  highImpact: typeof seedGeneticVariants;
-  k3Variants: typeof seedGeneticVariants;
-  stats: { totalVariants: number; confirmedVariants: number };
-}) {
-  return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium">Genetic Insights</h3>
-        <Link
-          to="/insights/genetics"
-          className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-        >
-          View all ({stats.totalVariants})
-        </Link>
-      </div>
-      <div className="space-y-3">
-        {highImpact.map((variant) => {
-          const confidence = CONFIDENCE_LEVELS[variant.confidence];
-          return (
-            <div
-              key={variant.id}
-              className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">{variant.gene}</span>
-                  <span
-                    className={`text-xs px-1.5 py-0.5 rounded ${confidence.color} bg-current/10`}
-                  >
-                    {confidence.label}
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            {metrics.length} tracked
+          </span>
+          {/* CountDots: inline status dot row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {statuses.map((s) =>
+              (statusCounts[s] || 0) > 0 ? (
+                <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <StatusDot status={s} size={7} />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
+                    {statusCounts[s]}
                   </span>
-                </div>
-                <div className="text-xs text-gray-500">{variant.protocolAction}</div>
-              </div>
-              <span className="text-xs text-gray-400 font-mono">{variant.genotype}</span>
-            </div>
-          );
-        })}
-      </div>
-      {k3Variants.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-          <div className="text-xs text-yellow-600 dark:text-yellow-400">
-            {k3Variants.length} K3 variant{k3Variants.length !== 1 ? "s" : ""} need
-            verification
+                </span>
+              ) : null
+            )}
           </div>
         </div>
-      )}
-    </div>
+      </Card>
+    </Link>
   );
 }
+
+// ── Main dashboard component ───────────────────────────────────────────────────
 
 export default function Dashboard({ loaderData }: Route.ComponentProps) {
   const {
@@ -359,150 +341,168 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
     currentVersion,
     activeSupplements,
   } = loaderData;
-  const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
 
-  const attentionItems = (statusCounts.deficient || 0) + (statusCounts.excess || 0);
+  const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
+  const needLook = (statusCounts.deficient || 0) + (statusCounts.excess || 0);
+  const phaseBarPhases = buildPhaseBarPhases(cessationDay, targetDay);
+
+  // Eyebrow date
+  const now = new Date();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const eyebrowDate = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight mb-2">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Comprehensive wellness tracking across 9 metric categories
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={`Today's frame · ${eyebrowDate}`}
+        title="Dashboard"
+        sub="Your signals, one frame at a time. 9 categories, tracked."
+      />
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link
-          to="/metrics"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className="text-2xl font-bold">{totalMetrics}</div>
-          <div className="text-xs text-gray-500">Metrics Tracked</div>
-        </Link>
-        <Link
+      {/* Stat tiles — zt-grid-4 */}
+      <div className="zt-grid-4">
+        <StatTile label="Metrics tracked" value={totalMetrics} to="/metrics" />
+        <StatTile
+          label="Need a look"
+          value={needLook}
+          hint={needLook > 0 ? <StatusBadge status="borderline" /> : undefined}
           to="/metrics?status=deficient"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className={`text-2xl font-bold ${attentionItems > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
-            {attentionItems}
-          </div>
-          <div className="text-xs text-gray-500">Need Attention</div>
-        </Link>
-        <Link
-          to="/protocol/supplements"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className="text-2xl font-bold">{activeSupplements}</div>
-          <div className="text-xs text-gray-500">Active Supplements</div>
-        </Link>
-        <Link
-          to="/protocol/versions"
-          className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-        >
-          <div className="text-2xl font-bold">{currentVersion}</div>
-          <div className="text-xs text-gray-500">Protocol Version</div>
-        </Link>
+        />
+        <StatTile label="Active supplements" value={activeSupplements} to="/protocol/supplements" />
+        <StatTile label="Protocol version" value={currentVersion} unit="7 versions" to="/protocol/versions" />
       </div>
 
-      {/* Protocol row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CessationProgress
-          currentDay={cessationDay}
-          cessationPhase={cessationPhase}
-          targetDay={targetDay}
-        />
-        <div className="grid grid-cols-1 gap-4">
-          <TopCorrelations correlations={topCorrelations} stats={stats} />
-        </div>
-      </div>
-
-      {/* Insights row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <GeneticInsights
-          highImpact={highImpactVariants}
-          k3Variants={k3Variants}
-          stats={stats}
-        />
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium">Metric Status</h3>
+      {/* Cessation + correlations — zt-grid-2 */}
+      <div className="zt-grid-2">
+        <Card padding="lg">
+          {/* Section label */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
+              Cessation protocol
+            </div>
             <Link
-              to="/metrics"
-              className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+              to="/protocol/cessation"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
             >
-              View all
+              View details →
             </Link>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                <span className="text-sm">Optimal</span>
-              </div>
-              <span className="font-medium">{statusCounts.optimal || 0}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                <span className="text-sm">Borderline</span>
-              </div>
-              <span className="font-medium">{statusCounts.borderline || 0}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                <span className="text-sm">Deficient</span>
-              </div>
-              <span className="font-medium">{statusCounts.deficient || 0}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                <span className="text-sm">Excess</span>
-              </div>
-              <span className="font-medium">{statusCounts.excess || 0}</span>
-            </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+            <span className="zt-readout" style={{ fontSize: "var(--text-3xl)" }}>Day {cessationDay}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>of {targetDay}</span>
           </div>
-          {/* Status bar */}
-          {totalMetrics > 0 && (
-            <div className="mt-4 h-2 rounded-full overflow-hidden flex">
-              {statusCounts.optimal > 0 && (
-                <div
-                  className="bg-green-500"
-                  style={{ width: `${((statusCounts.optimal || 0) / totalMetrics) * 100}%` }}
-                />
-              )}
-              {statusCounts.borderline > 0 && (
-                <div
-                  className="bg-yellow-500"
-                  style={{ width: `${((statusCounts.borderline || 0) / totalMetrics) * 100}%` }}
-                />
-              )}
-              {statusCounts.deficient > 0 && (
-                <div
-                  className="bg-red-500"
-                  style={{ width: `${((statusCounts.deficient || 0) / totalMetrics) * 100}%` }}
-                />
-              )}
-              {statusCounts.excess > 0 && (
-                <div
-                  className="bg-orange-500"
-                  style={{ width: `${((statusCounts.excess || 0) / totalMetrics) * 100}%` }}
-                />
-              )}
+          <p style={{ margin: "8px 0 22px", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+            {cessationPhase.label} phase — {cessationPhase.focus}.
+          </p>
+          <PhaseBar phases={phaseBarPhases} compact />
+        </Card>
+
+        <Card padding="lg">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
+              Top correlations
             </div>
-          )}
-        </div>
+            <Link
+              to="/insights/correlations"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
+            >
+              View all · {stats.totalCorrelations} →
+            </Link>
+          </div>
+          <div>
+            {topCorrelations.map((c, i) => (
+              <CorrRow key={c.id} c={c} last={i === topCorrelations.length - 1} />
+            ))}
+          </div>
+          <div style={{ marginTop: 14, fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+            {stats.strongCorrelations} strong correlations (|r| ≥ 0.7)
+          </div>
+        </Card>
       </div>
 
-      {/* Categories grid */}
+      {/* Genetic insights + metric status — zt-grid-2 */}
+      <div className="zt-grid-2">
+        <Card padding="lg">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
+              Genetic insights
+            </div>
+            <Link
+              to="/insights/genetics"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
+            >
+              View all · {stats.totalVariants} →
+            </Link>
+          </div>
+          {highImpactVariants.map((g, i) => (
+            <GeneRow key={g.id} g={g} last={i === highImpactVariants.length - 1} />
+          ))}
+          {k3Variants.length > 0 && (
+            <div style={{ marginTop: 14, fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--warning)" }}>
+              {k3Variants.length} K3 variant{k3Variants.length !== 1 ? "s" : ""} need verification
+            </div>
+          )}
+        </Card>
+
+        <Card padding="lg">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
+              Metric status
+            </div>
+            <Link
+              to="/metrics"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
+            >
+              View all →
+            </Link>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
+            <MetricRing
+              value={statusCounts.optimal || 0}
+              max={totalMetrics}
+              tone="vital"
+              size={132}
+              thickness={13}
+              label={statusCounts.optimal || 0}
+              sublabel="optimal"
+            />
+            <div style={{ flex: 1, minWidth: 180, display: "flex", flexDirection: "column", gap: 2 }}>
+              {(["optimal", "borderline", "deficient", "excess"] as MetricStatus[]).map((k) => (
+                <div
+                  key={k}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 0",
+                    borderBottom: "1px solid var(--border)",
+                  }}
+                >
+                  <StatusDot status={k} />
+                  <span style={{ fontSize: "var(--text-sm)", textTransform: "capitalize", color: "var(--text-secondary)" }}>
+                    {k}
+                  </span>
+                  <span className="zt-tnum" style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-md)" }}>
+                    {statusCounts[k] || 0}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Category grid — zt-grid-3 */}
       <div>
-        <h2 className="text-lg font-medium mb-4">Metric Categories</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "var(--gap-lg)" }}>
+          <div className="zt-eyebrow">Metric categories</div>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>
+            {categories.length}
+          </span>
+        </div>
+        <div className="zt-grid-3">
           {categories.map((category) => (
-            <CategoryCard
+            <CategoryCardItem
               key={category}
               category={category}
               metrics={byCategory[category] || []}
