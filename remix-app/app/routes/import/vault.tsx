@@ -527,6 +527,9 @@ export default function VaultImport() {
                     gap: 10,
                     fontSize: "var(--text-sm)",
                     color: "var(--text-secondary)",
+                    // Wrap the label/description pair instead of forcing the
+                    // row wider than a 390px mobile viewport (04.1-09 R2 #4b).
+                    flexWrap: "wrap",
                   }}
                 >
                   <span
@@ -536,11 +539,12 @@ export default function VaultImport() {
                       color: "var(--text)",
                       flexShrink: 0,
                       minWidth: 140,
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {col}
                   </span>
-                  <span>{desc}</span>
+                  <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{desc}</span>
                 </div>
               ))}
             </div>
@@ -559,6 +563,10 @@ export default function VaultImport() {
                   padding: "3px 7px",
                   borderRadius: 6,
                   color: "var(--text-secondary)",
+                  // Let the long mono vault path wrap instead of forcing the
+                  // row wider than a 390px mobile viewport (04.1-09 R2 #4a).
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-all",
                 }}
               >
                 /Users/mac/vaults/#Bwell/602/
