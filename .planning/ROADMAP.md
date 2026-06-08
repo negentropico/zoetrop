@@ -10,7 +10,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 
 ## Phases
 
-- [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08)
+- [ ] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam
 - [ ] **Phase 2: PHI / BAA Compliance Gate + Vercel Cutover** — Migrate the deploy target Netlify→Vercel, execute Neon + Vercel + LLM-provider BAAs, enable HIPAA on the Neon project, configure pgAudit — a release gate before any client PHI is written
 - [ ] **Phase 3: Identity + Tenancy Spine with RLS** — Ship Better-Auth org roles, `tenants`/`users`/`subjects` tables, add `tenantId`/`subjectId` to all 8 data tables, atomic RLS-enable+policies, SET LOCAL transaction wrapper, cross-tenant isolation tests
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
@@ -155,7 +155,7 @@ Likely plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
+| 1. Schema Baseline + Engine Tests + Auth Spike | 1/5 | In Progress |  |
 | 2. PHI / BAA Compliance Gate | 0/TBD | Not started | - |
 | 3. Identity + Tenancy Spine with RLS | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |

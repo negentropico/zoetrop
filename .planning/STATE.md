@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 04.1 complete (8/8) — ready to discuss Phase 5
+status: executing
+stopped_at: "Phase 04.1 (Design System Adoption) complete (8/8) — pulled forward out-of-sequence; resume Phase 1 (plan 2 of 5)"
 last_updated: 2026-06-08T04:51:23.955Z
 last_activity: 2026-06-08
 progress:
   total_phases: 7
-  completed_phases: 2
-  total_plans: 13
-  completed_plans: 13
-  percent: 29
+  completed_phases: 1
+  total_plans: 5
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
@@ -21,16 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 5 — lab ingest pipeline
+**Current focus:** Phase 01 — schema-baseline-engine-tests-auth-spike
+
+> Note: Phase 04.1 (Design System Adoption) was completed out-of-sequence on 2026-06-08 (its roundtrip gate was satisfied). The engine-first critical path resumes at Phase 1.
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
-Status: Ready to plan
+Phase: 01 (schema-baseline-engine-tests-auth-spike) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
 Last activity: 2026-06-08
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
