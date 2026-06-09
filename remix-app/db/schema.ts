@@ -7,6 +7,7 @@ import {
   timestamp,
   jsonb,
   pgEnum,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -66,6 +67,8 @@ export const cessationPhaseEnum = pgEnum('cessation_phase', [
   'clearing',    // Days 61-120
   'optimization', // Days 121-150
 ]);
+
+export const appRoleEnum = pgEnum('app_role', ['owner', 'practitioner', 'client']);
 
 // Core metrics table
 export const metrics = pgTable('metrics', {
@@ -169,7 +172,34 @@ export const cessationLog = pgTable('cessation_log', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Tenancy spine (D-03 full spine)
+export const tenants = pgTable('tenants', {
+  id: text('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const subjects = pgTable('subjects', {
+  id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  displayName: varchar('display_name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 // Relations
+export const tenantsRelations = relations(tenants, ({ many }) => ({
+  subjects: many(subjects),
+}));
+
+export const subjectsRelations = relations(subjects, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [subjects.tenantId],
+    references: [tenants.id],
+  }),
+}));
+
 export const protocolVersionsRelations = relations(protocolVersions, ({ many }) => ({
   changes: many(protocolChanges),
 }));
@@ -199,3 +229,6 @@ export const correlationsRelations = relations(correlations, ({ one }) => ({
     references: [supplements.id],
   }),
 }));
+
+// Re-export Better-Auth tables so drizzleAdapter can locate them via barrel import
+export * from './auth-schema';
