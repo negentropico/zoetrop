@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/supplements";
-import { realSupplements } from "../../lib/protocol-data";
-import { SUPPLEMENT_TIERS, type SupplementTier, type Supplement } from "../../types/protocol";
-import { Card } from "../../components/ui/Card";
-import { Badge } from "../../components/ui/Badge";
-import { PageHeader } from "../../components/ui/PageHeader";
+import { realSupplements } from "~/lib/protocol-data";
+import { SUPPLEMENT_TIERS, type SupplementTier, type Supplement } from "~/types/protocol";
+import { Card } from "~/components/ui/Card";
+import { Badge } from "~/components/ui/Badge";
+import { PageHeader } from "~/components/ui/PageHeader";
 
 export function meta({}: Route.MetaArgs) {
   return [

@@ -5,8 +5,8 @@ import {
   type MetricCategory,
   type MetricStatus,
   type Metric,
-} from "../../types/metrics";
-import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
+} from "~/types/metrics";
+import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "~/lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
 import {
   Pill,
@@ -20,13 +20,13 @@ import {
   Dna,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Card } from "../../components/ui/Card";
-import { CatChip } from "../../components/ui/CatChip";
-import { StatusDot } from "../../components/ui/StatusDot";
-import { Sparkline } from "../../components/ui/Sparkline";
-import { RangeBar } from "../../components/ui/RangeBar";
-import type { MetricWithRange } from "../../components/ui/RangeBar";
-import { PageHeader } from "../../components/ui/PageHeader";
+import { Card } from "~/components/ui/Card";
+import { CatChip } from "~/components/ui/CatChip";
+import { StatusDot } from "~/components/ui/StatusDot";
+import { Sparkline } from "~/components/ui/Sparkline";
+import { RangeBar } from "~/components/ui/RangeBar";
+import type { MetricWithRange } from "~/components/ui/RangeBar";
+import { PageHeader } from "~/components/ui/PageHeader";
 
 const LUCIDE_MAP: Record<string, LucideIcon> = {
   pill: Pill,

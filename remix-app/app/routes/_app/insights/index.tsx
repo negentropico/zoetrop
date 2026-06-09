@@ -3,12 +3,12 @@ import type { Route } from "./+types/index";
 import {
   seedCorrelations,
   seedGeneticVariants,
-} from "../../lib/seed-data";
-import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES } from "../../types/genetics";
-import { Badge } from "../../components/ui/Badge";
-import { Card } from "../../components/ui/Card";
-import { PageHeader } from "../../components/ui/PageHeader";
-import { Button } from "../../components/ui/Button";
+} from "~/lib/seed-data";
+import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES } from "~/types/genetics";
+import { Badge } from "~/components/ui/Badge";
+import { Card } from "~/components/ui/Card";
+import { PageHeader } from "~/components/ui/PageHeader";
+import { Button } from "~/components/ui/Button";
 
 export function meta({}: Route.MetaArgs) {
   return [

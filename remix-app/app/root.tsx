@@ -9,7 +9,6 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { AppShell } from "./components/shell/AppShell";
 
 // Replace Inter with the three Zoetrope brand fonts (D-11).
 // Weights: Space Grotesk 400/500/600/700 + Hanken Grotesk 300–800 + Space Mono 400/700.
@@ -26,40 +25,6 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap",
   },
 ];
-
-// THROWAWAY pilot gate (Phase 2 stopgap, 2026-06-08): HTTP Basic-Auth on the
-// public Vercel deploy until Phase 3 real auth (Better-Auth) ships. Active only
-// when PILOT_BASIC_AUTH ("user:pass") is set in the environment — so local dev
-// (no such env var) is ungated. REMOVE this loader when Phase 3 auth lands.
-export async function loader({ request }: Route.LoaderArgs) {
-  const expected = process.env.PILOT_BASIC_AUTH;
-  if (expected) {
-    const header = request.headers.get("authorization") ?? "";
-    const [scheme, encoded] = header.split(" ");
-    let provided = "";
-    if (scheme === "Basic" && encoded) {
-      try {
-        provided = atob(encoded);
-      } catch {
-        provided = "";
-      }
-    }
-    if (provided !== expected) {
-      throw new Response("Authentication required", {
-        status: 401,
-        headers: { "WWW-Authenticate": 'Basic realm="Zoetrop pilot", charset="UTF-8"' },
-      });
-    }
-  }
-  return null;
-}
-
-// Forward the thrown 401's WWW-Authenticate header (pilot gate) so the browser
-// shows the native Basic-Auth dialog — RR strips thrown-Response headers unless
-// the route re-exports them via errorHeaders. Throwaway with the loader above.
-export function headers({ errorHeaders, loaderHeaders }: Route.HeadersArgs) {
-  return errorHeaders ?? loaderHeaders;
-}
 
 // No-flash theme script (static literal — T-04.1-02: no interpolation of any
 // user/runtime value, reads only its own localStorage + matchMedia, writes only
@@ -89,14 +54,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-// All 16 routes render inside AppShell (TopNav + main + footer + BottomTab).
-// The inline Header function is deleted; TopNav (in AppShell) replaces it (D-07).
+// App renders a bare Outlet — AppShell lives in routes/_app/layout.tsx
+// so only authenticated routes get the shell (Pitfall 3 / D-05).
 export default function App() {
-  return (
-    <AppShell>
-      <Outlet />
-    </AppShell>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

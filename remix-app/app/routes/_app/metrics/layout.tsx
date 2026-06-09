@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router";
-import { CATEGORY_INFO, type MetricCategory } from "../../types/metrics";
-import { CatChip } from "../../components/ui/CatChip";
+import { CATEGORY_INFO, type MetricCategory } from "~/types/metrics";
+import { CatChip } from "~/components/ui/CatChip";
 import {
   Pill,
   Gem,

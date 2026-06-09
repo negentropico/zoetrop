@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/genetics";
-import { seedGeneticVariants } from "../../lib/seed-data";
+import { seedGeneticVariants } from "~/lib/seed-data";
 import {
   CONFIDENCE_LEVELS,
   VARIANT_CATEGORIES,
   type ConfidenceLevel,
   type VariantCategory,
   type GeneticVariant,
-} from "../../types/genetics";
-import { Badge } from "../../components/ui/Badge";
-import { Card } from "../../components/ui/Card";
-import { DataTable } from "../../components/ui/DataTable";
-import { PageHeader } from "../../components/ui/PageHeader";
+} from "~/types/genetics";
+import { Badge } from "~/components/ui/Badge";
+import { Card } from "~/components/ui/Card";
+import { DataTable } from "~/components/ui/DataTable";
+import { PageHeader } from "~/components/ui/PageHeader";
 
 export function meta({}: Route.MetaArgs) {
   return [

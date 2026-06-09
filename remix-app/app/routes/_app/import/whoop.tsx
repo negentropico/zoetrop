@@ -1,10 +1,10 @@
 import { useState } from "react";
 import type { Route } from "./+types/whoop";
-import { Card } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { Badge } from "../../components/ui/Badge";
-import { PageHeader } from "../../components/ui/PageHeader";
-import { Dropzone } from "../../components/ui/Dropzone";
+import { Card } from "~/components/ui/Card";
+import { Button } from "~/components/ui/Button";
+import { Badge } from "~/components/ui/Badge";
+import { PageHeader } from "~/components/ui/PageHeader";
+import { Dropzone } from "~/components/ui/Dropzone";
 import { FileJson, Check, X } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {

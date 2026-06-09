@@ -5,13 +5,13 @@ import {
   realSupplements,
   realCessationLog,
   realMilestones,
-} from "../../lib/protocol-data";
-import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "../../types/protocol";
+} from "~/lib/protocol-data";
+import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "~/types/protocol";
 import { differenceInDays, parseISO, format } from "date-fns";
-import { Card } from "../../components/ui/Card";
-import { Badge } from "../../components/ui/Badge";
-import { PhaseBar } from "../../components/ui/PhaseBar";
-import type { Phase } from "../../components/ui/PhaseBar";
+import { Card } from "~/components/ui/Card";
+import { Badge } from "~/components/ui/Badge";
+import { PhaseBar } from "~/components/ui/PhaseBar";
+import type { Phase } from "~/components/ui/PhaseBar";
 
 export function meta({}: Route.MetaArgs) {
   return [

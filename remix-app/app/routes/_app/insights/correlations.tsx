@@ -4,11 +4,11 @@ import {
   seedCorrelations,
   seedSupplements,
   type SupplementCorrelation,
-} from "../../lib/seed-data";
-import { Badge } from "../../components/ui/Badge";
-import { Card } from "../../components/ui/Card";
-import { DataTable } from "../../components/ui/DataTable";
-import { PageHeader } from "../../components/ui/PageHeader";
+} from "~/lib/seed-data";
+import { Badge } from "~/components/ui/Badge";
+import { Card } from "~/components/ui/Card";
+import { DataTable } from "~/components/ui/DataTable";
+import { PageHeader } from "~/components/ui/PageHeader";
 
 export function meta({}: Route.MetaArgs) {
   return [

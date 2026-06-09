@@ -5,13 +5,13 @@ import {
   realProtocolChanges,
   realMilestones,
   realSupplements,
-} from "../../lib/protocol-data";
+} from "~/lib/protocol-data";
 import { format, parseISO } from "date-fns";
-import { Card } from "../../components/ui/Card";
-import { Badge } from "../../components/ui/Badge";
-import { PageHeader } from "../../components/ui/PageHeader";
-import { Crumb } from "../../components/ui/Crumb";
-import { Button } from "../../components/ui/Button";
+import { Card } from "~/components/ui/Card";
+import { Badge } from "~/components/ui/Badge";
+import { PageHeader } from "~/components/ui/PageHeader";
+import { Crumb } from "~/components/ui/Crumb";
+import { Button } from "~/components/ui/Button";
 
 export function loader({ params }: Route.LoaderArgs) {
   const { version: versionParam } = params;

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { Route } from "./+types/vault";
-import { Card } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { PageHeader } from "../../components/ui/PageHeader";
-import { Dropzone } from "../../components/ui/Dropzone";
+import { Card } from "~/components/ui/Card";
+import { Button } from "~/components/ui/Button";
+import { PageHeader } from "~/components/ui/PageHeader";
+import { Dropzone } from "~/components/ui/Dropzone";
 import { Check, X } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {

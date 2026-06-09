@@ -5,18 +5,18 @@ import {
   type MetricCategory,
   type MetricStatus,
   type Metric,
-} from "../../types/metrics";
-import { getRealMetrics, getProjections, getMetricTargets, MILESTONES } from "../../lib/real-data";
+} from "~/types/metrics";
+import { getRealMetrics, getProjections, getMetricTargets, MILESTONES } from "~/lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
-import { TrendChart } from "../../components/ui/TrendChart";
+import { TrendChart } from "~/components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
-import { Card } from "../../components/ui/Card";
-import { StatusBadge } from "../../components/ui/StatusBadge";
-import { RangeBar } from "../../components/ui/RangeBar";
-import type { MetricWithRange } from "../../components/ui/RangeBar";
-import { DataTable } from "../../components/ui/DataTable";
-import { Crumb } from "../../components/ui/Crumb";
-import { Badge } from "../../components/ui/Badge";
+import { Card } from "~/components/ui/Card";
+import { StatusBadge } from "~/components/ui/StatusBadge";
+import { RangeBar } from "~/components/ui/RangeBar";
+import type { MetricWithRange } from "~/components/ui/RangeBar";
+import { DataTable } from "~/components/ui/DataTable";
+import { Crumb } from "~/components/ui/Crumb";
+import { Badge } from "~/components/ui/Badge";
 
 function isValidCategory(category: string): category is MetricCategory {
   return category in CATEGORY_INFO;

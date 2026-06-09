@@ -1,16 +1,16 @@
 import { Link } from "react-router";
 import { Check, Play, Circle, Info, ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/cessation";
-import { realCessationLog } from "../../lib/protocol-data";
-import { CESSATION_PHASES, type CessationPhase } from "../../types/protocol";
+import { realCessationLog } from "~/lib/protocol-data";
+import { CESSATION_PHASES, type CessationPhase } from "~/types/protocol";
 import { differenceInDays, parseISO, format, addDays } from "date-fns";
-import { Card } from "../../components/ui/Card";
-import { PageHeader } from "../../components/ui/PageHeader";
-import { MetricRing } from "../../components/ui/MetricRing";
-import { PhaseBar } from "../../components/ui/PhaseBar";
-import { ProgressBar } from "../../components/ui/ProgressBar";
-import { Button } from "../../components/ui/Button";
-import type { Phase } from "../../components/ui/PhaseBar";
+import { Card } from "~/components/ui/Card";
+import { PageHeader } from "~/components/ui/PageHeader";
+import { MetricRing } from "~/components/ui/MetricRing";
+import { PhaseBar } from "~/components/ui/PhaseBar";
+import { ProgressBar } from "~/components/ui/ProgressBar";
+import { Button } from "~/components/ui/Button";
+import type { Phase } from "~/components/ui/PhaseBar";
 
 export function meta({}: Route.MetaArgs) {
   return [

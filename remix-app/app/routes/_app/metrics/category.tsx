@@ -5,10 +5,10 @@ import {
   type MetricCategory,
   type MetricStatus,
   type Metric,
-} from "../../types/metrics";
-import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "../../lib/real-data";
+} from "~/types/metrics";
+import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "~/lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
-import { TrendSparkline } from "../../components/ui/TrendChart";
+import { TrendSparkline } from "~/components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
 import {
   Pill,
@@ -22,13 +22,13 @@ import {
   Dna,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Card } from "../../components/ui/Card";
-import { CatChip } from "../../components/ui/CatChip";
-import { StatusBadge } from "../../components/ui/StatusBadge";
-import { StatusDot } from "../../components/ui/StatusDot";
-import { RangeBar } from "../../components/ui/RangeBar";
-import type { MetricWithRange } from "../../components/ui/RangeBar";
-import { Crumb } from "../../components/ui/Crumb";
+import { Card } from "~/components/ui/Card";
+import { CatChip } from "~/components/ui/CatChip";
+import { StatusBadge } from "~/components/ui/StatusBadge";
+import { StatusDot } from "~/components/ui/StatusDot";
+import { RangeBar } from "~/components/ui/RangeBar";
+import type { MetricWithRange } from "~/components/ui/RangeBar";
+import { Crumb } from "~/components/ui/Crumb";
 
 const LUCIDE_MAP: Record<string, LucideIcon> = {
   pill: Pill,

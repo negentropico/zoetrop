@@ -1,11 +1,11 @@
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/compare";
-import { realProtocolVersions, realProtocolChanges } from "../../lib/protocol-data";
+import { realProtocolVersions, realProtocolChanges } from "~/lib/protocol-data";
 import { format, parseISO } from "date-fns";
-import { Card } from "../../components/ui/Card";
-import { Badge } from "../../components/ui/Badge";
-import { PageHeader } from "../../components/ui/PageHeader";
-import { Button } from "../../components/ui/Button";
+import { Card } from "~/components/ui/Card";
+import { Badge } from "~/components/ui/Badge";
+import { PageHeader } from "~/components/ui/PageHeader";
+import { Button } from "~/components/ui/Button";
 
 export function meta({}: Route.MetaArgs) {
   return [
