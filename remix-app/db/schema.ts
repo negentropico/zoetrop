@@ -90,15 +90,19 @@ export const metrics = pgTable('metrics', {
   syncVersion: integer('sync_version').notNull().default(1),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Protocol versions (601 → 602 → 603)
 export const protocolVersions = pgTable('protocol_versions', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  version: varchar('version', { length: 10 }).notNull().unique(), // e.g., "601", "602", "603"
+  version: varchar('version', { length: 10 }).notNull(), // global unique removed — per-subject composite UNIQUE added in Plan 04 (TEN-04)
   effectiveDate: timestamp('effective_date').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Protocol changes (what changed between versions)
@@ -111,6 +115,8 @@ export const protocolChanges = pgTable('protocol_changes', {
   newDosage: varchar('new_dosage', { length: 100 }),
   rationale: text('rationale'),
   createdAt: timestamp('created_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Milestones with biometric snapshots
@@ -121,6 +127,8 @@ export const milestones = pgTable('milestones', {
   protocolVersion: varchar('protocol_version', { length: 10 }),
   biometricSnapshot: jsonb('biometric_snapshot'), // Snapshot of key metrics at this point
   createdAt: timestamp('created_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Supplements with genetic basis
@@ -137,6 +145,8 @@ export const supplements = pgTable('supplements', {
   isActive: integer('is_active').notNull().default(1), // Boolean as int for SQLite compat
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Supplement log (track when supplements are taken)
@@ -147,6 +157,8 @@ export const supplementLog = pgTable('supplement_log', {
   dosage: real('dosage'), // Override if different from default
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Correlations (calculated relationships between supplements and metrics)
@@ -159,6 +171,8 @@ export const correlations = pgTable('correlations', {
   sampleSize: integer('sample_size').notNull(),
   pValue: real('p_value'), // Statistical significance
   calculatedAt: timestamp('calculated_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Cessation tracking (FAAH-based 120+ day protocol)
@@ -170,6 +184,8 @@ export const cessationLog = pgTable('cessation_log', {
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
 });
 
 // Tenancy spine (D-03 full spine)
