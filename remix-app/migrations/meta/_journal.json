@@ -8,6 +8,20 @@
       "when": 1780876883906,
       "tag": "0000_light_blue_shield",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781005935089,
+      "tag": "0001_better_auth_and_tenancy_spine",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781005965714,
+      "tag": "0002_tenancy_columns_nullable",
+      "breakpoints": true
     }
   ]
 }
