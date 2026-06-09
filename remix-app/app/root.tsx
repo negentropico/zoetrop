@@ -54,6 +54,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   return null;
 }
 
+// Forward the thrown 401's WWW-Authenticate header (pilot gate) so the browser
+// shows the native Basic-Auth dialog — RR strips thrown-Response headers unless
+// the route re-exports them via errorHeaders. Throwaway with the loader above.
+export function headers({ errorHeaders, loaderHeaders }: Route.HeadersArgs) {
+  return errorHeaders ?? loaderHeaders;
+}
+
 // No-flash theme script (static literal — T-04.1-02: no interpolation of any
 // user/runtime value, reads only its own localStorage + matchMedia, writes only
 // data-theme; XSS-safe by construction).
