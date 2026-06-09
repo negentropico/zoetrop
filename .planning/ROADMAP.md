@@ -88,7 +88,21 @@ Plans:
   2. All 8 existing data tables (`metrics`, `protocolVersions`, `protocolChanges`, `milestones`, `supplements`, `supplementLog`, `correlations`, `cessationLog`) have non-nullable `tenantId` and `subjectId` columns, backfilled with the owner's IDs, with a composite index on `(tenant_id, subject_id)` confirmed via `\d+ table_name`
   3. Protocol version lineage is unique on `(tenantId, subjectId, version)` — the old global `UNIQUE(version)` constraint is replaced; `pg_indexes` confirms the new constraint
 
-**Plans**: TBD
+**Plans**: 5 plans in 3 waves
+Plans:
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Wave-0 foundation: gated install of @better-auth/drizzle-adapter + tsx, vite.config test glob for tests/**, the 6 VALIDATION.md contract test files (red) [AUTH-01, AUTH-02, TEN-01, TEN-04]
+- [ ] 03-02-PLAN.md — Schema layer: db/auth-schema.ts (Better-Auth tables) + app_role enum + tenants/subjects spine + nullable tenant_id/subject_id on 8 tables + drop global version unique; generate migrations 0001/0002 [AUTH-02, TEN-01, TEN-04]
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 03-03-PLAN.md — Auth server core: auth.server.ts (email/password + drizzleAdapter + role input:false + invite-only beforeSignUp hook + 30-day session) + auth-client.ts + /api/auth/* resource route [AUTH-01, AUTH-02]
+- [ ] 03-04-PLAN.md — Backfill + NOT NULL/index/constraint migrations (0003/0004) + owner seed + [BLOCKING] db:migrate to Neon + DB schema-introspection verification [TEN-01, TEN-04]
+
+**Wave 3** *(blocked on 03-03)*
+
+- [ ] 03-05-PLAN.md — Public/private routing split: authenticated _app/ layout (session redirect) + landing/login/logout + route move under _app/ + remove PILOT_BASIC_AUTH from root.tsx + delete Vercel env var (D-05) [AUTH-01, AUTH-02]
 
 ### Phase 4: Static-to-DB Data Layer Migration
 
@@ -190,7 +204,7 @@ Likely plans:
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
-| 3. Identity + Tenancy Scoping | 0/TBD | Not started | - |
+| 3. Identity + Tenancy Scoping | 0/5 | Planned | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
