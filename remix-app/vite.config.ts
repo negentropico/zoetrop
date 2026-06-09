@@ -20,7 +20,12 @@ export default defineConfig({
     // pragma to a single test file is sufficient — no global default change needed.
     environment: "node",
     setupFiles: ["./app/test-setup.ts"],
-    include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
+    include: [
+      "app/**/*.test.ts",
+      "app/**/*.test.tsx",
+      "tests/**/*.test.ts",
+      "tests/**/*.test.tsx",
+    ],
     // Vitest 4.x exits 1 when no test files match (CI guard). The harness is
     // installed before any engine tests exist (Plans 01-04/01-05 add them), so
     // an empty run must still exit 0 to prove the harness boots. The include
