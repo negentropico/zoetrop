@@ -11,7 +11,6 @@ import { describe, it, expect } from "vitest";
 // Source: 03-RESEARCH.md § Pattern 3 + § Code Examples (Authenticated Layout
 //   Loader: throw redirect(`/login?redirect=...`) when session is null).
 
-// @ts-expect-error — ~/routes/_app/layout does not exist until Plan 05 (Wave-0 red contract)
 import { loader } from "~/routes/_app/layout";
 
 describe("AUTH-02 authenticated layout loader redirect", () => {
@@ -21,7 +20,7 @@ describe("AUTH-02 authenticated layout loader redirect", () => {
     let thrown: unknown;
     try {
       // React Router loaders receive { request, params, context }.
-      await loader({ request, params: {}, context: {} });
+      await loader({ request, params: {}, context: {}, unstable_pattern: "/dashboard" });
     } catch (err) {
       thrown = err;
     }
