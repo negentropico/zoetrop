@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 02 complete (4/4) — pilot live at zoetrop.vercel.app; engine path resumes at Phase 3 (Identity + Tenancy Scoping)
-last_updated: 2026-06-08T23:13:52.522Z
+status: Ready to discuss/plan
+stopped_at: Phase 3 context gathered
+last_updated: "2026-06-09T00:04:58.323Z"
 last_activity: 2026-06-08
 progress:
   total_phases: 8
@@ -109,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-08T23:13:52Z
-Stopped at: Phase 02 complete (4/4) — re-scoped to pilot deploy baseline; live at https://zoetrop.vercel.app on Neon orange-paper-97068012. 04.1-09 browser-verified. Engine path resumes at Phase 3.
-Resume file: None
+Last session: 2026-06-09T00:04:58.318Z
+Stopped at: Phase 3 context gathered
+Resume file: .planning/phases/03-identity-tenancy-scoping/03-CONTEXT.md
