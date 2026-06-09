@@ -240,7 +240,7 @@ export const auth = betterAuth({
 ```typescript
 import { createAuthMiddleware, APIError } from "better-auth/api";
 ```
-[CITED: https://www.better-auth.com/docs/concepts/hooks]
+[CONFIRMED 2026-06-09 against installed `better-auth@1.6.14`: both are re-exported from `better-auth/api` — see `node_modules/better-auth/dist/api/index.d.mts` line 3963 and the `./api` entry in the package `exports` map. Original source: https://www.better-auth.com/docs/concepts/hooks]
 
 ### Pattern 2: API Resource Route (catch-all handler)
 
@@ -566,7 +566,7 @@ ALTER TABLE "protocol_versions"
 
 **What goes wrong:** The `beforeSignUp` hook that enforces invite-only signup also blocks the seed script that creates the owner account, requiring a separate path to bypass it.
 **Why it happens:** The hook fires for all sign-up attempts including programmatic ones via `auth.api.signUpEmail()`.
-**How to avoid:** The seed script passes the `OWNER_INVITE_TOKEN` as `inviteToken` in the signup body, which the hook validates. Alternatively, seed the owner by inserting directly into the `user` table in the seed migration (bypassing Better-Auth's HTTP endpoint entirely) and hashing the password with Better-Auth's hash function. The direct DB insert approach is simpler but requires knowing the internal password hash format.
+**How to avoid:** The seed script passes the `OWNER_INVITE_TOKEN` as `inviteToken` in the signup body, which the hook validates. This is the CONFIRMED Phase 3 seed path (see Open Questions Q1, RESOLVED): seed via `auth.api.signUpEmail()` so Better-Auth owns the password hash + the `user`/`account` write — do NOT hand-insert with a raw `hashPassword`.
 **Warning signs:** Seed script returns 403 Forbidden; no owner account in `user` table after migration.
 
 ### Pitfall 6: `protocol_versions` global unique constraint conflict during migration
@@ -665,32 +665,40 @@ hooks: {
 },
 ```
 
-### Owner Seed (direct DB insert, bypasses invite gate)
+### Owner Seed (via Better-Auth signUpEmail, invite-token bypass — CONFIRMED PATH)
 
 ```typescript
 // Seed script: remix-app/scripts/seed-owner.ts
-// Seeds owner user + tenant + subject into DB before any HTTP-layer signup
+// CONFIRMED 2026-06-09 (Open Questions Q1, RESOLVED): seed the owner USER through
+// auth.api.signUpEmail() passing OWNER_INVITE_TOKEN so the beforeSignUp hook lets it
+// through (Pitfall 5) and Better-Auth owns the password hash + the user/account write
+// (V6 — never hand-roll). The tenant + subject rows are direct Drizzle inserts; the
+// owner's role is elevated to "owner" via a direct Drizzle UPDATE after sign-up
+// (additionalFields default 'client'; input:false blocks self-assignment).
+// The raw `hashPassword` import is intentionally NOT used.
 import { getDb } from "../app/lib/db.server";
-import { user, tenants, subjects } from "../../db/schema";
-import { hashPassword } from "better-auth/crypto"; // [ASSUMED: exact import path]
+import { auth } from "../app/lib/auth.server";
+import { tenants, subjects, user } from "../../db/schema";
+import { eq } from "drizzle-orm";
 
 const db = getDb();
 const tenantId = crypto.randomUUID();
 const subjectId = crypto.randomUUID();
-const userId = crypto.randomUUID();
 
 await db.insert(tenants).values({ id: tenantId, name: "Owner Tenant" });
-await db.insert(subjects).values({ id: subjectId, tenantId, displayName: "Owner" });
-await db.insert(user).values({
-  id: userId,
-  email: process.env.OWNER_EMAIL!,
-  name: process.env.OWNER_NAME ?? "Owner",
-  password: await hashPassword(process.env.OWNER_PASSWORD!),
-  role: "owner",
-  emailVerified: true,
-  createdAt: new Date(),
-  updatedAt: new Date(),
+await db.insert(subjects).values({ id: subjectId, tenantId, displayName: process.env.OWNER_NAME ?? "Owner" });
+
+await auth.api.signUpEmail({
+  body: {
+    email: process.env.OWNER_EMAIL!,
+    password: process.env.OWNER_PASSWORD!,
+    name: process.env.OWNER_NAME ?? "Owner",
+    inviteToken: process.env.OWNER_INVITE_TOKEN!, // satisfies the invite-only hook
+  },
 });
+
+// Elevate the freshly-created owner to role "owner" (server-side only)
+await db.update(user).set({ role: "owner" }).where(eq(user.email, process.env.OWNER_EMAIL!));
 ```
 
 ---
@@ -714,31 +722,31 @@ await db.insert(user).values({
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | `hashPassword` is exported from `better-auth/crypto` for direct DB seeding | Code Examples (owner seed) | Seed script compilation error; need to find the correct import or use `auth.api.signUpEmail()` with the invite token instead |
-| A2 | `createAuthMiddleware` and `APIError` import from `"better-auth/api"` | Pattern 1 | TypeScript compile error; may be `"better-auth/server"` or the root package |
+| A1 | `hashPassword` is exported from `better-auth/crypto` for direct DB seeding | Code Examples (owner seed) | RESOLVED — confirmed exported, BUT the seed uses `auth.api.signUpEmail()` instead (see Open Questions Q1, RESOLVED); the raw-hash path is dropped |
+| A2 | `createAuthMiddleware` and `APIError` import from `"better-auth/api"` | Pattern 1 | RESOLVED — confirmed both re-exported from `better-auth/api` against installed `better-auth@1.6.14` (Open Questions Q3-import, RESOLVED) |
 | A3 | Using `text` (not Postgres `uuid` type) for `tenants.id`/`subjects.id` aligns cleanly with Better-Auth `user.id` FK pattern | Pattern 5 | FK type mismatch if Better-Auth generates `uuid` columns — check generated SQL output |
 | A4 | drizzle-kit `generate` will attempt a single-step NOT NULL alter when schema declares `notNull()` without a default | Pitfall 1 / Migration Pattern | May require adjustment to migration sequencing if drizzle-kit is smarter than assumed |
-| A5 | The `_app/` folder-based route prefix is the clean way to namespace authenticated routes without a URL segment | Pattern 3 | Route file naming convention — verify with React Router 7 RouteConfig; `layout()` wrapper has no URL segment by design, so the folder name is arbitrary |
+| A5 | The `_app/` folder-based route prefix is the clean way to namespace authenticated routes without a URL segment | Pattern 3 | RESOLVED — confirmed `_app/` has no special meaning under explicit `RouteConfig`; `layout()` adds no URL segment (Open Questions Q3, RESOLVED) |
 | A6 | Better-Auth `asResponse: true` in `auth.api.signInEmail()` returns a full `Response` with `Set-Cookie` headers that can be forwarded via React Router's `redirect()` | Code Examples | If wrong, the sign-in response does not set the session cookie; need to inspect Better-Auth's server-side API shape |
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`hashPassword` import for direct DB seeding**
-   - What we know: Better-Auth stores hashed passwords in the `account` table (`password` column), not in `user`. Passwords are associated via the `account` table's `providerId: "credential"` record.
-   - What's unclear: The exact import path for hashing, and whether seeding requires inserting into both `user` AND `account` tables.
-   - Recommendation: During the seed task, use `auth.api.signUpEmail()` with the invite token env var (set `OWNER_INVITE_TOKEN` in the seed environment) rather than direct DB inserts — avoids needing to know Better-Auth's internal hashing/account storage format.
+> Resolved 2026-06-09 by reading the INSTALLED package's own type definitions (`remix-app/node_modules/better-auth@1.6.14`: `package.json` `exports` map + `dist/**/*.d.mts`) and the installed `@react-router/dev` routes API. These are confirmed facts, not assumptions — the dependent plans (03-03 Task 1, 03-04 Task 1) now ship against them with no "verify during execution" hedge.
 
-2. **Session shape with `additionalFields`**
-   - What we know: Better-Auth `additionalFields` on `user` appear in `session.user.role` after the user is signed in.
-   - What's unclear: Whether the Drizzle adapter automatically includes `additionalFields` in the `getSession()` response, or if explicit schema mapping is needed.
-   - Recommendation: After `auth.server.ts` is set up, verify `session.user.role` in a test loader before building role-gating logic.
+1. **`hashPassword` import for the owner seed — RESOLVED (and superseded by `signUpEmail`)**
+   - **Confirmed fact (A1):** `hashPassword` (and `verifyPassword`) ARE exported from `better-auth/crypto` — verified in `node_modules/better-auth/dist/crypto/index.d.mts` (`export { ... hashPassword ... verifyPassword }`) plus the `./crypto` entry in the package `exports` map. The original [ASSUMED] guess was correct.
+   - **Decision — DO NOT use the raw hash import.** Seeding via `hashPassword` requires hand-inserting BOTH the `user` row AND a matching `account` row (`providerId: "credential"`, `password: <hash>`) in the exact internal shape Better-Auth expects on sign-in — brittle and version-coupled.
+   - **Confirmed approach (03-04 Task 1):** seed the owner USER via `auth.api.signUpEmail({ body: { email, password, name, inviteToken: process.env.OWNER_INVITE_TOKEN } })`. `signUpEmail` is a real server-API method — verified exported from `better-auth/api` (`dist/api/index.d.mts` line 3963) and exposed on `auth.api`. Passing `OWNER_INVITE_TOKEN` satisfies the `beforeSignUp` invite hook (Pitfall 5); Better-Auth owns the password hash + the `user`/`account` write (V6). After sign-up, the seed elevates the user's `role` to `"owner"` via a direct Drizzle UPDATE (additional field defaults to `'client'`; `input:false` blocks self-assignment, so server-side elevation is the only path). **The raw `hashPassword` import is dropped from the seed plan entirely.**
 
-3. **React Router 7 folder-based route organization (`_app/` prefix)**
-   - What we know: React Router 7 with an explicit `routes.ts` `RouteConfig` does not use file-name conventions — the layout file path is explicit in `layout("routes/_app/layout.tsx", [...])`.
-   - What's unclear: Whether the `_app/` convention has any special meaning in the React Router Vite plugin (some frameworks treat `_` prefixed folders specially).
-   - Recommendation: The `_app/` folder is just a filesystem organization choice. The route table is explicit — there are no magic conventions. Verify with a minimal test during Wave 0.
+2. **`createAuthMiddleware` + `APIError` import path — RESOLVED**
+   - **Confirmed fact (A2):** both `createAuthMiddleware` and `APIError` are re-exported from `better-auth/api` — verified in `node_modules/better-auth/dist/api/index.d.mts` line 3963 (`export { APIError, ... createAuthMiddleware, ... }`) and the `./api` entry in the package `exports` map (`./api` → `dist/api/index.mjs`). NOT `better-auth/server` (no such export exists) and NOT `better-auth/plugins`.
+   - **Decision (03-03 Task 1):** `import { createAuthMiddleware, APIError } from "better-auth/api";` — wire it as fact, no fallback-path hedge.
+
+3. **React Router 7 folder-based route organization (`_app/` prefix) — RESOLVED**
+   - **Confirmed fact (A5):** the `_app/` folder prefix has NO special meaning. Routing is fully explicit via `RouteConfig` in `app/routes.ts`. The installed `@react-router/dev` API (`node_modules/@react-router/dev/dist/routes-*.d.ts`) declares `layout(file: string, children?: RouteConfigEntry[]): RouteConfigEntry` and `route(path: string | null | undefined, file: string, ...)` — a `layout()` adds NO URL segment, and the URL path comes only from the explicit `route("dashboard", ...)` first argument, never from the file path or folder name. The existing `app/routes.ts` already proves this: `layout("routes/metrics/layout.tsx", [ route("metrics", ...) ])` derives no URL from the `metrics/` folder. (`_`-prefix specialness is a flat-file-convention behaviour, which this project does NOT use.)
+   - **Decision (03-05):** `_app/` is purely a filesystem organization choice for the authenticated route tree. 03-05 wires `layout("routes/_app/layout.tsx", [ route("dashboard", "routes/_app/dashboard.tsx"), ... ])` with confidence — no Wave-0 spike needed.
 
 ---
 
@@ -848,6 +856,8 @@ The `tenantId` and `subjectId` columns added in Phase 3 are the values that Phas
 - [Better-Auth official docs — Organization plugin](https://www.better-auth.com/docs/plugins/organization) — schema tables; role model; invitation workflow
 - [Better-Auth official docs — Admin plugin](https://www.better-auth.com/docs/plugins/admin) — additionalFields role column; user.role; session schema
 - [Better-Auth official docs — Options reference](https://www.better-auth.com/docs/reference/options) — disableSignUp option
+- [Installed `better-auth@1.6.14` type definitions](remix-app/node_modules/better-auth) — `package.json` exports map + `dist/api/index.d.mts` (line 3963: createAuthMiddleware, APIError, signUpEmail, signInEmail, signOut, getSession) + `dist/crypto/index.d.mts` (hashPassword, verifyPassword) — used to RESOLVE Open Questions Q1/Q2
+- [Installed `@react-router/dev` routes API](remix-app/node_modules/@react-router/dev/dist/routes-CZR-bKRt.d.ts) — `layout(file, children?)` / `route(path, file, ...)` signatures confirming `_app/` carries no URL/convention meaning — used to RESOLVE Open Questions Q3
 - [Drizzle ORM — Custom migrations](https://orm.drizzle.team/docs/kit-custom-migrations) — generate --custom; ADD COLUMN nullable → backfill → NOT NULL pattern
 - [01-SPIKE-FINDINGS.md](/.planning/phases/01-schema-baseline-engine-tests-auth-spike/01-SPIKE-FINDINGS.md) — SET LOCAL vs bare SET leak proof; NOBYPASSRLS requirement; fail-closed NULLIF policy
 
@@ -866,9 +876,10 @@ The `tenantId` and `subjectId` columns added in Phase 3 are the values that Phas
 - Standard Stack: HIGH — better-auth and @better-auth/drizzle-adapter confirmed on npm registry + official docs
 - Architecture: HIGH — React Router 7 layout pattern + Better-Auth handler pattern confirmed from official docs
 - Migration mechanics: MEDIUM — expand-contract pattern verified from Drizzle custom migrations docs; exact drizzle-kit behavior with NOT NULL columns not confirmed by a live run
-- Invite-only hook: HIGH — createAuthMiddleware + APIError pattern confirmed from official hooks docs
+- Invite-only hook: HIGH — createAuthMiddleware + APIError pattern confirmed from official hooks docs AND the installed package's own type defs
 - Org plugin analysis: HIGH — confirmed org plugin tables and roles; confirmed it is NOT the right fit for this project
 - Pitfalls: MEDIUM — some derived from spike findings (HIGH); others from training knowledge (MEDIUM)
+- Open Questions: RESOLVED 2026-06-09 against the installed `better-auth@1.6.14` + `@react-router/dev` type definitions (HIGH)
 
 **Research date:** 2026-06-09
 **Valid until:** 2026-07-09 (Better-Auth is actively developed; recheck if > 30 days)

@@ -98,10 +98,10 @@ Plans:
 **Wave 2** *(blocked on Wave 1)*
 
 - [ ] 03-03-PLAN.md — Auth server core: auth.server.ts (email/password + drizzleAdapter + role input:false + invite-only beforeSignUp hook + 30-day session) + auth-client.ts + /api/auth/* resource route [AUTH-01, AUTH-02]
-- [ ] 03-04-PLAN.md — Backfill + NOT NULL/index/constraint migrations (0003/0004) + owner seed + [BLOCKING] db:migrate to Neon + DB schema-introspection verification [TEN-01, TEN-04]
 
-**Wave 3** *(blocked on 03-03)*
+**Wave 3** *(blocked on 03-03; 03-04 and 03-05 run in parallel — no file overlap)*
 
+- [ ] 03-04-PLAN.md — Owner seed (via auth.api.signUpEmail from 03-03) + backfill + NOT NULL/index/constraint migrations (0003/0004) + [BLOCKING] db:migrate to Neon + DB schema-introspection verification [TEN-01, TEN-04]
 - [ ] 03-05-PLAN.md — Public/private routing split: authenticated _app/ layout (session redirect) + landing/login/logout + route move under _app/ + remove PILOT_BASIC_AUTH from root.tsx + delete Vercel env var (D-05) [AUTH-01, AUTH-02]
 
 ### Phase 4: Static-to-DB Data Layer Migration
