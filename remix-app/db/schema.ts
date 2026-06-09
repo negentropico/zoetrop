@@ -8,6 +8,8 @@ import {
   jsonb,
   pgEnum,
   boolean,
+  index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -90,20 +92,25 @@ export const metrics = pgTable('metrics', {
   syncVersion: integer('sync_version').notNull().default(1),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Protocol versions (601 → 602 → 603)
 export const protocolVersions = pgTable('protocol_versions', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  version: varchar('version', { length: 10 }).notNull(), // global unique removed — per-subject composite UNIQUE added in Plan 04 (TEN-04)
+  version: varchar('version', { length: 10 }).notNull(), // global unique removed in Plan 02; per-subject composite UNIQUE added in Plan 04 (TEN-04)
   effectiveDate: timestamp('effective_date').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
-});
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
+}, (t) => [
+  // TEN-04: per-subject version uniqueness (old global UNIQUE dropped in migration 0002)
+  uniqueIndex('protocol_versions_tenant_subject_version_unique').on(t.tenantId, t.subjectId, t.version),
+  // TEN-01: composite index for efficient tenant+subject scoping
+  index('idx_protocol_versions_tenant_subject').on(t.tenantId, t.subjectId),
+]);
 
 // Protocol changes (what changed between versions)
 export const protocolChanges = pgTable('protocol_changes', {
@@ -115,8 +122,8 @@ export const protocolChanges = pgTable('protocol_changes', {
   newDosage: varchar('new_dosage', { length: 100 }),
   rationale: text('rationale'),
   createdAt: timestamp('created_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Milestones with biometric snapshots
@@ -127,8 +134,8 @@ export const milestones = pgTable('milestones', {
   protocolVersion: varchar('protocol_version', { length: 10 }),
   biometricSnapshot: jsonb('biometric_snapshot'), // Snapshot of key metrics at this point
   createdAt: timestamp('created_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Supplements with genetic basis
@@ -145,8 +152,8 @@ export const supplements = pgTable('supplements', {
   isActive: integer('is_active').notNull().default(1), // Boolean as int for SQLite compat
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Supplement log (track when supplements are taken)
@@ -157,8 +164,8 @@ export const supplementLog = pgTable('supplement_log', {
   dosage: real('dosage'), // Override if different from default
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Correlations (calculated relationships between supplements and metrics)
@@ -171,8 +178,8 @@ export const correlations = pgTable('correlations', {
   sampleSize: integer('sample_size').notNull(),
   pValue: real('p_value'), // Statistical significance
   calculatedAt: timestamp('calculated_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Cessation tracking (FAAH-based 120+ day protocol)
@@ -184,8 +191,8 @@ export const cessationLog = pgTable('cessation_log', {
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-  tenantId: text('tenant_id').references(() => tenants.id),   // nullable — expand-contract (Pitfall 1)
-  subjectId: text('subject_id').references(() => subjects.id), // nullable — expand-contract (Pitfall 1)
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
+  subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
 // Tenancy spine (D-03 full spine)
