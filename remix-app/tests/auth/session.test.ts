@@ -14,7 +14,6 @@ import { describe, it, expect } from "vitest";
 //
 // Source: 03-RESEARCH.md § Code Examples (getSession), § Pattern 1 (auth.server.ts shape).
 
-// @ts-expect-error — ~/lib/auth.server does not exist until Plan 03 (Wave-0 red contract)
 import { auth } from "~/lib/auth.server";
 
 describe("AUTH-01 getSession contract", () => {
