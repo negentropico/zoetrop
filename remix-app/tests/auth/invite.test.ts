@@ -13,7 +13,6 @@ import { describe, it, expect } from "vitest";
 // Source: 03-RESEARCH.md § Code Examples (Invite-Only Gate Hook),
 //   § Pattern 1 (createAuthMiddleware before hook → APIError "FORBIDDEN").
 
-// @ts-expect-error — ~/lib/auth.server does not exist until Plan 03 (Wave-0 red contract)
 import { auth } from "~/lib/auth.server";
 
 interface ForbiddenShape {
@@ -26,15 +25,18 @@ describe("D-01 invite-only signup gate", () => {
   it("rejects sign-up carrying a bogus invite token with a 403-shaped error", async () => {
     let thrown: unknown;
     try {
-      await auth.api.signUpEmail({
-        body: {
-          email: "intruder@example.com",
-          password: "not-a-real-password-123",
-          name: "Intruder",
-          // Deliberately wrong token — must never match OWNER_INVITE_TOKEN.
-          inviteToken: "definitely-not-the-owner-invite-token",
-        },
-      });
+      // Better-Auth's signUpEmail body type is a ZodIntersection with ZodRecord<string, any>
+      // that accepts extra fields at runtime (inviteToken reaches ctx.body in the hook),
+      // but the TypeScript inference only surfaces the known fields. Cast via unknown to
+      // pass the extra field through — inviteToken is the real contract assertion here.
+      const body = {
+        email: "intruder@example.com",
+        password: "not-a-real-password-123",
+        name: "Intruder",
+        // Deliberately wrong token — must never match OWNER_INVITE_TOKEN.
+        inviteToken: "definitely-not-the-owner-invite-token",
+      } as unknown as { email: string; password: string; name: string };
+      await auth.api.signUpEmail({ body });
     } catch (err) {
       thrown = err;
     }

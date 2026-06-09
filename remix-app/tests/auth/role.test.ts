@@ -10,7 +10,6 @@ import { describe, it, expect } from "vitest";
 // Source: 03-RESEARCH.md § Pattern 1 (user.additionalFields.role:
 //   { type: ["owner","practitioner","client"], input: false }).
 
-// @ts-expect-error — ~/lib/auth.server does not exist until Plan 03 (Wave-0 red contract)
 import { auth } from "~/lib/auth.server";
 
 describe("AUTH-02 role additional-field contract", () => {

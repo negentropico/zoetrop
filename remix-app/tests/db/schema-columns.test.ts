@@ -66,7 +66,7 @@ describe.skipIf(!connectionString)(
 
         const byName = new Map(
           rows.map((r) => [
-            (r as Record<string, unknown>)["column_name"] as string,
+            (r as unknown as Record<string, unknown>)["column_name"] as string,
             r.is_nullable,
           ])
         );
