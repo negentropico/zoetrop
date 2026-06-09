@@ -10,16 +10,16 @@
 ### Identity & Access
 
 - [ ] **AUTH-01**: A user can sign in with email + password and stay signed in across sessions
-- [ ] **AUTH-02**: Each user has a role (owner / practitioner / client) that gates what they can access
+- [x] **AUTH-02**: Each user has a role (owner / practitioner / client) that gates what they can access
 - [ ] **AUTH-03**: A practitioner can access only the subjects (clients) assigned to them within their tenant
 - [ ] **AUTH-04**: Authentication and access events are written to an immutable audit log
 
 ### Multi-Tenancy & Isolation
 
-- [ ] **TEN-01**: Every health-data table is scoped by `tenantId` + `subjectId`
+- [x] **TEN-01**: Every health-data table is scoped by `tenantId` + `subjectId`
 - [ ] **TEN-02**: Postgres RLS prevents any query from returning another tenant's or subject's rows (proven by an automated cross-tenant isolation test)
 - [ ] **TEN-03**: Tenant/subject context is set per-request via `SET LOCAL` inside a transaction, with no leakage across pooled connections
-- [ ] **TEN-04**: Protocol version lineage (P0–P6) is per-subject, unique on `(tenantId, subjectId, version)`
+- [x] **TEN-04**: Protocol version lineage (P0–P6) is per-subject, unique on `(tenantId, subjectId, version)`
 
 ### Data Layer
 
@@ -105,13 +105,13 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | COMP-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | COMP-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | AUTH-01 | Phase 3 — Identity + Tenancy Scoping | Pending |
-| AUTH-02 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| AUTH-02 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | AUTH-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | AUTH-04 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
-| TEN-01 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| TEN-01 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | TEN-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | TEN-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
-| TEN-04 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| TEN-04 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
 | DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
 | DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
