@@ -9,7 +9,7 @@
 
 ### Identity & Access
 
-- [ ] **AUTH-01**: A user can sign in with email + password and stay signed in across sessions
+- [x] **AUTH-01**: A user can sign in with email + password and stay signed in across sessions
 - [x] **AUTH-02**: Each user has a role (owner / practitioner / client) that gates what they can access
 - [ ] **AUTH-03**: A practitioner can access only the subjects (clients) assigned to them within their tenant
 - [ ] **AUTH-04**: Authentication and access events are written to an immutable audit log
@@ -104,7 +104,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
 | COMP-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | COMP-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
-| AUTH-01 | Phase 3 — Identity + Tenancy Scoping | Pending |
+| AUTH-01 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | AUTH-02 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | AUTH-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | AUTH-04 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |

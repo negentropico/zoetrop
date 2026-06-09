@@ -97,7 +97,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 03-03-PLAN.md — Auth server core: auth.server.ts (email/password + drizzleAdapter + role input:false + invite-only beforeSignUp hook + 30-day session) + auth-client.ts + /api/auth/* resource route [AUTH-01, AUTH-02]
+- [x] 03-03-PLAN.md — Auth server core: auth.server.ts (email/password + drizzleAdapter + role input:false + invite-only beforeSignUp hook + 30-day session) + auth-client.ts + /api/auth/* resource route [AUTH-01, AUTH-02]
 
 **Wave 3** *(blocked on 03-03; 03-04 and 03-05 run in parallel — no file overlap)*
 
@@ -204,7 +204,7 @@ Likely plans:
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
-| 3. Identity + Tenancy Scoping | 2/5 | In Progress|  |
+| 3. Identity + Tenancy Scoping | 3/5 | In Progress|  |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
