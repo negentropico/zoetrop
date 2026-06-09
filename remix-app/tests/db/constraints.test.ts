@@ -22,6 +22,20 @@ interface ConstraintRow {
   column_names: string[];
 }
 
+// The @neondatabase/serverless driver returns array_agg(...) as a Postgres
+// array-literal STRING (e.g. "{tenant_id,subject_id,version}"), not a parsed
+// JS array. Normalize so the column-set assertions work regardless of the
+// driver's array-parsing behavior.
+function parsePgTextArray(value: string | string[]): string[] {
+  if (Array.isArray(value)) return value;
+  return value
+    .replace(/^\{/, "")
+    .replace(/\}$/, "")
+    .split(",")
+    .map((s) => s.trim().replace(/^"(.*)"$/, "$1"))
+    .filter((s) => s.length > 0);
+}
+
 let pool: Pool | null = null;
 
 function getPool(): Pool {
@@ -40,7 +54,10 @@ describe.skipIf(!connectionString)(
   () => {
     // All UNIQUE constraints on protocol_versions, with their ordered columns.
     async function uniqueConstraints(): Promise<ConstraintRow[]> {
-      const { rows } = await getPool().query<ConstraintRow>(
+      const { rows } = await getPool().query<{
+        constraint_name: string;
+        column_names: string | string[];
+      }>(
         `SELECT tc.constraint_name AS constraint_name,
                 array_agg(kcu.column_name ORDER BY kcu.ordinal_position) AS column_names
            FROM information_schema.table_constraints tc
@@ -52,7 +69,10 @@ describe.skipIf(!connectionString)(
             AND tc.constraint_type = 'UNIQUE'
           GROUP BY tc.constraint_name`
       );
-      return rows;
+      return rows.map((r) => ({
+        constraint_name: r.constraint_name,
+        column_names: parsePgTextArray(r.column_names),
+      }));
     }
 
     it("has a composite UNIQUE on (tenant_id, subject_id, version)", async () => {
