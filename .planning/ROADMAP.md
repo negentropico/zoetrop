@@ -92,7 +92,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Wave-0 foundation: gated install of @better-auth/drizzle-adapter + tsx, vite.config test glob for tests/**, the 6 VALIDATION.md contract test files (red) [AUTH-01, AUTH-02, TEN-01, TEN-04]
+- [x] 03-01-PLAN.md — Wave-0 foundation: gated install of @better-auth/drizzle-adapter + tsx, vite.config test glob for tests/**, the 6 VALIDATION.md contract test files (red) [AUTH-01, AUTH-02, TEN-01, TEN-04]
 - [x] 03-02-PLAN.md — Schema layer: db/auth-schema.ts (Better-Auth tables) + app_role enum + tenants/subjects spine + nullable tenant_id/subject_id on 8 tables + drop global version unique; generate migrations 0001/0002 [AUTH-02, TEN-01, TEN-04]
 
 **Wave 2** *(blocked on Wave 1)*
@@ -204,7 +204,7 @@ Likely plans:
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
-| 3. Identity + Tenancy Scoping | 1/5 | In Progress|  |
+| 3. Identity + Tenancy Scoping | 2/5 | In Progress|  |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |

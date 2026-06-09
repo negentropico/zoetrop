@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-06-09T11:55:46.349Z"
+stopped_at: Completed 03-01-PLAN.md (Wave-0 contracts)
+last_updated: "2026-06-09T18:23:11.357Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
   percent: 38
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 03 (identity-tenancy-scoping) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-09
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [████████░░] 83%
 | Phase 02 P02-01 | 69s | 2 tasks | 4 files |
 | Phase 04.1 P09 (gap-closure) | 6m | 3 tasks | 14 files |
 | Phase 03-identity-tenancy-scoping P02 | 401 | 3 tasks | 7 files |
+| Phase 03-identity-tenancy-scoping P01 | 9min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase 02-02]: D-04: zoetrop.vercel.app is canonical deploy URL — propagated to CLAUDE.md Deployment/Naming/Database + PLATFORM.md §5.7; no netlify.app URLs remain
 - [Phase 02-02]: D-12/D-13: pgAudit auto-configured by Neon (all,-misc, log_parameter=off, superset of D-12 baseline); SELECT logging deferred to Phase 3 — carry-forward recorded in runbook (T-02-06 mitigated)
 - [Phase 04.1-09]: Grid-blowout fixed at the source `.zt-grid-*` helper (`minmax(0,1fr)` tracks + `min-width:0` on children) so every consumer is fixed at once; route-local inline multi-column grids hardened the same way; `UI-01-n` ds-audit gate locks it in. Orchestrator browser visual pass (16 routes × 1280/390 × light/dark) still pending.
+- [Phase 03-01]: better-auth bumped ^1.6.14 -> ^1.6.15 to satisfy @better-auth/drizzle-adapter's @better-auth/core ^1.6.15 peer (within already-verified package family; no --force/--legacy-peer-deps)
+- [Phase 03-01]: Wave-0 RED contracts live — 6 test files bind AUTH-01/AUTH-02/TEN-01/TEN-04/D-01; auth/route red on not-yet-built modules, DB introspection skip-guards on DATABASE_URL_UNPOOLED||DATABASE_URL. Plans 03/05 + 02/04 turn them green.
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T11:55:46.343Z
-Stopped at: Phase 3 context gathered
+Last session: 2026-06-09T18:23:11.353Z
+Stopped at: Completed 03-01-PLAN.md (Wave-0 contracts)
 Resume file: None
