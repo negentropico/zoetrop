@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: 03-04-PLAN.md BLOCKED at Task 3 — human-action checkpoint (db migrate + seed-owner)
-last_updated: "2026-06-09T19:10:00.000Z"
+stopped_at: Completed 03-04-PLAN.md (seed-owner.ts + migrations 0003/0004; live Neon migrated — TEN-01/TEN-04)
+last_updated: "2026-06-09T20:30:00.000Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 23
-  completed_plans: 21
-  percent: 38
+  completed_plans: 22
+  percent: 40
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 03 (identity-tenancy-scoping) — EXECUTING
-Plan: 4 of 5
-Status: Ready to execute
+Plan: 5 of 5
+Status: Ready to execute (03-04 complete; live Neon at final tenancy contract)
 Last activity: 2026-06-09
 
-Progress: [█████████░] 91%
+Progress: [█████████░] 95%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 20
+- Total plans completed: 22
 - Average duration: —
 - Total execution time: —
 
@@ -67,6 +67,7 @@ Progress: [█████████░] 91%
 | Phase 03-identity-tenancy-scoping P02 | 401 | 3 tasks | 7 files |
 | Phase 03-identity-tenancy-scoping P01 | 9min | 3 tasks | 9 files |
 | Phase 03-identity-tenancy-scoping P03 | 403s | 2 tasks | 8 files |
+| Phase 03-identity-tenancy-scoping P04 | ~35m | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -95,10 +96,12 @@ Recent decisions affecting current work:
 - [Phase 03-01]: better-auth bumped ^1.6.14 -> ^1.6.15 to satisfy @better-auth/drizzle-adapter's @better-auth/core ^1.6.15 peer (within already-verified package family; no --force/--legacy-peer-deps)
 - [Phase 03-01]: Wave-0 RED contracts live — 6 test files bind AUTH-01/AUTH-02/TEN-01/TEN-04/D-01; auth/route red on not-yet-built modules, DB introspection skip-guards on DATABASE_URL_UNPOOLED||DATABASE_URL. Plans 03/05 + 02/04 turn them green.
 - [Phase ?]: 03-03: Better-Auth singleton wired to Neon via getDb(); invite hook via createAuthMiddleware+APIError; role input:false; NETLIFY_DATABASE_URL test stub
+- [Phase 03-04]: Expand-contract tenancy migration COMPLETE on live Neon (orange-paper-97068012) — TEN-01 (16 NOT NULL tenant_id/subject_id + composite index on all 8 tables) + TEN-04 (composite UNIQUE(tenant_id,subject_id,version); old global UNIQUE absent); owner seeded (tenant + owner-subject + role=owner user m@negentropi.co). Journal-split execution (0001/0002 → seed → 0003/0004) avoided the backfill-before-spine guardrail trip.
+- [Phase 03-04]: Deviation 0644fa7 — constraints.test.ts array-parsing bug: @neondatabase/serverless returns array_agg as a pg text-array STRING not a JS array; parsePgTextArray() added. DB contract tests 18/18 green against live Neon; full suite 99 passing (only auth-layout.test.ts red — Plan 05 builds it).
 
 ### Pending Todos
 
-None yet.
+- [Plan 05 / Vercel]: Set OWNER_INVITE_TOKEN in Vercel env (production + preview) so the deployed beforeSignUp invite gate validates against the seeded owner's token. Carried forward to Plan 05's Vercel work. Do NOT commit the value.
 
 ### Blockers/Concerns
 
@@ -115,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T19:10:00.000Z
-Stopped at: 03-04-PLAN.md Task 3 checkpoint:human-action — seed-owner + db:migrate on live Neon DB
+Last session: 2026-06-09T20:30:00.000Z
+Stopped at: Completed 03-04-PLAN.md — live Neon at final tenancy contract (TEN-01/TEN-04). Next: 03-05 (auth routes + _app layout).
 Resume file: None
