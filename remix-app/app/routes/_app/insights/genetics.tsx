@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/genetics";
-import { seedGeneticVariants } from "~/lib/seed-data";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getSubjectGenotypes } from "~/lib/data.server";
+import { GENETIC_KNOWLEDGE } from "~/lib/genetics-knowledge.server";
 import {
   CONFIDENCE_LEVELS,
   VARIANT_CATEGORIES,
   type ConfidenceLevel,
   type VariantCategory,
-  type GeneticVariant,
 } from "~/types/genetics";
 import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
@@ -30,8 +31,46 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
-  const variants = seedGeneticVariants;
+// Derived variant shape (DB PHI + knowledge plane join)
+type DerivedVariant = {
+  id: number;
+  gene: string;
+  rsid: string | null;
+  genotype: string;
+  confidence: ConfidenceLevel;
+  category: VariantCategory;
+  impact: string;
+  clinicalImplication: string;
+  protocolAction: string;
+  notes?: string;
+};
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
+
+  const genotypeRows = await getSubjectGenotypes(tenantId, subjectId);
+
+  // Shape C join: DB rows + GENETIC_KNOWLEDGE by gene
+  const variants: DerivedVariant[] = genotypeRows.flatMap((row) => {
+    const knowledge = GENETIC_KNOWLEDGE[row.gene];
+    if (!knowledge) return [];
+    const variant: DerivedVariant = {
+      id: row.id,
+      gene: row.gene,
+      rsid: row.rsid ?? null,
+      genotype: row.genotype,
+      confidence: knowledge.confidence,
+      category: knowledge.category as VariantCategory,
+      impact: knowledge.impact,
+      clinicalImplication: knowledge.clinicalImplication,
+      protocolAction: knowledge.protocolAction,
+      notes: knowledge.notes,
+    };
+    return [variant];
+  });
 
   // Group by category
   const byCategory = variants.reduce((acc, v) => {
@@ -40,7 +79,7 @@ export function loader() {
     }
     acc[v.category].push(v);
     return acc;
-  }, {} as Record<string, GeneticVariant[]>);
+  }, {} as Record<string, DerivedVariant[]>);
 
   // Stats
   const byConfidence = variants.reduce((acc, v) => {
@@ -91,7 +130,7 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
 
   // DataTable columns
   type VRow = {
-    id: string;
+    id: number;
     gene: string;
     rsid?: string | null;
     genotype: string;
@@ -132,8 +171,6 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
     {
       key: "confidence" as keyof VRow & string,
       label: "Confidence",
-      // K-number + label so the badge reads the same as the tiles and guide,
-      // and carries a colorblind-safe text channel beyond color alone.
       render: (v: VRow) => (
         <Badge tone={CONF_TONE[v.confidence]}>
           {v.confidence} · {CONFIDENCE_LEVELS[v.confidence].label}
@@ -179,9 +216,7 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
         sub="Genetic variants informing supplement protocol — methylation, detox, and metabolic pathways."
       />
 
-      {/* Stats — tiles use the canonical CONFIDENCE_LEVELS labels (not ad-hoc
-          "HIGH"/"INFERRED") so tiles, table badges, and guide speak one
-          vocabulary. Auto-fit grid fits TOTAL + all four K-levels. */}
+      {/* Stats */}
       <div
         style={{
           display: "grid",
@@ -326,9 +361,7 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
         {filtered.length} of {stats.total} variants
       </div>
 
-      {/* DataTable — minWidth:0 lets the inner scroll container shrink so the
-          640px-min table scrolls within the card instead of widening the page
-          at mobile (04.1-09 R2). */}
+      {/* DataTable */}
       <Card padding="md" style={{ minWidth: 0 }}>
         <DataTable<VRow>
           columns={columns}

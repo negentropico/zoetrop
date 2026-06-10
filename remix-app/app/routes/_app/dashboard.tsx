@@ -2,21 +2,20 @@ import { Link, useLoaderData } from "react-router";
 import { CATEGORY_INFO, type MetricCategory, type MetricStatus, type Metric } from "~/types/metrics";
 import { CESSATION_PHASES } from "~/types/protocol";
 import { CONFIDENCE_LEVELS } from "~/types/genetics";
+import { requireUser } from "~/lib/authz.server";
 import {
-  seedCorrelations,
-  seedGeneticVariants,
-  getCorrelationColor,
-} from "~/lib/seed-data";
-import {
-  realCessationLog,
-  realProtocolVersions,
-  realSupplements,
-  getCessationDay,
-  getCurrentCessationPhase,
-} from "~/lib/protocol-data";
-import { getLatestRealMetrics } from "~/lib/real-data";
+  getOwnerSubject,
+  getCorrelations,
+  getSubjectGenotypes,
+  getCessationLog,
+  getProtocolVersions,
+  getSupplements,
+  getMetrics,
+} from "~/lib/data.server";
+import { dbRowToMetric } from "~/lib/db-mappers.server";
+import { GENETIC_KNOWLEDGE } from "~/lib/genetics-knowledge.server";
+import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { getMetricStatus } from "~/lib/metrics";
-import { differenceInDays, parseISO } from "date-fns";
 import {
   Pill,
   Gem,
@@ -38,6 +37,15 @@ import { PhaseBar } from "~/components/ui/PhaseBar";
 import { MetricRing } from "~/components/ui/MetricRing";
 import type { Phase } from "~/components/ui/PhaseBar";
 
+// Significance derivation — survivor presentation helper (non-PHI)
+function getCorrelationSignificance(r: number): "strong" | "moderate" | "weak" | "none" {
+  const absR = Math.abs(r);
+  if (absR >= 0.7) return "strong";
+  if (absR >= 0.4) return "moderate";
+  if (absR >= 0.2) return "weak";
+  return "none";
+}
+
 // Lucide icon map by category icon name
 const LUCIDE_MAP: Record<string, LucideIcon> = {
   pill: Pill,
@@ -58,28 +66,130 @@ export function meta() {
   ];
 }
 
-export function loader() {
+// Correlation shape returned by the DB + derivation
+type DerivedCorrelation = {
+  id: number;
+  supplementId: number;
+  supplementName: string;
+  metricName: string;
+  correlation: number;
+  lagDays: number;
+  sampleSize: number;
+  pValue: number | null;
+  significance: "strong" | "moderate" | "weak" | "none";
+  direction: "positive" | "negative";
+};
+
+// Genetic variant shape from DB + knowledge join
+type DerivedVariant = {
+  id: number;
+  gene: string;
+  rsid: string | null;
+  genotype: string;
+  confidence: string;
+  category: string;
+  impact: string;
+  clinicalImplication: string;
+  protocolAction: string;
+};
+
+export async function loader({ request }: { request: Request }, now: Date = new Date()) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
+
+  const [
+    correlationsRows,
+    supplementsRows,
+    genotypeRows,
+    cessationRows,
+    protocolVersionsRows,
+    metricsRows,
+  ] = await Promise.all([
+    getCorrelations(tenantId, subjectId),
+    getSupplements(tenantId, subjectId),
+    getSubjectGenotypes(tenantId, subjectId),
+    getCessationLog(tenantId, subjectId),
+    getProtocolVersions(tenantId, subjectId),
+    getMetrics(tenantId, subjectId),
+  ]);
+
+  // Build supplement id → name map
+  const suppNameMap = new Map(supplementsRows.map((s) => [s.id, s.name]));
+
+  // Derive correlations with supplementName, significance, direction
+  const allCorrelations: DerivedCorrelation[] = correlationsRows.map((c) => ({
+    id: c.id,
+    supplementId: c.supplementId,
+    supplementName: suppNameMap.get(c.supplementId) ?? `Supplement #${c.supplementId}`,
+    metricName: c.metricName,
+    correlation: c.correlation,
+    lagDays: c.lagDays,
+    sampleSize: c.sampleSize,
+    pValue: c.pValue ?? null,
+    significance: getCorrelationSignificance(c.correlation),
+    direction: c.correlation >= 0 ? "positive" : "negative",
+  }));
+
   // Top correlations by absolute value
-  const topCorrelations = [...seedCorrelations]
+  const topCorrelations = [...allCorrelations]
     .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation))
     .slice(0, 3);
 
+  // Join genotypes with GENETIC_KNOWLEDGE
+  const allVariants: DerivedVariant[] = genotypeRows
+    .flatMap((row) => {
+      const knowledge = GENETIC_KNOWLEDGE[row.gene];
+      if (!knowledge) return [];
+      const variant: DerivedVariant = {
+        id: row.id,
+        gene: row.gene,
+        rsid: row.rsid ?? null,
+        genotype: row.genotype,
+        confidence: knowledge.confidence,
+        category: knowledge.category,
+        impact: knowledge.impact,
+        clinicalImplication: knowledge.clinicalImplication,
+        protocolAction: knowledge.protocolAction,
+      };
+      return [variant];
+    });
+
   // High-impact genetic variants
-  const highImpactVariants = seedGeneticVariants
+  const highImpactVariants = allVariants
     .filter((v) => v.impact === "high")
     .slice(0, 3);
 
   // K3 variants needing verification
-  const k3Variants = seedGeneticVariants.filter((v) => v.confidence === "K3");
+  const k3Variants = allVariants.filter((v) => v.confidence === "K3");
 
-  // Real cessation data
-  const cessation = realCessationLog[0];
-  const cessationDay = cessation ? getCessationDay() : 0;
+  // Cessation data
+  const cessation = cessationRows[0] ?? null;
+  const cessationDay = cessation ? getCessationDay(now) : 0;
   const cessationPhase = getCurrentCessationPhase(cessationDay);
   const targetDay = 150;
 
+  // Protocol versions — sorted ascending, pick latest
+  const sortedVersions = [...protocolVersionsRows].sort(
+    (a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
+  );
+  const currentVersionObj = sortedVersions[sortedVersions.length - 1] ?? null;
+  const activeSupplements = supplementsRows.filter((s) => s.isActive).length;
+
   // Real metrics data
-  const latestMetrics = getLatestRealMetrics();
+  const allMetrics = metricsRows.map(dbRowToMetric);
+
+  // Get latest value for each unique metric name
+  const latestByName = new Map<string, Metric>();
+  allMetrics.forEach((m) => {
+    const existing = latestByName.get(m.name);
+    if (!existing || new Date(m.timestamp) > new Date(existing.timestamp)) {
+      latestByName.set(m.name, m);
+    }
+  });
+  const latestMetrics = Array.from(latestByName.values());
+
   const byCategory = (Object.keys(CATEGORY_INFO) as MetricCategory[]).reduce(
     (acc, cat) => {
       acc[cat] = latestMetrics.filter((m) => m.category === cat);
@@ -98,19 +208,15 @@ export function loader() {
     {} as Record<MetricStatus, number>
   );
 
-  // Protocol data
-  const currentVersion = realProtocolVersions[realProtocolVersions.length - 1];
-  const activeSupplements = realSupplements.filter((s) => s.isActive).length;
-
   return {
     topCorrelations,
     highImpactVariants,
     k3Variants,
     stats: {
-      totalCorrelations: seedCorrelations.length,
-      strongCorrelations: seedCorrelations.filter((c) => c.significance === "strong").length,
-      totalVariants: seedGeneticVariants.length,
-      confirmedVariants: seedGeneticVariants.filter((v) => v.confidence === "K1").length,
+      totalCorrelations: allCorrelations.length,
+      strongCorrelations: allCorrelations.filter((c) => c.significance === "strong").length,
+      totalVariants: allVariants.length,
+      confirmedVariants: allVariants.filter((v) => v.confidence === "K1").length,
     },
     cessationDay,
     cessationPhase,
@@ -118,7 +224,7 @@ export function loader() {
     byCategory,
     statusCounts,
     totalMetrics: latestMetrics.length,
-    currentVersion: currentVersion?.version || "—",
+    currentVersion: currentVersionObj?.version || "—",
     activeSupplements,
   };
 }
@@ -174,7 +280,7 @@ function StatTile({
   );
 }
 
-function CorrRow({ c, last }: { c: typeof seedCorrelations[0]; last: boolean }) {
+function CorrRow({ c, last }: { c: DerivedCorrelation; last: boolean }) {
   const neg = c.correlation < 0;
   const col = neg ? "var(--danger)" : "var(--vital-500, var(--vital))";
   const sign = c.correlation >= 0 ? "+" : "";
@@ -202,7 +308,7 @@ function CorrRow({ c, last }: { c: typeof seedCorrelations[0]; last: boolean }) 
   );
 }
 
-function GeneRow({ g, last }: { g: typeof seedGeneticVariants[0]; last: boolean }) {
+function GeneRow({ g, last }: { g: DerivedVariant; last: boolean }) {
   const conf = g.confidence === "K1" ? "vital" : "energy";
   const confLabel = g.confidence;
   const confColor = conf === "vital" ? "var(--vital)" : "var(--energy)";
@@ -366,9 +472,6 @@ export default function Dashboard() {
         <StatTile
           label="Need a look"
           value={needLook}
-          // needLook counts out-of-range metrics (deficient + excess) — show the
-          // actual split, not a single hardcoded "borderline" badge that
-          // mislabels the count and ignores the 15 borderline metrics.
           hint={
             needLook > 0 ? (
               <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -391,13 +494,9 @@ export default function Dashboard() {
         <StatTile label="Protocol version" value={currentVersion} unit="7 versions" to="/protocol/versions" />
       </div>
 
-      {/* Cessation + correlations — zt-grid-2.
-          align-items:start so the shorter Cessation card sizes to its content
-          instead of stretching to match the taller correlations card (which
-          left a large empty void at the bottom of the cessation card). */}
+      {/* Cessation + correlations — zt-grid-2 */}
       <div className="zt-grid-2" style={{ alignItems: "start" }}>
         <Card padding="lg">
-          {/* Section label */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
               Cessation protocol

@@ -1,14 +1,20 @@
 import { useState } from "react";
 import type { Route } from "./+types/correlations";
-import {
-  seedCorrelations,
-  seedSupplements,
-  type SupplementCorrelation,
-} from "~/lib/seed-data";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getCorrelations, getSupplements } from "~/lib/data.server";
 import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
 import { DataTable } from "~/components/ui/DataTable";
 import { PageHeader } from "~/components/ui/PageHeader";
+
+// Significance derivation — survivor presentation helper (non-PHI)
+function getCorrelationSignificance(r: number): "strong" | "moderate" | "weak" | "none" {
+  const absR = Math.abs(r);
+  if (absR >= 0.7) return "strong";
+  if (absR >= 0.4) return "moderate";
+  if (absR >= 0.2) return "weak";
+  return "none";
+}
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,9 +23,35 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
-  const correlations = seedCorrelations;
-  const supplements = seedSupplements;
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
+
+  const [correlationsRows, supplementsRows] = await Promise.all([
+    getCorrelations(tenantId, subjectId),
+    getSupplements(tenantId, subjectId),
+  ]);
+
+  // Build supplement id → name map
+  const suppNameMap = new Map(supplementsRows.map((s) => [s.id, s.name]));
+
+  // Derive correlations with supplementName, significance, direction
+  const correlations = correlationsRows.map((c) => ({
+    id: c.id,
+    supplementId: c.supplementId,
+    supplementName: suppNameMap.get(c.supplementId) ?? `Supplement #${c.supplementId}`,
+    metricName: c.metricName,
+    correlation: c.correlation,
+    lagDays: c.lagDays,
+    sampleSize: c.sampleSize,
+    pValue: c.pValue ?? null,
+    significance: getCorrelationSignificance(c.correlation),
+    direction: (c.correlation >= 0 ? "positive" : "negative") as "positive" | "negative",
+  }));
+
+  const supplements = supplementsRows;
 
   // Group by supplement
   const bySuplement = correlations.reduce((acc, corr) => {
@@ -28,12 +60,13 @@ export function loader() {
     }
     acc[corr.supplementName].push(corr);
     return acc;
-  }, {} as Record<string, SupplementCorrelation[]>);
+  }, {} as Record<string, typeof correlations>);
 
   // Stats
   const avgCorrelation =
-    correlations.reduce((sum, c) => sum + Math.abs(c.correlation), 0) /
-    correlations.length;
+    correlations.length > 0
+      ? correlations.reduce((sum, c) => sum + Math.abs(c.correlation), 0) / correlations.length
+      : 0;
 
   return {
     correlations,
@@ -45,7 +78,7 @@ export function loader() {
       moderate: correlations.filter((c) => c.significance === "moderate").length,
       weak: correlations.filter((c) => c.significance === "weak").length,
       avgCorrelation: avgCorrelation.toFixed(2),
-      significant: correlations.filter((c) => c.pValue < 0.05).length,
+      significant: correlations.filter((c) => (c.pValue ?? 1) < 0.05).length,
     },
   };
 }
@@ -163,7 +196,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
   if (sortBy === "r") {
     filtered.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation));
   } else if (sortBy === "p") {
-    filtered.sort((a, b) => a.pValue - b.pValue);
+    filtered.sort((a, b) => (a.pValue ?? 1) - (b.pValue ?? 1));
   } else if (sortBy === "n") {
     filtered.sort((a, b) => b.sampleSize - a.sampleSize);
   }
@@ -227,7 +260,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
     correlation: number;
     significance: string;
     lagDays: number;
-    pValue: number;
+    pValue: number | null;
     sampleSize: number;
   };
 
@@ -290,19 +323,20 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
       label: "p-value",
       align: "right" as const,
       mono: true,
-      render: (c: CorrRow) => (
-        <span
-          style={{
-            color:
-              c.pValue < 0.05
-                ? "var(--vital-500)"
-                : "var(--text-muted)",
-          }}
-        >
-          {c.pValue.toFixed(3)}
-          {c.pValue < 0.05 ? " *" : ""}
-        </span>
-      ),
+      render: (c: CorrRow) => {
+        const p = c.pValue;
+        if (p == null) return <span style={{ color: "var(--text-muted)" }}>—</span>;
+        return (
+          <span
+            style={{
+              color: p < 0.05 ? "var(--vital-500)" : "var(--text-muted)",
+            }}
+          >
+            {p.toFixed(3)}
+            {p < 0.05 ? " *" : ""}
+          </span>
+        );
+      },
     },
     {
       key: "sampleSize" as keyof CorrRow & string,
@@ -399,11 +433,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
         </Card>
       </div>
 
-      {/* Mobile cards — card-per-row at <=760px.
-          Do NOT set `display` inline here: an inline `display:flex` overrides the
-          `.corr-mobile { display:none }` rule + the media query below, so this list
-          renders alongside the desktop table at ALL widths (duplicate rows).
-          `display` is owned by the .corr-mobile class. */}
+      {/* Mobile cards — card-per-row at <=760px */}
       <div className="corr-mobile" style={{ flexDirection: "column", gap: 10 }}>
         {filtered.map((c) => (
           <Card key={c.id} padding="md">
@@ -460,14 +490,16 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
                 {c.significance}
               </Badge>
               <span>{c.lagDays}d lag</span>
-              <span
-                style={{
-                  color: c.pValue < 0.05 ? "var(--vital-500)" : "var(--text-muted)",
-                }}
-              >
-                p={c.pValue.toFixed(3)}
-                {c.pValue < 0.05 ? " *" : ""}
-              </span>
+              {c.pValue != null && (
+                <span
+                  style={{
+                    color: c.pValue < 0.05 ? "var(--vital-500)" : "var(--text-muted)",
+                  }}
+                >
+                  p={c.pValue.toFixed(3)}
+                  {c.pValue < 0.05 ? " *" : ""}
+                </span>
+              )}
               <span>n={c.sampleSize}</span>
             </div>
           </Card>

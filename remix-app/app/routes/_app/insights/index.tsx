@@ -1,14 +1,27 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/index";
+import { requireUser } from "~/lib/authz.server";
 import {
-  seedCorrelations,
-  seedGeneticVariants,
-} from "~/lib/seed-data";
+  getOwnerSubject,
+  getCorrelations,
+  getSubjectGenotypes,
+  getSupplements,
+} from "~/lib/data.server";
+import { GENETIC_KNOWLEDGE } from "~/lib/genetics-knowledge.server";
 import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES } from "~/types/genetics";
 import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
 import { Button } from "~/components/ui/Button";
+
+// Significance derivation — survivor presentation helper (non-PHI)
+function getCorrelationSignificance(r: number): "strong" | "moderate" | "weak" | "none" {
+  const absR = Math.abs(r);
+  if (absR >= 0.7) return "strong";
+  if (absR >= 0.4) return "moderate";
+  if (absR >= 0.2) return "weak";
+  return "none";
+}
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,40 +30,80 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
+
+  const [correlationsRows, supplementsRows, genotypeRows] = await Promise.all([
+    getCorrelations(tenantId, subjectId),
+    getSupplements(tenantId, subjectId),
+    getSubjectGenotypes(tenantId, subjectId),
+  ]);
+
+  // Build supplement id → name map
+  const suppNameMap = new Map(supplementsRows.map((s) => [s.id, s.name]));
+
+  // Derive correlations with supplementName + significance
+  const allCorrelations = correlationsRows.map((c) => ({
+    id: c.id,
+    supplementId: c.supplementId,
+    supplementName: suppNameMap.get(c.supplementId) ?? `Supplement #${c.supplementId}`,
+    metricName: c.metricName,
+    correlation: c.correlation,
+    lagDays: c.lagDays,
+    sampleSize: c.sampleSize,
+    pValue: c.pValue ?? null,
+    significance: getCorrelationSignificance(c.correlation),
+    direction: (c.correlation >= 0 ? "positive" : "negative") as "positive" | "negative",
+  }));
+
   // Top correlations
-  const topCorrelations = [...seedCorrelations]
+  const topCorrelations = [...allCorrelations]
     .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation))
     .slice(0, 5);
 
+  // Join genotypes with GENETIC_KNOWLEDGE
+  const allVariants = genotypeRows.flatMap((row) => {
+    const knowledge = GENETIC_KNOWLEDGE[row.gene];
+    if (!knowledge) return [];
+    return [{
+      id: row.id,
+      gene: row.gene,
+      rsid: row.rsid ?? null,
+      genotype: row.genotype,
+      confidence: knowledge.confidence,
+      category: knowledge.category,
+      impact: knowledge.impact,
+      clinicalImplication: knowledge.clinicalImplication,
+      protocolAction: knowledge.protocolAction,
+    }];
+  });
+
   // High-impact genetic variants
-  const highImpactVariants = seedGeneticVariants.filter(
-    (v) => v.impact === "high"
-  );
+  const highImpactVariants = allVariants.filter((v) => v.impact === "high");
 
   // Variant counts by category
-  const variantsByCategory = seedGeneticVariants.reduce((acc, v) => {
+  const variantsByCategory = allVariants.reduce((acc, v) => {
     acc[v.category] = (acc[v.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
   // Correlation stats
-  const strongCorrelations = seedCorrelations.filter(
-    (c) => c.significance === "strong"
-  );
-  const significantCorrelations = seedCorrelations.filter((c) => c.pValue < 0.05);
+  const strongCorrelations = allCorrelations.filter((c) => c.significance === "strong");
+  const significantCorrelations = allCorrelations.filter((c) => (c.pValue ?? 1) < 0.05);
 
   return {
     topCorrelations,
     highImpactVariants,
     variantsByCategory,
     stats: {
-      totalCorrelations: seedCorrelations.length,
+      totalCorrelations: allCorrelations.length,
       strongCorrelations: strongCorrelations.length,
       significantCorrelations: significantCorrelations.length,
-      totalVariants: seedGeneticVariants.length,
-      confirmedVariants: seedGeneticVariants.filter((v) => v.confidence === "K1")
-        .length,
+      totalVariants: allVariants.length,
+      confirmedVariants: allVariants.filter((v) => v.confidence === "K1").length,
     },
   };
 }
