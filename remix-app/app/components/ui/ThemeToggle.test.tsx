@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { ThemeToggle } from "./ThemeToggle";
 
 describe("ThemeToggle", () => {
   beforeEach(() => {
-    // Reset documentElement data-theme and localStorage before each test
+    // Reset documentElement data-theme and localStorage before each test.
+    // The component reads localStorage for initial state and useLayoutEffect
+    // keeps data-theme in sync, so we seed localStorage to control the theme.
     document.documentElement.removeAttribute("data-theme");
     localStorage.removeItem("zt-theme");
   });
@@ -16,29 +18,45 @@ describe("ThemeToggle", () => {
     cleanup();
   });
 
-  it("renders with initial aria-label for light mode (default)", () => {
+  it("renders with initial aria-label for light mode (default, no stored preference)", () => {
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
     expect(button.getAttribute("aria-label")).toBe("Switch to dark theme");
   });
 
-  it("renders with light-mode aria-label when data-theme is light", () => {
-    document.documentElement.setAttribute("data-theme", "light");
+  it("renders with light-mode aria-label when localStorage has light", () => {
+    localStorage.setItem("zt-theme", "light");
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
     expect(button.getAttribute("aria-label")).toBe("Switch to dark theme");
   });
 
-  it("renders with dark-mode aria-label when data-theme is dark", () => {
-    document.documentElement.setAttribute("data-theme", "dark");
+  it("renders with dark-mode aria-label when localStorage has dark", () => {
+    localStorage.setItem("zt-theme", "dark");
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
     expect(button.getAttribute("aria-label")).toBe("Switch to light theme");
   });
 
+  it("useLayoutEffect sets data-theme from localStorage on mount (dark)", () => {
+    localStorage.setItem("zt-theme", "dark");
+    act(() => {
+      render(<ThemeToggle />);
+    });
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+  });
+
+  it("useLayoutEffect sets data-theme from localStorage on mount (light)", () => {
+    localStorage.setItem("zt-theme", "light");
+    act(() => {
+      render(<ThemeToggle />);
+    });
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+  });
+
   it("clicking toggle sets data-theme to dark and writes localStorage", async () => {
     const user = userEvent.setup();
-    document.documentElement.setAttribute("data-theme", "light");
+    localStorage.setItem("zt-theme", "light");
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
 
@@ -50,7 +68,7 @@ describe("ThemeToggle", () => {
 
   it("clicking toggle twice returns to light and writes localStorage", async () => {
     const user = userEvent.setup();
-    document.documentElement.setAttribute("data-theme", "light");
+    localStorage.setItem("zt-theme", "light");
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
 
@@ -63,7 +81,7 @@ describe("ThemeToggle", () => {
 
   it("aria-label updates after toggle click", async () => {
     const user = userEvent.setup();
-    document.documentElement.setAttribute("data-theme", "light");
+    localStorage.setItem("zt-theme", "light");
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
 

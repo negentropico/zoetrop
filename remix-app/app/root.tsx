@@ -8,6 +8,7 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { useLayoutEffect } from "react";
 import "./app.css";
 
 // Replace Inter with the three Zoetrope brand fonts (D-11).
@@ -31,6 +32,43 @@ export const links: Route.LinksFunction = () => [
 // data-theme; XSS-safe by construction).
 const NO_FLASH_SCRIPT = `(function(){try{var t=localStorage.getItem('zt-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
+// ThemeRestorer: re-applies data-theme after React's commit phase on ALL routes.
+//
+// React 19's singleton acquisition (commitHostSingletonAcquisition) strips ALL
+// attributes from <html> during StrictMode's double-invocation "reappear" cycle
+// and during Suspense boundary transitions. This clears data-theme set by the
+// no-flash script, making the page appear light even when dark is persisted.
+//
+// useLayoutEffect fires synchronously after the commit phase (before paint),
+// so it re-applies data-theme before the user sees anything. This fixes:
+//   1. All routes showing the wrong theme post-hydration (login vs dashboard).
+//   2. ThemeToggle needing two clicks (state diverged from DOM after strip).
+//
+// The ThemeToggle component has its own useLayoutEffect for the same reason —
+// this one covers routes that don't mount ThemeToggle (e.g. /login, /landing).
+function ThemeRestorer() {
+  useLayoutEffect(() => {
+    // Re-read from localStorage (the canonical source) and re-apply.
+    // Mirrors the no-flash script logic exactly.
+    let theme: string;
+    try {
+      const stored = localStorage.getItem("zt-theme");
+      if (stored === "dark" || stored === "light") {
+        theme = stored;
+      } else {
+        theme =
+          window.matchMedia?.("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+      }
+    } catch {
+      theme = "light";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+  }, []);
+  return null;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning: the inline no-flash script sets data-theme on
@@ -46,6 +84,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="bg-paper text-ink min-h-screen font-text">
+        <ThemeRestorer />
         {children}
         <ScrollRestoration />
         <Scripts />
