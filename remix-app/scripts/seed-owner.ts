@@ -110,9 +110,9 @@ console.log(`[seed-owner] Owner user created via Better-Auth: email=${OWNER_EMAI
 
 await db
   .update(user)
-  .set({ role: "owner" })
+  .set({ role: "owner", tenantId })
   .where(eq(user.email, OWNER_EMAIL));
-console.log(`[seed-owner] Role elevated to "owner" for ${OWNER_EMAIL}`);
+console.log(`[seed-owner] Role elevated to "owner", tenantId set to ${tenantId} for ${OWNER_EMAIL}`);
 
 // ── 6. Print IDs for manual verification ─────────────────────────────────────
 
