@@ -129,7 +129,7 @@ Plans:
 
 **Wave 2**
 
-- [ ] 03.1-02-PLAN.md — Invite system server logic: per-invite single-use/role-scoped/7-day-expiring tokens (hash-at-rest, copy-link), tiered policy, and the rewritten beforeSignUp hook resolving hashed tokens + assigning role/tenant (break-glass OWNER_INVITE_TOKEN retained) [D-06/D-07/D-08/D-09/D-10]
+- [x] 03.1-02-PLAN.md — Invite system server logic: per-invite single-use/role-scoped/7-day-expiring tokens (hash-at-rest, copy-link), tiered policy, and the rewritten beforeSignUp hook resolving hashed tokens + assigning role/tenant (break-glass OWNER_INVITE_TOKEN retained) [D-06/D-07/D-08/D-09/D-10]
 
 **Wave 3**
 
@@ -236,7 +236,7 @@ Likely plans:
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
-| 3.1. Account & Roles — UX + Authorization *(inserted)* | 1/4 | In Progress|  |
+| 3.1. Account & Roles — UX + Authorization *(inserted)* | 2/4 | In Progress|  |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
