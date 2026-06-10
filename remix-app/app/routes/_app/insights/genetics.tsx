@@ -14,6 +14,15 @@ import { Card } from "~/components/ui/Card";
 import { DataTable } from "~/components/ui/DataTable";
 import { PageHeader } from "~/components/ui/PageHeader";
 
+// One tone per confidence level — shared by the stat tiles, the table badges,
+// and the guide so the confidence vocabulary is identical everywhere it appears.
+const CONF_TONE: Record<ConfidenceLevel, "vital" | "focus" | "energy" | "neutral"> = {
+  K1: "vital",
+  K2: "focus",
+  K3: "energy",
+  K4: "neutral",
+};
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Genetic Profile - Zoetrop" },
@@ -123,9 +132,11 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
     {
       key: "confidence" as keyof VRow & string,
       label: "Confidence",
+      // K-number + label so the badge reads the same as the tiles and guide,
+      // and carries a colorblind-safe text channel beyond color alone.
       render: (v: VRow) => (
-        <Badge tone={v.confidence === "K1" ? "vital" : v.confidence === "K2" ? "focus" : "energy"}>
-          {CONFIDENCE_LEVELS[v.confidence].label}
+        <Badge tone={CONF_TONE[v.confidence]}>
+          {v.confidence} · {CONFIDENCE_LEVELS[v.confidence].label}
         </Badge>
       ),
     },
@@ -168,13 +179,23 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
         sub="Genetic variants informing supplement protocol — methylation, detox, and metabolic pathways."
       />
 
-      {/* Stats */}
-      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-xl)" }}>
+      {/* Stats — tiles use the canonical CONFIDENCE_LEVELS labels (not ad-hoc
+          "HIGH"/"INFERRED") so tiles, table badges, and guide speak one
+          vocabulary. Auto-fit grid fits TOTAL + all four K-levels. */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: "var(--gap-md)",
+          marginBottom: "var(--gap-xl)",
+        }}
+      >
         {[
           { label: "TOTAL VARIANTS", value: stats.total },
-          { label: "K1 CONFIRMED", value: stats.k1Confirmed },
-          { label: "K2 HIGH", value: stats.byConfidence["K2"] || 0 },
-          { label: "K3 INFERRED", value: stats.byConfidence["K3"] || 0 },
+          ...confidenceLevels.map((level) => ({
+            label: `${level} ${CONFIDENCE_LEVELS[level].label}`,
+            value: stats.byConfidence[level] || 0,
+          })),
         ].map(({ label, value }) => (
           <Card key={label} padding="md" style={{ textAlign: "center" }}>
             <span
@@ -335,21 +356,15 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
                 key={level}
                 style={{ display: "flex", alignItems: "flex-start", gap: 12 }}
               >
-                <Badge
-                  tone={
-                    level === "K1" ? "vital" : level === "K2" ? "focus" : "energy"
-                  }
-                >
-                  {info.label}
+                <Badge tone={CONF_TONE[level]}>
+                  {level} · {info.label}
                 </Badge>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, fontSize: "var(--text-sm)" }}>
-                    {info.label}
-                  </div>
                   <div
                     style={{
                       fontSize: "var(--text-sm)",
                       color: "var(--text-muted)",
+                      marginTop: 2,
                     }}
                   >
                     {info.description}
