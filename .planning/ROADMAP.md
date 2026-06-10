@@ -8,13 +8,14 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 
 ## Milestones
 
-- 🚧 **M1 — Engine-First Platform** — Phases 1–6 + inserted 4.1, gated for multi-client by Phase 7 (in progress)
+- 🚧 **M1 — Engine-First Platform** — Phases 1–6 + inserted 3.1/4.1, gated for multi-client by Phase 7 (in progress)
 
 ## Phases
 
 - [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08, concurrent session)
 - [x] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7) (completed 2026-06-08)
 - [x] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7 (completed 2026-06-10)
+- [ ] **Phase 3.1: Account & Roles — UX + Authorization** *(inserted)* — Build the authenticated account surface (nav + logout UI + preferences, per-invite role-scoped tokens) and a real owner/practitioner/client authorization model on top of the Phase 3 identity + tenant/subject scoping. Promoted from backlog 999.1 (owner UAT feedback)
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
@@ -103,6 +104,23 @@ Plans:
 
 - [x] 03-04-PLAN.md — Owner seed (via auth.api.signUpEmail from 03-03) + backfill + NOT NULL/index/constraint migrations (0003/0004) + [BLOCKING] db:migrate to Neon + DB schema-introspection verification [TEN-01, TEN-04]
 - [x] 03-05-PLAN.md — Public/private routing split: authenticated _app/ layout (session redirect) + landing/login/logout + route move under _app/ + remove PILOT_BASIC_AUTH from root.tsx + delete Vercel env var (D-05) [AUTH-01, AUTH-02]
+
+### Phase 03.1: Account & Roles — UX + Authorization (INSERTED)
+
+**Goal**: The authenticated app has a real account surface and authorization model on top of the Phase 3 identity layer — a nav affordance to log out and reach preferences/account settings, an invite function that issues per-invite single-use role-scoped tokens (replacing the single shared `OWNER_INVITE_TOKEN`), and an enforced owner/practitioner/client permission model that agrees with the tenant/subject scoping and feeds the deferred Phase 7 RLS gate
+**Depends on**: Phase 3 (identity engine: Better-Auth sign-in, `role` field, invite gate, tenant/subject scoping). Inserted before Phase 4 — promoted from backlog 999.1 (owner UAT feedback, 2026-06-09).
+**Requirements**: extends AUTH-01/AUTH-02; relates to TEN-01 scoping + the Phase 7 RLS gate (exact IDs resolved in discuss-phase)
+**Scope** (see `.planning/phases/03.1-account-roles-ux-authorization/CAPTURE.md` for full detail + root-cause analysis):
+
+  1. **Account navigation** — an account nav/menu in the authenticated shell (`TopNav`/`AppShell`) exposing logout (POST to the existing `/logout` action) + a preferences/account-settings entry point. Today there is no logout UI — the only way out is clearing cookies.
+  2. **Invite function** — an account-page invite flow that moves from the single shared `OWNER_INVITE_TOKEN` env secret to per-invite tokens: single-use, role-scoped (the token encodes practitioner vs client), with expiry. Likely a new `invites` table (token hash, role, tenant_id, created_by, expires_at, consumed_at) + generate/list/revoke UI.
+  3. **Role permissions** — define and enforce owner (full control) / practitioner (manage their tenant's subjects) / client (own data only) authorization. Decide where authz is enforced (route loaders/actions via `session.user.role` + subject-ownership checks, and/or DB-level RLS) and coordinate with the Phase 7 RLS + `SET LOCAL` work so app-layer authz and DB-layer isolation agree.
+
+**Note**: The theme-toggle defect originally captured here was resolved out-of-band (commit 7678592, debug session `theme-toggle-ssr-hydration`) and is NOT in this phase's scope.
+
+**Open scoping question** (resolve in discuss-phase): whether this stays one phase or splits (account-nav + invite as a UI/identity slice vs role-permissions/authz sequenced against the Phase 7 RLS gate), and whether the per-invite `invites` table lands before or after the Phase 4 data-layer migration.
+
+**Plans**: TBD — run `/gsd-discuss-phase 03.1`, then `/gsd-plan-phase 03.1`
 
 ### Phase 4: Static-to-DB Data Layer Migration
 
@@ -205,6 +223,7 @@ Likely plans:
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
+| 3.1. Account & Roles — UX + Authorization *(inserted)* | 0/TBD | Not started | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
@@ -213,18 +232,4 @@ Likely plans:
 
 ## Backlog
 
-### Phase 999.1: Account & Roles — UX + Authorization (BACKLOG)
-
-**Goal:** Build the authenticated account surface (nav with logout + preferences, invite flow) and a real role-based authorization model (owner/practitioner/client) on top of the Phase 3 identity + tenant/subject scoping. Captured from owner UAT feedback after Phase 3 login verification (2026-06-09).
-
-**Requirements:** TBD (extends AUTH-01/AUTH-02; relates to TEN-01 scoping + the Phase 7 RLS gate)
-
-**Scope captured** (see `.planning/phases/999.1-account-roles-ux-authz/CAPTURE.md` for full detail + root-cause analysis):
-- Account nav/menu in the authenticated shell — logout (action exists) + preferences/account settings.
-- Account page invite function — generate/dispatch invite tokens (consider per-invite single-use, role-scoped tokens vs the current single shared `OWNER_INVITE_TOKEN`).
-- Role permissions — define + enforce what practitioners (multi-client) vs clients (own data only) can read/write/do; ties into tenant/subject scoping and the deferred Phase 7 RLS.
-- ~~🐛 Theme toggle defect~~ — ✅ RESOLVED 2026-06-09 (commit 7678592, debug session `theme-toggle-ssr-hydration`): React 19 `<html>` singleton-acquisition stripped `data-theme`; fixed via `useLayoutEffect` re-apply + `ThemeRestorer`. Verified live. (Remaining 999.1 scope = the 3 items above.)
-
-**Plans:** 0 plans
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+_No open backlog items. (999.1 Account & Roles promoted to Phase 3.1 on 2026-06-09.)_
