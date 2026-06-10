@@ -144,10 +144,30 @@ Plans:
 
   1. Every route loader reads live data from Neon scoped to the owner's tenant/subject (application-level `WHERE` in the interim; wrapped by `withTenantDb` once RLS lands in Phase 7) — no route reads from `real-data.ts`, `protocol-data.ts`, or `seed-data.ts` at runtime; a CI lint rule blocks direct imports of `*-data.ts` from non-seed contexts
   2. The owner's M0 metrics, protocol versions, supplements, cessation log, and correlations are present as rows in Neon under the owner's `tenantId`/`subjectId`; the dashboard renders the same data as M0 (visual spot-check passes)
-  3. `grep -r "real-data\|protocol-data\|seed-data" remix-app/app/routes/` returns no matches; the Netlify function bundle output contains no PHI strings (verified via `grep` against the build artifact)
+  3. `grep -r "real-data\|protocol-data\|seed-data" remix-app/app/routes/` returns no matches; the Vercel build output (react-router build client bundle) contains no PHI strings (verified via `grep` against the build artifact) [D-10]
   4. Vestigial `syncStatus`/`syncVersion` columns are absent from all tables (confirmed via schema introspection); all `subcategory: ... as any` casts are replaced with typed alternatives; `tsc --noEmit` passes with zero errors
 
-**Plans**: TBD
+**Plans**: 5 plans in 5 waves
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Schema vestige sweep + subject_genotypes table + db.server cleanup + [BLOCKING] migration 0006 to Neon + Wave-0 test scaffolds + PHI fixture gitignore [DATA-05]
+
+**Wave 2** *(blocked on 04-01)*
+
+- [ ] 04-02-PLAN.md — Centralized tenant-scoped data.server.ts read module + typed DB→Metric mapper (no `as any`) + server-only genetics knowledge module [DATA-01, DATA-05]
+
+**Wave 3** *(blocked on 04-02)*
+
+- [ ] 04-03-PLAN.md — Idempotent seed-data.ts orchestrator + run seed to Neon + DATA-02 row-count test green + capture parity fixtures from static modules (gitignored) [DATA-02]
+
+**Wave 4** *(blocked on 04-03)*
+
+- [ ] 04-04-PLAN.md — Rewire all 13 _app loaders to data.server.ts + parity test green + eslint no-restricted-imports CI lint gate + owner visual checkpoint [DATA-01]
+
+**Wave 5** *(blocked on 04-04 owner approval)*
+
+- [ ] 04-05-PLAN.md — Relocate non-PHI survivors + delete PHI arrays + retire one-shot scripts + DATA-04 build PHI-grep gate [DATA-04]
 
 ### Phase 04.1: Design System Adoption (INSERTED)
 
@@ -237,7 +257,7 @@ Likely plans:
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
-| 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
+| 4. Static-to-DB Data Layer Migration | 0/5 | Planned | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
