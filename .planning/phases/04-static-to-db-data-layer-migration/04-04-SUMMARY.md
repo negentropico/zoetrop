@@ -64,10 +64,13 @@ decisions:
 metrics:
   duration: "~2 sessions (context window continuation)"
   completed: "2026-06-10"
-  tasks_completed: 3
+  tasks_completed: 4
   tasks_total: 4
   files_created: 3
   files_modified: 17
+
+checkpoint:
+  task_4_human_verify: "APPROVED 2026-06-10 — owner response: 'verified. All values look correct.' Visual spot-check of dashboard, metrics, protocol, insights, and cessation routes passed against live Neon data. Wave 5 static-module deletion is unblocked by this approval."
 ---
 
 # Phase 04 Plan 04: Static-to-DB Data Layer Migration Summary
@@ -104,6 +107,21 @@ Dashboard, insights/index, and insights/correlations tests use range assertions 
 - `app/lib/metrics.ts`: added `MetricTarget`, `METRIC_TARGETS`, `getMetricTargets`, `getProjections` so metrics routes can import static targets from an allowed path
 - Migrated `metrics/{index,category,detail}.tsx` from `real-data` → `~/lib/metrics` for these functions
 - `npm run lint` exits 0 — gate is green
+
+### Task 4 — Owner visual spot-check (checkpoint:human-verify) [APPROVED]
+
+**Checkpoint approval recorded 2026-06-10.** Owner response: **"verified. All values look correct."**
+
+Spot-checked routes (dev server against live Neon):
+- Dashboard (`/`) — cessation day counter (~169), correlations table, top metrics
+- Metrics overview (`/metrics`) — 38 metrics with correct values
+- Protocol (`/protocol`) — current version P6, supplement count, cessation phase
+- Insights (`/insights`) — correlation count (9 in DB), genetic variants
+- Protocol cessation (`/protocol/cessation`) — phase bars with correct current day
+
+**Wave 5 gate:** This recorded approval is the precondition for Wave 5's deletion of the static data modules (`real-data.ts` data arrays, `seed-data.ts`, static portions of `protocol-data.ts`). Survivor functions already extracted to `~/lib/cessation` and `~/lib/metrics` must be preserved through that deletion.
+
+**CoQ10 reconciliation note for Wave 5:** the live DB intentionally has 9 correlations vs the static fixture's 10 — the CoQ10 → Recovery Score row (static id=10, correlation 0.32) was never seeded into Neon. Before or during Wave 5, either seed the CoQ10 row (if it should exist) or accept the 9-row DB as canonical; the parity test already tolerates either outcome via range assertions.
 
 ## Deviations from Plan
 
@@ -145,6 +163,13 @@ None — all loaders are wired to live data. No placeholder text or hardcoded em
 
 None — no new network endpoints, auth paths, or schema changes introduced. The ESLint gate reduces attack surface by preventing future static-data regressions.
 
-## Self-Check: PENDING
+## Self-Check: PASSED
 
-(completed after checkpoint verification)
+- FOUND: `.planning/phases/04-static-to-db-data-layer-migration/04-04-SUMMARY.md`
+- FOUND: commit 4133036 (Task 1 — 9 loaders rewired)
+- FOUND: commit ad66465 (Task 2 — 4 loaders + parity 13/13)
+- FOUND: commit b65f76b (Task 3 — ESLint gate)
+- FOUND: commit 2a14d67 (SUMMARY metadata commit)
+- Checkpoint Task 4: APPROVED by owner ("verified. All values look correct.")
+- `npm run typecheck` green, `npm test` 139 passed / 42 skipped, `npm run lint` exit 0
+- No files under `tests/fixtures/` staged or committed (PHI, gitignored)
