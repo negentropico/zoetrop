@@ -166,7 +166,14 @@ export async function loader({ request }: { request: Request }, now: Date = new 
 
   // Cessation data
   const cessation = cessationRows[0] ?? null;
-  const cessationDay = cessation ? getCessationDay(now) : 0;
+  const cessationDay = cessation
+    ? getCessationDay(
+        cessation.startDate instanceof Date
+          ? cessation.startDate.toISOString()
+          : (cessation.startDate as unknown as string),
+        now
+      )
+    : 0;
   const cessationPhase = getCurrentCessationPhase(cessationDay);
   const targetDay = 150;
 
