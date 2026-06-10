@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03.1 UI-SPEC approved
-last_updated: "2026-06-10T08:59:41.019Z"
-last_activity: 2026-06-10 -- Phase 03.1 execution started
+stopped_at: Completed 03.1-01 — authz foundation + invites schema + migration applied
+last_updated: "2026-06-10T09:08:26.337Z"
+last_activity: 2026-06-10
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 27
-  completed_plans: 23
+  completed_plans: 24
   percent: 44
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 03.1 (account-roles-ux-authorization) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 03.1
-Last activity: 2026-06-10 -- Phase 03.1 execution started
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-06-10
 
-Progress: [          ] 0%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [          ] 0%
 | Phase 03-identity-tenancy-scoping P03 | 403s | 2 tasks | 8 files |
 | Phase 03-identity-tenancy-scoping P04 | ~35m | 3 tasks | 8 files |
 | Phase 03-identity-tenancy-scoping P05 | 9min | 3 tasks | 24 files |
+| Phase 03.1 P01 | 15min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,7 @@ Recent decisions affecting current work:
 - [Phase 03-04]: Expand-contract tenancy migration COMPLETE on live Neon (orange-paper-97068012) — TEN-01 (16 NOT NULL tenant_id/subject_id + composite index on all 8 tables) + TEN-04 (composite UNIQUE(tenant_id,subject_id,version); old global UNIQUE absent); owner seeded (tenant + owner-subject + role=owner user m@negentropi.co). Journal-split execution (0001/0002 → seed → 0003/0004) avoided the backfill-before-spine guardrail trip.
 - [Phase 03-04]: Deviation 0644fa7 — constraints.test.ts array-parsing bug: @neondatabase/serverless returns array_agg as a pg text-array STRING not a JS array; parsePgTextArray() added. DB contract tests 18/18 green against live Neon; full suite 99 passing (only auth-layout.test.ts red — Plan 05 builds it).
 - [Phase ?]: [Phase 03-05]: Public/private auth surface split shipped — landing.tsx at / (no AppShell), auth/login+logout, and one authenticated _app/layout.tsx loader gating all 16 app routes (getSession → redirect /login). AppShell moved off root.tsx (bare Outlet). PILOT_BASIC_AUTH stopgap removed from code (D-05); Vercel env-var deletion + prod 200-check deferred to post-deploy (prod still serves old code). Local smoke test: signed-out /dashboard 302, owner sign-in 30-day persistent cookie, /logout 302. AUTH-01/AUTH-02 satisfied.
+- [Phase ?]: [Phase 03.1-01]: invites table in schema.ts, hand-corrected 0005 migration (Drizzle snapshot drift from custom 0002-0004), user.tenantId nullable expand-contract, authz helpers RLS-compatible
 
 ### Pending Todos
 
@@ -122,6 +124,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-10T05:18:38.848Z
-Stopped at: Phase 03.1 UI-SPEC approved
-Resume file: .planning/phases/03.1-account-roles-ux-authorization/03.1-UI-SPEC.md
+Last session: 2026-06-10T09:08:26.332Z
+Stopped at: Completed 03.1-01 — authz foundation + invites schema + migration applied
+Resume file: None

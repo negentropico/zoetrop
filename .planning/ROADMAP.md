@@ -124,7 +124,7 @@ Plans:
 Plans:
 **Wave 1** (parallel — disjoint files)
 
-- [ ] 03.1-01-PLAN.md — Schema + authz foundation: add user.tenantId, hand-rolled invites table (hash-only) + migration 0005, and the RLS-compatible authz helpers (requireUser/requireRole/assertSubjectAccess/CAPABILITIES/can) with fail-closed unit tests [D-06/D-07/D-11/D-12/D-13; D-01 mitigation]
+- [x] 03.1-01-PLAN.md — Schema + authz foundation: add user.tenantId, hand-rolled invites table (hash-only) + migration 0005, and the RLS-compatible authz helpers (requireUser/requireRole/assertSubjectAccess/CAPABILITIES/can) with fail-closed unit tests [D-06/D-07/D-11/D-12/D-13; D-01 mitigation]
 - [ ] 03.1-03-PLAN.md — Account shell UI: accessible DropdownMenu primitive + AccountMenu (Settings/Theme/Sign-out), threaded through AppShell→TopNav and mirrored into the mobile BottomTab (Account→/settings) [D-02/D-03] *(human-verify checkpoint)*
 
 **Wave 2**
@@ -236,7 +236,7 @@ Likely plans:
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
-| 3.1. Account & Roles — UX + Authorization *(inserted)* | 0/4 | Planned | - |
+| 3.1. Account & Roles — UX + Authorization *(inserted)* | 1/4 | In Progress|  |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
