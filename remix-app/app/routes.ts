@@ -37,11 +37,13 @@ export default [
       route("import/whoop", "routes/_app/import/whoop.tsx"),
       route("import/vault", "routes/_app/import/vault.tsx"),
     ]),
-    // Ingest (Plan 05-02: upload action; Plan 05-03: review/consent UI)
+    // Ingest (Plan 05-02: upload action; Plan 05-03: review/consent/document UI)
     layout("routes/_app/ingest/layout.tsx", [
+      index("routes/_app/ingest/index.tsx"),
       route("ingest/upload", "routes/_app/ingest/upload.tsx"),
       route("ingest/review", "routes/_app/ingest/review.tsx"),
       route("ingest/consent", "routes/_app/ingest/consent.tsx"),
+      route("ingest/documents/:id", "routes/_app/ingest/document.tsx"),
     ]),
     // Settings
     route("settings", "routes/_app/settings/index.tsx"),
