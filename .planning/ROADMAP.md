@@ -16,7 +16,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [x] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7) (completed 2026-06-08)
 - [x] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7 (completed 2026-06-10)
 - [x] **Phase 3.1: Account & Roles — UX + Authorization** *(inserted)* — Build the authenticated account surface (nav + logout UI + preferences, per-invite role-scoped tokens) and a real owner/practitioner/client authorization model on top of the Phase 3 identity + tenant/subject scoping. Promoted from backlog 999.1 (owner UAT feedback) (completed 2026-06-10)
-- [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
+- [x] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts (completed 2026-06-10)
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
 - [ ] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports
@@ -167,7 +167,7 @@ Plans:
 
 **Wave 5** *(blocked on 04-04 owner approval)*
 
-- [ ] 04-05-PLAN.md — Relocate non-PHI survivors + delete PHI arrays + retire one-shot scripts + DATA-04 build PHI-grep gate [DATA-04]
+- [x] 04-05-PLAN.md — Relocate non-PHI survivors + delete PHI arrays + retire one-shot scripts + DATA-04 build PHI-grep gate [DATA-04]
 
 ### Phase 04.1: Design System Adoption (INSERTED)
 
@@ -257,7 +257,7 @@ Likely plans:
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
-| 4. Static-to-DB Data Layer Migration | 4/5 | In Progress|  |
+| 4. Static-to-DB Data Layer Migration | 5/5 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
