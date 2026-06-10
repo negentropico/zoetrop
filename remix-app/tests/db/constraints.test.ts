@@ -14,8 +14,9 @@ import { Pool } from "@neondatabase/serverless";
 // Source: 03-RESEARCH.md § Migration Sequence (Migration D constraint swap),
 //   § Pitfall 6 (drop global UNIQUE(version) before adding composite UNIQUE).
 
-const connectionString =
-  process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
+const connectionString = process.env["DB_URL_STUBBED"]
+  ? undefined
+  : process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
 
 interface ConstraintRow {
   constraint_name: string;

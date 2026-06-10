@@ -8,13 +8,14 @@
 if (!process.env["BETTER_AUTH_SECRET"]) {
   process.env["BETTER_AUTH_SECRET"] = "test-secret-stub-not-real";
 }
-// Stub NETLIFY_DATABASE_URL so db.server.ts getPool() doesn't throw during
-// import. We use NETLIFY_DATABASE_URL (the first fallback in db.server.ts's
-// `NETLIFY_DATABASE_URL || DATABASE_URL` check) rather than DATABASE_URL, so
-// the DB-introspection tests' skip-guard (`DATABASE_URL_UNPOOLED || DATABASE_URL`)
-// stays falsy and those tests are skipped instead of attempting a real connection.
-if (!process.env["DATABASE_URL"] && !process.env["NETLIFY_DATABASE_URL"]) {
-  process.env["NETLIFY_DATABASE_URL"] = "postgres://stub:stub@localhost:5432/stub";
+// Stub DATABASE_URL so db.server.ts getPool() doesn't throw during import
+// (db.server.ts reads DATABASE_URL only — the NETLIFY_DATABASE_URL fallback
+// was removed in Phase 4, D-08). DB_URL_STUBBED marks the stub so the
+// live-Neon introspection tests' skip-guards can treat the stub as "no
+// connection string" and skip instead of attempting a real connection.
+if (!process.env["DATABASE_URL"]) {
+  process.env["DATABASE_URL"] = "postgres://stub:stub@localhost:5432/stub";
+  process.env["DB_URL_STUBBED"] = "1";
 }
 
 // jsdom localStorage setup:

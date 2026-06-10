@@ -17,8 +17,9 @@ import { Pool } from "@neondatabase/serverless";
 //   cessation_log: 1 active cessation entry
 //   subject_genotypes: 15 genetic variants
 
-const connectionString =
-  process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
+const connectionString = process.env["DB_URL_STUBBED"]
+  ? undefined
+  : process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
 
 const SEEDED_TABLES = [
   { table: "metrics", minRows: 40 },

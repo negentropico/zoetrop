@@ -15,8 +15,9 @@ import { Pool } from "@neondatabase/serverless";
 // Source: 03-RESEARCH.md § Migration Sequence (Migration D: SET NOT NULL +
 //   CREATE INDEX (tenant_id, subject_id)); CLAUDE.md (8 tables).
 
-const connectionString =
-  process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
+const connectionString = process.env["DB_URL_STUBBED"]
+  ? undefined
+  : process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
 
 const DATA_TABLES = [
   "metrics",

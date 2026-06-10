@@ -21,8 +21,9 @@ import { describe, it } from "vitest";
 //   deterministic across test runs. Plan 04 passes this to loaders via
 //   an injectable `now` parameter.
 
-const connectionString =
-  process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
+const connectionString = process.env["DB_URL_STUBBED"]
+  ? undefined
+  : process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
 
 // Pin execution date for deterministic cessation phase math.
 // Plan 04 will pass this to loaders via an injectable `now` parameter.
