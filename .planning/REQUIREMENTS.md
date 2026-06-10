@@ -23,11 +23,11 @@
 
 ### Data Layer
 
-- [ ] **DATA-01**: All route loaders read live data from Neon at runtime (no static-TypeScript data as a runtime source)
-- [ ] **DATA-02**: The owner's existing M0 data is migrated into the real database tables
+- [x] **DATA-01**: All route loaders read live data from Neon at runtime (no static-TypeScript data as a runtime source)
+- [x] **DATA-02**: The owner's existing M0 data is migrated into the real database tables
 - [x] **DATA-03**: A committed Drizzle `migrations/` baseline exists; all schema changes go through migrations
-- [ ] **DATA-04**: No PHI is present in the client bundle or static source (verified against the build output)
-- [ ] **DATA-05**: Vestigial `syncStatus`/`syncVersion` columns and `subcategory: ... as any` casts are removed
+- [x] **DATA-04**: No PHI is present in the client bundle or static source (verified against the build output)
+- [x] **DATA-05**: Vestigial `syncStatus`/`syncVersion` columns and `subcategory: ... as any` casts are removed
 
 ### Engine & Genetics
 
@@ -112,10 +112,10 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | TEN-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | TEN-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
 | TEN-04 | Phase 3 — Identity + Tenancy Scoping | Complete |
-| DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
-| DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
-| DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
-| DATA-05 | Phase 4 — Static-to-DB Data Layer Migration | Pending |
+| DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
+| DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
+| DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
+| DATA-05 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
 | UI-01 | Phase 4.1 — Design System Adoption | Complete |
 | LAB-01 | Phase 5 — Lab Ingest Pipeline | Pending |
 | LAB-02 | Phase 5 — Lab Ingest Pipeline | Pending |
