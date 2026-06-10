@@ -5,6 +5,7 @@
 import { useLocation, NavLink } from "react-router";
 import { Wordmark } from "../ui/Wordmark";
 import { ThemeToggle } from "../ui/ThemeToggle";
+import { AccountMenu } from "./AccountMenu";
 
 const NAV = [
   {
@@ -39,7 +40,11 @@ const NAV = [
   },
 ] as const;
 
-export function TopNav() {
+interface TopNavProps {
+  user: { name: string; email: string; role: string };
+}
+
+export function TopNav({ user }: TopNavProps) {
   const { pathname } = useLocation();
   return (
     <header
@@ -115,6 +120,7 @@ export function TopNav() {
             })}
           </nav>
           <ThemeToggle />
+          <AccountMenu user={user} />
         </div>
       </div>
     </header>

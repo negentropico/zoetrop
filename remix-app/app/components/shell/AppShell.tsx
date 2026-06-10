@@ -9,13 +9,14 @@ import { SpiralMark } from "../ui/SpiralMark";
 interface AppShellProps {
   children: ReactNode;
   wide?: boolean; // max-width 1280 (Insights, Import) vs 1180 default
+  user: { name: string; email: string; role: string };
 }
 
-export function AppShell({ children, wide = false }: AppShellProps) {
+export function AppShell({ children, wide = false, user }: AppShellProps) {
   const maxW = wide ? 1280 : 1180;
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <TopNav />
+      <TopNav user={user} />
       <main
         style={{
           maxWidth: maxW,

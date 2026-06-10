@@ -3,7 +3,7 @@
 // Source: docs/design-system/_rounds/round1/app/lib.jsx BottomTab (lines 406–420)
 // Translated: hash Link → react-router Link + useLocation
 import { useLocation, Link } from "react-router";
-import { LayoutGrid, Activity, ListChecks, GitCompare, Download } from "lucide-react";
+import { LayoutGrid, Activity, ListChecks, GitCompare, User } from "lucide-react";
 
 const NAV_ITEMS = [
   {
@@ -31,10 +31,10 @@ const NAV_ITEMS = [
     match: (p: string) => p.startsWith("/insights"),
   },
   {
-    to: "/import/whoop",
-    label: "Import",
-    icon: Download,
-    match: (p: string) => p.startsWith("/import"),
+    to: "/settings",
+    label: "Account",
+    icon: User,
+    match: (p: string) => p.startsWith("/settings"),
   },
 ] as const;
 

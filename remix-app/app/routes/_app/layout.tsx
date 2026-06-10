@@ -1,4 +1,4 @@
-import { redirect, Outlet } from "react-router";
+import { redirect, Outlet, useLoaderData } from "react-router";
 import type { LoaderFunctionArgs } from "react-router";
 import { auth } from "~/lib/auth.server";
 import { AppShell } from "~/components/shell/AppShell";
@@ -14,14 +14,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
     throw redirect(`/login?redirect=${encodeURIComponent(url.pathname)}`);
   }
-  return { user: session.user };
+  // Normalize the session user for the shell — role is `string | null | undefined`
+  // from Better-Auth additionalFields but shell components require `string`.
+  // Coerce to "client" as a safe default (read-only role) when unset.
+  const u = session.user;
+  return {
+    user: {
+      name: u.name,
+      email: u.email,
+      role: u.role ?? "client",
+    },
+  };
 }
 
 // AppShell moves here from root.tsx (Pitfall 3 — never leave AppShell in root
 // where it would wrap public/login routes too).
+// Thread the session user (name, email, role) from loader → AppShell → TopNav → AccountMenu.
 export default function AppLayout() {
+  const { user } = useLoaderData<typeof loader>();
   return (
-    <AppShell>
+    <AppShell user={user}>
       <Outlet />
     </AppShell>
   );
