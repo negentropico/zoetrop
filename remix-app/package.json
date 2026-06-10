@@ -13,6 +13,7 @@
     "db:migrate": "node --env-file-if-exists=.env node_modules/.bin/drizzle-kit migrate",
     "db:studio": "node --env-file-if-exists=.env node_modules/.bin/drizzle-kit studio",
     "db:seed-owner": "tsx --env-file-if-exists=.env scripts/seed-owner.ts",
+    "db:seed-dictionary": "tsx --env-file-if-exists=.env scripts/seed-analyte-dictionary.ts",
     "ds:audit": "bash scripts/ds-audit.sh",
     "lint": "eslint app/routes app/components"
   },
