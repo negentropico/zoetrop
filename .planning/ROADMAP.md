@@ -229,7 +229,7 @@ Plans:
 
 **Wave 2** *(blocked on 05-01)*
 
-- [ ] 05-02-PLAN.md — Server pipeline: consent gate + audit logger, Anthropic (claude-sonnet-4-6) tool-use extraction, background `extractionWorker` (unpdf + grounding/range/dictionary), `/ingest/upload` action with `waitUntil` + consent gate + PDF validation [LAB-01, LAB-02, LAB-03, LAB-06]
+- [x] 05-02-PLAN.md — Server pipeline: consent gate + audit logger, Anthropic (claude-sonnet-4-6) tool-use extraction, background `extractionWorker` (unpdf + grounding/range/dictionary), `/ingest/upload` action with `waitUntil` + consent gate + PDF validation [LAB-01, LAB-02, LAB-03, LAB-06]
 
 **Wave 3** *(blocked on 05-02)*
 
@@ -279,7 +279,7 @@ Plans:
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
 | 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
-| 5. Lab Ingest Pipeline | 1/3 | In Progress|  |
+| 5. Lab Ingest Pipeline | 2/3 | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
 

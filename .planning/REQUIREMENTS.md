@@ -38,7 +38,7 @@
 ### Lab Ingest
 
 - [x] **LAB-01**: A practitioner can upload a lab document (PDF) for a subject
-- [ ] **LAB-02**: An asynchronous extraction job parses the document into structured candidate metrics (does not block the request)
+- [x] **LAB-02**: An asynchronous extraction job parses the document into structured candidate metrics (does not block the request)
 - [x] **LAB-03**: Extracted values are validated (grounded to source text + physiological-range sanity + per-field confidence) before reaching review
 - [ ] **LAB-04**: A practitioner reviews extracted fields side-by-side with the source document and can approve, edit, or reject each
 - [x] **LAB-05**: Only practitioner-approved metrics are written to the subject's record, each producing an audit-log entry
@@ -118,7 +118,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | DATA-05 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
 | UI-01 | Phase 4.1 — Design System Adoption | Complete |
 | LAB-01 | Phase 5 — Lab Ingest Pipeline | Complete |
-| LAB-02 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-02 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-03 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-04 | Phase 5 — Lab Ingest Pipeline | Pending |
 | LAB-05 | Phase 5 — Lab Ingest Pipeline | Complete |
