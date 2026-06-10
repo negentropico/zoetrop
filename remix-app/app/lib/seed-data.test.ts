@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculatePearsonCorrelation } from "~/lib/seed-data";
+import { calculatePearsonCorrelation } from "~/lib/correlations";
 
 describe("calculatePearsonCorrelation", () => {
   it("perfect positive correlation → 1", () => {
