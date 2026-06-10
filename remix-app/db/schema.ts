@@ -12,6 +12,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { user } from './auth-schema';
 
 // Enums
 export const metricCategoryEnum = pgEnum('metric_category', [
@@ -71,6 +72,27 @@ export const cessationPhaseEnum = pgEnum('cessation_phase', [
 ]);
 
 export const appRoleEnum = pgEnum('app_role', ['owner', 'practitioner', 'client']);
+
+// ── Invites table (D-06: hand-rolled, single-use, role-scoped, expiring) ─────
+// SECURITY: Only the SHA-256 hex hash of the raw token is stored (D-06 / T-031-INV-2).
+// The raw token NEVER appears in this table. The logical FK from createdBy/consumedBy
+// to user.id is valid because user is imported from ./auth-schema (which is also
+// re-exported at the bottom of this file).
+export const invites = pgTable('invites', {
+  id: text('id').primaryKey(),
+  tokenHash: text('token_hash').notNull().unique(), // SHA-256 hex of raw token — no raw-token column
+  role: appRoleEnum('role').notNull(),              // the role this invite grants
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  createdBy: text('created_by').notNull().references(() => user.id),
+  expiresAt: timestamp('expires_at').notNull(),
+  consumedAt: timestamp('consumed_at'),              // NULL = not yet used
+  consumedBy: text('consumed_by').references(() => user.id),
+  revokedAt: timestamp('revoked_at'),                // NULL = not revoked
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => [
+  index('idx_invites_tenant').on(t.tenantId),
+  index('idx_invites_token_hash').on(t.tokenHash),
+]);
 
 // Core metrics table
 export const metrics = pgTable('metrics', {
@@ -250,6 +272,17 @@ export const correlationsRelations = relations(correlations, ({ one }) => ({
   supplement: one(supplements, {
     fields: [correlations.supplementId],
     references: [supplements.id],
+  }),
+}));
+
+export const invitesRelations = relations(invites, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [invites.tenantId],
+    references: [tenants.id],
+  }),
+  createdByUser: one(user, {
+    fields: [invites.createdBy],
+    references: [user.id],
   }),
 }));
 

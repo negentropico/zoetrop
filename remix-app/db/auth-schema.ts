@@ -18,6 +18,12 @@ export const user = pgTable('user', {
   updatedAt: timestamp('updated_at').notNull(),
   // additionalFields (AUTH-02):
   role: text('role').default('client'), // 'owner' | 'practitioner' | 'client'
+  // Logical FK to tenants.id — plain text to avoid circular import with schema.ts
+  // (schema.ts re-exports this table; adding .references(() => tenants.id) here
+  // would create a circular dependency). The FK is enforced at the DB level via the
+  // invites.tenant_id FK and the Phase 7 RLS policy keyed on tenantId.
+  // Nullable: live table already has the owner row; NOT NULL would require a backfill.
+  tenantId: text('tenant_id'), // → tenants.id (logical FK, no .references() to avoid circular import)
 });
 
 export const session = pgTable('session', {
