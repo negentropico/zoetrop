@@ -344,6 +344,7 @@ export default function Dashboard() {
 
   const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
   const needLook = (statusCounts.deficient || 0) + (statusCounts.excess || 0);
+  const cessationComplete = cessationDay >= targetDay;
   const phaseBarPhases = buildPhaseBarPhases(cessationDay, targetDay);
 
   // Eyebrow date
@@ -365,15 +366,36 @@ export default function Dashboard() {
         <StatTile
           label="Need a look"
           value={needLook}
-          hint={needLook > 0 ? <StatusBadge status="borderline" /> : undefined}
-          to="/metrics?status=deficient"
+          // needLook counts out-of-range metrics (deficient + excess) — show the
+          // actual split, not a single hardcoded "borderline" badge that
+          // mislabels the count and ignores the 15 borderline metrics.
+          hint={
+            needLook > 0 ? (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                {(["deficient", "excess"] as MetricStatus[]).map((s) =>
+                  (statusCounts[s] || 0) > 0 ? (
+                    <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <StatusDot status={s} size={7} />
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
+                        {statusCounts[s]}
+                      </span>
+                    </span>
+                  ) : null
+                )}
+              </span>
+            ) : undefined
+          }
+          to="/metrics"
         />
         <StatTile label="Active supplements" value={activeSupplements} to="/protocol/supplements" />
         <StatTile label="Protocol version" value={currentVersion} unit="7 versions" to="/protocol/versions" />
       </div>
 
-      {/* Cessation + correlations — zt-grid-2 */}
-      <div className="zt-grid-2">
+      {/* Cessation + correlations — zt-grid-2.
+          align-items:start so the shorter Cessation card sizes to its content
+          instead of stretching to match the taller correlations card (which
+          left a large empty void at the bottom of the cessation card). */}
+      <div className="zt-grid-2" style={{ alignItems: "start" }}>
         <Card padding="lg">
           {/* Section label */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
@@ -389,10 +411,16 @@ export default function Dashboard() {
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
             <span className="zt-readout" style={{ fontSize: "var(--text-3xl)" }}>Day {cessationDay}</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>of {targetDay}</span>
+            {cessationComplete ? (
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--vital-500, var(--vital))" }}>· complete</span>
+            ) : (
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>of {targetDay}</span>
+            )}
           </div>
           <p style={{ margin: "8px 0 22px", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
-            {cessationPhase.label} phase — {cessationPhase.focus}.
+            {cessationComplete
+              ? `${targetDay}-day protocol complete — all phases finished.`
+              : `${cessationPhase.label} phase — ${cessationPhase.focus}.`}
           </p>
           <PhaseBar phases={phaseBarPhases} compact />
         </Card>
