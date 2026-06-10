@@ -210,3 +210,21 @@ Likely plans:
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
+
+## Backlog
+
+### Phase 999.1: Account & Roles — UX + Authorization (BACKLOG)
+
+**Goal:** Build the authenticated account surface (nav with logout + preferences, invite flow) and a real role-based authorization model (owner/practitioner/client) on top of the Phase 3 identity + tenant/subject scoping. Captured from owner UAT feedback after Phase 3 login verification (2026-06-09).
+
+**Requirements:** TBD (extends AUTH-01/AUTH-02; relates to TEN-01 scoping + the Phase 7 RLS gate)
+
+**Scope captured** (see `.planning/phases/999.1-account-roles-ux-authz/CAPTURE.md` for full detail + root-cause analysis):
+- Account nav/menu in the authenticated shell — logout (action exists) + preferences/account settings.
+- Account page invite function — generate/dispatch invite tokens (consider per-invite single-use, role-scoped tokens vs the current single shared `OWNER_INVITE_TOKEN`).
+- Role permissions — define + enforce what practitioners (multi-client) vs clients (own data only) can read/write/do; ties into tenant/subject scoping and the deferred Phase 7 RLS.
+- 🐛 Theme toggle defect (live, design-system/Phase 4.1): login renders dark, dashboard light; toggle needs two clicks; theme state not seeded from the persisted value at load (SSR/hydration). Can be a standalone quick-fix/debug before this phase.
+
+**Plans:** 0 plans
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
