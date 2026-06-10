@@ -28,6 +28,11 @@ export function meta({}: Route.MetaArgs) {
 // ── Loader ────────────────────────────────────────────────────────────────────
 
 export async function loader({ request }: Route.LoaderArgs) {
+  // Contract (WR-06): /settings is available to ALL authenticated roles for
+  // self-management (Profile / Security / Preferences). Only the Invites surface
+  // is role-gated — hidden here via canInviteClient and enforced server-side in
+  // the generate-invite action and the revoke resource route. Clients are not
+  // 403'd from the page itself, only from invites.
   const { user } = await requireUser(request);
 
   // Compute capabilities on the server and pass booleans through loader data so
@@ -55,10 +60,18 @@ export async function action({ request }: Route.ActionArgs) {
 
   // ── update-profile ──────────────────────────────────────────────────────────
   if (intent === "update-profile") {
-    const name = formData.get("name") as string;
+    // WR-04: validate name — a crafted POST can omit it (null) or send whitespace.
+    const name = formData.get("name");
+    if (typeof name !== "string" || !name.trim()) {
+      return {
+        intent: "update-profile",
+        success: false,
+        error: "Please enter your name.",
+      };
+    }
     try {
       await auth.api.updateUser({
-        body: { name },
+        body: { name: name.trim() },
         headers: request.headers,
       });
       return { intent: "update-profile", success: true, error: null };
@@ -103,18 +116,19 @@ export async function action({ request }: Route.ActionArgs) {
       });
       return { intent: "change-password", success: true, error: null, errorField: null };
     } catch (err) {
-      // Better-Auth returns an error for wrong current password
-      const msg =
-        err instanceof Error && err.message.toLowerCase().includes("invalid")
-          ? "Current password is incorrect."
-          : err instanceof Error && err.message.toLowerCase().includes("password")
-          ? "Current password is incorrect."
-          : "Current password is incorrect.";
+      // WR-07: only assert "wrong current password" when the error actually says
+      // so. Better-Auth raises an invalid-password error for a wrong
+      // currentPassword; any other failure (network, backend, rate-limit) must
+      // not be misreported as a credential problem.
+      const raw = err instanceof Error ? err.message.toLowerCase() : "";
+      const wrongCurrent = raw.includes("invalid") || raw.includes("incorrect");
       return {
         intent: "change-password",
         success: false,
-        error: msg,
-        errorField: "currentPassword",
+        error: wrongCurrent
+          ? "Current password is incorrect."
+          : "Unable to change your password. Try again.",
+        errorField: wrongCurrent ? "currentPassword" : null,
       };
     }
   }
@@ -130,6 +144,24 @@ export async function action({ request }: Route.ActionArgs) {
         intent: "generate-invite",
         success: false,
         error: "Unable to generate invite. Try again.",
+        token: null,
+        url: null,
+        role: null,
+        expiresAt: null,
+      };
+    }
+
+    // WR-05: re-assert the capability for the REQUESTED role at the boundary.
+    // requireRole above only proves owner|practitioner — it does NOT prove this
+    // actor may mint THIS role. A practitioner cannot invite a practitioner (the
+    // UI hides that pill, but a crafted POST must be denied here too). This makes
+    // the authorization intent explicit rather than relying solely on
+    // generateInvite's internal can() check (defense-in-depth).
+    if (!can(user, `invite:${role}`)) {
+      return {
+        intent: "generate-invite",
+        success: false,
+        error: "You can't invite that role.",
         token: null,
         url: null,
         role: null,
