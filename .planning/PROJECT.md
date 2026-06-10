@@ -25,9 +25,9 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 
 <!-- M1: single practitioner, multi-client. The engine-first proving ground. Hypotheses until shipped. -->
 
-- [ ] Identity + auth layer with roles (owner / practitioner / client)
-- [ ] Tenant + subject scoping on every data table, isolated via Postgres RLS
-- [ ] Per-client (per-subject) protocol version lineage (P0–P6 becomes per-client; 4-week iteration = new version)
+- [x] Identity + auth layer with roles (owner / practitioner / client) — *Phase 3 ✓: Better-Auth email/password sign-in + invite-only `beforeSignUp` gate + `role` additional field (`input:false`); authenticated layout gates all app routes (AUTH-01/AUTH-02)*
+- [ ] Tenant + subject scoping on every data table, isolated via Postgres RLS — *Phase 3 ✓ (scoping): `tenant_id`/`subject_id` NOT NULL + composite index on all 8 tables, owner backfilled in live Neon (TEN-01); RLS enable+policies + SET LOCAL isolation deferred to Phase 7*
+- [ ] Per-client (per-subject) protocol version lineage (P0–P6 becomes per-client; 4-week iteration = new version) — *Phase 3 ✓ (schema): `UNIQUE(tenant_id, subject_id, version)` on `protocol_versions`, old global unique dropped (TEN-04); per-client lineage behavior lands with the data layer (Phase 4+)*
 - [ ] Promote the engine to first-class schema: `geneticVariants` + `variantProtocolMap` with `confidence` (K1–K4) + evidence/citation field
 - [ ] Lab-ingest pipeline: upload panel → LLM-assisted parse → **human review** → structured `metrics`
 - [ ] Confidence-graded lab→protocol report generation (the proof slice)
@@ -93,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-08 after Phase 1 (schema baseline + engine tests + auth spike) complete*
+*Last updated: 2026-06-09 after Phase 3 (identity + tenancy scoping) complete — Better-Auth + tenancy schema live on Neon (Phases 2 and 4.1 also completed since the prior update).*
