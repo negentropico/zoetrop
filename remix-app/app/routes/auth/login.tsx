@@ -12,9 +12,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
 // Sign-in action — forward Set-Cookie from Better-Auth's response (A6).
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const redirectTo = (formData.get("redirect") as string) || "/dashboard";
+  const email = formData.get("email");
+  const password = formData.get("password");
+  // WR-04: reject absent/non-string fields (a crafted POST bypasses the
+  // client-side `required`) before calling Better-Auth.
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    !email ||
+    !password
+  ) {
+    return { error: "Invalid credentials" };
+  }
+  // WR-05: only honor same-origin local paths to prevent an open redirect
+  // (e.g. ?redirect=https://evil/ or //evil/) post-authentication.
+  const rawRedirect = formData.get("redirect");
+  const redirectTo =
+    typeof rawRedirect === "string" &&
+    rawRedirect.startsWith("/") &&
+    !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/dashboard";
 
   const response = await auth.api.signInEmail({
     body: { email, password },

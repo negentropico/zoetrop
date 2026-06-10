@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { createAuthMiddleware, APIError } from "better-auth/api";
+import { timingSafeEqual } from "node:crypto";
 import { getDb } from "./db.server";
 import * as schema from "../../db/schema";
 
@@ -52,11 +53,18 @@ export const auth = betterAuth({
   // generation — never hand-rolled (V6).
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path === "/sign-up/email") {
+      // WR-06: fail closed against ANY sign-up surface (not just /sign-up/email),
+      // and use a length-checked constant-time compare for the invite secret.
+      if (ctx.path.startsWith("/sign-up")) {
         const body = ctx.body as Record<string, unknown>;
-        const token = body?.inviteToken as string | undefined;
+        const token = body?.inviteToken;
         const ownerToken = process.env.OWNER_INVITE_TOKEN;
-        if (!ownerToken || token !== ownerToken) {
+        const ok =
+          typeof token === "string" &&
+          !!ownerToken &&
+          token.length === ownerToken.length &&
+          timingSafeEqual(Buffer.from(token), Buffer.from(ownerToken));
+        if (!ok) {
           throw new APIError("FORBIDDEN", { message: "signup_disabled" });
         }
       }
