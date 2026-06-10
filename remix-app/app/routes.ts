@@ -37,5 +37,8 @@ export default [
       route("import/whoop", "routes/_app/import/whoop.tsx"),
       route("import/vault", "routes/_app/import/vault.tsx"),
     ]),
+    // Settings
+    route("settings", "routes/_app/settings/index.tsx"),
+    route("settings/invites/:inviteId/revoke", "routes/_app/settings/invites.ts"),
   ]),
 ] satisfies RouteConfig;
