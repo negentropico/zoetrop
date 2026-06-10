@@ -606,20 +606,20 @@ export default function WhoopImport() {
                 color: "var(--text-muted)",
               }}
             >
-              Default path{" "}
+              Default location{" "}
               <span
                 style={{
                   background: "var(--surface-sunken)",
                   padding: "3px 7px",
                   borderRadius: 6,
                   color: "var(--text-secondary)",
-                  // Let the long mono path wrap instead of forcing the row
-                  // wider than a 390px mobile viewport (04.1-09 R2 #3).
+                  // Let long content wrap instead of forcing the row wider than
+                  // a 390px mobile viewport (04.1-09 R2 #3).
                   overflowWrap: "anywhere",
                   wordBreak: "break-all",
                 }}
               >
-                ~/Code/Whoop/results/
+                your WHOOP Analyzer output folder
               </span>
             </div>
           </Card>

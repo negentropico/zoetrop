@@ -65,9 +65,10 @@ export function PhaseBar({ phases, height = 14, showLabels = true, compact = fal
                 style={{
                   color: p.state === "current" ? "var(--ink)" : "var(--text-muted)",
                   fontWeight: p.state === "current" ? 700 : 400,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  // Wrap long single-word labels (e.g. "Optimization") on narrow
+                  // segments instead of truncating to "OPTIMIZAT…".
+                  overflowWrap: "anywhere",
+                  lineHeight: 1.2,
                   fontSize: compact ? "0.625rem" : "var(--text-2xs)",
                 }}
               >
