@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 03.1 UI-SPEC approved
-last_updated: "2026-06-10T05:51:24.839Z"
-last_activity: 2026-06-10 -- Phase 03.1 planning complete
+last_updated: "2026-06-10T08:59:41.019Z"
+last_activity: 2026-06-10 -- Phase 03.1 execution started
 progress:
   total_phases: 9
   completed_phases: 4
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 3.1 — Account & Roles (UX + authorization), promoted from backlog 999.1 and inserted before Phase 04 (static-to-DB data layer). Phase 4.1 design-system already complete.
+**Current focus:** Phase 03.1 — account-roles-ux-authorization
 
 > Note: Phases 1, 2, and 4.1 are complete. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 3.1
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-10 -- Phase 03.1 planning complete
+Phase: 03.1 (account-roles-ux-authorization) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 03.1
+Last activity: 2026-06-10 -- Phase 03.1 execution started
 
 Progress: [          ] 0%
 
