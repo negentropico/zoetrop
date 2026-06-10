@@ -53,11 +53,14 @@ decisions:
 metrics:
   duration: "~30min"
   completed: "2026-06-10"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_created: 2
   files_modified: 3
   files_deleted: 6
+
+checkpoint:
+  task_3_human_verify: "APPROVED 2026-06-10 — owner response: 'approved'. DATA-04 verification PASSED: client-bundle PHI grep clean (zero matches), route-source grep clean, app renders correctly with DB-backed data. Phase 4 cut-over complete; Neon is the single source of truth."
 ---
 
 # Phase 04 Plan 05: PHI Deletion + D-06 Survivor Relocation Summary
@@ -112,7 +115,7 @@ Typecheck: exits 0 post-Task 1.
 - `npm test` → 139 passed / 42 skipped (same as pre-deletion)
 - `npm run lint` → exits 0
 
-### Task 3 — DATA-04 build PHI grep (awaiting owner verification)
+### Task 3 — DATA-04 build PHI grep (checkpoint:human-verify) [APPROVED]
 
 **Build completed successfully.** React Router production build (`npm run build`) produced `build/client/` (55 JS + 1 CSS assets).
 
@@ -130,7 +133,7 @@ grep -rnE "real-data|seed-data" remix-app/app/routes/
 
 **build/ gitignore:** Confirmed — `build/` is gitignored; no build artifact committed.
 
-**Pending:** Owner visual confirmation that the app still renders correctly (DB-backed, identical to Plan 04's approved state). The build PHI grep evidence is ready for inspection.
+**Checkpoint approval recorded 2026-06-10.** Owner response: **"approved"** — the DATA-04 verification PASSED: client-bundle PHI grep clean (zero matches), route-source grep clean, and the app renders correctly with DB-backed data. The D-09 cut-over is complete; Neon is the single source of truth and no PHI lives in committed TypeScript source.
 
 **D-07 note:** The pre-deletion commits in git history contain PHI. A destructive history rewrite (squash-then-re-push) is NOT done here — this is a private n=1 repo with no external clients. The Phase 7 pre-client gate checklist includes the repo-squash (D-07) as a required step before any external client PHI is handled.
 
@@ -186,4 +189,7 @@ Typecheck: exits 0
 Lint: exits 0
 Build: succeeds; client-bundle PHI grep = 0 matches
 
-Task 3 checkpoint: awaiting owner approval (build PHI grep clean, app renders DB-backed).
+Task 3 checkpoint: APPROVED by owner ("approved") — DATA-04 verification PASSED.
+
+Phase 4 closes DATA-01 (loaders DB-backed, parity 13/13), DATA-02 (live Neon seed),
+DATA-04 (no PHI in build client bundle or static source), DATA-05 (schema columns).
