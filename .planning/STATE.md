@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 03.1-01 — authz foundation + invites schema + migration applied
-last_updated: "2026-06-10T09:25:21.382Z"
+status: ready_to_plan
+stopped_at: Phase 03.1 complete (4/4) — next incomplete phase is Phase 4 (Static-to-DB Data Layer Migration); 4.1 already complete
+last_updated: 2026-06-10T11:15:37.671Z
 last_activity: 2026-06-10
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 27
-  completed_plans: 25
-  percent: 44
+  completed_plans: 27
+  percent: 56
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 03.1 — account-roles-ux-authorization
+**Current focus:** Phase 4 — Static-to-DB Data Layer Migration
 
-> Note: Phases 1, 2, and 4.1 are complete. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
+> Note: Phases 1, 2, 3, 3.1, and 4.1 are complete (3.1 completed 2026-06-10). Phase 4.1 (design system) was executed early on 2026-06-08, so the next incomplete phase is **Phase 4 (Static-to-DB Data Layer Migration)**, NOT 4.1 — `phase.complete` mis-pointed to 4.1 and this was corrected by hand. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 03.1 (account-roles-ux-authorization) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
+Phase: 4
+Plan: Not started
+Status: Ready to discuss
 Last activity: 2026-06-10
 
 Progress: [█████████░] 93%
@@ -39,7 +39,7 @@ Progress: [█████████░] 93%
 
 **Velocity:**
 
-- Total plans completed: 27
+- Total plans completed: 31
 - Average duration: —
 - Total execution time: —
 
@@ -51,6 +51,7 @@ Progress: [█████████░] 93%
 | 04.1 | 9 | - | - |
 | 02 | 4 | - | - |
 | 03 | 5 | - | - |
+| 03.1 | 4 | - | - |
 
 **Recent Trend:** No data yet
 
