@@ -89,8 +89,11 @@ export function RangeBar({ m, height = 8, showEndpoints = false }: RangeBarProps
           className="flex justify-between mt-2 font-mono text-2xs"
           style={{ color: "var(--text-muted)" }}
         >
-          <span>{m.min} {m.unit}</span>
-          <span>{m.max} {m.unit}</span>
+          {/* Label the reference-range bounds (the clinically meaningful numbers
+              shown elsewhere on screen), not the padded axis extremes — m.min/m.max
+              include 10–20% visual breathing room and match nothing else. */}
+          <span>{m.ref[0]} {m.unit}</span>
+          <span>{m.ref[1]} {m.unit}</span>
         </div>
       )}
     </div>
