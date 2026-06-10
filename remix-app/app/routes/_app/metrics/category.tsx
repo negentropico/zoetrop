@@ -6,8 +6,7 @@ import {
   type MetricStatus,
   type Metric,
 } from "~/types/metrics";
-import { getMetricTargets } from "~/lib/real-data";
-import { getMetricStatus } from "~/lib/metrics";
+import { getMetricTargets, getMetricStatus } from "~/lib/metrics";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getMetrics } from "~/lib/data.server";
 import { dbRowToMetric } from "~/lib/db-mappers.server";

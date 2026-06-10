@@ -54,7 +54,6 @@ export function TopNav({ user }: TopNavProps) {
         // Solid fallback before color-mix (Pitfall 8 / A6 — Safari <16.2)
         background: "var(--paper)",
         // Progressive enhancement: glassmorphism backdrop
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         borderBottom: "1px solid var(--border)",
       }}
     >
