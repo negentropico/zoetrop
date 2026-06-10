@@ -221,7 +221,19 @@ Likely plans:
   6. The consent form is presented at client intake before any PHI is stored; a `consentLog` record with `{subjectId, consentedAt, consentVersion}` is persisted and required for any subsequent data write for that subject
 
 **UI hint**: yes
-**Plans**: TBD
+**Plans**: 3 plans in 3 waves
+Plans:
+**Wave 1**
+
+- [ ] 05-01-PLAN.md — Wave-0 foundation: package legitimacy gate + installs, 4 schema tables + `lab` enum [BLOCKING db:migrate], 3 pure validation functions (grounding/range/dictionary), analyte dictionary seed, 7 RED contract tests [LAB-01, LAB-03, LAB-05, LAB-06]
+
+**Wave 2** *(blocked on 05-01)*
+
+- [ ] 05-02-PLAN.md — Server pipeline: consent gate + audit logger, Anthropic (claude-sonnet-4-6) tool-use extraction, background `extractionWorker` (unpdf + grounding/range/dictionary), `/ingest/upload` action with `waitUntil` + consent gate + PDF validation [LAB-01, LAB-02, LAB-03, LAB-06]
+
+**Wave 3** *(blocked on 05-02)*
+
+- [ ] 05-03-PLAN.md — Review UI: ingest layout/routes, consent form, authed PDF byte stream, `PdfPageViewer` (react-pdf), `/ingest/review` side-by-side per-field approve/edit/reject (no bulk-approve) writing approved-only metrics with `assertSubjectAccess` + auditLog; end-to-end UAT on Vercel preview [LAB-04, LAB-05, LAB-06]
 
 ### Phase 6: Engine Promotion + Confidence-Graded Reports
 
@@ -267,7 +279,7 @@ Likely plans:
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
 | 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
-| 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
+| 5. Lab Ingest Pipeline | 0/3 | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
 
