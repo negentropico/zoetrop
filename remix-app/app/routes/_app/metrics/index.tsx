@@ -194,7 +194,8 @@ function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
               fontSize: "var(--text-2xs)",
               color: "var(--text-muted)",
               marginLeft: 6,
-              textTransform: "uppercase",
+              // No uppercase: preserves case-sensitive units and the micro sign
+              // µ (uppercasing maps µ→Μ → "µmol/L" renders as "MMOL/L").
             }}
           >
             {metric.unit}

@@ -304,7 +304,8 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
                           fontFamily: "var(--font-mono)",
                           fontSize: "var(--text-2xs)",
                           color: "var(--text-muted)",
-                          textTransform: "uppercase",
+                          // No uppercase: preserves case-sensitive units and the
+                          // micro sign µ (uppercasing maps µ→Μ → "µmol/L"→"MMOL/L").
                         }}
                       >
                         {metric.unit}
@@ -348,6 +349,27 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
           Value
         </span>
       </div>
+
+      {/* Sparse-category guidance — keeps a 1–3 metric category from reading as
+          an empty page; turns the whitespace into a next action. */}
+      {totalCount > 0 && totalCount <= 3 && (
+        <p
+          style={{
+            marginTop: "var(--gap-2xl)",
+            textAlign: "center",
+            color: "var(--text-muted)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-xs)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          {totalCount} tracked metric{totalCount === 1 ? "" : "s"} in{" "}
+          {categoryInfo.label.toLowerCase()}.{" "}
+          <Link to="/import" style={{ color: "var(--accent)" }}>
+            Import more →
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

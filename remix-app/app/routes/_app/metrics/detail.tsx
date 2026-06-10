@@ -158,7 +158,9 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
               fontFamily: "var(--font-mono)",
               fontSize: "var(--text-sm)",
               color: "var(--text-muted)",
-              textTransform: "uppercase",
+              // No text-transform: clinical units are case-sensitive and
+              // uppercasing the micro sign µ (U+00B5) maps it to Greek capital
+              // mu Μ (U+039C), rendering "µmol/L" as "MMOL/L".
               letterSpacing: "0.08em",
               marginTop: 2,
             }}
@@ -223,10 +225,15 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
             }}
           >
             <div className="zt-eyebrow">Trend over time</div>
-            {projections.length > 0 && (
+            {history.length >= 2 && projections.length > 0 && (
               <Badge tone="focus">With 2026 targets</Badge>
             )}
           </div>
+          {/* A single reading is not a trend — plotting one actual point beside
+              the target markers reads as a trajectory that does not exist. Show
+              the line only once there are ≥2 real measurements. */}
+          {history.length >= 2 ? (
+          <>
           <TrendChart
             data={history}
             projections={projections}
@@ -268,6 +275,13 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
               Reference
             </span>
           </div>
+          </>
+          ) : (
+            <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+              Only one measurement logged so far. A trend line appears once you
+              record a second reading.
+            </p>
+          )}
         </Card>
       )}
 
@@ -368,7 +382,7 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
               },
               {
                 key: "value",
-                label: metric.unit,
+                label: "Value",
                 align: "right",
                 mono: true,
                 render: (r) => `${r.value.toFixed(2)} ${metric.unit}`,
