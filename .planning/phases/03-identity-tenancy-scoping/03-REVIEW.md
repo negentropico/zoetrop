@@ -34,7 +34,10 @@ findings:
   warning: 6
   info: 4
   total: 13
-status: issues_found
+status: partially_resolved
+resolved: [CR-01, CR-03, WR-03, WR-04, WR-05, WR-06]
+deferred: [CR-02, WR-01, WR-02, IN-01, IN-02, IN-03, IN-04]
+resolution_commit: 9215579
 ---
 
 # Phase 3: Code Review Report
@@ -196,6 +199,20 @@ if (ctx.path.startsWith("/sign-up")) {
 **Fix:** No change required while nesting holds. If/when per-subject scoping lands, the loader should derive `subjectId` from the session (`session.user`) rather than assuming the single n=1 subject, which will also make the auth dependency explicit at the data layer.
 
 ---
+
+## Resolution (2026-06-09, commit 9215579)
+
+**Fixed + verified locally end-to-end:**
+- **CR-01** — `logout.tsx` uses `asResponse: true` and forwards the cookie-clearing `Set-Cookie`. Verified: logout response now carries `session_token=…; Max-Age=0` and `/dashboard` post-logout returns 302→`/login`.
+- **CR-03** — `db:migrate`/`db:studio`/`db:seed-owner` load `.env` via `--env-file-if-exists` (CI-safe: falls back to injected `process.env`). Verified `npm run db:migrate` exit 0.
+- **WR-03** — authenticated `Wordmark` links to `/dashboard` (only rendered in `TopNav`; `landing.tsx` uses inline brand markup, not the component).
+- **WR-04 / WR-05** — `login.tsx` validates `email`/`password` presence and only honors same-origin local redirect paths. Verified: `https://evil/` and `//evil/` both fall back to `/dashboard`; `/metrics` honored.
+- **WR-06** — invite gate uses length-checked `timingSafeEqual` and fails closed on any `/sign-up*` path.
+
+**Deferred** (future-repeatability / info — the live prod DB already migrated + seeded via the orchestrator's journal-split, so these are not live defects):
+- **CR-02 / WR-02** — single-pass `db:migrate` can't interleave the seed between 0002 and 0003 on a *populated* DB; prod tables were empty + applied via journal-split. Future fix: make the spine a data-migration step or document the explicit 3-command sequence + add a `RAISE EXCEPTION` spine guard to 0003.
+- **WR-01** — seed is non-transactional (orphan rows on partial failure). Owner already seeded; wrap in `db.transaction` before reuse on other tenants.
+- **IN-01..04** — role column `.notNull()` defense-in-depth, unused `appRoleEnum`, positive-path layout-loader test, dashboard loader self-gating. Tracked for a later hardening pass.
 
 _Reviewed: 2026-06-09_
 _Reviewer: Claude (gsd-code-reviewer)_
