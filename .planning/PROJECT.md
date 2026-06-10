@@ -31,7 +31,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 - [ ] Promote the engine to first-class schema: `geneticVariants` + `variantProtocolMap` with `confidence` (K1–K4) + evidence/citation field
 - [ ] Lab-ingest pipeline: upload panel → LLM-assisted parse → **human review** → structured `metrics`
 - [ ] Confidence-graded lab→protocol report generation (the proof slice)
-- [ ] Wire the app to Neon at runtime (replace the static-TypeScript data layer; commit a Drizzle migrations baseline) — *Phase 1 ✓: migrations baseline committed (DATA-03) + schema applied to Neon; runtime wiring (replace static data) remains for Phase 4*
+- [x] Wire the app to Neon at runtime (replace the static-TypeScript data layer; commit a Drizzle migrations baseline) — *Phase 1 ✓: migrations baseline committed (DATA-03) + schema applied to Neon. **Phase 4 ✓ (2026-06-10):** all 13 `_app` loaders read live Neon via tenant-scoped `data.server.ts`; owner M0 data seeded (DATA-02); PHI removed from TS source + client bundle, build-artifact-verified (DATA-04); sync vestiges + `as any` casts retired (DATA-05); CI lint gate blocks `*-data.ts` imports from routes (DATA-01); verification passed 4/4*
 - [ ] Test harness (Vitest) covering the engine (status classification, cessation phase math, Pearson) and the ingest parsers — *Phase 1 ✓: engine harness done (COMP-01, 39 tests); ingest-parser tests deferred to Phase 5*
 - [ ] PHI security posture: encryption at rest/in transit, RBAC, audit trail, consent capture at intake — *full hardening + BAAs deferred to Phase 7 (pre-client gate); single-user pilot uses standard-tier infra (2026-06-08 re-scope)*
 
@@ -93,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-10 after Phase 3.1 (account & roles — UX + authorization) complete — account surface + per-invite role-scoped tokens + enforced owner/practitioner/client authz live (code-review remediated; 14/14 must-haves verified). Next incomplete phase: Phase 4 (Static-to-DB data layer migration); Phase 4.1 was executed early.*
+*Last updated: 2026-06-10 after Phase 4 (static-to-DB data layer migration) complete — all loaders DB-backed, owner M0 data in Neon, PHI out of source and client bundle, verification passed 4/4 (gap-closure 04-06/04-07 closed both blockers). Next incomplete phase: Phase 5 (Lab Ingest Pipeline). Note: post-phase code review flagged CR-01 (loaders authenticate but `assertSubjectAccess` has no callers — client-role users can read owner PHI); see 04-REVIEW.md.*
