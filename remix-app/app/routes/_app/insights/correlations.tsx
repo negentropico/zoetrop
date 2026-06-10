@@ -399,8 +399,12 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
         </Card>
       </div>
 
-      {/* Mobile cards — card-per-row at <=760px */}
-      <div className="corr-mobile" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* Mobile cards — card-per-row at <=760px.
+          Do NOT set `display` inline here: an inline `display:flex` overrides the
+          `.corr-mobile { display:none }` rule + the media query below, so this list
+          renders alongside the desktop table at ALL widths (duplicate rows).
+          `display` is owned by the .corr-mobile class. */}
+      <div className="corr-mobile" style={{ flexDirection: "column", gap: 10 }}>
         {filtered.map((c) => (
           <Card key={c.id} padding="md">
             <div
