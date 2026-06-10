@@ -320,7 +320,7 @@ export default function InsightsIndex({ loaderData }: Route.ComponentProps) {
         </Card>
       </div>
 
-      {/* Key insights */}
+      {/* Key insights — derived from loader data; no hardcoded health facts */}
       <Card
         padding="lg"
         tone="focus"
@@ -330,35 +330,65 @@ export default function InsightsIndex({ loaderData }: Route.ComponentProps) {
           Key insights
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            {
-              head: "Methylfolate → Homocysteine",
-              body: "shows a strong negative correlation (r=−0.71), supporting the MTHFR protocol action.",
-            },
-            {
-              head: "Magnesium",
-              body: "correlates positively with both HRV and sleep performance, suggesting autonomic benefits.",
-            },
-            {
-              head: "FAAH and CYP1A2",
-              body: "variants are K3 (inferred) — consider SelfDecode verification.",
-            },
-          ].map(({ head, body }) => (
-            <div
-              key={head}
-              style={{
-                display: "flex",
-                gap: 10,
-                fontSize: "var(--text-sm)",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <span style={{ color: "var(--accent)", flexShrink: 0 }}>·</span>
-              <span>
-                <strong style={{ color: "var(--text)" }}>{head}</strong> {body}
-              </span>
-            </div>
-          ))}
+          {(() => {
+            const items: Array<{ head: string; body: string }> = [];
+
+            // Strongest correlation insight — derived from topCorrelations (sorted by |r| desc)
+            if (topCorrelations.length > 0) {
+              const corr = topCorrelations[0];
+              const sign = corr.correlation >= 0 ? "+" : "";
+              items.push({
+                head: `${corr.supplementName} → ${corr.metricName}`,
+                body: `shows a ${corr.significance} ${corr.direction} correlation (r=${sign}${corr.correlation.toFixed(2)}).`,
+              });
+            }
+
+            // Second correlation insight if available
+            if (topCorrelations.length > 1) {
+              const corr2 = topCorrelations[1];
+              const sign2 = corr2.correlation >= 0 ? "+" : "";
+              items.push({
+                head: corr2.supplementName,
+                body: `shows a ${corr2.significance} ${corr2.direction} association with ${corr2.metricName} (r=${sign2}${corr2.correlation.toFixed(2)}).`,
+              });
+            }
+
+            // Genetic narrative — gated on actual DB variant rows; no gene names hardcoded
+            if (highImpactVariants.length > 0) {
+              const variant = highImpactVariants[0];
+              items.push({
+                head: variant.gene,
+                body: highImpactVariants.length === 1
+                  ? `1 protocol-defining variant identified. ${variant.protocolAction}`
+                  : `${highImpactVariants.length} protocol-defining variants identified. ${variant.protocolAction}`,
+              });
+            }
+
+            if (items.length === 0) {
+              return (
+                <div style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+                  No correlation or variant data yet. Import data to generate insights.
+                </div>
+              );
+            }
+
+            return items.map(({ head, body }) => (
+              <div
+                key={head}
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <span style={{ color: "var(--accent)", flexShrink: 0 }}>·</span>
+                <span>
+                  <strong style={{ color: "var(--text)" }}>{head}</strong> {body}
+                </span>
+              </div>
+            ));
+          })()}
         </div>
       </Card>
 
