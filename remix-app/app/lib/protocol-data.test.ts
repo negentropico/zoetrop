@@ -1,20 +1,21 @@
 import { describe, it, expect } from "vitest";
 import { parseISO, addDays } from "date-fns";
-import { getCessationDay, getCurrentCessationPhase } from "~/lib/protocol-data";
+import { getCessationDay, getCurrentCessationPhase, CESSATION_START_DATE } from "~/lib/protocol-data";
 
 // Cessation start is 2025-12-23T00:00:00.000Z. Always inject `now` (Pitfall 5) —
 // never call getCessationDay() with no args in a test (would be date-coupled).
+// New signature: getCessationDay(startDateIso: string, now: Date) — pass CESSATION_START_DATE explicitly.
 const START = parseISO("2025-12-23T00:00:00.000Z");
 const day = (n: number) => addDays(START, n);
 
 describe("getCessationDay (injectable now)", () => {
   for (const n of [1, 21, 22, 60, 61, 120, 121, 150, 151]) {
     it(`returns ${n} for now = start + ${n} days`, () => {
-      expect(getCessationDay(day(n))).toBe(n);
+      expect(getCessationDay(CESSATION_START_DATE, day(n))).toBe(n);
     });
   }
   it("returns 0 at the start date", () => {
-    expect(getCessationDay(START)).toBe(0);
+    expect(getCessationDay(CESSATION_START_DATE, START)).toBe(0);
   });
 });
 
