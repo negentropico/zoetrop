@@ -62,7 +62,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     : null;
 
   // Calculate cessation progress using DB cessation log + survivor engine fns
-  const cessationDay = cessation ? getCessationDay(new Date()) : 0;
+  const cessationDay = cessation
+    ? getCessationDay(
+        cessation.startDate instanceof Date
+          ? cessation.startDate.toISOString()
+          : (cessation.startDate as unknown as string),
+        new Date()
+      )
+    : 0;
   const cessationPhase = getCurrentCessationPhase(cessationDay);
 
   // Group supplements by tier

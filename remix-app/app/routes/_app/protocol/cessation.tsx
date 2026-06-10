@@ -64,7 +64,7 @@ export async function loader({ request }: Route.LoaderArgs, now: Date = new Date
     };
   }
 
-  const currentDay = getCessationDay(now);
+  const currentDay = getCessationDay(cessation.startDate, now);
   const targetDay = 150;
 
   // Find current phase using survivor engine fn

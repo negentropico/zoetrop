@@ -20,14 +20,20 @@ import { differenceInDays, parseISO } from "date-fns";
 /**
  * Real cessation start date from vault: December 23, 2025
  * Source: 08_Cessation_Protocol.md - "Start Date: December 23, 2025"
+ *
+ * NOTE: This constant is retained as seed documentation and as the empty-cessation
+ * default in route loaders. It is NOT a runtime input to getCessationDay — the day
+ * calculation reads the startDateIso parameter passed from the DB cessation_log row.
  */
 export const CESSATION_START_DATE = "2025-12-23T00:00:00.000Z";
 
 /**
- * Calculate current cessation day from the real start date
+ * Calculate current cessation day from the given start date ISO string.
+ * @param startDateIso - The cessation start date as an ISO 8601 string (from DB cessation_log.startDate)
+ * @param now - The reference "now" date (defaults to current date; injectable for testing)
  */
-export function getCessationDay(now: Date = new Date()): number {
-  return differenceInDays(now, parseISO(CESSATION_START_DATE));
+export function getCessationDay(startDateIso: string, now: Date = new Date()): number {
+  return differenceInDays(now, parseISO(startDateIso));
 }
 
 /**
