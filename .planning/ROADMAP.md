@@ -175,7 +175,7 @@ Plans:
 
 **Wave 7** *(gap-closure — closes VERIFICATION.md BLOCKER 1 / CR-03; blocked on 04-06 — shares cessation.tsx)*
 
-- [ ] 04-07-PLAN.md — Remove hardcoded PHI JSX literals: derive insights/index "Key insights" card from loader data (gate genetic narrative on DB variants), de-PHI cessation "Why 150 days?" card; rebuild + grep build/client/ clean [DATA-04]
+- [x] 04-07-PLAN.md — Remove hardcoded PHI JSX literals: derive insights/index "Key insights" card from loader data (gate genetic narrative on DB variants), de-PHI cessation "Why 150 days?" card; rebuild + grep build/client/ clean [DATA-04]
 
 ### Phase 04.1: Design System Adoption (INSERTED)
 
@@ -265,7 +265,7 @@ Likely plans:
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
-| 4. Static-to-DB Data Layer Migration | 6/7 | In Progress|  |
+| 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
