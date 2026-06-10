@@ -9,6 +9,11 @@
  *   - The raw token is returned to the caller exactly once for copy-link delivery (D-09).
  *   - Any lookup error / expired / consumed / revoked / unknown token → null (fail-closed, T-031-INV-6).
  *
+ * CR-01 split: resolveInviteByToken VALIDATES (non-mutating SELECT) and is used in the
+ * beforeSignUp gate; consumeInviteByToken BURNS (guarded UPDATE) and runs adjacent to the
+ * user-row write so a failed/duplicate signup never burns the token (atomic role+tenant
+ * delivery — see auth.server.ts databaseHooks).
+ *
  * Out of scope (→ later plans): email delivery, RLS, AUTH-03, AUTH-04.
  */
 
@@ -135,13 +140,17 @@ export async function listInvites(tenantId: string) {
  *
  * IDOR guard: the UPDATE filters by BOTH id AND tenantId so an actor in
  * tenant A cannot revoke an invite in tenant B (T-031-INV-4 / PATTERNS.md IDOR note).
+ *
+ * Returns { revoked: boolean } reflecting whether a row was actually changed (WR-02).
+ * A wrong/empty tenant or unknown id matches zero rows → { revoked: false }, so the
+ * caller can surface "Invite not found." instead of a silent false success.
  */
 export async function revokeInvite(opts: {
   id: string;
   tenantId: string;
-}): Promise<void> {
+}): Promise<{ revoked: boolean }> {
   const db = getDb();
-  await db
+  const changed = await db
     .update(invites)
     .set({ revokedAt: new Date() })
     .where(
@@ -149,13 +158,64 @@ export async function revokeInvite(opts: {
         eq(invites.id, opts.id),
         eq(invites.tenantId, opts.tenantId) // tenant-scope prevents cross-tenant revoke
       )
-    );
+    )
+    .returning({ id: invites.id });
+
+  // WR-02: a no-op UPDATE (0 rows) is NOT a success — report it honestly.
+  return { revoked: changed.length > 0 };
+}
+
+// ── resolveInviteByToken ──────────────────────────────────────────────────────
+
+/**
+ * VALIDATE an invite by its raw token WITHOUT consuming it (CR-01).
+ *
+ * Performs the exact same fail-closed checks as consumeInviteByToken — un-consumed,
+ * un-revoked, not expired, known hash — but runs a SELECT ONLY: it NEVER marks the
+ * invite consumed. Used by the beforeSignUp gate to validate a token up front so a
+ * signup that later fails (duplicate email, write error) does not burn the token.
+ *
+ * Returns { role, tenantId } if the token is currently valid, or null otherwise
+ * (unknown / consumed / revoked / expired / any error → null, fail-closed).
+ *
+ * NEVER logs the raw token (T-031-INV-5).
+ */
+export async function resolveInviteByToken(
+  raw: string
+): Promise<{ role: string; tenantId: string } | null> {
+  try {
+    const tokenHash = hashToken(raw);
+    const now = new Date();
+    const db = getDb();
+
+    const rows = await db
+      .select()
+      .from(invites)
+      .where(
+        and(
+          eq(invites.tokenHash, tokenHash),
+          isNull(invites.consumedAt),
+          isNull(invites.revokedAt),
+          gt(invites.expiresAt, now) // fail-closed: expired tokens are refused
+        )
+      )
+      .limit(1);
+
+    const invite = rows[0];
+    if (!invite) return null; // unknown / consumed / revoked / expired
+
+    // SELECT only — no UPDATE here. The burn happens in consumeInviteByToken,
+    // adjacent to the user-row write (CR-01 atomic delivery).
+    return { role: invite.role, tenantId: invite.tenantId };
+  } catch {
+    return null; // fail closed on any error (T-031-INV-6)
+  }
 }
 
 // ── consumeInviteByToken ──────────────────────────────────────────────────────
 
 /**
- * Consume an invite by its raw token.
+ * Consume (BURN) an invite by its raw token, single-use.
  *
  * Returns { role, tenantId } on success, or null on any failure (fail-closed):
  *   - unknown token hash
@@ -166,10 +226,19 @@ export async function revokeInvite(opts: {
  * Single-use race-safety (T-031-INV-3): the consume is a guarded UPDATE WHERE
  * consumedAt IS NULL — a concurrent second redeem updates 0 rows and returns null.
  *
+ * WR-01: when `consumedBy` (the consuming user's id) is supplied, it is recorded
+ * alongside consumedAt so the invite audit trail attributes the redemption to a user.
+ * The caller passes this from databaseHooks.user.create.after where the new id exists.
+ *
+ * CR-01: this runs ADJACENT to the user-row write (in the user.create hooks), so the
+ * burn and the role/tenant injection commit together — a failed signup never burns
+ * the token, and a resolved-but-unburnable invite fails closed (the hook throws).
+ *
  * NEVER logs the raw token (T-031-INV-5).
  */
 export async function consumeInviteByToken(
-  raw: string
+  raw: string,
+  consumedBy?: string
 ): Promise<{ role: string; tenantId: string } | null> {
   try {
     const tokenHash = hashToken(raw);
@@ -198,9 +267,17 @@ export async function consumeInviteByToken(
 
     // Step 2: Guarded UPDATE — WHERE consumedAt IS NULL makes this race-safe (T-031-INV-3)
     // A concurrent second redeem will find consumedAt already set and update 0 rows.
+    // WR-01: record consumedBy when the consuming user id is available.
+    const setPayload: { consumedAt: Date; consumedBy?: string } = {
+      consumedAt: now,
+    };
+    if (consumedBy) {
+      setPayload.consumedBy = consumedBy;
+    }
+
     const updated = await db
       .update(invites)
-      .set({ consumedAt: now })
+      .set(setPayload)
       .where(
         and(
           eq(invites.tokenHash, tokenHash),

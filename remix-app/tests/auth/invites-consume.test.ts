@@ -113,6 +113,22 @@ describe("resolveInviteByToken — validates without consuming (CR-01)", () => {
     expect(result).toBeNull();
     expect(state.updateCalls).toBe(0);
   });
+
+  it("CR-01 invariant: resolve-then-fail leaves the token still consumable (resolve never burns)", async () => {
+    // Simulate the beforeSignUp gate: VALIDATE the token (resolve), then a downstream
+    // signup failure — the token must NOT have been burned, so a later consume succeeds.
+    state.selectRows = [{ role: "client", tenantId: "tenant-q" }];
+
+    const resolved = await resolveInviteByToken("token-q");
+    expect(resolved).toEqual({ role: "client", tenantId: "tenant-q" });
+    expect(state.updateCalls).toBe(0); // resolve did NOT burn
+
+    // Now the (retried) signup reaches the user-write step and consumes for real.
+    state.updateReturning = [{ id: "invite-q" }];
+    const burned = await consumeInviteByToken("token-q", "user-q");
+    expect(burned).toEqual({ role: "client", tenantId: "tenant-q" });
+    expect(state.updateCalls).toBe(1); // exactly one burn, at write time
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
