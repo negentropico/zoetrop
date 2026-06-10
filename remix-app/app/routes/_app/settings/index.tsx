@@ -30,14 +30,20 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
 
-  // Load invites only for roles that can invite (owner or practitioner)
-  // A missing tenantId yields an empty list (fail-closed, T-031-SET-5)
+  // Compute capabilities on the server and pass booleans through loader data so
+  // the (client-rendered) component never imports the server-only authz module.
+  // canInviteClient also requires a tenantId (invites are tenant-scoped, T-031-SET-5).
+  const canInviteClient = can(user, "invite:client") && !!user.tenantId;
+  const canInvitePractitioner = can(user, "invite:practitioner");
+
+  // Load invites only for roles that can invite (owner or practitioner) AND
+  // that have a tenant. A missing tenantId yields an empty list (fail-closed).
   let invites: InviteRow[] = [];
-  if (can(user, "invite:client") && user.tenantId) {
-    invites = await listInvites(user.tenantId);
+  if (canInviteClient) {
+    invites = await listInvites(user.tenantId!);
   }
 
-  return { user, invites };
+  return { user, invites, canInviteClient, canInvitePractitioner };
 }
 
 // ── Action ────────────────────────────────────────────────────────────────────
@@ -322,7 +328,8 @@ function GeneratedLinkCard({
 // ── Default component ─────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const { user, invites } = useLoaderData<typeof loader>();
+  const { user, invites, canInviteClient, canInvitePractitioner } =
+    useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   // ── Profile state ──────────────────────────────────────────────────────────
@@ -359,7 +366,7 @@ export default function SettingsPage() {
 
   // ── Invite generate state ──────────────────────────────────────────────────
   const [selectedRole, setSelectedRole] = useState<"practitioner" | "client">(
-    can(user, "invite:practitioner") ? "practitioner" : "client"
+    canInvitePractitioner ? "practitioner" : "client"
   );
   const [generatedLink, setGeneratedLink] = useState<{
     url: string;
@@ -609,7 +616,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* ── 3. INVITES (Task 2 fills this) ──────────────────────────────── */}
-        {can(user, "invite:client") && (
+        {canInviteClient && (
           <Card elevation="sm" padding="lg">
             <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
               INVITES
@@ -629,7 +636,7 @@ export default function SettingsPage() {
 
             {/* Role selector */}
             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              {can(user, "invite:practitioner") && (
+              {canInvitePractitioner && (
                 <button
                   type="button"
                   onClick={() => setSelectedRole("practitioner")}
