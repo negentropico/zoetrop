@@ -2,18 +2,24 @@ import { redirect, useActionData, useSearchParams } from "react-router";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { auth } from "~/lib/auth.server";
 
-// Redirect already-authenticated users away from the login page.
+// Redirect already-authenticated users away from the login / invite-redeem page.
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (session) throw redirect("/dashboard");
   return null;
 }
 
-// Sign-in action — forward Set-Cookie from Better-Auth's response (A6).
+// Single action serving two intents:
+//   - "signin"  → existing email/password sign-in
+//   - "signup"  → invite redemption: create the account, with role + tenant
+//                 assigned server-side by the beforeSignUp hook from the invite
+//                 row (NEVER from user input — the ?role param is display-only).
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
+  const intent = formData.get("intent");
   const email = formData.get("email");
   const password = formData.get("password");
+
   // WR-04: reject absent/non-string fields (a crafted POST bypasses the
   // client-side `required`) before calling Better-Auth.
   if (
@@ -22,8 +28,73 @@ export async function action({ request }: ActionFunctionArgs) {
     !email ||
     !password
   ) {
-    return { error: "Invalid credentials" };
+    return {
+      error: "Invalid credentials.",
+      mode: intent === "signup" ? "signup" : "signin",
+    } as const;
   }
+
+  // ── Invite redemption (sign-up) ──────────────────────────────────────────────
+  if (intent === "signup") {
+    const name = formData.get("name");
+    const inviteToken = formData.get("inviteToken");
+
+    if (typeof name !== "string" || !name.trim()) {
+      return { error: "Please enter your name.", mode: "signup" } as const;
+    }
+    if (typeof inviteToken !== "string" || !inviteToken) {
+      return {
+        error:
+          "This invite link is missing its token. Ask your inviter for a fresh link.",
+        mode: "signup",
+      } as const;
+    }
+    if (password.length < 8) {
+      return {
+        error: "Password must be at least 8 characters.",
+        mode: "signup",
+      } as const;
+    }
+
+    // signUpEmail triggers the beforeSignUp hook, which resolves the hashed
+    // token, consumes the invite (single-use, race-safe), and injects the
+    // invite's role + tenantId. The signUpEmail body type narrows to known
+    // fields; the hook reads `inviteToken` off ctx.body at runtime, so we cast
+    // it on without losing type safety on the rest.
+    let response: Response;
+    try {
+      response = await auth.api.signUpEmail({
+        body: {
+          email,
+          password,
+          name: name.trim(),
+          ...({ inviteToken } as Record<string, unknown>),
+        },
+        asResponse: true,
+      });
+    } catch {
+      // beforeSignUp throws FORBIDDEN ("signup_disabled") for invalid / expired /
+      // consumed / revoked invites (fail-closed).
+      return {
+        error:
+          "This invite is invalid, expired, or has already been used. Ask your inviter for a new link.",
+        mode: "signup",
+      } as const;
+    }
+
+    if (!response.ok) {
+      return {
+        error:
+          "We couldn't create your account. The invite may be invalid or used, or that email may already be registered.",
+        mode: "signup",
+      } as const;
+    }
+
+    // Better-Auth auto-signs-in on sign-up (default) — forward its Set-Cookie.
+    throw redirect("/dashboard", { headers: response.headers });
+  }
+
+  // ── Sign-in (default) ────────────────────────────────────────────────────────
   // WR-05: only honor same-origin local paths to prevent an open redirect
   // (e.g. ?redirect=https://evil/ or //evil/) post-authentication.
   const rawRedirect = formData.get("redirect");
@@ -40,16 +111,81 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 
   if (!response.ok) {
-    return { error: "Invalid credentials" };
+    return { error: "Invalid credentials.", mode: "signin" } as const;
   }
 
   // Forward the Set-Cookie header from Better-Auth's response.
   throw redirect(redirectTo, { headers: response.headers });
 }
 
+// Display-only mapping for the ?role hint on an invite link. The actual role is
+// assigned server-side from the invite row — this is purely cosmetic.
+const ROLE_LABELS: Record<string, string> = {
+  owner: "an Owner",
+  practitioner: "a Practitioner",
+  client: "a Client",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontFamily: "var(--font-mono)",
+  fontSize: "var(--text-xs)",
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  color: "var(--text-muted)",
+  marginBottom: 6,
+};
+
+const inputStyle: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: "var(--radius-md)",
+  border: "1px solid var(--border)",
+  background: "var(--bg)",
+  color: "var(--ink)",
+  fontSize: "var(--text-base)",
+  fontFamily: "var(--font-text)",
+  boxSizing: "border-box",
+};
+
+function Field({
+  id,
+  name,
+  type,
+  label,
+  autoComplete,
+}: {
+  id: string;
+  name: string;
+  type: string;
+  label: string;
+  autoComplete: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} style={labelStyle}>
+        {label}
+      </label>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        required
+        autoComplete={autoComplete}
+        style={inputStyle}
+      />
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
+
+  const inviteToken = searchParams.get("inviteToken");
+  const role = searchParams.get("role");
+  const isInvite = !!inviteToken;
   const redirectTo = searchParams.get("redirect") ?? "/dashboard";
 
   return (
@@ -98,8 +234,20 @@ export default function LoginPage() {
               letterSpacing: "0.08em",
             }}
           >
-            Sign in to continue
+            {isInvite ? "Create your account" : "Sign in to continue"}
           </p>
+          {isInvite && role && ROLE_LABELS[role] && (
+            <p
+              style={{
+                fontFamily: "var(--font-text)",
+                fontSize: "var(--text-sm)",
+                color: "var(--text-muted)",
+                marginTop: 8,
+              }}
+            >
+              You&rsquo;ve been invited as {ROLE_LABELS[role]}.
+            </p>
+          )}
         </div>
 
         {/* Error */}
@@ -122,80 +270,59 @@ export default function LoginPage() {
 
         {/* Form */}
         <form method="post">
-          <input type="hidden" name="redirect" value={redirectTo} />
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap-md)" }}>
-            <div>
-              <label
-                htmlFor="email"
-                style={{
-                  display: "block",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "var(--text-xs)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--text-muted)",
-                  marginBottom: 6,
-                }}
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid var(--border)",
-                  background: "var(--bg)",
-                  color: "var(--ink)",
-                  fontSize: "var(--text-base)",
-                  fontFamily: "var(--font-text)",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                style={{
-                  display: "block",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "var(--text-xs)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--text-muted)",
-                  marginBottom: 6,
-                }}
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid var(--border)",
-                  background: "var(--bg)",
-                  color: "var(--ink)",
-                  fontSize: "var(--text-base)",
-                  fontFamily: "var(--font-text)",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--gap-md)",
+            }}
+          >
+            {isInvite ? (
+              <>
+                <input type="hidden" name="intent" value="signup" />
+                <input type="hidden" name="inviteToken" value={inviteToken} />
+                <Field
+                  id="name"
+                  name="name"
+                  type="text"
+                  label="Name"
+                  autoComplete="name"
+                />
+                <Field
+                  id="email"
+                  name="email"
+                  type="email"
+                  label="Email"
+                  autoComplete="email"
+                />
+                <Field
+                  id="password"
+                  name="password"
+                  type="password"
+                  label="Password"
+                  autoComplete="new-password"
+                />
+              </>
+            ) : (
+              <>
+                <input type="hidden" name="intent" value="signin" />
+                <input type="hidden" name="redirect" value={redirectTo} />
+                <Field
+                  id="email"
+                  name="email"
+                  type="email"
+                  label="Email"
+                  autoComplete="email"
+                />
+                <Field
+                  id="password"
+                  name="password"
+                  type="password"
+                  label="Password"
+                  autoComplete="current-password"
+                />
+              </>
+            )}
 
             <button
               type="submit"
@@ -215,7 +342,7 @@ export default function LoginPage() {
                 marginTop: "var(--gap-sm)",
               }}
             >
-              Sign in
+              {isInvite ? "Create account" : "Sign in"}
             </button>
           </div>
         </form>
