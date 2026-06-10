@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-06-10T20:35:55.006Z"
-last_activity: 2026-06-10 -- Phase 05 planning complete
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-06-10T22:46:00.884Z"
+last_activity: 2026-06-10
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 37
-  completed_plans: 34
+  completed_plans: 35
   percent: 67
 ---
 
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 5 — lab-ingest-pipeline (next up; Phase 4 completed 2026-06-10)
+**Current focus:** Phase 05 — lab-ingest-pipeline
 
 > Note: Phases 1, 2, 3, 3.1, 4, and 4.1 are complete (Phase 4 completed 2026-06-10 with verification passed 4/4). Phase 4.1 (design system) was executed early on 2026-06-08; `phase.complete` for Phase 4 again mis-pointed "next" at the already-complete 4.1 and was corrected by hand — **the next incomplete phase is Phase 5 (Lab Ingest Pipeline)**. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 05 (lab-ingest-pipeline)
-Plan: Not started
+Phase: 05 (lab-ingest-pipeline) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-06-10 -- Phase 05 planning complete
+Last activity: 2026-06-10
 
 Progress: [██████░░░░] 67%
 
@@ -73,6 +73,7 @@ Progress: [██████░░░░] 67%
 | Phase 03-identity-tenancy-scoping P04 | ~35m | 3 tasks | 8 files |
 | Phase 03-identity-tenancy-scoping P05 | 9min | 3 tasks | 24 files |
 | Phase 03.1 P01 | 15min | 3 tasks | 8 files |
+| Phase 05 P01 | 25min | 4 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 03-04]: Deviation 0644fa7 — constraints.test.ts array-parsing bug: @neondatabase/serverless returns array_agg as a pg text-array STRING not a JS array; parsePgTextArray() added. DB contract tests 18/18 green against live Neon; full suite 99 passing (only auth-layout.test.ts red — Plan 05 builds it).
 - [Phase ?]: [Phase 03-05]: Public/private auth surface split shipped — landing.tsx at / (no AppShell), auth/login+logout, and one authenticated _app/layout.tsx loader gating all 16 app routes (getSession → redirect /login). AppShell moved off root.tsx (bare Outlet). PILOT_BASIC_AUTH stopgap removed from code (D-05); Vercel env-var deletion + prod 200-check deferred to post-deploy (prod still serves old code). Local smoke test: signed-out /dashboard 302, owner sign-in 30-day persistent cookie, /logout 302. AUTH-01/AUTH-02 satisfied.
 - [Phase ?]: [Phase 03.1-01]: invites table in schema.ts, hand-corrected 0005 migration (Drizzle snapshot drift from custom 0002-0004), user.tenantId nullable expand-contract, authz helpers RLS-compatible
+- [Phase ?]: [Phase 05-01]: 4 lab-ingest tables (lab_documents/lab_extractions/audit_log/consent_log) applied to live Neon via reviewed migration 0007; data_source enum +lab (D-16); audit_log PHI-free by design (D-13); enum ADD VALUE not in transaction (Pitfall 3 cleared at apply)
+- [Phase ?]: [Phase 05-01]: analyte dictionary is a server-only TS module (D-01) — 101 entries seeded from owner 38 live-Neon analytes + D-03 common panels, no PHI; re-runnable via npm run db:seed-dictionary
 
 ### Pending Todos
 
@@ -126,6 +129,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-10T19:44:28.698Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-lab-ingest-pipeline/05-CONTEXT.md
+Last session: 2026-06-10T22:45:49.075Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None

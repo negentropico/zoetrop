@@ -37,12 +37,12 @@
 
 ### Lab Ingest
 
-- [ ] **LAB-01**: A practitioner can upload a lab document (PDF) for a subject
+- [x] **LAB-01**: A practitioner can upload a lab document (PDF) for a subject
 - [ ] **LAB-02**: An asynchronous extraction job parses the document into structured candidate metrics (does not block the request)
-- [ ] **LAB-03**: Extracted values are validated (grounded to source text + physiological-range sanity + per-field confidence) before reaching review
+- [x] **LAB-03**: Extracted values are validated (grounded to source text + physiological-range sanity + per-field confidence) before reaching review
 - [ ] **LAB-04**: A practitioner reviews extracted fields side-by-side with the source document and can approve, edit, or reject each
-- [ ] **LAB-05**: Only practitioner-approved metrics are written to the subject's record, each producing an audit-log entry
-- [ ] **LAB-06**: Client consent is captured at intake before any client PHI is stored
+- [x] **LAB-05**: Only practitioner-approved metrics are written to the subject's record, each producing an audit-log entry
+- [x] **LAB-06**: Client consent is captured at intake before any client PHI is stored
 
 ### Reports
 
@@ -117,12 +117,12 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | DATA-04 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
 | DATA-05 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
 | UI-01 | Phase 4.1 — Design System Adoption | Complete |
-| LAB-01 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-01 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-02 | Phase 5 — Lab Ingest Pipeline | Pending |
-| LAB-03 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-03 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-04 | Phase 5 — Lab Ingest Pipeline | Pending |
-| LAB-05 | Phase 5 — Lab Ingest Pipeline | Pending |
-| LAB-06 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-05 | Phase 5 — Lab Ingest Pipeline | Complete |
+| LAB-06 | Phase 5 — Lab Ingest Pipeline | Complete |
 | ENG-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
 | ENG-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
 | ENG-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |

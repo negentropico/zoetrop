@@ -225,7 +225,7 @@ Likely plans:
 Plans:
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — Wave-0 foundation: package legitimacy gate + installs, 4 schema tables + `lab` enum [BLOCKING db:migrate], 3 pure validation functions (grounding/range/dictionary), analyte dictionary seed, 7 RED contract tests [LAB-01, LAB-03, LAB-05, LAB-06]
+- [x] 05-01-PLAN.md — Wave-0 foundation: package legitimacy gate + installs, 4 schema tables + `lab` enum [BLOCKING db:migrate], 3 pure validation functions (grounding/range/dictionary), analyte dictionary seed, 7 RED contract tests [LAB-01, LAB-03, LAB-05, LAB-06]
 
 **Wave 2** *(blocked on 05-01)*
 
@@ -279,7 +279,7 @@ Plans:
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
 | 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
-| 5. Lab Ingest Pipeline | 0/3 | Not started | - |
+| 5. Lab Ingest Pipeline | 1/3 | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
 
