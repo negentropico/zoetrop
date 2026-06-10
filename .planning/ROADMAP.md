@@ -171,7 +171,7 @@ Plans:
 
 **Wave 6** *(gap-closure — closes VERIFICATION.md BLOCKER 2 / CR-02)*
 
-- [ ] 04-06-PLAN.md — Cessation day computed from DB: re-signature getCessationDay(startDateIso, now), pass DB cessation.startDate at all 3 loader sites, keep CESSATION_START_DATE as seed-doc/default only; unit + parity tests stay green (owner day still 169) [DATA-01]
+- [x] 04-06-PLAN.md — Cessation day computed from DB: re-signature getCessationDay(startDateIso, now), pass DB cessation.startDate at all 3 loader sites, keep CESSATION_START_DATE as seed-doc/default only; unit + parity tests stay green (owner day still 169) [DATA-01]
 
 **Wave 7** *(gap-closure — closes VERIFICATION.md BLOCKER 1 / CR-03; blocked on 04-06 — shares cessation.tsx)*
 
@@ -265,7 +265,7 @@ Likely plans:
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
-| 4. Static-to-DB Data Layer Migration | 5/7 | Gap-closure (2 blockers; plans 04-06/04-07) | - |
+| 4. Static-to-DB Data Layer Migration | 6/7 | In Progress|  |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
