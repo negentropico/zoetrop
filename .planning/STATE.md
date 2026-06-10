@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: "Completed 03-05-PLAN.md — real Better-Auth surface live (public landing + login/logout + _app/ gated layout); D-05 code removed; phase 03 COMPLETE (5/5). Post-deploy: delete PILOT_BASIC_AUTH from Vercel."
-last_updated: "2026-06-10T01:06:49.651Z"
+status: ready_to_plan
+stopped_at: Phase 03 complete (5/5) — ready to discuss Phase 04 (4.1 already done)
+last_updated: 2026-06-10T01:33:47.128Z
 last_activity: 2026-06-10
 progress:
   total_phases: 8
@@ -21,25 +21,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 03 — identity-tenancy-scoping
+**Current focus:** Phase 04 — static-to-DB data layer migration (Phase 4.1 design-system already complete; phase.complete mis-advanced the pointer to 4.1 — repaired)
 
 > Note: Phases 1, 2, and 4.1 are complete. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 03 (identity-tenancy-scoping) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
+Phase: 04
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-10
 
-Progress: [██████████] 100%
+Progress: [          ] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 22
+- Total plans completed: 27
 - Average duration: —
 - Total execution time: —
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100%
 | 01 | 5 | - | - |
 | 04.1 | 9 | - | - |
 | 02 | 4 | - | - |
+| 03 | 5 | - | - |
 
 **Recent Trend:** No data yet
 
