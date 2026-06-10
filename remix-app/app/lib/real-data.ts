@@ -126,8 +126,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 70, max: 100 },
     optimalRange: { min: 75, max: 90 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-hba1c-m2",
@@ -141,8 +139,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 4.0, max: 5.7 },
     optimalRange: { min: 4.5, max: 5.3 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-insulin-m2",
@@ -156,8 +152,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 2, max: 20 },
     optimalRange: { min: 2, max: 8 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-creatinine-m2",
@@ -171,8 +165,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 0.7, max: 1.3 },
     optimalRange: { min: 0.7, max: 1.1 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-egfr-m2",
@@ -186,8 +178,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 60, max: 120 },
     optimalRange: { min: 90, max: 120 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-bun-m2",
@@ -201,8 +191,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 7, max: 20 },
     optimalRange: { min: 10, max: 18 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Lipid Panel
@@ -218,8 +206,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 125, max: 200 },
     optimalRange: { min: 140, max: 180 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "lipids-hdl-m2",
@@ -233,8 +219,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 40, max: 100 },
     optimalRange: { min: 50, max: 80 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "lipids-ldl-m2",
@@ -248,8 +232,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 0, max: 130 },
     optimalRange: { min: 0, max: 100 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "lipids-trig-m2",
@@ -263,8 +245,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 0, max: 150 },
     optimalRange: { min: 0, max: 100 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Vitamins
@@ -280,8 +260,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 30, max: 100 },
     optimalRange: { min: 40, max: 60 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "vitamins-b12-m2",
@@ -295,8 +273,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 200, max: 900 },
     optimalRange: { min: 400, max: 800 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "vitamins-folate-m2",
@@ -310,8 +286,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 3, max: 25 },
     optimalRange: { min: 10, max: 20 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "vitamins-b6-m2",
@@ -325,8 +299,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 5, max: 50 },
     optimalRange: { min: 20, max: 50 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "vitamins-biotin-m2",
@@ -340,8 +312,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 0.1, max: 4.0 },
     optimalRange: { min: 0.5, max: 2.0 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Minerals
@@ -357,8 +327,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 60, max: 120 },
     optimalRange: { min: 70, max: 100 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "minerals-copper-m2",
@@ -372,8 +340,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 70, max: 175 },
     optimalRange: { min: 80, max: 140 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "minerals-magnesium-m2",
@@ -387,8 +353,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 4.2, max: 6.8 },
     optimalRange: { min: 5.5, max: 6.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Inflammatory
@@ -404,8 +368,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 5, max: 15 },
     optimalRange: { min: 5, max: 8 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Hormones
@@ -421,8 +383,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 300, max: 1000 },
     optimalRange: { min: 500, max: 800 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-cortisol-m2",
@@ -436,8 +396,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 6.2, max: 19.4 },
     optimalRange: { min: 10, max: 18 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-tsh-m2",
@@ -451,8 +409,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 0.4, max: 4.0 },
     optimalRange: { min: 1.0, max: 2.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-freet4-m2",
@@ -466,8 +422,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 0.8, max: 1.8 },
     optimalRange: { min: 1.0, max: 1.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-freet3-m2",
@@ -481,8 +435,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 2.3, max: 4.2 },
     optimalRange: { min: 2.8, max: 3.8 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-dheas-m2",
@@ -496,8 +448,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 100, max: 500 },
     optimalRange: { min: 250, max: 400 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Hematology
@@ -513,8 +463,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 4.5, max: 11 },
     optimalRange: { min: 4.5, max: 7.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-rbc-m2",
@@ -528,8 +476,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 4.5, max: 5.9 },
     optimalRange: { min: 4.5, max: 5.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-hemoglobin-m2",
@@ -543,8 +489,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 13.5, max: 17.5 },
     optimalRange: { min: 14.0, max: 16.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-hematocrit-m2",
@@ -558,8 +502,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 38, max: 50 },
     optimalRange: { min: 42, max: 48 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-platelets-m2",
@@ -573,8 +515,6 @@ export const realBloodWorkM2: Metric[] = [
     referenceRange: { min: 150, max: 400 },
     optimalRange: { min: 200, max: 300 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 ];
 
@@ -593,8 +533,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 70, max: 100 },
     optimalRange: { min: 75, max: 90 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-creatinine-m1",
@@ -608,8 +546,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 0.7, max: 1.3 },
     optimalRange: { min: 0.7, max: 1.1 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-egfr-m1",
@@ -623,8 +559,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 60, max: 120 },
     optimalRange: { min: 90, max: 120 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "metabolic-bun-m1",
@@ -638,8 +572,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 7, max: 20 },
     optimalRange: { min: 10, max: 18 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Lipid Panel
@@ -655,8 +587,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 125, max: 200 },
     optimalRange: { min: 140, max: 180 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "lipids-hdl-m1",
@@ -670,8 +600,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 40, max: 100 },
     optimalRange: { min: 50, max: 80 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "lipids-ldl-m1",
@@ -685,8 +613,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 0, max: 130 },
     optimalRange: { min: 0, max: 100 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "lipids-trig-m1",
@@ -700,8 +626,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 0, max: 150 },
     optimalRange: { min: 0, max: 100 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Vitamins
@@ -717,8 +641,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 30, max: 100 },
     optimalRange: { min: 40, max: 60 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "vitamins-b6-m1",
@@ -732,8 +654,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 5, max: 50 },
     optimalRange: { min: 20, max: 50 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "vitamins-biotin-m1",
@@ -747,8 +667,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 0.1, max: 4.0 },
     optimalRange: { min: 0.5, max: 2.0 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Minerals
@@ -764,8 +682,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 60, max: 120 },
     optimalRange: { min: 70, max: 100 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Hormones
@@ -781,8 +697,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 300, max: 1000 },
     optimalRange: { min: 500, max: 800 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-cortisol-m1",
@@ -796,8 +710,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 6.2, max: 19.4 },
     optimalRange: { min: 10, max: 18 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hormones-tsh-m1",
@@ -811,8 +723,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 0.4, max: 4.0 },
     optimalRange: { min: 1.0, max: 2.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // Hematology
@@ -828,8 +738,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 4.5, max: 11 },
     optimalRange: { min: 4.5, max: 7.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-rbc-m1",
@@ -843,8 +751,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 4.5, max: 5.9 },
     optimalRange: { min: 4.5, max: 5.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-hemoglobin-m1",
@@ -858,8 +764,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 13.5, max: 17.5 },
     optimalRange: { min: 14.0, max: 16.5 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-hematocrit-m1",
@@ -873,8 +777,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 38, max: 50 },
     optimalRange: { min: 42, max: 48 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "hematology-platelets-m1",
@@ -888,8 +790,6 @@ export const realBloodWorkM1: Metric[] = [
     referenceRange: { min: 150, max: 400 },
     optimalRange: { min: 200, max: 300 },
     source: "bloodwork",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 ];
 
@@ -908,8 +808,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 180, max: 230 },
     optimalRange: { min: 195, max: 215 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-fat-pct-m1",
@@ -923,8 +821,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 10, max: 30 },
     optimalRange: { min: 12, max: 20 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-lean-mass-m1",
@@ -938,8 +834,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 140, max: 180 },
     optimalRange: { min: 160, max: 175 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-vat-m1",
@@ -953,8 +847,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 0, max: 1500 },
     optimalRange: { min: 0, max: 500 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // M2 - May 2025
@@ -970,8 +862,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 180, max: 230 },
     optimalRange: { min: 195, max: 215 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-fat-pct-m2",
@@ -985,8 +875,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 10, max: 30 },
     optimalRange: { min: 12, max: 20 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-lean-mass-m2",
@@ -1000,8 +888,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 140, max: 180 },
     optimalRange: { min: 160, max: 175 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-vat-m2",
@@ -1015,8 +901,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 0, max: 1500 },
     optimalRange: { min: 0, max: 500 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // M3 - Sep 2025
@@ -1032,8 +916,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 180, max: 230 },
     optimalRange: { min: 195, max: 215 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-fat-pct-m3",
@@ -1047,8 +929,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 10, max: 30 },
     optimalRange: { min: 12, max: 20 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-lean-mass-m3",
@@ -1062,8 +942,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 140, max: 180 },
     optimalRange: { min: 160, max: 175 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "body-vat-m3",
@@ -1077,8 +955,6 @@ export const realBodyComposition: Metric[] = [
     referenceRange: { min: 0, max: 1500 },
     optimalRange: { min: 0, max: 500 },
     source: "dexa",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 ];
 
@@ -1097,8 +973,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 20, max: 100 },
     optimalRange: { min: 40, max: 70 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-rhr-m1",
@@ -1112,8 +986,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 50, max: 80 },
     optimalRange: { min: 50, max: 60 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-recovery-m1",
@@ -1127,8 +999,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 0, max: 100 },
     optimalRange: { min: 66, max: 100 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-sleep-m1",
@@ -1142,8 +1012,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 6, max: 9 },
     optimalRange: { min: 7, max: 8.5 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // M2 - May 2025
@@ -1159,8 +1027,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 20, max: 100 },
     optimalRange: { min: 40, max: 70 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-rhr-m2",
@@ -1174,8 +1040,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 50, max: 80 },
     optimalRange: { min: 50, max: 60 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-recovery-m2",
@@ -1189,8 +1053,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 0, max: 100 },
     optimalRange: { min: 66, max: 100 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-sleep-m2",
@@ -1204,8 +1066,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 6, max: 9 },
     optimalRange: { min: 7, max: 8.5 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // M3 - Aug/Sep 2025 (peak optimization)
@@ -1221,8 +1081,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 20, max: 100 },
     optimalRange: { min: 40, max: 70 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-rhr-m3",
@@ -1236,8 +1094,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 50, max: 80 },
     optimalRange: { min: 50, max: 60 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-recovery-m3",
@@ -1251,8 +1107,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 0, max: 100 },
     optimalRange: { min: 66, max: 100 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-sleep-m3",
@@ -1266,8 +1120,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 6, max: 9 },
     optimalRange: { min: 7, max: 8.5 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 
   // M4 - Jan 2026 (current - cessation acute phase)
@@ -1283,8 +1135,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 20, max: 100 },
     optimalRange: { min: 40, max: 70 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-rhr-m4",
@@ -1298,8 +1148,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 50, max: 80 },
     optimalRange: { min: 50, max: 60 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
   {
     id: "autonomic-recovery-m4",
@@ -1313,8 +1161,6 @@ export const realAutonomicData: Metric[] = [
     referenceRange: { min: 0, max: 100 },
     optimalRange: { min: 66, max: 100 },
     source: "whoop",
-    syncStatus: "local",
-    syncVersion: 1,
   },
 ];
 

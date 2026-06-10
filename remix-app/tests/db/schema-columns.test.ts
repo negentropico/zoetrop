@@ -50,6 +50,59 @@ afterAll(async () => {
   if (pool) await pool.end();
 });
 
+// ── DATA-05 vestige columns absent (live Neon) ─────────────────────────────
+// Assertions are RED until migration 0006 is applied (Task 2), then GREEN.
+// Checks: metrics has no sync_status/sync_version; supplements.is_active is
+// boolean; subject_genotypes table exists with gene and genotype columns.
+
+interface DataTypeRow {
+  column_name: string;
+  data_type: string;
+}
+
+describe.skipIf(!connectionString)(
+  "DATA-05 vestige columns absent (live Neon)",
+  () => {
+    it("metrics table has no sync_status or sync_version column", async () => {
+      const { rows } = await getPool().query<{ column_name: string }>(
+        `SELECT column_name
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = 'metrics'
+            AND column_name = ANY($1)`,
+        [["sync_status", "sync_version"]]
+      );
+      expect(rows.length).toBe(0);
+    });
+
+    it("supplements.is_active has data_type = 'boolean'", async () => {
+      const { rows } = await getPool().query<DataTypeRow>(
+        `SELECT column_name, data_type
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = 'supplements'
+            AND column_name = 'is_active'`
+      );
+      expect(rows.length).toBe(1);
+      expect(rows[0].data_type).toBe("boolean");
+    });
+
+    it("subject_genotypes table exists with gene and genotype columns", async () => {
+      const { rows } = await getPool().query<{ column_name: string }>(
+        `SELECT column_name
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = 'subject_genotypes'
+            AND column_name = ANY($1)`,
+        [["gene", "genotype"]]
+      );
+      const cols = rows.map((r) => r.column_name);
+      expect(cols).toContain("gene");
+      expect(cols).toContain("genotype");
+    });
+  }
+);
+
 describe.skipIf(!connectionString)(
   "TEN-01 tenancy columns + composite index (live Neon)",
   () => {

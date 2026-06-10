@@ -9,12 +9,11 @@ let _pool: Pool | null = null;
 function getPool(): Pool {
   if (_pool) return _pool;
 
-  const connectionString =
-    process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
     throw new Error(
-      'Database connection string not found. Set NETLIFY_DATABASE_URL or DATABASE_URL.'
+      'DATABASE_URL is required. Set it in .env or Vercel environment variables.'
     );
   }
 

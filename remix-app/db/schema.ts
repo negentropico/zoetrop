@@ -43,12 +43,6 @@ export const dataSourceEnum = pgEnum('data_source', [
   'vault',
 ]);
 
-export const syncStatusEnum = pgEnum('sync_status', [
-  'local',
-  'synced',
-  'pending',
-]);
-
 export const supplementTierEnum = pgEnum('supplement_tier', [
   'tier1',
   'tier2',
@@ -110,15 +104,13 @@ export const metrics = pgTable('metrics', {
   optimalMin: real('optimal_min'),
   optimalMax: real('optimal_max'),
   source: dataSourceEnum('source').notNull(),
-  syncStatus: syncStatusEnum('sync_status').notNull().default('local'),
-  syncVersion: integer('sync_version').notNull().default(1),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
   tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
   subjectId: text('subject_id').notNull().references(() => subjects.id), // NOT NULL — final state (Plan 04, migration 0004)
 });
 
-// Protocol versions (601 → 602 → 603)
+// Protocol versions (P0 → P6)
 export const protocolVersions = pgTable('protocol_versions', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   version: varchar('version', { length: 10 }).notNull(), // global unique removed in Plan 02; per-subject composite UNIQUE added in Plan 04 (TEN-04)
@@ -171,7 +163,7 @@ export const supplements = pgTable('supplements', {
   geneticBasis: text('genetic_basis'), // Which genetic variants justify this supplement
   timing: varchar('timing', { length: 100 }), // e.g., "with meals", "AM only", "before bed"
   notes: text('notes'),
-  isActive: integer('is_active').notNull().default(1), // Boolean as int for SQLite compat
+  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
   tenantId: text('tenant_id').notNull().references(() => tenants.id),   // NOT NULL — final state (Plan 04, migration 0004)
@@ -233,6 +225,21 @@ export const subjects = pgTable('subjects', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Genetic variant profiles per subject/tenant.
+// `gene` is the join key for the Phase 4 genetics knowledge module (D-03).
+export const subjectGenotypes = pgTable('subject_genotypes', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  gene: varchar('gene', { length: 100 }).notNull(),
+  rsid: varchar('rsid', { length: 20 }),
+  genotype: varchar('genotype', { length: 50 }).notNull(),
+  assaySource: varchar('assay_source', { length: 100 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+}, (t) => [
+  index('idx_subject_genotypes_tenant_subject').on(t.tenantId, t.subjectId),
+]);
+
 // Relations
 export const tenantsRelations = relations(tenants, ({ many }) => ({
   subjects: many(subjects),
@@ -283,6 +290,17 @@ export const invitesRelations = relations(invites, ({ one }) => ({
   createdByUser: one(user, {
     fields: [invites.createdBy],
     references: [user.id],
+  }),
+}));
+
+export const subjectGenotypesRelations = relations(subjectGenotypes, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [subjectGenotypes.tenantId],
+    references: [tenants.id],
+  }),
+  subject: one(subjects, {
+    fields: [subjectGenotypes.subjectId],
+    references: [subjects.id],
   }),
 }));
 

@@ -453,22 +453,6 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
                 </div>
               </div>
             )}
-            <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                Sync status
-              </div>
-              <div style={{ fontWeight: 600, marginTop: 4, textTransform: "capitalize" }}>
-                {metric.syncStatus}
-              </div>
-            </div>
           </div>
         </Card>
       </div>

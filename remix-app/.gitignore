@@ -8,3 +8,9 @@
 
 # Vercel
 /.vercel/
+
+# PHI fixtures — gitignored before any are written (T-04-PHI-FIX, D-09 ordering)
+# These JSON snapshots contain health data (blood panels, genotypes) and MUST
+# never be committed. Created locally by Plan 03 seed capture; deleted after
+# cut-over parity verification.
+tests/fixtures/
