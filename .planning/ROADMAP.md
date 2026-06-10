@@ -155,7 +155,7 @@ Plans:
 
 **Wave 2** *(blocked on 04-01)*
 
-- [ ] 04-02-PLAN.md — Centralized tenant-scoped data.server.ts read module + typed DB→Metric mapper (no `as any`) + server-only genetics knowledge module [DATA-01, DATA-05]
+- [x] 04-02-PLAN.md — Centralized tenant-scoped data.server.ts read module + typed DB→Metric mapper (no `as any`) + server-only genetics knowledge module [DATA-01, DATA-05]
 
 **Wave 3** *(blocked on 04-02)*
 
@@ -257,7 +257,7 @@ Likely plans:
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
-| 4. Static-to-DB Data Layer Migration | 1/5 | In Progress|  |
+| 4. Static-to-DB Data Layer Migration | 2/5 | In Progress|  |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
