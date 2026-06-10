@@ -38,8 +38,15 @@ let generateInvite: (opts: {
   expiresAt: Date;
 }>;
 let listInvites: (tenantId: string) => Promise<unknown[]>;
-let revokeInvite: (opts: { id: string; tenantId: string }) => Promise<void>;
+let revokeInvite: (opts: {
+  id: string;
+  tenantId: string;
+}) => Promise<{ revoked: boolean }>;
 let consumeInviteByToken: (
+  raw: string,
+  consumedBy?: string
+) => Promise<{ role: string; tenantId: string } | null>;
+let resolveInviteByToken: (
   raw: string
 ) => Promise<{ role: string; tenantId: string } | null>;
 
@@ -52,6 +59,8 @@ beforeAll(async () => {
   revokeInvite = mod.revokeInvite as typeof revokeInvite;
   consumeInviteByToken =
     mod.consumeInviteByToken as typeof consumeInviteByToken;
+  resolveInviteByToken =
+    mod.resolveInviteByToken as typeof resolveInviteByToken;
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -193,13 +202,14 @@ describe("generateInvite — expiry math (owner, unconditional if no DB needed; 
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("invites.server.ts — source contracts (unconditional)", () => {
-  it("exports hashToken, newRawToken, generateInvite, listInvites, revokeInvite, consumeInviteByToken", () => {
+  it("exports hashToken, newRawToken, generateInvite, listInvites, revokeInvite, consumeInviteByToken, resolveInviteByToken", () => {
     expect(typeof hashToken).toBe("function");
     expect(typeof newRawToken).toBe("function");
     expect(typeof generateInvite).toBe("function");
     expect(typeof listInvites).toBe("function");
     expect(typeof revokeInvite).toBe("function");
     expect(typeof consumeInviteByToken).toBe("function");
+    expect(typeof resolveInviteByToken).toBe("function");
   });
 
   it("hashToken produces consistent 64-char hex output (SHA-256 contract)", () => {
