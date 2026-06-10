@@ -408,13 +408,13 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <Info size={20} color="var(--focus-500, var(--focus))" />
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", color: "var(--ink)" }}>
-              Why 150 days?
+              Why {targetDay} days?
             </span>
           </div>
           <p style={{ margin: 0, color: "var(--text-secondary)", lineHeight: "var(--leading-relaxed)" }}>
-            Lower FAAH activity (K3 inferred from SelfDecode) means slower anandamide breakdown. This
-            extends the metabolic clearing timeline beyond the typical 30–60 day window. The previous
-            76-day attempt was insufficient. A minimum of 120 days is required, with 150 days
+            This protocol uses a {targetDay}-day window because FAAH-informed metabolic clearing extends
+            beyond the typical 30–60 day range. Reduced FAAH activity slows anandamide breakdown,
+            extending the clearance timeline. A minimum of 120 days is used, with {targetDay} days
             recommended for full metabolic normalization.
           </p>
         </Card>
