@@ -279,6 +279,7 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
   }
 
   const overallProgress = Math.min((currentDay / targetDay) * 100, 100);
+  const complete = currentDay >= targetDay;
   const phaseBarPhases = buildPhaseBarPhases(currentDay);
 
   return (
@@ -314,7 +315,9 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
                 Day {currentDay}
               </span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-                {currentPhase.label} phase · {daysInPhase} days in · target {targetDay}
+                {complete
+                  ? `Protocol complete · all ${CESSATION_PHASES.length} phases finished`
+                  : `${currentPhase.label} phase · ${daysInPhase} days in · target ${targetDay}`}
               </span>
             </div>
             <div style={{ marginTop: 22 }}>
