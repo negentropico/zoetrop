@@ -41,6 +41,27 @@ export const dataSourceEnum = pgEnum('data_source', [
   'bloodwork',
   'csv',
   'vault',
+  'lab', // ← D-16: added for LLM-assisted lab ingest pipeline (Plan 05-01)
+]);
+
+// ── Lab ingest pipeline enums (Plan 05-01) ─────────────────────────────────────
+export const labDocStatusEnum = pgEnum('lab_doc_status', [
+  'uploaded',
+  'processing',
+  'pending_review',
+  'completed',
+  'failed',
+]);
+
+export const labExtractionStatusEnum = pgEnum('lab_extraction_status', [
+  'pending_review',
+  'approved',
+  'rejected',
+]);
+
+export const confidenceLevelEnum = pgEnum('confidence_level', [
+  'high',
+  'low',
 ]);
 
 export const supplementTierEnum = pgEnum('supplement_tier', [
@@ -240,6 +261,104 @@ export const subjectGenotypes = pgTable('subject_genotypes', {
   index('idx_subject_genotypes_tenant_subject').on(t.tenantId, t.subjectId),
 ]);
 
+// ── Lab ingest pipeline tables (Plan 05-01) ────────────────────────────────────
+
+// lab_documents — uploaded PDF files awaiting or completed extraction (LAB-01)
+// pdfBytes stored as text (base64) for pilot; TODO: migrate to Vercel Blob at M2
+export const labDocuments = pgTable('lab_documents', {
+  id: text('id').primaryKey(),                          // UUID v4, set by the upload action
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  uploadedBy: text('uploaded_by').notNull().references(() => user.id),
+  status: labDocStatusEnum('status').notNull().default('uploaded'),
+  fileName: varchar('file_name', { length: 255 }).notNull(),
+  pdfBytes: text('pdf_bytes'),                          // base64 PDF; nullable (set null after all extractions resolved)
+  pageCount: integer('page_count'),
+  errorMessage: text('error_message'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (t) => [
+  index('idx_lab_documents_tenant_subject').on(t.tenantId, t.subjectId),
+  index('idx_lab_documents_status').on(t.status),
+]);
+
+// lab_extractions — per-field LLM extraction results awaiting practitioner review (LAB-02/04)
+// Raw fields: verbatim from LLM. Resolved fields: matched from dictionary (D-01).
+export const labExtractions = pgTable('lab_extractions', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  labDocumentId: text('lab_document_id').notNull().references(() => labDocuments.id),
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  // Raw extraction from LLM (verbatim)
+  rawAnalyteName: varchar('raw_analyte_name', { length: 255 }).notNull(),
+  rawValue: real('raw_value').notNull(),
+  rawUnit: varchar('raw_unit', { length: 50 }).notNull(),
+  sourceTextSnippet: text('source_text_snippet'),       // verbatim text from the PDF page
+  pageNumber: integer('page_number'),
+  // Validation results (LAB-03)
+  confidence: confidenceLevelEnum('confidence').notNull().default('high'),
+  rangeFlag: varchar('range_flag', { length: 50 }),     // 'normal' | 'below_reference' | 'above_reference' | 'no_range_data'
+  unrecognized: boolean('unrecognized').notNull().default(false),
+  // Resolved (dictionary-matched) fields — populated for recognized analytes (D-01)
+  resolvedMetricName: varchar('resolved_metric_name', { length: 255 }),
+  resolvedCategory: metricCategoryEnum('resolved_category'),
+  resolvedSubcategory: varchar('resolved_subcategory', { length: 100 }),
+  resolvedUnit: varchar('resolved_unit', { length: 50 }),
+  resolvedReferenceMin: real('resolved_reference_min'),
+  resolvedReferenceMax: real('resolved_reference_max'),
+  resolvedOptimalMin: real('resolved_optimal_min'),
+  resolvedOptimalMax: real('resolved_optimal_max'),
+  resolvedImprovement: varchar('resolved_improvement', { length: 50 }),
+  // Review outcome (LAB-04)
+  status: labExtractionStatusEnum('status').notNull().default('pending_review'),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewedBy: text('reviewed_by').references(() => user.id),
+  // Final approved value (may be edited during review)
+  approvedValue: real('approved_value'),
+  approvedUnit: varchar('approved_unit', { length: 50 }),
+  // FK to committed metric row (set after approval — LAB-05)
+  committedMetricId: varchar('committed_metric_id', { length: 36 }).references(() => metrics.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (t) => [
+  index('idx_lab_extractions_doc').on(t.labDocumentId),
+  index('idx_lab_extractions_tenant_subject').on(t.tenantId, t.subjectId),
+]);
+
+// audit_log — lifecycle event log for the lab ingest pipeline (LAB-05 / D-13)
+// SECURITY: NO PHI field values — only IDs and metadata. D-13 constraint.
+// Verified by ingest-schema.test.ts: no column named 'value' or 'name'.
+export const auditLog = pgTable('audit_log', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  userId: text('user_id').notNull().references(() => user.id),
+  role: appRoleEnum('role').notNull(),
+  action: varchar('action', { length: 50 }).notNull(),   // 'upload' | 'extraction-complete' | 'approve' | 'reject' | 'metric-insert'
+  tableName: varchar('table_name', { length: 100 }),     // 'metrics' | 'lab_documents' | etc.
+  operation: varchar('operation', { length: 20 }),       // 'insert' | 'update'
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  // NO PHI columns — only the entity ID (not its value), D-13
+  entityId: text('entity_id'),                           // ID of the affected row (not its value or name)
+  timestamp: timestamp('timestamp').notNull().defaultNow(),
+}, (t) => [
+  index('idx_audit_log_tenant_subject').on(t.tenantId, t.subjectId),
+  index('idx_audit_log_timestamp').on(t.timestamp),
+]);
+
+// consent_log — per-subject consent records for PHI processing (LAB-06 / D-08)
+// Consent gate: upload action checks for a consentLog row before any PHI insert.
+// D-09: designed generically for future client intake (not pilot-specific).
+export const consentLog = pgTable('consent_log', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  consentedAt: timestamp('consented_at').notNull(),
+  consentVersion: varchar('consent_version', { length: 50 }).notNull(), // e.g. 'v1-pilot-self'
+  consentedByUserId: text('consented_by_user_id').references(() => user.id),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => [
+  index('idx_consent_log_subject').on(t.subjectId),
+]);
+
 // Relations
 export const tenantsRelations = relations(tenants, ({ many }) => ({
   subjects: many(subjects),
@@ -301,6 +420,71 @@ export const subjectGenotypesRelations = relations(subjectGenotypes, ({ one }) =
   subject: one(subjects, {
     fields: [subjectGenotypes.subjectId],
     references: [subjects.id],
+  }),
+}));
+
+export const labDocumentsRelations = relations(labDocuments, ({ one, many }) => ({
+  tenant: one(tenants, {
+    fields: [labDocuments.tenantId],
+    references: [tenants.id],
+  }),
+  subject: one(subjects, {
+    fields: [labDocuments.subjectId],
+    references: [subjects.id],
+  }),
+  uploadedByUser: one(user, {
+    fields: [labDocuments.uploadedBy],
+    references: [user.id],
+  }),
+  extractions: many(labExtractions),
+}));
+
+export const labExtractionsRelations = relations(labExtractions, ({ one }) => ({
+  document: one(labDocuments, {
+    fields: [labExtractions.labDocumentId],
+    references: [labDocuments.id],
+  }),
+  tenant: one(tenants, {
+    fields: [labExtractions.tenantId],
+    references: [tenants.id],
+  }),
+  subject: one(subjects, {
+    fields: [labExtractions.subjectId],
+    references: [subjects.id],
+  }),
+  reviewedByUser: one(user, {
+    fields: [labExtractions.reviewedBy],
+    references: [user.id],
+  }),
+  committedMetric: one(metrics, {
+    fields: [labExtractions.committedMetricId],
+    references: [metrics.id],
+  }),
+}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  user: one(user, {
+    fields: [auditLog.userId],
+    references: [user.id],
+  }),
+  tenant: one(tenants, {
+    fields: [auditLog.tenantId],
+    references: [tenants.id],
+  }),
+  subject: one(subjects, {
+    fields: [auditLog.subjectId],
+    references: [subjects.id],
+  }),
+}));
+
+export const consentLogRelations = relations(consentLog, ({ one }) => ({
+  subject: one(subjects, {
+    fields: [consentLog.subjectId],
+    references: [subjects.id],
+  }),
+  consentedByUser: one(user, {
+    fields: [consentLog.consentedByUserId],
+    references: [user.id],
   }),
 }));
 

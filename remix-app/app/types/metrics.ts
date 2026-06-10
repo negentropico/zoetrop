@@ -3,7 +3,7 @@
 export type MetricStatus = 'optimal' | 'borderline' | 'deficient' | 'excess';
 export type MetricTrend = 'improving' | 'stable' | 'declining';
 export type ImprovementDirection = 'higher is better' | 'lower is better' | 'target range';
-export type DataSource = 'manual' | 'whoop' | 'dexa' | 'bloodwork' | 'csv' | 'vault';
+export type DataSource = 'manual' | 'whoop' | 'dexa' | 'bloodwork' | 'csv' | 'vault' | 'lab'; // 'lab' added Plan 05-01 (D-16)
 
 // 9 Metric Categories
 export type MetricCategory =
