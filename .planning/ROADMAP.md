@@ -15,7 +15,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08, concurrent session)
 - [x] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7) (completed 2026-06-08)
 - [x] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7 (completed 2026-06-10)
-- [ ] **Phase 3.1: Account & Roles — UX + Authorization** *(inserted)* — Build the authenticated account surface (nav + logout UI + preferences, per-invite role-scoped tokens) and a real owner/practitioner/client authorization model on top of the Phase 3 identity + tenant/subject scoping. Promoted from backlog 999.1 (owner UAT feedback)
+- [x] **Phase 3.1: Account & Roles — UX + Authorization** *(inserted)* — Build the authenticated account surface (nav + logout UI + preferences, per-invite role-scoped tokens) and a real owner/practitioner/client authorization model on top of the Phase 3 identity + tenant/subject scoping. Promoted from backlog 999.1 (owner UAT feedback) (completed 2026-06-10)
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
@@ -125,7 +125,7 @@ Plans:
 **Wave 1** (parallel — disjoint files)
 
 - [x] 03.1-01-PLAN.md — Schema + authz foundation: add user.tenantId, hand-rolled invites table (hash-only) + migration 0005, and the RLS-compatible authz helpers (requireUser/requireRole/assertSubjectAccess/CAPABILITIES/can) with fail-closed unit tests [D-06/D-07/D-11/D-12/D-13; D-01 mitigation]
-- [ ] 03.1-03-PLAN.md — Account shell UI: accessible DropdownMenu primitive + AccountMenu (Settings/Theme/Sign-out), threaded through AppShell→TopNav and mirrored into the mobile BottomTab (Account→/settings) [D-02/D-03] *(human-verify checkpoint)*
+- [x] 03.1-03-PLAN.md — Account shell UI: accessible DropdownMenu primitive + AccountMenu (Settings/Theme/Sign-out), threaded through AppShell→TopNav and mirrored into the mobile BottomTab (Account→/settings) [D-02/D-03] *(human-verify checkpoint)*
 
 **Wave 2**
 
@@ -133,7 +133,7 @@ Plans:
 
 **Wave 3**
 
-- [ ] 03.1-04-PLAN.md — Settings hub at /settings: Profile (name+email), Security (changePassword requires current pw), Invites panel (generate/list/revoke, server-gated owner/practitioner), Preferences (theme), + 4 "Coming soon" placeholders [D-04/D-05/D-09/D-10/D-12] *(human-verify checkpoint)*
+- [x] 03.1-04-PLAN.md — Settings hub at /settings: Profile (name+email), Security (changePassword requires current pw), Invites panel (generate/list/revoke, server-gated owner/practitioner), Preferences (theme), + 4 "Coming soon" placeholders [D-04/D-05/D-09/D-10/D-12] *(human-verify checkpoint)*
 
 ### Phase 4: Static-to-DB Data Layer Migration
 
@@ -236,7 +236,7 @@ Likely plans:
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
-| 3.1. Account & Roles — UX + Authorization *(inserted)* | 2/4 | In Progress|  |
+| 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
