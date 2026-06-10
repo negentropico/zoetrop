@@ -163,8 +163,6 @@ export function generateSeedMetrics(): Metric[] {
           referenceRange: { min: template.refMin, max: template.refMax },
           optimalRange: { min: template.optMin, max: template.optMax },
           source: category === "autonomic" ? "whoop" : "bloodwork",
-          syncStatus: "local",
-          syncVersion: 1,
         });
       }
       globalIndex++;
