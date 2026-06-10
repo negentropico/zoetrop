@@ -14,7 +14,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 
 - [x] **Phase 1: Schema Baseline + Engine Tests + Auth Spike** — Commit the Drizzle migrations baseline, install Vitest with engine unit tests, and spike the Better-Auth↔Neon-JWK integration seam (completed 2026-06-08, concurrent session)
 - [x] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7) (completed 2026-06-08)
-- [ ] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7
+- [x] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7 (completed 2026-06-10)
 - [ ] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
@@ -102,7 +102,7 @@ Plans:
 **Wave 3** *(blocked on 03-03; 03-04 and 03-05 run in parallel — no file overlap)*
 
 - [x] 03-04-PLAN.md — Owner seed (via auth.api.signUpEmail from 03-03) + backfill + NOT NULL/index/constraint migrations (0003/0004) + [BLOCKING] db:migrate to Neon + DB schema-introspection verification [TEN-01, TEN-04]
-- [ ] 03-05-PLAN.md — Public/private routing split: authenticated _app/ layout (session redirect) + landing/login/logout + route move under _app/ + remove PILOT_BASIC_AUTH from root.tsx + delete Vercel env var (D-05) [AUTH-01, AUTH-02]
+- [x] 03-05-PLAN.md — Public/private routing split: authenticated _app/ layout (session redirect) + landing/login/logout + route move under _app/ + remove PILOT_BASIC_AUTH from root.tsx + delete Vercel env var (D-05) [AUTH-01, AUTH-02]
 
 ### Phase 4: Static-to-DB Data Layer Migration
 
@@ -204,7 +204,7 @@ Likely plans:
 |-------|----------------|--------|-----------|
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
-| 3. Identity + Tenancy Scoping | 4/5 | In Progress|  |
+| 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |

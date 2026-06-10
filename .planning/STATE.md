@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 03-04-PLAN.md (seed-owner.ts + migrations 0003/0004; live Neon migrated — TEN-01/TEN-04)
-last_updated: "2026-06-09T20:30:00.000Z"
-last_activity: 2026-06-09
+status: verifying
+stopped_at: "Completed 03-05-PLAN.md — real Better-Auth surface live (public landing + login/logout + _app/ gated layout); D-05 code removed; phase 03 COMPLETE (5/5). Post-deploy: delete PILOT_BASIC_AUTH from Vercel."
+last_updated: "2026-06-10T01:06:49.651Z"
+last_activity: 2026-06-10
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 23
-  completed_plans: 22
-  percent: 40
+  completed_plans: 23
+  percent: 50
 ---
 
 # Project State
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 Phase: 03 (identity-tenancy-scoping) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute (03-04 complete; live Neon at final tenancy contract)
-Last activity: 2026-06-09
+Status: Phase complete — ready for verification
+Last activity: 2026-06-10
 
-Progress: [█████████░] 95%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [█████████░] 95%
 | Phase 03-identity-tenancy-scoping P01 | 9min | 3 tasks | 9 files |
 | Phase 03-identity-tenancy-scoping P03 | 403s | 2 tasks | 8 files |
 | Phase 03-identity-tenancy-scoping P04 | ~35m | 3 tasks | 8 files |
+| Phase 03-identity-tenancy-scoping P05 | 9min | 3 tasks | 24 files |
 
 ## Accumulated Context
 
@@ -98,10 +99,12 @@ Recent decisions affecting current work:
 - [Phase ?]: 03-03: Better-Auth singleton wired to Neon via getDb(); invite hook via createAuthMiddleware+APIError; role input:false; NETLIFY_DATABASE_URL test stub
 - [Phase 03-04]: Expand-contract tenancy migration COMPLETE on live Neon (orange-paper-97068012) — TEN-01 (16 NOT NULL tenant_id/subject_id + composite index on all 8 tables) + TEN-04 (composite UNIQUE(tenant_id,subject_id,version); old global UNIQUE absent); owner seeded (tenant + owner-subject + role=owner user m@negentropi.co). Journal-split execution (0001/0002 → seed → 0003/0004) avoided the backfill-before-spine guardrail trip.
 - [Phase 03-04]: Deviation 0644fa7 — constraints.test.ts array-parsing bug: @neondatabase/serverless returns array_agg as a pg text-array STRING not a JS array; parsePgTextArray() added. DB contract tests 18/18 green against live Neon; full suite 99 passing (only auth-layout.test.ts red — Plan 05 builds it).
+- [Phase ?]: [Phase 03-05]: Public/private auth surface split shipped — landing.tsx at / (no AppShell), auth/login+logout, and one authenticated _app/layout.tsx loader gating all 16 app routes (getSession → redirect /login). AppShell moved off root.tsx (bare Outlet). PILOT_BASIC_AUTH stopgap removed from code (D-05); Vercel env-var deletion + prod 200-check deferred to post-deploy (prod still serves old code). Local smoke test: signed-out /dashboard 302, owner sign-in 30-day persistent cookie, /logout 302. AUTH-01/AUTH-02 satisfied.
 
 ### Pending Todos
 
-- [Plan 05 / Vercel]: Set OWNER_INVITE_TOKEN in Vercel env (production + preview) so the deployed beforeSignUp invite gate validates against the seeded owner's token. Carried forward to Plan 05's Vercel work. Do NOT commit the value.
+- [Plan 05 / Vercel]: Set OWNER_INVITE_TOKEN in Vercel env (production + preview). ✓ DONE — orchestrator pre-staged OWNER_INVITE_TOKEN to Production + Preview (encrypted; CLI for prod, REST for preview). Do NOT commit the value.
+- [Post-deploy / Vercel — D-05]: After merging `003-remix-foundation` to production + deploying: delete PILOT_BASIC_AUTH from Vercel (Prod+Preview), then `curl -I https://zoetrop.vercel.app/` expects 200 (not 401). Deferred because prod still runs the OLD Basic-Auth code; deleting pre-deploy would expose prod. resolves_phase: 03. See `.planning/todos/pending/delete-pilot-basic-auth-post-deploy.md`.
 
 ### Blockers/Concerns
 
@@ -118,6 +121,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-09T20:30:00.000Z
-Stopped at: Completed 03-04-PLAN.md — live Neon at final tenancy contract (TEN-01/TEN-04). Next: 03-05 (auth routes + _app layout).
+Last session: 2026-06-10T01:06:49.645Z
+Stopped at: Completed 03-05-PLAN.md — real Better-Auth surface live (public landing + login/logout + _app/ gated layout); D-05 code removed; phase 03 COMPLETE (5/5). Post-deploy: delete PILOT_BASIC_AUTH from Vercel.
 Resume file: None
