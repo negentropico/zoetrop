@@ -7,7 +7,11 @@ This is the natural Phase 3 follow-on: Phase 3 shipped the identity *engine* (Be
 
 ---
 
-## 1. 🐛 Theme toggle defect (live UX bug — design-system / Phase 4.1)
+## 1. 🐛 Theme toggle defect — ✅ RESOLVED 2026-06-09 (commit 7678592)
+
+> Fixed out-of-band via `/gsd:debug` (session `theme-toggle-ssr-hydration`). Root cause was NOT the owner hypothesis: React 19's `commitHostSingletonAcquisition` strips `<html>` attributes (incl. `data-theme`) during StrictMode double-invoke / Suspense transitions. Fix re-applies `data-theme` via `useLayoutEffect` (ThemeToggle + a new `ThemeRestorer` on all routes). Verified live in-browser. This item is DONE — no longer in 999.1 scope; the remaining scope is items 2–4 below.
+
+_(original capture preserved for context):_
 
 **Symptom:** The login page renders in **dark** mode, the dashboard renders in **light** mode (inconsistent initial theme). The theme toggle requires **two clicks** before the theme actually switches.
 

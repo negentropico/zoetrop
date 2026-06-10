@@ -223,7 +223,7 @@ Likely plans:
 - Account nav/menu in the authenticated shell — logout (action exists) + preferences/account settings.
 - Account page invite function — generate/dispatch invite tokens (consider per-invite single-use, role-scoped tokens vs the current single shared `OWNER_INVITE_TOKEN`).
 - Role permissions — define + enforce what practitioners (multi-client) vs clients (own data only) can read/write/do; ties into tenant/subject scoping and the deferred Phase 7 RLS.
-- 🐛 Theme toggle defect (live, design-system/Phase 4.1): login renders dark, dashboard light; toggle needs two clicks; theme state not seeded from the persisted value at load (SSR/hydration). Can be a standalone quick-fix/debug before this phase.
+- ~~🐛 Theme toggle defect~~ — ✅ RESOLVED 2026-06-09 (commit 7678592, debug session `theme-toggle-ssr-hydration`): React 19 `<html>` singleton-acquisition stripped `data-theme`; fixed via `useLayoutEffect` re-apply + `ThemeRestorer`. Verified live. (Remaining 999.1 scope = the 3 items above.)
 
 **Plans:** 0 plans
 Plans:
