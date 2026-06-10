@@ -9,9 +9,9 @@ import { AccountMenu } from "./AccountMenu";
 
 const NAV = [
   {
-    to: "/",
+    to: "/dashboard",
     label: "Dashboard",
-    match: (p: string) => p === "/",
+    match: (p: string) => p === "/dashboard",
     end: true,
   },
   {

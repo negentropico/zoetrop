@@ -7,10 +7,10 @@ import { LayoutGrid, Activity, ListChecks, GitCompare, User } from "lucide-react
 
 const NAV_ITEMS = [
   {
-    to: "/",
+    to: "/dashboard",
     label: "Dashboard",
     icon: LayoutGrid,
-    match: (p: string) => p === "/",
+    match: (p: string) => p === "/dashboard",
   },
   {
     to: "/metrics",
