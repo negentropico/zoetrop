@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/supplements";
-import { realSupplements } from "~/lib/protocol-data";
-import { SUPPLEMENT_TIERS, type SupplementTier, type Supplement } from "~/types/protocol";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getSupplements } from "~/lib/data.server";
+import { SUPPLEMENT_TIERS, type SupplementTier } from "~/types/protocol";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
 import { PageHeader } from "~/components/ui/PageHeader";
+
+// Supplement type from DB (subset of the full Supplement type used for display)
+type DBSupplement = {
+  id: number;
+  name: string;
+  tier: string;
+  dosage: number;
+  unit: string;
+  frequency: string;
+  timing: string | null;
+  isActive: boolean;
+  geneticBasis: string | null;
+  notes: string | null;
+};
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,20 +29,23 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
-  const supplements = realSupplements;
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const supplements = await getSupplements(user.tenantId!, subject.id);
 
   // Group by tier
   const byTier = supplements.reduce((acc, supp) => {
-    if (!acc[supp.tier]) acc[supp.tier] = [];
-    acc[supp.tier].push(supp);
+    const tier = supp.tier as SupplementTier;
+    if (!acc[tier]) acc[tier] = [];
+    acc[tier].push(supp);
     return acc;
-  }, {} as Record<SupplementTier, Supplement[]>);
+  }, {} as Record<SupplementTier, typeof supplements>);
 
   // Stats
   const totalDaily = supplements
     .filter((s) => s.frequency === "daily" && s.isActive)
-    .reduce((sum, s) => sum + 1, 0);
+    .reduce((sum) => sum + 1, 0);
 
   return {
     supplements,
@@ -53,7 +71,7 @@ function TierBadge({ tier }: { tier: SupplementTier }) {
   return <Badge tone={toneMap[tier] || "neutral"}>{info.label}</Badge>;
 }
 
-function SupplementCard({ supplement }: { supplement: Supplement }) {
+function SupplementCard({ supplement }: { supplement: DBSupplement }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -67,7 +85,7 @@ function SupplementCard({ supplement }: { supplement: Supplement }) {
             <span style={{ fontWeight: 500, color: "var(--ink)", fontSize: "var(--text-sm)" }}>
               {supplement.name}
             </span>
-            <TierBadge tier={supplement.tier} />
+            <TierBadge tier={supplement.tier as SupplementTier} />
             {!supplement.isActive && (
               <Badge tone="neutral">Inactive</Badge>
             )}
@@ -141,7 +159,7 @@ export default function Supplements({ loaderData }: Route.ComponentProps) {
   const showInactive = searchParams.get("inactive") === "true";
 
   // Filter supplements
-  let filtered = supplements;
+  let filtered = supplements as DBSupplement[];
   if (tierFilter) {
     filtered = filtered.filter((s) => s.tier === tierFilter);
   }

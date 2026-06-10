@@ -1,11 +1,11 @@
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/compare";
-import { realProtocolVersions, realProtocolChanges } from "~/lib/protocol-data";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getProtocolVersions, getProtocolChanges } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Button } from "~/components/ui/Button";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,12 +14,30 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const fromParam = url.searchParams.get("from");
   const toParam = url.searchParams.get("to");
 
-  const versions = realProtocolVersions;
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+
+  const [protocolVersionsRows, protocolChanges] = await Promise.all([
+    getProtocolVersions(user.tenantId!, subject.id),
+    getProtocolChanges(user.tenantId!, subject.id),
+  ]);
+
+  // Normalize timestamps to ISO strings
+  const normalizedVersions = protocolVersionsRows.map((v) => ({
+    ...v,
+    effectiveDate: v.effectiveDate instanceof Date ? v.effectiveDate.toISOString() : v.effectiveDate,
+    createdAt: v.createdAt instanceof Date ? v.createdAt.toISOString() : v.createdAt,
+  }));
+
+  // Sort versions ascending by effectiveDate
+  const versions = [...normalizedVersions].sort(
+    (a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
+  );
 
   // Default to comparing last two versions if not specified
   const fromVersion = fromParam
@@ -31,7 +49,7 @@ export function loader({ request }: Route.LoaderArgs) {
 
   // Get all changes for the "to" version (changes from previous)
   const changes = toVersion
-    ? realProtocolChanges.filter((c) => c.versionId === toVersion.id)
+    ? protocolChanges.filter((c) => c.versionId === toVersion.id)
     : [];
 
   // Categorize changes
@@ -46,14 +64,17 @@ export function loader({ request }: Route.LoaderArgs) {
 
   return {
     versions,
-    fromVersion,
-    toVersion,
+    fromVersion: fromVersion ?? null,
+    toVersion: toVersion ?? null,
     changes,
     added,
     removed,
     modified,
   };
 }
+
+// Version type inferred from loader return
+type VersionItem = NonNullable<Awaited<ReturnType<typeof loader>>["versions"]>[number];
 
 function VersionSelector({
   label,
@@ -64,7 +85,7 @@ function VersionSelector({
 }: {
   label: string;
   value: string | undefined;
-  versions: typeof realProtocolVersions;
+  versions: VersionItem[];
   onChange: (version: string) => void;
   excludeVersion?: string;
 }) {
@@ -173,7 +194,7 @@ export default function Compare({ loaderData }: Route.ComponentProps) {
             </div>
             <div className="zt-eyebrow" style={{ marginTop: 4 }}>Added</div>
           </Card>
-          <Card padding="md" tone={removed.length > 0 ? undefined : undefined} style={{ textAlign: "center" }}>
+          <Card padding="md" style={{ textAlign: "center" }}>
             <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: removed.length > 0 ? "var(--danger)" : "var(--ink)" }}>
               {removed.length}
             </div>

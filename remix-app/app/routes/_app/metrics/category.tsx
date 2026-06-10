@@ -6,8 +6,11 @@ import {
   type MetricStatus,
   type Metric,
 } from "~/types/metrics";
-import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "~/lib/real-data";
+import { getMetricTargets } from "~/lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getMetrics } from "~/lib/data.server";
+import { dbRowToMetric } from "~/lib/db-mappers.server";
 import { TrendSparkline } from "~/components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
 import {
@@ -47,7 +50,7 @@ function isValidCategory(category: string): category is MetricCategory {
   return category in CATEGORY_INFO;
 }
 
-export function loader({ params }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const { category } = params;
 
   if (!category || !isValidCategory(category)) {
@@ -56,9 +59,10 @@ export function loader({ params }: Route.LoaderArgs) {
 
   const categoryInfo = CATEGORY_INFO[category];
 
-  // Get all real metrics for this category
-  const allMetrics = getRealMetrics();
-  const categoryMetrics = allMetrics.filter((m) => m.category === category);
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const rows = await getMetrics(user.tenantId!, subject.id, category);
+  const categoryMetrics = rows.map(dbRowToMetric);
 
   // Get latest value for each unique metric name
   const latestByName = new Map<string, Metric>();

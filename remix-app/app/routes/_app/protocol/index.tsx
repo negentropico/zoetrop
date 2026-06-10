@@ -1,11 +1,14 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/index";
+import { requireUser } from "~/lib/authz.server";
 import {
-  realProtocolVersions,
-  realSupplements,
-  realCessationLog,
-  realMilestones,
-} from "~/lib/protocol-data";
+  getOwnerSubject,
+  getProtocolVersions,
+  getSupplements,
+  getCessationLog,
+  getMilestones,
+} from "~/lib/data.server";
+import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "~/types/protocol";
 import { differenceInDays, parseISO, format } from "date-fns";
 import { Card } from "~/components/ui/Card";
@@ -20,22 +23,47 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
-  // Using real protocol data from vault
-  const currentVersion = realProtocolVersions[realProtocolVersions.length - 1];
-  const activeSupplements = realSupplements.filter((s) => s.isActive);
-  const cessation = realCessationLog[0];
-  const latestMilestone = realMilestones[realMilestones.length - 1];
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
 
-  // Calculate cessation progress
-  let cessationDay = 0;
-  let cessationPhase = CESSATION_PHASES[0];
-  if (cessation) {
-    cessationDay = differenceInDays(new Date(), parseISO(cessation.startDate));
-    cessationPhase = CESSATION_PHASES.find(
-      (p) => cessationDay >= p.dayRange.start && cessationDay <= p.dayRange.end
-    ) || CESSATION_PHASES[CESSATION_PHASES.length - 1];
-  }
+  const [protocolVersionsRows, supplements, cessationRows, milestonesRows] = await Promise.all([
+    getProtocolVersions(tenantId, subjectId),
+    getSupplements(tenantId, subjectId),
+    getCessationLog(tenantId, subjectId),
+    getMilestones(tenantId, subjectId),
+  ]);
+
+  // Normalize timestamps to ISO strings
+  const normalizedVersions = protocolVersionsRows.map((v) => ({
+    ...v,
+    effectiveDate: v.effectiveDate instanceof Date ? v.effectiveDate.toISOString() : v.effectiveDate,
+    createdAt: v.createdAt instanceof Date ? v.createdAt.toISOString() : v.createdAt,
+  }));
+  const normalizedMilestones = milestonesRows.map((m) => ({
+    ...m,
+    date: m.date instanceof Date ? m.date.toISOString() : m.date,
+    createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+  }));
+
+  const cessation = cessationRows[0] ?? null;
+  const activeSupplements = supplements.filter((s) => s.isActive);
+
+  // Sort versions ascending by effectiveDate for consistency
+  const sortedVersions = [...normalizedVersions].sort(
+    (a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
+  );
+
+  const currentVersion = sortedVersions[sortedVersions.length - 1] ?? null;
+  const latestMilestone = normalizedMilestones.length > 0
+    ? normalizedMilestones[normalizedMilestones.length - 1]
+    : null;
+
+  // Calculate cessation progress using DB cessation log + survivor engine fns
+  const cessationDay = cessation ? getCessationDay(new Date()) : 0;
+  const cessationPhase = getCurrentCessationPhase(cessationDay);
 
   // Group supplements by tier
   const supplementsByTier = activeSupplements.reduce((acc, supp) => {
@@ -51,8 +79,8 @@ export function loader() {
     cessationDay,
     cessationPhase,
     latestMilestone,
-    totalVersions: realProtocolVersions.length,
-    protocolVersions: realProtocolVersions,
+    totalVersions: sortedVersions.length,
+    protocolVersions: sortedVersions,
   };
 }
 
@@ -192,7 +220,7 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
               </Link>
             </div>
           </div>
-          {protocolVersions.slice().reverse().slice(0, 4).map((version, i) => (
+          {[...protocolVersions].reverse().slice(0, 4).map((version, i) => (
             <Link
               key={version.id}
               to={`/protocol/versions/${version.version}`}

@@ -1,11 +1,13 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/version-detail";
+import { requireUser } from "~/lib/authz.server";
 import {
-  realProtocolVersions,
-  realProtocolChanges,
-  realMilestones,
-  realSupplements,
-} from "~/lib/protocol-data";
+  getOwnerSubject,
+  getProtocolVersions,
+  getProtocolChanges,
+  getMilestones,
+  getSupplements,
+} from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -13,35 +15,66 @@ import { PageHeader } from "~/components/ui/PageHeader";
 import { Crumb } from "~/components/ui/Crumb";
 import { Button } from "~/components/ui/Button";
 
-export function loader({ params }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const { version: versionParam } = params;
 
-  const version = realProtocolVersions.find((v) => v.version === versionParam);
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
+
+  const [protocolVersionsRows, protocolChangesRows, milestonesRows, supplementsRows] = await Promise.all([
+    getProtocolVersions(tenantId, subjectId),
+    getProtocolChanges(tenantId, subjectId),
+    getMilestones(tenantId, subjectId),
+    getSupplements(tenantId, subjectId),
+  ]);
+
+  // Normalize timestamps to ISO strings
+  const protocolVersionsList = protocolVersionsRows.map((v) => ({
+    ...v,
+    effectiveDate: v.effectiveDate instanceof Date ? v.effectiveDate.toISOString() : v.effectiveDate,
+    createdAt: v.createdAt instanceof Date ? v.createdAt.toISOString() : v.createdAt,
+  }));
+  const milestonesList = milestonesRows.map((m) => ({
+    ...m,
+    date: m.date instanceof Date ? m.date.toISOString() : m.date,
+    createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+  }));
+
+  // Sort versions ascending by effectiveDate
+  const sortedVersions = [...protocolVersionsList].sort(
+    (a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
+  );
+
+  const version = sortedVersions.find((v) => v.version === versionParam);
   if (!version) {
     throw new Response("Version not found", { status: 404 });
   }
 
-  const changes = realProtocolChanges.filter((c) => c.versionId === version.id);
-  const milestones = realMilestones.filter((m) => m.protocolVersion === version.version);
+  const changes = protocolChangesRows.filter((c) => c.versionId === version.id);
+  const versionMilestones = milestonesList.filter((m) => m.protocolVersion === version.version);
 
   // Get supplements active during this version
-  // For M6 (current), show all supplements
-  const supplements = version.version === "P6" ? realSupplements : [];
+  // For the current (latest) version, show all supplements
+  const latestVersion = sortedVersions[sortedVersions.length - 1];
+  const versionSupplements =
+    version.version === latestVersion?.version ? supplementsRows : [];
 
   // Find previous and next versions for navigation
-  const versionIndex = realProtocolVersions.findIndex((v) => v.id === version.id);
-  const previousVersion = versionIndex > 0 ? realProtocolVersions[versionIndex - 1] : null;
+  const versionIndex = sortedVersions.findIndex((v) => v.id === version.id);
+  const previousVersion = versionIndex > 0 ? sortedVersions[versionIndex - 1] : null;
   const nextVersion =
-    versionIndex < realProtocolVersions.length - 1 ? realProtocolVersions[versionIndex + 1] : null;
+    versionIndex < sortedVersions.length - 1 ? sortedVersions[versionIndex + 1] : null;
 
   return {
     version,
     changes,
-    milestones,
-    supplements,
+    milestones: versionMilestones,
+    supplements: versionSupplements,
     previousVersion,
     nextVersion,
-    isLatest: version.version === realProtocolVersions[realProtocolVersions.length - 1].version,
+    isLatest: version.version === latestVersion?.version,
   };
 }
 
@@ -216,9 +249,9 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
                   <p style={{ margin: 0, color: "var(--ink)", fontSize: "var(--text-sm)" }}>{milestone.description}</p>
                   {milestone.biometricSnapshot && (
                     <div style={{ display: "flex", gap: 16, marginTop: 8, flexWrap: "wrap" }}>
-                      {Object.entries(milestone.biometricSnapshot).map(([key, value]) => (
+                      {Object.entries(milestone.biometricSnapshot as Record<string, unknown>).map(([key, value]) => (
                         <span key={key} style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                          {key}: <span style={{ fontWeight: 600, color: "var(--ink)" }}>{value}</span>
+                          {key}: <span style={{ fontWeight: 600, color: "var(--ink)" }}>{String(value)}</span>
                         </span>
                       ))}
                     </div>

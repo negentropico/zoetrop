@@ -6,8 +6,11 @@ import {
   type MetricStatus,
   type Metric,
 } from "~/types/metrics";
-import { getRealMetrics, getLatestRealMetrics, getMetricTargets } from "~/lib/real-data";
+import { getMetricTargets } from "~/lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getMetrics } from "~/lib/data.server";
+import { dbRowToMetric } from "~/lib/db-mappers.server";
 import {
   Pill,
   Gem,
@@ -49,10 +52,21 @@ export function meta({}: Route.MetaArgs) {
 
 type MetricWithChartInfo = Metric & { historyCount: number; hasProjections: boolean };
 
-export function loader() {
-  // Use real tracked data from vault
-  const allMetrics = getRealMetrics();
-  const latestMetrics = getLatestRealMetrics();
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const rows = await getMetrics(user.tenantId!, subject.id);
+  const allMetrics = rows.map(dbRowToMetric);
+
+  // Get latest value for each unique metric name
+  const latestByName = new Map<string, Metric>();
+  allMetrics.forEach((m) => {
+    const existing = latestByName.get(m.name);
+    if (!existing || new Date(m.timestamp) > new Date(existing.timestamp)) {
+      latestByName.set(m.name, m);
+    }
+  });
+  const latestMetrics = Array.from(latestByName.values());
 
   // Count history points per metric name
   const countByName = new Map<string, number>();

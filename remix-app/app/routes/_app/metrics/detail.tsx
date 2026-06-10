@@ -6,8 +6,11 @@ import {
   type MetricStatus,
   type Metric,
 } from "~/types/metrics";
-import { getRealMetrics, getProjections, getMetricTargets, MILESTONES } from "~/lib/real-data";
+import { getProjections, getMetricTargets } from "~/lib/real-data";
 import { getMetricStatus } from "~/lib/metrics";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getMetrics } from "~/lib/data.server";
+import { dbRowToMetric } from "~/lib/db-mappers.server";
 import { TrendChart } from "~/components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
@@ -22,7 +25,7 @@ function isValidCategory(category: string): category is MetricCategory {
   return category in CATEGORY_INFO;
 }
 
-export function loader({ params }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const { category, metricId } = params;
 
   if (!category || !isValidCategory(category)) {
@@ -35,8 +38,11 @@ export function loader({ params }: Route.LoaderArgs) {
 
   const categoryInfo = CATEGORY_INFO[category];
 
-  // Get all real metrics and find by ID
-  const allMetrics = getRealMetrics();
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const rows = await getMetrics(user.tenantId!, subject.id, category);
+  const allMetrics = rows.map(dbRowToMetric);
+
   const metric = allMetrics.find((m) => m.id === metricId);
 
   if (!metric) {
@@ -49,7 +55,7 @@ export function loader({ params }: Route.LoaderArgs) {
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .map((m) => ({ timestamp: m.timestamp, value: m.value }));
 
-  // Get projections (Q1/Q2 targets) for this metric
+  // Get projections (Q1/Q2 targets) for this metric — non-PHI goal targets survivor
   const projections = getProjections(metric.name);
   const targets = getMetricTargets(metric.name);
 

@@ -1,6 +1,12 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/versions";
-import { realProtocolVersions, realProtocolChanges, realMilestones } from "~/lib/protocol-data";
+import { requireUser } from "~/lib/authz.server";
+import {
+  getOwnerSubject,
+  getProtocolVersions,
+  getProtocolChanges,
+  getMilestones,
+} from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -14,21 +20,49 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const tenantId = user.tenantId!;
+  const subjectId = subject.id;
+
+  const [protocolVersionsRows, protocolChangesRows, milestonesRows] = await Promise.all([
+    getProtocolVersions(tenantId, subjectId),
+    getProtocolChanges(tenantId, subjectId),
+    getMilestones(tenantId, subjectId),
+  ]);
+
+  // Normalize timestamp → ISO string for JSON serialization
+  const normalizedVersions = protocolVersionsRows.map((v) => ({
+    ...v,
+    effectiveDate: v.effectiveDate instanceof Date ? v.effectiveDate.toISOString() : v.effectiveDate,
+    createdAt: v.createdAt instanceof Date ? v.createdAt.toISOString() : v.createdAt,
+  }));
+  const normalizedMilestones = milestonesRows.map((m) => ({
+    ...m,
+    date: m.date instanceof Date ? m.date.toISOString() : m.date,
+    createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+  }));
+
+  // Sort versions ascending by effectiveDate
+  const sortedVersions = [...normalizedVersions].sort(
+    (a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
+  );
+
   // Enrich versions with change counts and milestones
-  const versions = realProtocolVersions.map((version) => {
-    const changes = realProtocolChanges.filter((c) => c.versionId === version.id);
-    const milestones = realMilestones.filter((m) => m.protocolVersion === version.version);
+  const versions = sortedVersions.map((version) => {
+    const changes = protocolChangesRows.filter((c) => c.versionId === version.id);
+    const versionMilestones = normalizedMilestones.filter((m) => m.protocolVersion === version.version);
 
     return {
       ...version,
       changeCount: changes.length,
-      milestones,
+      milestones: versionMilestones,
       changes: changes.slice(0, 3), // Preview first 3 changes
     };
   });
 
-  return { versions: versions.reverse() }; // Most recent first
+  return { versions: [...versions].reverse() }; // Most recent first
 }
 
 // Change type badge — brand tokens, no raw grays

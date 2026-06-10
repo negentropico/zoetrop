@@ -1,9 +1,11 @@
 import { Link } from "react-router";
 import { Check, Play, Circle, Info, ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/cessation";
-import { realCessationLog } from "~/lib/protocol-data";
+import { requireUser } from "~/lib/authz.server";
+import { getOwnerSubject, getCessationLog } from "~/lib/data.server";
+import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { CESSATION_PHASES, type CessationPhase } from "~/types/protocol";
-import { differenceInDays, parseISO, format, addDays } from "date-fns";
+import { parseISO, format, addDays } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
 import { MetricRing } from "~/components/ui/MetricRing";
@@ -19,8 +21,25 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export function loader() {
-  const cessation = realCessationLog[0];
+export async function loader({ request }: Route.LoaderArgs, now: Date = new Date()) {
+  const { user } = await requireUser(request);
+  const subject = await getOwnerSubject(user.tenantId!);
+  const cessationRows = await getCessationLog(user.tenantId!, subject.id);
+  // Normalize timestamps to ISO strings for JSON serialization
+  const cessation = cessationRows[0]
+    ? {
+        ...cessationRows[0],
+        startDate: cessationRows[0].startDate instanceof Date
+          ? cessationRows[0].startDate.toISOString()
+          : (cessationRows[0].startDate as unknown as string),
+        endDate: cessationRows[0].endDate instanceof Date
+          ? cessationRows[0].endDate.toISOString()
+          : (cessationRows[0].endDate as unknown as string | null),
+        createdAt: cessationRows[0].createdAt instanceof Date
+          ? cessationRows[0].createdAt.toISOString()
+          : cessationRows[0].createdAt,
+      }
+    : null;
 
   if (!cessation) {
     return {
@@ -45,14 +64,11 @@ export function loader() {
     };
   }
 
-  const startDate = parseISO(cessation.startDate);
-  const currentDay = differenceInDays(new Date(), startDate);
+  const currentDay = getCessationDay(now);
   const targetDay = 150;
 
-  // Find current phase
-  const currentPhase = CESSATION_PHASES.find(
-    (p) => currentDay >= p.dayRange.start && currentDay <= p.dayRange.end
-  ) || CESSATION_PHASES[CESSATION_PHASES.length - 1];
+  // Find current phase using survivor engine fn
+  const currentPhase = getCurrentCessationPhase(currentDay);
 
   const daysInPhase = currentDay - currentPhase.dayRange.start + 1;
   const phaseDuration = currentPhase.dayRange.end - currentPhase.dayRange.start + 1;
@@ -63,6 +79,7 @@ export function loader() {
   const daysUntilNextPhase = nextPhase ? nextPhase.dayRange.start - currentDay : 0;
 
   // Projected completion
+  const startDate = parseISO(cessation.startDate);
   const projectedCompletion = addDays(startDate, targetDay);
 
   // Phase progress for visualization
