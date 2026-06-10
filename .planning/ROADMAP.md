@@ -16,7 +16,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [x] **Phase 2: Vercel Cutover + Pilot Deploy Baseline** — Migrate the deploy target Netlify→Vercel on standard-tier infra, set the standard env vars, and stand up a live single-user production deploy. PHI/BAA/HIPAA hardening is deferred to the pre-client gate (Phase 7) (completed 2026-06-08)
 - [x] **Phase 3: Identity + Tenancy Scoping** — Ship Better-Auth roles, `tenants`/`users`/`subjects` tables, and add `tenantId`/`subjectId` columns + composite index + per-subject protocol-version uniqueness to all 8 data tables. RLS enable+policies, the SET LOCAL wrapper, and cross-tenant isolation tests are deferred to Phase 7 (completed 2026-06-10)
 - [x] **Phase 3.1: Account & Roles — UX + Authorization** *(inserted)* — Build the authenticated account surface (nav + logout UI + preferences, per-invite role-scoped tokens) and a real owner/practitioner/client authorization model on top of the Phase 3 identity + tenant/subject scoping. Promoted from backlog 999.1 (owner UAT feedback) (completed 2026-06-10)
-- [x] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts (completed 2026-06-10)
+- [~] **Phase 4: Static-to-DB Data Layer Migration** — Wire all route loaders to Neon via `withTenantDb`, seed owner's M0 data into live tables, remove PHI from TypeScript source, retire sync vestiges and `as any` casts (5 plans executed 2026-06-10; verification found 2 blockers — gap-closure plans 04-06/04-07 in flight)
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrope brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
 - [ ] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports
@@ -147,7 +147,7 @@ Plans:
   3. `grep -r "real-data\|protocol-data\|seed-data" remix-app/app/routes/` returns no matches; the Vercel build output (react-router build client bundle) contains no PHI strings (verified via `grep` against the build artifact) [D-10]
   4. Vestigial `syncStatus`/`syncVersion` columns are absent from all tables (confirmed via schema introspection); all `subcategory: ... as any` casts are replaced with typed alternatives; `tsc --noEmit` passes with zero errors
 
-**Plans**: 5 plans in 5 waves
+**Plans**: 7 plans (5 executed + 2 gap-closure) in 7 waves
 Plans:
 **Wave 1**
 
@@ -168,6 +168,14 @@ Plans:
 **Wave 5** *(blocked on 04-04 owner approval)*
 
 - [x] 04-05-PLAN.md — Relocate non-PHI survivors + delete PHI arrays + retire one-shot scripts + DATA-04 build PHI-grep gate [DATA-04]
+
+**Wave 6** *(gap-closure — closes VERIFICATION.md BLOCKER 2 / CR-02)*
+
+- [ ] 04-06-PLAN.md — Cessation day computed from DB: re-signature getCessationDay(startDateIso, now), pass DB cessation.startDate at all 3 loader sites, keep CESSATION_START_DATE as seed-doc/default only; unit + parity tests stay green (owner day still 169) [DATA-01]
+
+**Wave 7** *(gap-closure — closes VERIFICATION.md BLOCKER 1 / CR-03; blocked on 04-06 — shares cessation.tsx)*
+
+- [ ] 04-07-PLAN.md — Remove hardcoded PHI JSX literals: derive insights/index "Key insights" card from loader data (gate genetic narrative on DB variants), de-PHI cessation "Why 150 days?" card; rebuild + grep build/client/ clean [DATA-04]
 
 ### Phase 04.1: Design System Adoption (INSERTED)
 
@@ -257,7 +265,7 @@ Likely plans:
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
-| 4. Static-to-DB Data Layer Migration | 5/5 | Complete   | 2026-06-10 |
+| 4. Static-to-DB Data Layer Migration | 5/7 | Gap-closure (2 blockers; plans 04-06/04-07) | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
