@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 03 complete (5/5); promoted backlog 999.1 → Phase 3.1 (inserted before Phase 04) — ready to discuss Phase 3.1
-last_updated: 2026-06-10T01:33:47.128Z
+status: planning
+stopped_at: Phase 03.1 context gathered
+last_updated: "2026-06-10T05:04:58.719Z"
 last_activity: 2026-06-10
 progress:
   total_phases: 9
@@ -122,6 +122,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-10T01:06:49.645Z
-Stopped at: Completed 03-05-PLAN.md — real Better-Auth surface live (public landing + login/logout + _app/ gated layout); D-05 code removed; phase 03 COMPLETE (5/5). Post-deploy: delete PILOT_BASIC_AUTH from Vercel.
-Resume file: None
+Last session: 2026-06-10T05:04:58.714Z
+Stopped at: Phase 03.1 context gathered
+Resume file: .planning/phases/03.1-account-roles-ux-authorization/03.1-CONTEXT.md
