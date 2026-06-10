@@ -120,7 +120,20 @@ Plans:
 
 **Open scoping question** (resolve in discuss-phase): whether this stays one phase or splits (account-nav + invite as a UI/identity slice vs role-permissions/authz sequenced against the Phase 7 RLS gate), and whether the per-invite `invites` table lands before or after the Phase 4 data-layer migration.
 
-**Plans**: TBD — run `/gsd-discuss-phase 03.1`, then `/gsd-plan-phase 03.1`
+**Plans**: 4 plans in 3 waves
+Plans:
+**Wave 1** (parallel — disjoint files)
+
+- [ ] 03.1-01-PLAN.md — Schema + authz foundation: add user.tenantId, hand-rolled invites table (hash-only) + migration 0005, and the RLS-compatible authz helpers (requireUser/requireRole/assertSubjectAccess/CAPABILITIES/can) with fail-closed unit tests [D-06/D-07/D-11/D-12/D-13; D-01 mitigation]
+- [ ] 03.1-03-PLAN.md — Account shell UI: accessible DropdownMenu primitive + AccountMenu (Settings/Theme/Sign-out), threaded through AppShell→TopNav and mirrored into the mobile BottomTab (Account→/settings) [D-02/D-03] *(human-verify checkpoint)*
+
+**Wave 2**
+
+- [ ] 03.1-02-PLAN.md — Invite system server logic: per-invite single-use/role-scoped/7-day-expiring tokens (hash-at-rest, copy-link), tiered policy, and the rewritten beforeSignUp hook resolving hashed tokens + assigning role/tenant (break-glass OWNER_INVITE_TOKEN retained) [D-06/D-07/D-08/D-09/D-10]
+
+**Wave 3**
+
+- [ ] 03.1-04-PLAN.md — Settings hub at /settings: Profile (name+email), Security (changePassword requires current pw), Invites panel (generate/list/revoke, server-gated owner/practitioner), Preferences (theme), + 4 "Coming soon" placeholders [D-04/D-05/D-09/D-10/D-12] *(human-verify checkpoint)*
 
 ### Phase 4: Static-to-DB Data Layer Migration
 
@@ -223,7 +236,7 @@ Likely plans:
 | 1. Schema Baseline + Engine Tests + Auth Spike | 5/5 | Complete   | 2026-06-08 |
 | 2. Vercel Cutover + Pilot Deploy Baseline | 4/4 | Complete   | 2026-06-08 |
 | 3. Identity + Tenancy Scoping | 5/5 | Complete   | 2026-06-10 |
-| 3.1. Account & Roles — UX + Authorization *(inserted)* | 0/TBD | Not started | - |
+| 3.1. Account & Roles — UX + Authorization *(inserted)* | 0/4 | Planned | - |
 | 4. Static-to-DB Data Layer Migration | 0/TBD | Not started | - |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 0/TBD | Not started | - |
