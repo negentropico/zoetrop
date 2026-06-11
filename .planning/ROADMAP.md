@@ -254,7 +254,21 @@ Plans:
   5. K4 recommendations carry an explicit visible disclaimer: "This recommendation is speculative (limited evidence). Discuss with a licensed practitioner before acting."; a lint test asserts no generated report body contains imperative patterns (`"you should"`, `"you must"`, `"you need to"`) and that every K4 block contains the disclaimer string
 
 **UI hint**: yes
-**Plans**: TBD
+**Plans**: 5 plans in 3 waves
+Plans:
+**Wave 1** (parallel — disjoint files)
+
+- [ ] 06-01-PLAN.md — Pure engine extraction: engine.ts (classifyMetricStatus/getCessationDay/getCessationPhase/computePearson/mapVariantToProtocol) + report.ts type contracts + CONFIDENCE_LEVELS relabel + import-purity tests + re-pointed suites [ENG-01]
+- [ ] 06-02-PLAN.md — Schema promotion: evidenceTierEnum + geneticVariants/variantProtocolMap/metricProtocolMap (non-PHI) + reports (tenant-scoped) + corpus read layer + seed scaffold + Wave-0 corpus-lint/DB-schema tests + [BLOCKING] migration 0009 to Neon [ENG-02]
+
+**Wave 2** (parallel — disjoint files)
+
+- [ ] 06-03-PLAN.md — Corpus authoring: LLM-assisted + human-reviewed owner-complete evidence-tiered corpus, seed to Neon (non-null K), retire genetics-knowledge.server.ts + re-point its 3 consumers [ENG-02, ENG-03]
+- [ ] 06-04-PLAN.md — Report UI components: KGradeBadge + RecommendationBlock + DisclaimerCallout (inline K body, locked K4 disclaimer) + Reports nav entry + BottomTab overflow fix [RPT-02, RPT-03]
+
+**Wave 3** (blocked on Waves 1–2)
+
+- [ ] 06-05-PLAN.md — Report path: deterministic generateReport (engine+corpus → frozen versioned snapshot → reports row) + /reports/generate (role-gated) + /reports/:reportId (assertSubjectAccess render with inline K) + list + threat model [RPT-01, RPT-02, RPT-03, ENG-03]
 
 ### Phase 7: PHI Compliance Hardening — Pre-Client Gate (DEFERRED HARDENING)
 
