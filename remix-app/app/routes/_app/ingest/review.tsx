@@ -30,7 +30,7 @@ import { requireUser, requireRole, assertSubjectAccess } from "~/lib/authz.serve
 import type { AppRole } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
 import { getDb } from "~/lib/db.server";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { labDocuments, labExtractions, metrics, auditLog } from "../../../../db/schema";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -134,33 +134,62 @@ export async function action({ request }: Route.ActionArgs) {
         ? editedUnitStr
         : (extraction.resolvedUnit ?? extraction.rawUnit);
 
-    const metricId = crypto.randomUUID();
+    // Compute metric timestamp: specimen collection date if captured, else now
+    // reviewedAt stays 'now' (review time != collection time)
+    const metricTimestamp: Date = extraction.collectedAt ?? now;
 
-    // Drizzle transaction: INSERT metrics + UPDATE labExtractions + INSERT auditLog
+    const analyteName = extraction.resolvedMetricName ?? extraction.rawAnalyteName;
+
+    // DEDUP: check for existing metric with same subjectId + same analyte name + same calendar day
+    const dayStart = new Date(metricTimestamp);
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+
+    const existingMetrics = await db
+      .select({ id: metrics.id })
+      .from(metrics)
+      .where(
+        and(
+          eq(metrics.subjectId, extraction.subjectId),
+          eq(metrics.name, analyteName),
+          sql`${metrics.timestamp} >= ${dayStart}`,
+          sql`${metrics.timestamp} < ${dayEnd}`
+        )
+      )
+      .limit(1);
+
+    const existingMetric = existingMetrics[0] ?? null;
+    const deduped = existingMetric !== null;
+    const metricId = deduped ? existingMetric.id : crypto.randomUUID();
+
+    // Drizzle transaction: conditionally INSERT metrics + UPDATE labExtractions + INSERT auditLog
     await db.transaction(async (tx) => {
-      // INSERT metrics row — source: 'lab' (LAB-05)
-      await tx.insert(metrics).values({
-        id: metricId,
-        name: extraction.resolvedMetricName ?? extraction.rawAnalyteName,
-        value: approvedValue,
-        unit: approvedUnit,
-        category: extraction.resolvedCategory ?? "hematology",
-        subcategory: extraction.resolvedSubcategory ?? undefined,
-        timestamp: now,
-        improvement: (extraction.resolvedImprovement ?? "target range") as
-          | "higher is better"
-          | "lower is better"
-          | "target range",
-        referenceMin: extraction.resolvedReferenceMin ?? undefined,
-        referenceMax: extraction.resolvedReferenceMax ?? undefined,
-        optimalMin: extraction.resolvedOptimalMin ?? undefined,
-        optimalMax: extraction.resolvedOptimalMax ?? undefined,
-        source: "lab",
-        tenantId: extraction.tenantId,
-        subjectId: extraction.subjectId,
-      });
+      if (!deduped) {
+        // INSERT metrics row — source: 'lab' (LAB-05)
+        await tx.insert(metrics).values({
+          id: metricId,
+          name: analyteName,
+          value: approvedValue,
+          unit: approvedUnit,
+          category: extraction.resolvedCategory ?? "hematology",
+          subcategory: extraction.resolvedSubcategory ?? undefined,
+          timestamp: metricTimestamp,
+          improvement: (extraction.resolvedImprovement ?? "target range") as
+            | "higher is better"
+            | "lower is better"
+            | "target range",
+          referenceMin: extraction.resolvedReferenceMin ?? undefined,
+          referenceMax: extraction.resolvedReferenceMax ?? undefined,
+          optimalMin: extraction.resolvedOptimalMin ?? undefined,
+          optimalMax: extraction.resolvedOptimalMax ?? undefined,
+          source: "lab",
+          tenantId: extraction.tenantId,
+          subjectId: extraction.subjectId,
+        });
+      }
 
-      // UPDATE labExtractions → approved
+      // UPDATE labExtractions → approved; link to committed metric (existing or new)
       await tx
         .update(labExtractions)
         .set({
@@ -174,13 +203,13 @@ export async function action({ request }: Route.ActionArgs) {
         })
         .where(eq(labExtractions.id, extraction.id));
 
-      // D-13: auditLog — no PHI values
+      // D-13: auditLog — no PHI values; operation indicates dedup to avoid re-insert
       await tx.insert(auditLog).values({
         userId: user.id,
         role: user.role as AppRole,
         action: "approve",
         tableName: "metrics",
-        operation: "insert",
+        operation: deduped ? "dedup-link" : "insert",
         tenantId: extraction.tenantId,
         subjectId: extraction.subjectId,
         entityId: metricId,
@@ -191,7 +220,7 @@ export async function action({ request }: Route.ActionArgs) {
     // After approval: check if all extractions for this doc are terminal → purge pdfBytes
     await maybePurgeDocBytes(db, extraction.labDocumentId, now);
 
-    return { ok: true, action: "approve", metricId };
+    return { ok: true, action: "approve" as const, deduped, metricId };
   }
 
   if (intent === "reject") {
@@ -320,6 +349,19 @@ function ExtractionRow({
   const displayValue = extraction.approvedValue ?? extraction.rawValue;
   const displayUnit = extraction.approvedUnit ?? extraction.resolvedUnit ?? extraction.rawUnit;
 
+  // Detect dedup outcome from the last approve action response
+  const approveResult = fetcher.data && fetcher.data.action === "approve" ? fetcher.data : null;
+  const wasDeduped = approveResult?.deduped === true;
+
+  // Format collection date for dedup note
+  const collectionDateLabel = extraction.collectedAt
+    ? new Date(extraction.collectedAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
   return (
     <div
       onClick={onSelect}
@@ -346,7 +388,15 @@ function ExtractionRow({
           {displayName}
         </span>
         <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-          {isApproved ? "Approved" : isRejected ? "Rejected" : extraction.unrecognized ? "Unrecognized" : "Pending"}
+          {isApproved
+            ? wasDeduped
+              ? "Approved (linked)"
+              : "Approved"
+            : isRejected
+              ? "Rejected"
+              : extraction.unrecognized
+                ? "Unrecognized"
+                : "Pending"}
         </span>
       </div>
 
@@ -375,6 +425,20 @@ function ExtractionRow({
           </span>
         )}
       </div>
+
+      {/* Dedup note: shown when approve returns deduped=true */}
+      {wasDeduped && (
+        <div
+          style={{
+            marginTop: 6,
+            fontSize: "var(--text-xs)",
+            color: "var(--text-muted)",
+            fontStyle: "italic",
+          }}
+        >
+          Already in tracker{collectionDateLabel ? ` for ${collectionDateLabel}` : ""} — not duplicated
+        </div>
+      )}
 
       {/* Edit form */}
       {isPending && editing && (
