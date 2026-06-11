@@ -50,9 +50,15 @@ const mockState = vi.hoisted(() => ({
     approvedValue: number | null;
     approvedUnit: string | null;
     committedMetricId: string | null;
+    collectedAt: Date | null;
     createdAt: Date | null;
     updatedAt: Date | null;
   }>,
+  // existingMetrics: controls dedup query result (outer db.select for metrics)
+  // Empty array = no duplicate found; [{id}] = duplicate exists
+  existingMetrics: [] as Array<{ id: string }>,
+  // Call counter for outer db.select: 0=extractions lookup, 1=dedup metrics check
+  selectCallCount: 0,
   metricsInserted: [] as Array<Record<string, unknown>>,
   auditLogInserted: [] as Array<Record<string, unknown>>,
   extractionsUpdated: [] as Array<{ id: number; status: string }>,
@@ -62,11 +68,30 @@ const mockState = vi.hoisted(() => ({
 // Mock the DB module used by review.tsx action
 vi.mock("~/lib/db.server", () => ({
   getDb: () => ({
-    select: () => ({
-      from: () => ({
-        where: () => Promise.resolve(mockState.extractions),
-      }),
-    }),
+    select: (_cols?: unknown) => {
+      // Capture the call count at the time this select() is invoked.
+      // Call 0: extraction row lookup (labExtractions)
+      // Call 1: dedup metrics check (metrics)
+      // Call 2+: maybePurgeDocBytes inner selects (return [])
+      const callIndex = mockState.selectCallCount++;
+      return {
+        from: (_table?: unknown) => ({
+          where: (_cond?: unknown) => {
+            if (callIndex === 0) {
+              // First outer select: labExtractions lookup
+              return Promise.resolve(mockState.extractions);
+            } else if (callIndex === 1) {
+              // Second outer select: dedup metrics check
+              return {
+                limit: (_n?: number) => Promise.resolve(mockState.existingMetrics),
+              };
+            }
+            // Subsequent selects (maybePurgeDocBytes): no remaining pending_review
+            return Promise.resolve([]);
+          },
+        }),
+      };
+    },
     insert: (table: unknown) => ({
       values: (data: Record<string, unknown>) => {
         // Track which table is being inserted into
@@ -130,6 +155,23 @@ vi.mock("~/lib/db.server", () => ({
     },
   }),
 }));
+
+// Partial mock for authz: override requireUser to return a predictable owner user,
+// while keeping the real assertSubjectAccess and requireRole implementations.
+vi.mock("~/lib/authz.server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("~/lib/authz.server")>();
+  return {
+    ...actual,
+    requireUser: vi.fn().mockResolvedValue({
+      user: {
+        id: "user-001",
+        role: "owner",
+        tenantId: "tenant-001",
+      },
+      session: {},
+    }),
+  };
+});
 
 // ── GREEN now: assertSubjectAccess function contract (D-15) ──────────────────
 // These tests verify the authz primitive that the approve action MUST call.
@@ -328,5 +370,171 @@ describe("D-15 action sequence — assertSubjectAccess and no bulk-approve (LAB-
     for (const bulkIntent of bulkIntents) {
       expect(validIntents).not.toContain(bulkIntent);
     }
+  });
+});
+
+// ── GREEN: gap-closure — collectedAt timestamp + dedup behavior ───────────────
+// Coverage added for LAB-06-FIX (2026-06-10):
+//   (a) metric timestamp uses collectedAt when present; falls back to now when null
+//   (b) same-subject + same-analyte + same-day metric exists → no duplicate insert
+//   (c) no existing metric → inserts as before (deduped=false)
+
+describe("approve action — collectedAt timestamp + dedup (LAB-06-FIX)", () => {
+  // Helper: build a minimal pending_review extraction fixture with collectedAt support
+  function makeExtraction(
+    overrides: Partial<(typeof mockState.extractions)[0]> = {}
+  ): (typeof mockState.extractions)[0] {
+    return {
+      id: 42,
+      labDocumentId: "doc-001",
+      tenantId: "tenant-001",
+      subjectId: "subject-001",
+      rawAnalyteName: "Vitamin D",
+      rawValue: 32.5,
+      rawUnit: "ng/mL",
+      sourceTextSnippet: "Vitamin D 32.5 ng/mL",
+      pageNumber: 1,
+      confidence: "high",
+      rangeFlag: "normal",
+      unrecognized: false,
+      resolvedMetricName: "Vitamin D, 25-OH",
+      resolvedCategory: "vitamins",
+      resolvedSubcategory: "fat-soluble",
+      resolvedUnit: "ng/mL",
+      resolvedReferenceMin: 20,
+      resolvedReferenceMax: 80,
+      resolvedOptimalMin: 40,
+      resolvedOptimalMax: 80,
+      resolvedImprovement: "higher is better",
+      status: "pending_review" as const,
+      reviewedAt: null,
+      reviewedBy: null,
+      approvedValue: null,
+      approvedUnit: null,
+      committedMetricId: null,
+      collectedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
+    };
+  }
+
+  // Helper: build an approve request FormData
+  function makeApproveRequest(): Request {
+    const formData = new FormData();
+    formData.append("intent", "approve");
+    formData.append("extractionId", "42");
+    return new Request("http://localhost/ingest/review", {
+      method: "POST",
+      body: formData,
+    });
+  }
+
+  beforeEach(() => {
+    // Reset mock state before each test
+    mockState.extractions = [];
+    mockState.existingMetrics = [];
+    mockState.selectCallCount = 0;
+    mockState.metricsInserted = [];
+    mockState.auditLogInserted = [];
+    mockState.extractionsUpdated = [];
+    mockState.labDocumentsUpdated = [];
+  });
+
+  it("(a) metric timestamp uses collectedAt when present on the extraction", async () => {
+    const collectionDate = new Date("2025-03-15T00:00:00.000Z");
+    mockState.extractions = [makeExtraction({ collectedAt: collectionDate })];
+    mockState.existingMetrics = []; // no duplicate
+
+    const { action } = await import(
+      "~/routes/_app/ingest/review"
+    );
+    const result = await action({ request: makeApproveRequest() } as Parameters<typeof action>[0]);
+    const json = result as { ok: boolean; action: string; deduped: boolean; metricId: string };
+
+    expect(json.ok).toBe(true);
+    expect(json.deduped).toBe(false);
+    // The inserted metrics row should have timestamp === collectionDate
+    expect(mockState.metricsInserted).toHaveLength(1);
+    const inserted = mockState.metricsInserted[0];
+    expect(inserted.timestamp).toEqual(collectionDate);
+  });
+
+  it("(a) metric timestamp falls back to now when collectedAt is null", async () => {
+    const before = Date.now();
+    mockState.extractions = [makeExtraction({ collectedAt: null })];
+    mockState.existingMetrics = []; // no duplicate
+
+    const { action } = await import(
+      "~/routes/_app/ingest/review"
+    );
+    const result = await action({ request: makeApproveRequest() } as Parameters<typeof action>[0]);
+    const after = Date.now();
+    const json = result as { ok: boolean; action: string; deduped: boolean; metricId: string };
+
+    expect(json.ok).toBe(true);
+    expect(json.deduped).toBe(false);
+    expect(mockState.metricsInserted).toHaveLength(1);
+    const inserted = mockState.metricsInserted[0];
+    const ts = (inserted.timestamp as Date).getTime();
+    // Should be within the test execution window (fallback to now)
+    expect(ts).toBeGreaterThanOrEqual(before);
+    expect(ts).toBeLessThanOrEqual(after + 500); // 500ms buffer
+  });
+
+  it("(b) dedup: same-subject + same-analyte + same-day metric exists → no duplicate insert, deduped=true", async () => {
+    const existingId = "existing-metric-uuid";
+    mockState.extractions = [
+      makeExtraction({ collectedAt: new Date("2025-03-15T10:00:00.000Z") }),
+    ];
+    // Simulate dedup hit: a metric with the same id exists
+    mockState.existingMetrics = [{ id: existingId }];
+
+    const { action } = await import(
+      "~/routes/_app/ingest/review"
+    );
+    const result = await action({ request: makeApproveRequest() } as Parameters<typeof action>[0]);
+    const json = result as { ok: boolean; action: string; deduped: boolean; metricId: string };
+
+    expect(json.ok).toBe(true);
+    expect(json.deduped).toBe(true);
+    expect(json.metricId).toBe(existingId);
+    // NO new metrics row should have been inserted
+    expect(mockState.metricsInserted).toHaveLength(0);
+    // extractionsUpdated[0] = labExtractions update (from tx), [1] = labDocuments purge (maybePurge)
+    // There must be at least 1 update (the extraction approval)
+    expect(mockState.extractionsUpdated.length).toBeGreaterThanOrEqual(1);
+    // First update is the labExtractions approval
+    const updated = mockState.extractionsUpdated[0] as Record<string, unknown>;
+    expect(updated.committedMetricId).toBe(existingId);
+    expect(updated.status).toBe("approved");
+    // Audit log operation should indicate dedup
+    expect(mockState.auditLogInserted).toHaveLength(1);
+    const audit = mockState.auditLogInserted[0];
+    expect(audit.operation).toBe("dedup-link");
+  });
+
+  it("(c) no existing metric → inserts new metrics row, deduped=false", async () => {
+    mockState.extractions = [
+      makeExtraction({ collectedAt: new Date("2025-04-10T00:00:00.000Z") }),
+    ];
+    mockState.existingMetrics = []; // no duplicate
+
+    const { action } = await import(
+      "~/routes/_app/ingest/review"
+    );
+    const result = await action({ request: makeApproveRequest() } as Parameters<typeof action>[0]);
+    const json = result as { ok: boolean; action: string; deduped: boolean; metricId: string };
+
+    expect(json.ok).toBe(true);
+    expect(json.deduped).toBe(false);
+    // Exactly one new metrics row inserted
+    expect(mockState.metricsInserted).toHaveLength(1);
+    const inserted = mockState.metricsInserted[0];
+    expect(inserted.source).toBe("lab");
+    expect(inserted.name).toBe("Vitamin D, 25-OH"); // resolved name used
+    // Audit log operation should be 'insert'
+    expect(mockState.auditLogInserted).toHaveLength(1);
+    expect(mockState.auditLogInserted[0].operation).toBe("insert");
   });
 });
