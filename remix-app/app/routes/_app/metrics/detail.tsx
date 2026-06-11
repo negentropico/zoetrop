@@ -17,7 +17,7 @@ import { StatusBadge } from "~/components/ui/StatusBadge";
 import { RangeBar } from "~/components/ui/RangeBar";
 import type { MetricWithRange } from "~/components/ui/RangeBar";
 import { DataTable } from "~/components/ui/DataTable";
-import { Crumb } from "~/components/ui/Crumb";
+import { PageHeader } from "~/components/ui/PageHeader";
 import { Badge } from "~/components/ui/Badge";
 
 function isValidCategory(category: string): category is MetricCategory {
@@ -113,69 +113,37 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      {/* Breadcrumb — right-aligned meta row (matches PageHeader crumbs-only treatment) */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-        <Crumb
-          items={[
-            { label: "Metrics", to: "/metrics" },
-            { label: categoryInfo.label, to: `/metrics/${category}` },
-            { label: metric.name },
-          ]}
-        />
-      </div>
-
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 24,
-          flexWrap: "wrap",
-          marginBottom: "var(--gap-2xl)",
-        }}
-      >
-        <div style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 600, lineHeight: 1.1, whiteSpace: "nowrap" }}>
-              {metric.name}
-            </h1>
-            <StatusBadge status={status} />
+      <PageHeader
+        eyebrow={`Last updated ${format(parseISO(metric.timestamp), "MMM d, yyyy")}${metric.source ? ` · ${metric.source}` : ""}`}
+        title={metric.name}
+        titleAccessory={<StatusBadge status={status} />}
+        crumbs={[
+          { label: "Metrics", to: "/metrics" },
+          { label: categoryInfo.label, to: `/metrics/${category}` },
+          { label: metric.name },
+        ]}
+        right={
+          <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+            <span className="zt-readout" style={{ fontSize: "var(--text-3xl)" }}>
+              {metric.value.toFixed(2)}
+            </span>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-sm)",
+                color: "var(--text-muted)",
+                // No text-transform: clinical units are case-sensitive and
+                // uppercasing the micro sign µ (U+00B5) maps it to Greek capital
+                // mu Μ (U+039C), rendering "µmol/L" as "MMOL/L".
+                letterSpacing: "0.08em",
+                marginTop: 2,
+              }}
+            >
+              {metric.unit}
+            </div>
           </div>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-            }}
-          >
-            Last updated {format(parseISO(metric.timestamp), "MMM d, yyyy")}
-            {metric.source ? ` · ${metric.source}` : ""}
-          </p>
-        </div>
-        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-          <span className="zt-readout" style={{ fontSize: "var(--text-3xl)" }}>
-            {metric.value.toFixed(2)}
-          </span>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-muted)",
-              // No text-transform: clinical units are case-sensitive and
-              // uppercasing the micro sign µ (U+00B5) maps it to Greek capital
-              // mu Μ (U+039C), rendering "µmol/L" as "MMOL/L".
-              letterSpacing: "0.08em",
-              marginTop: 2,
-            }}
-          >
-            {metric.unit}
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Range status */}
       <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
