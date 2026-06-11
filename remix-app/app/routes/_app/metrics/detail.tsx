@@ -116,6 +116,7 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
       {/* Breadcrumb */}
       <Crumb
         items={[
+          { label: "zoetrope", to: "/dashboard" },
           { label: "Metrics", to: "/metrics" },
           { label: categoryInfo.label, to: `/metrics/${category}` },
           { label: metric.name },

@@ -213,7 +213,7 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       {/* Breadcrumb */}
-      <Crumb items={[{ label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]} />
+      <Crumb items={[{ label: "zoetrope", to: "/dashboard" }, { label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]} />
 
       {/* Category header */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: "var(--gap-xl)" }}>

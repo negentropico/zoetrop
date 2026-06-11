@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 Phase: 05 (lab-ingest-pipeline) — EXECUTING
 Plan: 3 of 3 — code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification
 Status: 05-03 code deliverables done (LAB-04/LAB-05/LAB-06 implemented); awaiting owner E2E UAT on Vercel preview, then phase verification (orchestrator)
-Last activity: 2026-06-10
+Last activity: 2026-06-11 - Completed quick task 260610-q56: consolidated left sidebar nav chrome refactor (on `left-nav-refactor` worktree branch)
 
 Progress: [██████████] 99%
 
@@ -124,6 +124,12 @@ Recent decisions affecting current work:
 
 - [Phase 7 gate]: LLM provider BAA + Neon/Vercel BAAs + Neon HIPAA-mode + pgAudit verification — deferred to Phase 7 (pre-client gate). NOT a blocker for the single-user pilot (standard-tier infra + subscription API). Required before any external client's PHI.
 - [Phase 7 risk]: RLS retrofit on 8 live tables is the highest-risk migration (now Phase 7). Rehearse on a Neon branch; RLS-enable + policies in one atomic migration (Pitfall 2). Phase 3 adds the tenant/subject columns up front so this retrofit is non-breaking.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260610-q56 | Consolidated left sidebar nav chrome refactor (prototype port: rail+accordion+flyout, cookie collapse, mobile drawer, breadcrumbs, routes flatten + /ingest index fix) — branch `left-nav-refactor` | 2026-06-11 | f585795 | [260610-q56-refactor-app-chrome-to-consolidated-left](./quick/260610-q56-refactor-app-chrome-to-consolidated-left/) |
 
 ## Deferred Items
 
