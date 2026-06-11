@@ -31,6 +31,9 @@ export interface NavChild {
   end?: boolean;
   /** Breadcrumb-only — never rendered in the accordion or flyout. */
   hidden?: boolean;
+  /** Page renders its own loader-derived Crumb — the shell must not (e.g.
+   *  /metrics/:category, which is both a nav child and a param route). */
+  ownCrumb?: boolean;
 }
 
 export interface NavGroup {
@@ -71,6 +74,7 @@ export const NAV_TREE: NavGroup[] = [
       ...categories.map((cat) => ({
         label: CATEGORY_INFO[cat].label,
         to: `/metrics/${cat}`,
+        ownCrumb: true,
       })),
     ],
   },
@@ -155,6 +159,7 @@ export function crumbsForPath(pathname: string): CrumbItem[] | null {
   }
   const child = group.children?.find((c) => pathname === c.to);
   if (!child) return null; // deeper than an exact child — page owns its Crumb
+  if (child.ownCrumb) return null; // child route renders its own Crumb
   return [
     { label: "zoetrope", to: "/dashboard" },
     { label: group.label, to: group.base },
