@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-11T22:43:45Z",
+  "phase": "06",
+  "phase_name": "engine-promotion-confidence-graded-reports",
+  "phase_dir": ".planning/phases/06-engine-promotion-confidence-graded-reports",
+  "workflow": "plan-phase",
+  "status": "paused",
+  "position": "plan-phase revision loop, iteration 1 of 3 — plan-checker ran (5 blockers + 3 warnings); revision pass 1 was dispatched but NOT applied (planner agent terminated before applying).",
+  "completed_tasks": [
+    {"id": 1, "name": "Research (gsd-phase-researcher) → 06-RESEARCH.md", "status": "done", "commit": "73a8d67"},
+    {"id": 2, "name": "Validation strategy → 06-VALIDATION.md", "status": "done", "commit": "56dd8b2"},
+    {"id": 3, "name": "Pattern map (gsd-pattern-mapper) → 06-PATTERNS.md", "status": "done", "commit": "7b4b463"},
+    {"id": 4, "name": "Plans (gsd-planner) → 5 PLAN.md in 3 waves", "status": "done", "commit": "77665d2"},
+    {"id": 5, "name": "Plan check (gsd-plan-checker) → ISSUES FOUND (5 blockers, 3 warnings)", "status": "done", "commit": null}
+  ],
+  "remaining_tasks": [
+    {"id": 6, "name": "Apply revision pass 1 to the 5 plans (resolutions already decided — see decisions[])", "status": "not_started"},
+    {"id": 7, "name": "Re-run gsd-plan-checker on revised plans (step 10/11)", "status": "not_started"},
+    {"id": 8, "name": "Set 06-VALIDATION.md nyquist_compliant: true once Wave-0 coverage confirmed in revised plans", "status": "not_started"},
+    {"id": 9, "name": "Requirements coverage gate (step 13) + Decision coverage gate (step 13a, BLOCKING)", "status": "not_started"},
+    {"id": 10, "name": "Record planning completion: gsd-sdk query state.planned-phase (step 13b)", "status": "not_started"},
+    {"id": 11, "name": "Annotate ROADMAP wave deps: gsd-sdk query roadmap.annotate-dependencies 06 (step 13c)", "status": "not_started"},
+    {"id": 12, "name": "Commit revised plans + STATE + ROADMAP (step 13d, commit_docs=true)", "status": "not_started"},
+    {"id": 13, "name": "Post-planning gap analysis (step 13e) + present <offer_next> (step 14). No auto-advance (auto flags false).", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "SendMessage to the completed 'phase6-planner' agent failed ('No agent named phase6-planner is currently addressable'). The agent terminated after returning PLANNING COMPLETE.", "type": "technical", "workaround": "On resume, spawn a FRESH gsd-planner (model: opus) in revision mode with the FULL revision context embedded (a fresh agent has no prior context — include the files_to_read list AND the verbatim revision instructions captured in .continue-here.md)."}
+  ],
+  "human_actions_pending": [],
+  "decisions": [
+    {"decision": "DB target for Phase 6 is Neon (NOT Supabase).", "rationale": "ROADMAP SC1/SC3 + CONTEXT D-03/D-05 (migration discipline DATA-03) are explicit about Neon. The staged Supabase move is a separate future migration, out of scope here. The memory note 'confirm DB target before Phase 6 planning' is resolved: Neon.", "phase": "06"},
+    {"decision": "Engine module is app/lib/engine.server.ts (NOT engine.ts).", "rationale": "Locked decision D-01 AND ROADMAP SC2 both name engine.server.ts. D-01 pre-empts the portability rationale ('.server.ts suffix is bundle-hygiene only; module must remain import-pure regardless'). The suffix is a Vite client-bundle convention — imports fine from vitest/Node, so SC2 'callable from a Node script' holds. The researcher recommended engine.ts but that contradicts the locked decision; honoring D-01 needs no ROADMAP amendment. THE 5 PLANS CURRENTLY USE engine.ts AND MUST BE RENAMED.", "phase": "06"},
+    {"decision": "Revision pass 1 resolutions are all DECIDED (see .continue-here.md 'Revision Instructions'). Do not re-litigate; apply them.", "rationale": "B1 rename engine.server.ts everywhere; B2 split 06-02 Task 1 (Wave-0 tests RED-first, ≤5 files/task); B3 add ENG-03 metric-rule eval unit test; B4 DisclaimerCallout assertion uses test.skip so vitest exits 0; W1 move non-null-K content truths from 06-02 to 06-03; W2 add reports/layout.tsx sub-layout; W3 folds into B3; plus fix 06-03 Task 3 files_modified consumer filename.", "phase": "06"}
+  ],
+  "uncommitted_files": [".planning/STATE.md (pre-existing modification, not from this session)"],
+  "next_action": "Resume plan-phase 6 at the revision step: spawn a fresh gsd-planner (opus) in revision mode with the verbatim revision instructions from .continue-here.md, then re-run gsd-plan-checker, then finish steps 13–14.",
+  "context_notes": "Standard /gsd-plan-phase 6 flow. yolo config but auto_advance=false, so finish with <offer_next> (manual), not auto-advance to execute. All gates already cleared: closed-phase (Pending), AI-SPEC (skipped — engine is deterministic, no runtime LLM), UI (06-UI-SPEC.md approved), schema-push (Drizzle → [BLOCKING] db:generate→db:migrate injected into 06-02), nyquist (06-VALIDATION.md present), security (ASVS L1, block-on high → threat_model required on report-path plans). phase_req_ids: ENG-01, ENG-02, ENG-03, RPT-01, RPT-02, RPT-03. Shared-tree caution: commit with explicit --files, never git add -A (other sessions write to .planning/)."
+}
