@@ -1,16 +1,14 @@
 // AppShell — consolidated left-nav chrome for all authenticated routes.
 // MobileTopBar (≤760px hamburger) + Sidebar (264px expanded / 64px rail /
 // off-canvas drawer) + class-driven content offset (.zn-app / .is-collapsed)
-// + shell-wide breadcrumbs (crumbsForPath) + footer eyebrow.
+// + footer eyebrow. Breadcrumbs are owned by PageHeader (meta row), not the shell.
 // Collapse state: initialized from the zt-nav cookie via the _app/layout.tsx
 // loader (SSR-consistent — no flash), written client-side on toggle.
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "react-router";
 import { Sidebar } from "./Sidebar";
 import { MobileTopBar } from "./MobileTopBar";
-import { Crumb } from "../ui/Crumb";
 import { SpiralMark } from "../ui/SpiralMark";
-import { crumbsForPath } from "./nav-tree";
 
 interface AppShellProps {
   children: ReactNode;
@@ -58,8 +56,6 @@ export function AppShell({ children, user, navCollapsed }: AppShellProps) {
     };
   }, [mobileOpen]);
 
-  const crumbs = crumbsForPath(pathname);
-
   return (
     <div
       className={
@@ -83,7 +79,6 @@ export function AppShell({ children, user, navCollapsed }: AppShellProps) {
       )}
       <main className="zn-main">
         <div className="zn-page">
-          {crumbs && <Crumb items={crumbs} />}
           {children}
           <footer
             style={{

@@ -144,25 +144,19 @@ export function isChildActive(pathname: string, child: NavChild): boolean {
   return pathname === child.to || pathname.startsWith(child.to + "/");
 }
 
-/** Shell-wide breadcrumb items for `pathname`, or null when the shell should
- *  not render a crumb: /dashboard, and anything deeper than an exact child
- *  (param routes own their loader-derived Crumbs). */
+/** Breadcrumb items for `pathname`, or null when no crumb should render.
+ *  Crumbs appear only at depth >= 2 (group + child) — no zoetrope segment,
+ *  and single-segment crumbs (/settings, group bases) are suppressed as pure
+ *  title duplication. Anything deeper than an exact child (param routes) owns
+ *  its loader-derived Crumb. */
 export function crumbsForPath(pathname: string): CrumbItem[] | null {
   if (pathname === "/dashboard") return null;
-  if (pathname === "/settings") {
-    return [{ label: "zoetrope", to: "/dashboard" }, { label: "Account settings" }];
-  }
+  if (pathname === "/settings") return null; // single segment — title duplication
   const group = groupOfPath(pathname);
   if (!group || group.id === "dashboard") return null;
-  if (pathname === group.base) {
-    return [{ label: "zoetrope", to: "/dashboard" }, { label: group.label }];
-  }
+  if (pathname === group.base) return null; // single segment — title duplication
   const child = group.children?.find((c) => pathname === c.to);
   if (!child) return null; // deeper than an exact child — page owns its Crumb
   if (child.ownCrumb) return null; // child route renders its own Crumb
-  return [
-    { label: "zoetrope", to: "/dashboard" },
-    { label: group.label, to: group.base },
-    { label: child.label },
-  ];
+  return [{ label: group.label, to: group.base }, { label: child.label }];
 }

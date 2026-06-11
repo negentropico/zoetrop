@@ -212,8 +212,10 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Crumb items={[{ label: "zoetrope", to: "/dashboard" }, { label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]} />
+      {/* Breadcrumb — right-aligned meta row (matches PageHeader crumbs-only treatment) */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+        <Crumb items={[{ label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]} />
+      </div>
 
       {/* Category header */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: "var(--gap-xl)" }}>

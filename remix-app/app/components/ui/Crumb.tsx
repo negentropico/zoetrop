@@ -28,7 +28,6 @@ export function Crumb({ items }: CrumbProps) {
         textTransform: "uppercase",
         letterSpacing: "0.08em",
         color: "var(--text-muted)",
-        marginBottom: "var(--gap-lg)",
       }}
     >
       {items.map((it, i) => (
