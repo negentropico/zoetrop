@@ -217,8 +217,8 @@ interface KGradeBadgeProps {
 | Font weight | 400 |
 | Letter spacing | 0.06em |
 | Text transform | uppercase |
-| Padding (chip) | 4px 9px |
-| Padding (inline) | 2px 6px |
+| Padding (chip) | 4px 8px |
+| Padding (inline) | 2px 4px |
 | Border radius | `--radius-pill` |
 | Line height | 1 |
 
@@ -333,10 +333,10 @@ interface DisclaimerCalloutProps {
 | Background | `var(--excess-bg)` (`#f7edd8` / dark `#362c14`) |
 | Left border | `3px solid var(--energy)` |
 | Border radius | `var(--radius-md)` (7px) on right side; `0` on left side (the accent stripe goes to the edge) |
-| Padding | `12px 14px` |
+| Padding | `12px 16px` |
 | Margin top | `12px` (gap from recommendation text) |
 | Icon | `alert-triangle` from lucide, 16px, `color: var(--energy-600)`, `flex-shrink: 0` |
-| Icon + text layout | `display: flex; gap: 10px; align-items: flex-start` |
+| Icon + text layout | `display: flex; gap: 8px; align-items: flex-start` |
 | Text | `--text-sm` 14px Hanken Grotesk weight 400 `--text-secondary` line-height 1.5 |
 | Locked string | "This recommendation is speculative (limited evidence). Discuss with a licensed practitioner before acting." |
 
