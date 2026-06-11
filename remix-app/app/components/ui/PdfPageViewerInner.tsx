@@ -1,5 +1,6 @@
 /**
- * PdfPageViewerInner.tsx — Client-ONLY PDF page renderer with text-layer snippet highlight.
+ * PdfPageViewerInner.tsx — Client-ONLY PDF page renderer with text-layer snippet
+ * highlight and multi-page navigation.
  *
  * ⚠️ Never import this module from server code, a loader, or a top-level route
  * module import. It pulls in react-pdf → pdfjs-dist, whose module evaluation
@@ -19,12 +20,14 @@
  * Worker config at module level (one-time setup, not per-render).
  *
  * LAB-04 / D-06: Renders the real PDF page beside extracted fields with the
- * grounded sourceTextSnippet highlighted.
+ * grounded sourceTextSnippet highlighted. The viewer auto-jumps to the selected
+ * extraction's page and lets the reviewer page through the full document for
+ * context (prev/next + "jump to highlighted page").
  */
 
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -43,7 +46,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export interface PdfPageViewerProps {
   /** URL of the PDF to render — should point to /ingest/documents/:id */
   pdfUrl: string;
-  /** 1-based page number to display */
+  /** 1-based page number the selected extraction is grounded on */
   pageNumber: number;
   /** Verbatim text snippet from the PDF to locate and highlight (D-06) */
   highlightSnippet?: string;
@@ -105,6 +108,38 @@ function applyTextLayerHighlight(
   }
 }
 
+// ── Nav button ───────────────────────────────────────────────────────────────
+
+function NavButton({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        background: "var(--surface-2)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-sm)",
+        padding: "4px 10px",
+        fontSize: "var(--text-xs)",
+        color: disabled ? "var(--text-muted)" : "var(--text-secondary)",
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function PdfPageViewerInner({
@@ -114,19 +149,30 @@ export function PdfPageViewerInner({
   width = 600,
 }: PdfPageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  // The page currently shown. Initialised to the extraction's page and re-synced
+  // whenever a different extraction is selected; also user-navigable.
+  const [currentPage, setCurrentPage] = useState(pageNumber);
 
-  // Re-apply highlights whenever the snippet or pageNumber changes
-  // (the text layer may already be in the DOM from a previous render)
+  // When the selected extraction changes, jump to its grounded page.
   useEffect(() => {
-    if (!highlightSnippet || !containerRef.current) return;
+    setCurrentPage(pageNumber);
+  }, [pageNumber]);
+
+  // The snippet only belongs on the extraction's own page — don't highlight
+  // (and don't search) while the reviewer is browsing other pages.
+  const onSnippetPage = currentPage === pageNumber;
+
+  // Re-apply highlights whenever the snippet or the shown page changes.
+  useEffect(() => {
+    if (!onSnippetPage || !highlightSnippet || !containerRef.current) return;
     applyTextLayerHighlight(containerRef.current, highlightSnippet);
-  }, [highlightSnippet, pageNumber]);
+  }, [highlightSnippet, currentPage, onSnippetPage]);
 
   function handlePageRenderSuccess() {
-    // Text layer renders slightly after the page — small delay to let it settle
-    if (!highlightSnippet || !containerRef.current) return;
+    // Text layer renders slightly after the page — poll briefly for it.
+    if (!onSnippetPage || !highlightSnippet || !containerRef.current) return;
     const container = containerRef.current;
-    // Poll briefly for the text layer to appear (it renders after the canvas)
     const maxWait = 2000;
     const interval = 100;
     let elapsed = 0;
@@ -144,16 +190,16 @@ export function PdfPageViewerInner({
     }, interval);
   }
 
+  const canPrev = currentPage > 1;
+  const canNext = numPages != null && currentPage < numPages;
+
   return (
     <div
-      ref={containerRef}
       style={{
-        position: "relative",
-        overflow: "auto",
-        maxHeight: 700,
         border: "1px solid var(--border)",
         borderRadius: "var(--radius-md)",
         background: "var(--surface-sunken)",
+        overflow: "hidden",
       }}
     >
       {/* Inline style for snippet highlight — injected once */}
@@ -165,53 +211,94 @@ export function PdfPageViewerInner({
         }
       `}</style>
 
-      <Document
-        file={pdfUrl}
-        loading={
-          <div
-            style={{
-              padding: "40px 24px",
-              textAlign: "center",
-              color: "var(--text-muted)",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            Loading PDF...
-          </div>
-        }
-        error={
-          <div
-            style={{
-              padding: "40px 24px",
-              textAlign: "center",
-              color: "var(--danger)",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            Failed to load PDF. The file may have been purged after review was completed.
-          </div>
-        }
-        noData={
-          <div
-            style={{
-              padding: "40px 24px",
-              textAlign: "center",
-              color: "var(--text-muted)",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            No PDF data available.
-          </div>
-        }
+      {/* Page navigation bar */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "8px 12px",
+          borderBottom: "1px solid var(--border)",
+          background: "var(--surface-2)",
+        }}
       >
-        <Page
-          pageNumber={pageNumber}
-          renderTextLayer={true}
-          renderAnnotationLayer={false}
-          width={width}
-          onRenderSuccess={handlePageRenderSuccess}
-        />
-      </Document>
+        <NavButton onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={!canPrev}>
+          ← Prev
+        </NavButton>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-xs)",
+            color: "var(--text-muted)",
+            minWidth: 80,
+            textAlign: "center",
+          }}
+        >
+          Page {currentPage}
+          {numPages ? ` / ${numPages}` : ""}
+        </span>
+        <NavButton onClick={() => setCurrentPage((p) => (numPages ? Math.min(numPages, p + 1) : p + 1))} disabled={!canNext}>
+          Next →
+        </NavButton>
+        {!onSnippetPage && (
+          <NavButton onClick={() => setCurrentPage(pageNumber)}>
+            ⤴ Jump to highlighted (p.{pageNumber})
+          </NavButton>
+        )}
+      </div>
+
+      {/* Scrollable page area */}
+      <div ref={containerRef} style={{ overflow: "auto", maxHeight: 660 }}>
+        <Document
+          file={pdfUrl}
+          onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+          loading={
+            <div
+              style={{
+                padding: "40px 24px",
+                textAlign: "center",
+                color: "var(--text-muted)",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              Loading PDF...
+            </div>
+          }
+          error={
+            <div
+              style={{
+                padding: "40px 24px",
+                textAlign: "center",
+                color: "var(--danger)",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              Failed to load PDF. The file may have been purged after review was completed.
+            </div>
+          }
+          noData={
+            <div
+              style={{
+                padding: "40px 24px",
+                textAlign: "center",
+                color: "var(--text-muted)",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              No PDF data available.
+            </div>
+          }
+        >
+          <Page
+            key={currentPage}
+            pageNumber={currentPage}
+            renderTextLayer={true}
+            renderAnnotationLayer={false}
+            width={width}
+            onRenderSuccess={handlePageRenderSuccess}
+          />
+        </Document>
+      </div>
     </div>
   );
 }
