@@ -36,9 +36,16 @@ import { Dropzone } from "~/components/ui/Dropzone";
 import type { AppRole } from "~/lib/authz.server";
 
 // ── Vercel function config ─────────────────────────────────────────────────
-// maxDuration: 120s — allows the response to return quickly while the worker
-// runs in the background for up to 120s (well within the 800s Pro plan cap).
-export const config = { maxDuration: 120 };
+// NOTE: We intentionally do NOT set a per-route `export const config` here.
+// The @vercel/react-router preset compiles one serverless function PER unique
+// route config, so a per-route `maxDuration` would split this route into its
+// own bundle. Under that split, React Router single-fetch `.data` requests for
+// OTHER routes (e.g. POST /ingest/consent.data from the hydrated consent form)
+// get mis-routed across bundles and 404 — which broke the upload→consent flow.
+// Keeping all routes on one default bundle makes `.data` routing correct.
+// Background extraction duration is covered by Fluid compute (enabled on the
+// project), which keeps the function alive for waitUntil() work; a single lab
+// PDF extraction completes well within the default window.
 
 // ── Meta ───────────────────────────────────────────────────────────────────
 
