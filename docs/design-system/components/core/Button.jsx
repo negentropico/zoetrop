@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope Button — the primary action primitive.
+ * Zoetrop Button — the primary action primitive.
  * Self-contained: styling via CSS custom properties from styles.css.
  */
 export function Button({

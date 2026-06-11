@@ -1,7 +1,7 @@
 # Design-roundtrip harness — the round protocol
 
 Tooling + protocol for design roundtrips between this repo and claude.ai/design
-(driven by the **zoetrope-design** skill bundle, the brand source of truth).
+(driven by the **zoetrop-design** skill bundle, the brand source of truth).
 Built after round 2 returned a 1.6MB self-decoding bundler HTML that had to be
 hand-decoded — see `../round2/README.md` for the pain points.
 
@@ -22,7 +22,7 @@ docs/design-system/_rounds/
    return), BRIEF (the design ask), `current-state/` snapshots generated from the
    repo (app.css, nav-tree.ts, routes.md, components.md), and a **copy of
    `RETURN-SPEC.md`** from this directory (the return contract — keep it byte-identical).
-2. **Send** with the zoetrope-design skill bundle in claude.ai/design.
+2. **Send** with the zoetrop-design skill bundle in claude.ai/design.
 3. **Drop the return** into `roundN/return/` exactly as received — never edit the raw drop.
 4. **Unbundle** (if the return includes a standalone bundler HTML):
    `node harness/unbundle.mjs "roundN/return/<file>.html" roundN/extracted/`

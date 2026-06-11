@@ -1,5 +1,5 @@
 /* Screens 02 + 03 — Metrics overview & Category (shared left nav) */
-const { Card: ZCard } = window.ZoetropeDesignSystem_48aebc;
+const { Card: ZCard } = window.ZoetropDesignSystem_48aebc;
 
 /* left section nav — reused by category + detail (Q4: scrolls horizontally on mobile) */
 function CategoryNav({ activeCat }) {

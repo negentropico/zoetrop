@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope Switch — on/off toggle. On-color maps to a metric family.
+ * Zoetrop Switch — on/off toggle. On-color maps to a metric family.
  */
 export function Switch({ checked = false, onChange, tone = 'focus', size = 'md', disabled = false, label = null, style = {}, ...rest }) {
   const dims = size === 'sm' ? { w: 38, h: 22, k: 16 } : { w: 48, h: 28, k: 22 };

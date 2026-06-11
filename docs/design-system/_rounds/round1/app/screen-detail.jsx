@@ -1,5 +1,5 @@
 /* Screen 04 — Metric detail (chart language for the whole product) */
-const { Card: DCard, MetricRing: DRing, Badge: DBadge } = window.ZoetropeDesignSystem_48aebc;
+const { Card: DCard, MetricRing: DRing, Badge: DBadge } = window.ZoetropDesignSystem_48aebc;
 
 function detailHistory(m) {
   if (m.history) return m.history;

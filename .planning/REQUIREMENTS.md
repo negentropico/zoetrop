@@ -58,7 +58,7 @@
 
 ### UI / Design System
 
-- [x] **UI-01**: All product UI surfaces conform to the Zoetrope design system — brand tokens (color / type / spacing / shadow / radius), typed signature components, and the calm "quiet coach" voice — governed by a binding `UI-SPEC.md` that subsequent UI phases build against
+- [x] **UI-01**: All product UI surfaces conform to the Zoetrop design system — brand tokens (color / type / spacing / shadow / radius), typed signature components, and the calm "quiet coach" voice — governed by a binding `UI-SPEC.md` that subsequent UI phases build against
 
 ## v2 Requirements
 

@@ -1,10 +1,10 @@
 ---
-name: zoetrope-design
-description: Use this skill to generate well-branded interfaces and assets for Zoetrope, a health & wellness tracking product, either for production or throwaway prototypes/mocks/etc. Contains essential design guidelines, colors, type, fonts, assets, and UI kit components for prototyping.
+name: zoetrop-design
+description: Use this skill to generate well-branded interfaces and assets for Zoetrop, a health & wellness tracking product, either for production or throwaway prototypes/mocks/etc. Contains essential design guidelines, colors, type, fonts, assets, and UI kit components for prototyping.
 user-invocable: true
 ---
 
-# Zoetrope Design System
+# Zoetrop Design System
 
 Read the **README.md** file within this skill first — it holds the brand context,
 content fundamentals, visual foundations, iconography, and a full file index.
@@ -17,7 +17,7 @@ Then explore the other files as needed.
 - `guidelines/` — foundation specimen cards (Colors / Type / Spacing / Brand).
 - `components/` — reusable React primitives (Button, IconButton, Badge, Avatar,
   Card, Input, Switch, SegmentedControl, MetricRing, ProgressBar, Stat).
-- `ui_kits/app/` — the Zoetrope mobile app, a full interactive recreation.
+- `ui_kits/app/` — the Zoetrop mobile app, a full interactive recreation.
 - `slides/` — branded sample slide templates (1280×720).
 
 ## How to work

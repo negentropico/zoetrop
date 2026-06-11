@@ -6,7 +6,7 @@
 <domain>
 ## Task Boundary
 
-Design roundtrips (claude.ai/design + the zoetrope-design skill bundle) bring back prototype artifacts that must be integrated into `remix-app/`. Round 1 (full redesign) returned clean source files in `docs/design-system/_rounds/round1/`. Round 2 (left nav) returned a 1.6MB self-decoding "bundler" HTML + loose jsx dumped in untracked `_notes/` — integration required hand-decoding a JSON-embedded template, sieving new CSS from token duplicates, and re-mapping prototype idioms onto app equivalents. Build a harness so future returns integrate rapidly, archive round2, and prep the round3 outbound package in `docs/design-system/_rounds/round3/`.
+Design roundtrips (claude.ai/design + the zoetrop-design skill bundle) bring back prototype artifacts that must be integrated into `remix-app/`. Round 1 (full redesign) returned clean source files in `docs/design-system/_rounds/round1/`. Round 2 (left nav) returned a 1.6MB self-decoding "bundler" HTML + loose jsx dumped in untracked `_notes/` — integration required hand-decoding a JSON-embedded template, sieving new CSS from token duplicates, and re-mapping prototype idioms onto app equivalents. Build a harness so future returns integrate rapidly, archive round2, and prep the round3 outbound package in `docs/design-system/_rounds/round3/`.
 
 </domain>
 
@@ -46,7 +46,7 @@ Design roundtrips (claude.ai/design + the zoetrope-design skill bundle) bring ba
    - Crude-but-honest string parsing is fine (strip comments, split on `}` boundaries); note its limits in --help.
 3. **`README.md`** (harness): the **round protocol** —
    - Directory layout per round: `roundN/package/` (outbound), `roundN/return/` (inbound raw drop — bundler HTML, loose files, screenshots), `roundN/extracted/` (unbundle.mjs output + css-delta report).
-   - Workflow: prep package (copy RETURN-SPEC in) → send with the zoetrope-design skill → drop return into `roundN/return/` → `unbundle.mjs` → `css-delta.mjs` → integrate via `/gsd-quick` with an approved plan (this exact flow shipped the left nav in 3 quick tasks; cite q56/rj2/rwg as the reference run).
+   - Workflow: prep package (copy RETURN-SPEC in) → send with the zoetrop-design skill → drop return into `roundN/return/` → `unbundle.mjs` → `css-delta.mjs` → integrate via `/gsd-quick` with an approved plan (this exact flow shipped the left nav in 3 quick tasks; cite q56/rj2/rwg as the reference run).
    - History table: round1 (full redesign, clean source), round2 (left nav, bundler HTML in _notes — the pain that motivated this harness), round3 (prepped, outbound).
 4. **`RETURN-SPEC.md`** (harness master copy; ALSO copied into round3/package/): the contract for what the design side returns. Key clauses:
    - Deliver **loose source files**, not only a standalone bundle: `app/*.jsx` per screen/component + ONE `new.css` containing ONLY rules/vars not already in the included `app.css` snapshot (no token redefinitions, no dark-remap duplication, no radius re-declarations).
@@ -57,7 +57,7 @@ Design roundtrips (claude.ai/design + the zoetrope-design skill bundle) bring ba
    - Breakpoint is 760px; dark theme via `html[data-theme="dark"]` var remap only.
 
 ### Round3 package — `docs/design-system/_rounds/round3/package/`
-- `README.md`: what this package is; contents map; the deployed preview URL note (basic-auth, credentials out-of-band); pointer to the zoetrope-design skill bundle as the brand source of truth; return instructions = RETURN-SPEC.md.
+- `README.md`: what this package is; contents map; the deployed preview URL note (basic-auth, credentials out-of-band); pointer to the zoetrop-design skill bundle as the brand source of truth; return instructions = RETURN-SPEC.md.
 - `BRIEF.md`: round3 design brief.
   - Part A — whole-app polish pass: enumerate ALL current routes from `remix-app/app/routes.ts` grouped by section (dashboard, metrics×3, protocol×6, insights×3, import×3, ingest×4, settings) under the new left-nav chrome (264px/64px rail, single-open accordion, flyout; unified PageHeader: meta row eyebrow-left/crumb-right, title row). Goals: density, hierarchy, spacing refinement; consistent application of frame cards/pills/mono micro-labels. Explicit "what NOT to change": nav interaction model (baked, round2), routing/IA, theme plumbing, brand foundations.
   - Part B — data-viz/charts focus: inventory the viz components with file paths (TrendChart + TrendSparkline in components/TrendChart.tsx [verify], Sparkline, MetricRing, RangeBar, PhaseBar, ProgressBar, StatusDot/StatusBadge, DataTable, correlations screens) and ask for a coherent chart language: axis/grid/label treatment, status-color usage (optimal/borderline/deficient/excess), hover/tooltip language, empty/loading states, ring-sweep motion rules.

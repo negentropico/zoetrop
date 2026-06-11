@@ -1,5 +1,5 @@
 /* ============================================================
-   Zoetrope redesign — shared lib: shell, router, primitives
+   Zoetrop redesign — shared lib: shell, router, primitives
    Exposes everything on window for the screen scripts.
    ============================================================ */
 const { useState, useEffect, useRef, useMemo } = React;
@@ -348,7 +348,7 @@ function Wordmark() {
     <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
       <SpiralMark size={26} />
       <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.02em', color: 'var(--ink)' }}>
-        zoetrope<span style={{ color: 'var(--accent)' }}>.</span>
+        zoetrop<span style={{ color: 'var(--accent)' }}>.</span>
       </span>
     </Link>
   );
@@ -426,7 +426,7 @@ function AppShell({ path, children, wide = false }) {
       <footer style={{ borderTop: '1px solid var(--border)', marginTop: 24 }}>
         <div style={{ maxWidth: wide ? 1280 : 1180, margin: '0 auto', padding: '22px var(--gap-2xl)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-faint)' }}>
-            <SpiralMark size={16} color="var(--text-faint)" /> zoetrope · brand roundtrip
+            <SpiralMark size={16} color="var(--text-faint)" /> zoetrop · brand roundtrip
           </span>
           <Link to="/about" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>Redesign decisions →</Link>
         </div>
@@ -451,7 +451,7 @@ function Crumb({ items }) {
   );
 }
 
-const _DS = window.ZoetropeDesignSystem_48aebc || {};
+const _DS = window.ZoetropDesignSystem_48aebc || {};
 Object.assign(window, {
   useState, useEffect, useRef, useMemo, useViewport, useRoute, navigate, Link,
   STATUS, FAMILY_COLOR, Icon, lucideSvg, SpiralMark, Eyebrow, PageHeader, SectionLabel,

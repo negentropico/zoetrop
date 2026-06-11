@@ -28,10 +28,17 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
+<<<<<<< HEAD
 Phase: 6
 Plan: Not started
 Status: Ready to plan
 Last activity: 2026-06-11 - Phase 5 complete (E2E UAT passed); quick task 260611-j6n (design-roundtrip harness + round3 package) completed
+=======
+Phase: 05 (lab-ingest-pipeline) — EXECUTING
+Plan: 3 of 3 — code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification
+Status: 05-03 code deliverables done (LAB-04/LAB-05/LAB-06 implemented); awaiting owner E2E UAT on Vercel preview, then phase verification (orchestrator)
+Last activity: 2026-06-11 - Completed quick task 260611-jq8: repo-wide Zoetrop→Zoetrop rename
+>>>>>>> left-nav-refactor
 
 Progress: [████████░░] 78%
 
@@ -84,7 +91,7 @@ Progress: [████████░░] 78%
 
 ### Roadmap Evolution
 
-- Phase 04.1 inserted after Phase 4: Design System Adoption — bridge Zoetrope brand tokens into Tailwind, port signature components to TSX, retrofit M0 screens, commit binding UI-SPEC.md; gated on a claude.ai/design roundtrip (see docs/DESIGN-SYSTEM-ADOPTION.md)
+- Phase 04.1 inserted after Phase 4: Design System Adoption — bridge Zoetrop brand tokens into Tailwind, port signature components to TSX, retrofit M0 screens, commit binding UI-SPEC.md; gated on a claude.ai/design roundtrip (see docs/DESIGN-SYSTEM-ADOPTION.md)
 
 ### Decisions
 
@@ -133,9 +140,10 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260610-q56 | Consolidated left sidebar nav chrome refactor (prototype port: rail+accordion+flyout, cookie collapse, mobile drawer, breadcrumbs, routes flatten + /ingest index fix) — branch `left-nav-refactor` | 2026-06-11 | f585795 | [260610-q56-refactor-app-chrome-to-consolidated-left](./quick/260610-q56-refactor-app-chrome-to-consolidated-left/) |
-| 260610-rj2 | Merge breadcrumb into PageHeader meta row — crumb right-aligned on eyebrow line, ZOETROPE segment dropped, single-segment crumbs suppressed | 2026-06-11 | ee771d4 | [260610-rj2-merge-breadcrumb-into-pageheader-meta-ro](./quick/260610-rj2-merge-breadcrumb-into-pageheader-meta-ro/) |
+| 260610-rj2 | Merge breadcrumb into PageHeader meta row — crumb right-aligned on eyebrow line, ZOETROP segment dropped, single-segment crumbs suppressed | 2026-06-11 | ee771d4 | [260610-rj2-merge-breadcrumb-into-pageheader-meta-ro](./quick/260610-rj2-merge-breadcrumb-into-pageheader-meta-ro/) |
 | 260610-rwg | Unify page headers — PageHeader icon/titleAccessory props; metrics category + detail migrated off hand-rolled headers | 2026-06-11 | 299c488 | [260610-rwg-unify-page-headers-extend-pageheader-ico](./quick/260610-rwg-unify-page-headers-extend-pageheader-ico/) |
 | 260611-j6n | Design-roundtrip integration harness (unbundle/css-delta + RETURN-SPEC protocol) + round2 archive + round3 outbound package | 2026-06-11 | 19cad6e | [260611-j6n-design-roundtrip-integration-harness-rou](./quick/260611-j6n-design-roundtrip-integration-harness-rou/) |
+| 260611-jq8 | Repo-wide rename Zoetrop→Zoetrop (all case variants, 95 files + round1 filename; includes wordmark rebrand edit) | 2026-06-11 | 1ed1ba6 | [260611-jq8-repo-wide-rename-zoetrop-to-zoetrop-all](./quick/260611-jq8-repo-wide-rename-zoetrop-to-zoetrop-all/) |
 
 ## Deferred Items
 

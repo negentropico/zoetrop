@@ -1,7 +1,7 @@
 /* Trends — the "moving picture": longer-range view across all three families. */
 
 function TrendsScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const { Card, Stat, SegmentedControl, Badge } = NS;
   const { ZSparkline } = window.ZApp;
   const [range, setRange] = React.useState('30d');

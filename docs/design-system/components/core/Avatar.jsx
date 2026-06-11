@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope Avatar — initials or image, with optional metric ring + status dot.
+ * Zoetrop Avatar — initials or image, with optional metric ring + status dot.
  */
 export function Avatar({
   src = null,

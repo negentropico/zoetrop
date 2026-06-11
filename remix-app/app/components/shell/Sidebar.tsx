@@ -266,10 +266,10 @@ export function Sidebar({
     >
       {/* header */}
       <div className="zn-head">
-        <Link to="/dashboard" className="zn-brand" aria-label="Zoetrope home">
+        <Link to="/dashboard" className="zn-brand" aria-label="Zoetrop home">
           <SpiralMark size={24} />
           <span className="zn-label zn-wordmark">
-            zoetrope
+            zoetrop
             <span style={{ color: "var(--accent)" }}>.</span>
           </span>
         </Link>

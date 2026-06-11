@@ -1,5 +1,5 @@
 /* ============================================================
-   Zoetrope — left navigation prototype
+   Zoetrop — left navigation prototype
    Sidebar: expanded tiers, collapsed icon rail, flyout submenus.
    Interaction model (baked): single open group, parent click
    expands, flyout on hover, comfortable density, metric
@@ -233,9 +233,9 @@ function Sidebar({ path, collapsed, setCollapsed }) {
     <aside className={'zn-side' + (collapsed ? ' is-collapsed' : '')}>
       {/* header */}
       <div className="zn-head">
-        <NLink to="/" className="zn-brand" aria-label="Zoetrope home">
+        <NLink to="/" className="zn-brand" aria-label="Zoetrop home">
           <SpiralMark size={24} />
-          <span className="zn-label zn-wordmark">zoetrope<span style={{ color: 'var(--accent)' }}>.</span></span>
+          <span className="zn-label zn-wordmark">zoetrop<span style={{ color: 'var(--accent)' }}>.</span></span>
         </NLink>
         <button type="button" className="zn-collapse" onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

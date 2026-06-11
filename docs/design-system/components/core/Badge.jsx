@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope Badge — small status/metric pill. `tone` maps to a metric family.
+ * Zoetrop Badge — small status/metric pill. `tone` maps to a metric family.
  */
 export function Badge({ tone = 'neutral', variant = 'soft', children, style = {}, ...rest }) {
   const tones = {

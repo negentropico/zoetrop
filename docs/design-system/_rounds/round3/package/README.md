@@ -3,7 +3,7 @@
 > **Purpose.** This is the **outbound package for design round 3**: a
 > whole-app polish pass under the new left-nav chrome, plus a coherent
 > **data-viz/chart language** for the metric visualizations. It is the *input*
-> to a design roundtrip via claude.ai/design with the **zoetrope-design** skill
+> to a design roundtrip via claude.ai/design with the **zoetrop-design** skill
 > bundle. The output flows back into the codebase per
 > [`RETURN-SPEC.md`](./RETURN-SPEC.md) — read it before producing anything.
 
@@ -15,7 +15,7 @@ chrome and giving the charts a unified visual language.
 
 ## How to use this package
 
-1. **Read the brand first.** The zoetrope-design skill bundle you already hold
+1. **Read the brand first.** The zoetrop-design skill bundle you already hold
    is the brand source of truth (brand, voice, visual foundations, tokens,
    iconography). Nothing in this package overrides it.
 2. **Work from the live preview.** There are **no screenshots in this package

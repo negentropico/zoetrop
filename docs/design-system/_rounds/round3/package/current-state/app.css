@@ -332,7 +332,7 @@
 
 /* ================================================================
    LAYER 4: Warm-dark token remap
-   (from Zoetrope Redesign.html html[data-theme="dark"] block)
+   (from Zoetrop Redesign.html html[data-theme="dark"] block)
    All brand utilities (bg-paper, text-ink, etc.) cascade to dark
    values automatically — zero dark: prefixes needed in components.
    ================================================================ */

@@ -1,5 +1,5 @@
 /* ============================================================
-   Zoetrope — left-nav prototype: shell, placeholder pages, mount
+   Zoetrop — left-nav prototype: shell, placeholder pages, mount
    Interaction model is baked in (see nav/sidebar.jsx):
    single open group · parent click expands · hover flyout ·
    comfortable density · metric categories in nav.
@@ -17,7 +17,7 @@ function GhostBlock({ h = 120, label }) {
 function PlaceholderPage({ group, child, path }) {
   const isOverview = !child || child.to === group.base;
   const title = isOverview ? group.label : child.label;
-  const crumb = [{ label: 'zoetrope', to: '/' }, { label: group.label, to: group.base }];
+  const crumb = [{ label: 'zoetrop', to: '/' }, { label: group.label, to: group.base }];
   if (!isOverview) crumb.push({ label: child.label });
   const routeTag = (path === '/' ? '/dashboard' : path);
   return (

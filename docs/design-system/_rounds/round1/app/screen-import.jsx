@@ -1,5 +1,5 @@
 /* Screen 08 — Import · WHOOP (ancestor of the Phase 5 lab-ingest review UI) */
-const ID = window.ZoetropeDesignSystem_48aebc;
+const ID = window.ZoetropDesignSystem_48aebc;
 
 function ImportTabs({ active, onChange }) {
   const tabs = [['overview', 'Overview'], ['whoop', 'WHOOP'], ['vault', 'Vault']];

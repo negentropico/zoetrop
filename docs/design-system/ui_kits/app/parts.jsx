@@ -1,9 +1,9 @@
-/* Zoetrope app — shared parts: Header, TabBar, BarChart, Sparkline, AddSheet.
+/* Zoetrop app — shared parts: Header, TabBar, BarChart, Sparkline, AddSheet.
    Primitives are read from the DS namespace INSIDE component bodies so this
    file is safe whether loaded directly or via the compiled bundle. */
 
 function ZHeader({ title, eyebrow, right = null }) {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const { Avatar } = NS;
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 20px 14px' }}>

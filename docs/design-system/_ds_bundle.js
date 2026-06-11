@@ -1,8 +1,8 @@
-/* @ds-bundle: {"format":3,"namespace":"ZoetropeDesignSystem_48aebc","components":[{"name":"Avatar","sourcePath":"components/core/Avatar.jsx"},{"name":"Badge","sourcePath":"components/core/Badge.jsx"},{"name":"Button","sourcePath":"components/core/Button.jsx"},{"name":"Card","sourcePath":"components/core/Card.jsx"},{"name":"IconButton","sourcePath":"components/core/IconButton.jsx"},{"name":"MetricRing","sourcePath":"components/data/MetricRing.jsx"},{"name":"ProgressBar","sourcePath":"components/data/ProgressBar.jsx"},{"name":"Stat","sourcePath":"components/data/Stat.jsx"},{"name":"Input","sourcePath":"components/forms/Input.jsx"},{"name":"SegmentedControl","sourcePath":"components/forms/SegmentedControl.jsx"},{"name":"Switch","sourcePath":"components/forms/Switch.jsx"}],"sourceHashes":{"components/core/Avatar.jsx":"4a04aee0dab4","components/core/Badge.jsx":"398a32d9ac32","components/core/Button.jsx":"afb64fc5ecdc","components/core/Card.jsx":"0e4f45382795","components/core/IconButton.jsx":"2502b61f3e7d","components/data/MetricRing.jsx":"e13a18a5da1c","components/data/ProgressBar.jsx":"1b79101c5428","components/data/Stat.jsx":"d488d43dd655","components/forms/Input.jsx":"e6583b047103","components/forms/SegmentedControl.jsx":"8d88f8523ae3","components/forms/Switch.jsx":"0915bbf4329c","ui_kits/app/ActivityScreen.jsx":"a9119b4e142b","ui_kits/app/App.jsx":"33c0d6a61d11","ui_kits/app/SleepScreen.jsx":"0ee3d6daef06","ui_kits/app/TodayScreen.jsx":"7c460b66913b","ui_kits/app/TrendsScreen.jsx":"34c0f5ba51a5","ui_kits/app/parts.jsx":"e7e55ee8cb5f"},"inlinedExternals":[],"unexposedExports":[]} */
+/* @ds-bundle: {"format":3,"namespace":"ZoetropDesignSystem_48aebc","components":[{"name":"Avatar","sourcePath":"components/core/Avatar.jsx"},{"name":"Badge","sourcePath":"components/core/Badge.jsx"},{"name":"Button","sourcePath":"components/core/Button.jsx"},{"name":"Card","sourcePath":"components/core/Card.jsx"},{"name":"IconButton","sourcePath":"components/core/IconButton.jsx"},{"name":"MetricRing","sourcePath":"components/data/MetricRing.jsx"},{"name":"ProgressBar","sourcePath":"components/data/ProgressBar.jsx"},{"name":"Stat","sourcePath":"components/data/Stat.jsx"},{"name":"Input","sourcePath":"components/forms/Input.jsx"},{"name":"SegmentedControl","sourcePath":"components/forms/SegmentedControl.jsx"},{"name":"Switch","sourcePath":"components/forms/Switch.jsx"}],"sourceHashes":{"components/core/Avatar.jsx":"4a04aee0dab4","components/core/Badge.jsx":"398a32d9ac32","components/core/Button.jsx":"afb64fc5ecdc","components/core/Card.jsx":"0e4f45382795","components/core/IconButton.jsx":"2502b61f3e7d","components/data/MetricRing.jsx":"e13a18a5da1c","components/data/ProgressBar.jsx":"1b79101c5428","components/data/Stat.jsx":"d488d43dd655","components/forms/Input.jsx":"e6583b047103","components/forms/SegmentedControl.jsx":"8d88f8523ae3","components/forms/Switch.jsx":"0915bbf4329c","ui_kits/app/ActivityScreen.jsx":"a9119b4e142b","ui_kits/app/App.jsx":"33c0d6a61d11","ui_kits/app/SleepScreen.jsx":"0ee3d6daef06","ui_kits/app/TodayScreen.jsx":"7c460b66913b","ui_kits/app/TrendsScreen.jsx":"34c0f5ba51a5","ui_kits/app/parts.jsx":"e7e55ee8cb5f"},"inlinedExternals":[],"unexposedExports":[]} */
 
 (() => {
 
-const __ds_ns = (window.ZoetropeDesignSystem_48aebc = window.ZoetropeDesignSystem_48aebc || {});
+const __ds_ns = (window.ZoetropDesignSystem_48aebc = window.ZoetropDesignSystem_48aebc || {});
 
 const __ds_scope = {};
 
@@ -12,7 +12,7 @@ const __ds_scope = {};
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Avatar — initials or image, with optional metric ring + status dot.
+ * Zoetrop Avatar — initials or image, with optional metric ring + status dot.
  */
 function Avatar({
   src = null,
@@ -99,7 +99,7 @@ Object.assign(__ds_scope, { Avatar });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Badge — small status/metric pill. `tone` maps to a metric family.
+ * Zoetrop Badge — small status/metric pill. `tone` maps to a metric family.
  */
 function Badge({
   tone = 'neutral',
@@ -184,7 +184,7 @@ Object.assign(__ds_scope, { Badge });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Button — the primary action primitive.
+ * Zoetrop Button — the primary action primitive.
  * Self-contained: styling via CSS custom properties from styles.css.
  */
 function Button({
@@ -311,7 +311,7 @@ Object.assign(__ds_scope, { Button });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Card — the base surface "frame". Soft warm shadow, gentle radius.
+ * Zoetrop Card — the base surface "frame". Soft warm shadow, gentle radius.
  * `accent` paints a metric-colored top hairline; `tone` tints the whole surface.
  */
 function Card({
@@ -386,7 +386,7 @@ Object.assign(__ds_scope, { Card });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope IconButton — square/circular control wrapping a single icon.
+ * Zoetrop IconButton — square/circular control wrapping a single icon.
  * Pass the icon as children (e.g. a Lucide <i> or SVG).
  */
 function IconButton({
@@ -475,7 +475,7 @@ Object.assign(__ds_scope, { IconButton });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope MetricRing — the signature progress ring. Sweeps on mount.
+ * Zoetrop MetricRing — the signature progress ring. Sweeps on mount.
  * `tone` maps to a metric family; supports a center label/value.
  */
 function MetricRing({
@@ -576,7 +576,7 @@ Object.assign(__ds_scope, { MetricRing });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope ProgressBar — linear track. Sweeps on mount; tone maps to metric family.
+ * Zoetrop ProgressBar — linear track. Sweeps on mount; tone maps to metric family.
  */
 function ProgressBar({
   value = 0,
@@ -649,7 +649,7 @@ Object.assign(__ds_scope, { ProgressBar });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Stat — a metric readout: eyebrow label, big value+unit, optional trend.
+ * Zoetrop Stat — a metric readout: eyebrow label, big value+unit, optional trend.
  */
 function Stat({
   label,
@@ -738,7 +738,7 @@ Object.assign(__ds_scope, { Stat });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Input — text field with optional label, leading icon, and hint/error.
+ * Zoetrop Input — text field with optional label, leading icon, and hint/error.
  */
 function Input({
   label = null,
@@ -826,7 +826,7 @@ Object.assign(__ds_scope, { Input });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope SegmentedControl — compact tab switch for ranges/views (Day/Week/Month).
+ * Zoetrop SegmentedControl — compact tab switch for ranges/views (Day/Week/Month).
  */
 function SegmentedControl({
   options = [],
@@ -888,7 +888,7 @@ Object.assign(__ds_scope, { SegmentedControl });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Zoetrope Switch — on/off toggle. On-color maps to a metric family.
+ * Zoetrop Switch — on/off toggle. On-color maps to a metric family.
  */
 function Switch({
   checked = false,
@@ -970,7 +970,7 @@ try { (() => {
 /* Move — activity detail: hero ring, weekly bars, breakdown stats. */
 
 function ActivityScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const {
     MetricRing,
     Card,
@@ -1149,7 +1149,7 @@ try { (() => {
 /* App root — tab navigation, header, floating add button + entry sheet. */
 
 function ZApp_Root() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const {
     Button,
     IconButton
@@ -1381,7 +1381,7 @@ try { (() => {
 /* Sleep — last night's stages, duration, and weekly rhythm. */
 
 function SleepScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const {
     Card,
     Stat,
@@ -1591,7 +1591,7 @@ try { (() => {
 /* Today — the home dashboard: three metric rings + summary cards. */
 
 function TodayScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const {
     MetricRing,
     Card,
@@ -1771,7 +1771,7 @@ try { (() => {
 /* Trends — the "moving picture": longer-range view across all three families. */
 
 function TrendsScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const {
     Card,
     Stat,
@@ -1919,7 +1919,7 @@ window.ZApp = Object.assign(window.ZApp || {}, {
 
 // ui_kits/app/parts.jsx
 try { (() => {
-/* Zoetrope app — shared parts: Header, TabBar, BarChart, Sparkline, AddSheet.
+/* Zoetrop app — shared parts: Header, TabBar, BarChart, Sparkline, AddSheet.
    Primitives are read from the DS namespace INSIDE component bodies so this
    file is safe whether loaded directly or via the compiled bundle. */
 
@@ -1928,7 +1928,7 @@ function ZHeader({
   eyebrow,
   right = null
 }) {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const {
     Avatar
   } = NS;

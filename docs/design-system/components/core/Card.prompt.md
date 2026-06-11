@@ -1,4 +1,4 @@
-The base surface for every Zoetrope module — soft warm shadow, large radius, optional metric accent.
+The base surface for every Zoetrop module — soft warm shadow, large radius, optional metric accent.
 
 ```jsx
 <Card accent="vital" elevation="md">

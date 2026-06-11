@@ -1,7 +1,7 @@
 /* Move — activity detail: hero ring, weekly bars, breakdown stats. */
 
 function ActivityScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const { MetricRing, Card, Stat, SegmentedControl, Badge } = NS;
   const { ZBarChart } = window.ZApp;
   const [range, setRange] = React.useState('Week');

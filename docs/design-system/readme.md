@@ -1,14 +1,14 @@
-# Zoetrope — Design System
+# Zoetrop — Design System
 
 > **Every frame of you.**
-> Zoetrope is a health & wellness tracking platform. It stitches small daily
+> Zoetrop is a health & wellness tracking platform. It stitches small daily
 > signals — movement, heart, sleep, breath — into a moving picture of how you
-> actually feel over time. The name is literal: a *zoetrope* is the pre-cinema
+> actually feel over time. The name is literal: a *zoetrop* is the pre-cinema
 > device that turns a sequence of still frames into motion. Your wellness is the
-> sequence; Zoetrope spins it into something you can read.
+> sequence; Zoetrop spins it into something you can read.
 
 This repository **is** the design system. An automated compiler reads it, bundles
-the components into a runtime library (`window.ZoetropeDesignSystem_48aebc`), and
+the components into a runtime library (`window.ZoetropDesignSystem_48aebc`), and
 indexes the tokens. Consumers link one file: **`styles.css`**.
 
 ---
@@ -17,7 +17,7 @@ indexes the tokens. Consumers link one file: **`styles.css`**.
 
 This system was **extrapolated and modeled** from a single supplied brand board
 (`uploads/colors.jpg`) — originally a colorway + identity study for a developer
-platform ("source.dev"). Zoetrope re-targets that visual language for health &
+platform ("source.dev"). Zoetrop re-targets that visual language for health &
 wellness. What was carried across:
 
 - **The five-color palette** — warm grey, amber, teal, periwinkle, charcoal —
@@ -26,7 +26,7 @@ wellness. What was carried across:
 - **Geometric-grotesque typography** with mono captions.
 - **Mathematical motifs** — Fibonacci sequences, the circle + half-circle "frame"
   glyph, motion-blur frame sequences, dot grids — which map perfectly onto the
-  zoetrope/animation concept.
+  zoetrop/animation concept.
 
 No codebase or Figma file was provided; everything below is derived design.
 
@@ -36,9 +36,9 @@ No codebase or Figma file was provided; everything below is derived design.
 
 | | |
 |---|---|
-| **Name** | Zoetrope |
+| **Name** | Zoetrop |
 | **Category** | Health & wellness tracking (app-first) |
-| **Wordmark** | `zoetrope.` lowercase, the period set in a metric accent |
+| **Wordmark** | `zoetrop.` lowercase, the period set in a metric accent |
 | **Voice** | Calm, precise, encouraging — a quiet coach, never a drill sergeant |
 | **Metric families** | Energy (amber) · Vital (teal) · Focus (periwinkle) |
 | **Neutrals** | Mist (warm grey) · Ink (charcoal) on warm Paper |
@@ -48,7 +48,7 @@ No codebase or Figma file was provided; everything below is derived design.
 
 ## CONTENT FUNDAMENTALS
 
-How Zoetrope writes.
+How Zoetrop writes.
 
 - **Person & address.** Speak to the user as **"you"**; the product refers to
   itself rarely and never as "I". Data belongs to the user: *"your week," "your
@@ -150,7 +150,7 @@ The complete look & feel. See the **Design System** tab for live specimen cards.
 
 ## ICONOGRAPHY
 
-- **System:** Zoetrope uses **[Lucide](https://lucide.dev)** — a clean,
+- **System:** Zoetrop uses **[Lucide](https://lucide.dev)** — a clean,
   open-source 24px stroke icon set whose **~1.75px geometric stroke** matches the
   grotesque type and the brand's precise, mathematical character. This is a
   **documented substitution**: no proprietary icon set was supplied. Swap for a
@@ -187,13 +187,13 @@ system built on the spiral & phyllotaxis families: `pattern-spiral`,
 
 **`guidelines/`** — foundation specimen cards (Colors, Type, Spacing, Brand)
 
-**`components/`** — reusable React primitives (namespace `ZoetropeDesignSystem_48aebc`)
+**`components/`** — reusable React primitives (namespace `ZoetropDesignSystem_48aebc`)
 - `core/` — Button, IconButton, Badge, Avatar, Card
 - `forms/` — Input, Switch, SegmentedControl
 - `data/` — MetricRing, ProgressBar, Stat
 
 **`ui_kits/`**
-- `app/` — Zoetrope mobile app (Today, Activity, Sleep, Trends)
+- `app/` — Zoetrop mobile app (Today, Activity, Sleep, Trends)
 
 **`slides/`** — branded sample slides (Title, Metric, Quote, Comparison)
 

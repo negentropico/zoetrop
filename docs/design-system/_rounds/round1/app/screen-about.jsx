@@ -1,5 +1,5 @@
 /* About — written record of the Q1–Q5 resolutions + new components (brief deliverable #2/#3/#5) */
-const AD = window.ZoetropeDesignSystem_48aebc;
+const AD = window.ZoetropDesignSystem_48aebc;
 
 function Swatch({ c, label }) {
   return (
@@ -24,7 +24,7 @@ function Decision({ q, title, children }) {
 function AboutScreen({ path }) {
   return (
     <AppShell path={path}>
-      <PageHeader eyebrow="Roundtrip notes" title="Redesign decisions" sub="How the shipped Zoetrop screens were re-expressed in the Zoetrope brand — and the open questions resolved along the way." />
+      <PageHeader eyebrow="Roundtrip notes" title="Redesign decisions" sub="How the shipped Zoetrop screens were re-expressed in the Zoetrop brand — and the open questions resolved along the way." />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-lg)' }}>
         <Decision q="Q1" title="9 categories → 3 families: status drives color">
@@ -50,7 +50,7 @@ function AboutScreen({ path }) {
         </Decision>
 
         <Decision q="Q5" title="Wordmark — flagged, not relitigated">
-          The header shows the brand form <strong>zoetrope.</strong> with the periwinkle period, alongside a small <em>codename Zoetrop</em> tag. The treatment is neutral and easy to swap when the public brand is settled.
+          The header shows the brand form <strong>zoetrop.</strong> with the periwinkle period, alongside a small <em>codename Zoetrop</em> tag. The treatment is neutral and easy to swap when the public brand is settled.
         </Decision>
 
         <ZCard padding="lg">

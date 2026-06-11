@@ -1,7 +1,7 @@
 /* Sleep — last night's stages, duration, and weekly rhythm. */
 
 function SleepScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const { Card, Stat, Badge, ProgressBar } = NS;
   const { ZBarChart } = window.ZApp;
 

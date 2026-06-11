@@ -98,5 +98,5 @@ Plus the heaviest consumer screen: **correlations**
   fixed this round.
 - **Theme plumbing** — `html[data-theme="dark"]` var remap + existing
   `ThemeToggle`. Never reimplement theming (RETURN-SPEC §4, §6).
-- **Brand foundations** — tokens, type, iconography from the zoetrope-design
+- **Brand foundations** — tokens, type, iconography from the zoetrop-design
   skill bundle are the constants, not variables.

@@ -1,7 +1,7 @@
 /* App root — tab navigation, header, floating add button + entry sheet. */
 
 function ZApp_Root() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const { Button, IconButton } = NS;
   const { ZHeader, ZTabBar, TodayScreen, ActivityScreen, SleepScreen, TrendsScreen } = window.ZApp;
   const [tab, setTab] = React.useState('today');
