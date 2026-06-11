@@ -16,9 +16,18 @@ All 6 Phase 5 success criteria are implemented and committed; 5/6 are verified b
 inspection (see 05-VERIFICATION.md). The remaining confirmations are runtime-only behaviors
 that only a real Vercel deploy can prove. Infra is ready:
 
-- Preview (git-linked, SSO-protected): https://zoetrop-gtpsezj4x-negentropico.vercel.app
+- Preview (git-linked, SSO-protected, stable branch alias):
+  https://zoetrop-git-003-remix-foundation-negentropico.vercel.app
 - `ANTHROPIC_API_KEY` set in Vercel Preview + Production
 - GitHub connected (negentropico/zoetrop, rootDirectory=remix-app, production branch main)
+- Auto-deploy-on-push confirmed (push to branch → preview build)
+
+> NOTE: An SSR crash found during pre-UAT testing was fixed before this UAT is runnable.
+> `react-pdf`/`pdfjs-dist` was crashing the serverless function on cold-start import
+> (`ReferenceError: DOMMatrix is not defined`), 500-ing every route. Fixed in commit
+> `06582cb` (PdfPageViewer split into a client-only dynamic import). Verified on the prod
+> server build: `/` 200, `/ingest/review` 302, no DOMMatrix. The preview above (commit
+> `0ae8505`) is the first deploy that can actually be UAT'd.
 
 ## Tests
 
