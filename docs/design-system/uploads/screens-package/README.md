@@ -66,7 +66,7 @@ not just the home page.
 ## Important context
 
 - **Name.** Screens say **"Zoetrop"** (no *e*); the brand DS wordmark is
-  **"zoetrope."** (with *e*, trailing period). `Zoetrop` is the internal
+  **"zoetrop."** (with *e*, trailing period). `Zoetrop` is the internal
   codename; the public brand is deferred. **Do not** treat the wordmark as
   settled — flag, don't relitigate. See the global brief.
 - **Domain mismatch.** The brand's three metric *families* (Energy/Vital/Focus

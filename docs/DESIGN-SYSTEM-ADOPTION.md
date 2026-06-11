@@ -1,7 +1,7 @@
 # Design System Adoption
 
 > Narrative companion to the GSD roadmap (alongside `docs/PLATFORM.md` and
-> `docs/PRINCIPLES.md`). How the generated **Zoetrope** brand design system
+> `docs/PRINCIPLES.md`). How the generated **Zoetrop** brand design system
 > (`docs/design-system/`) lands in the product and binds future UI work.
 >
 > **Status:** Phase 04.1 **complete** · design roundtrip delivered · brand shipped
@@ -77,7 +77,7 @@ the **open design questions** the roundtrip must resolve (below).
    ~449px on mobile). The roundtrip proposes a real responsive nav + dense-table
    reflow.
 4. **Emoji → Lucide** mapping for the 9 categories (proposed table in the brief).
-5. **Wordmark.** "Zoetrop" (app) vs "zoetrope." (brand). Internal codename;
+5. **Wordmark.** "Zoetrop" (app) vs "zoetrop." (brand). Internal codename;
    public brand deferred — flag, don't relitigate.
 
 ## 6. Integration architecture (as-built — Phase 04.1)
@@ -137,7 +137,7 @@ revisions return.
 
 > *(sequenced between Phase 4 and Phase 5 — see `ROADMAP.md` for full success
 > criteria)*
-> **Goal:** The Zoetrope brand is a working, typed foundation in the app, the M0
+> **Goal:** The Zoetrop brand is a working, typed foundation in the app, the M0
 > screens are re-skinned in-brand, and a binding `UI-SPEC.md` governs all
 > subsequent UI — so Phases 5 & 6 build in-brand from the first commit.
 > **Depends on:** Phase 4 (live data — reskin once, on the live screens, not the

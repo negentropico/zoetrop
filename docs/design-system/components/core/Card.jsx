@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope Card — the base surface "frame". Soft warm shadow, gentle radius.
+ * Zoetrop Card — the base surface "frame". Soft warm shadow, gentle radius.
  * `accent` paints a metric-colored top hairline; `tone` tints the whole surface.
  */
 export function Card({

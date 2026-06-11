@@ -1,4 +1,4 @@
-// Card — the "frame" surface container every Zoetrope module sits in.
+// Card — the "frame" surface container every Zoetrop module sits in.
 // ELEVATION/PADDING/TONE_BG/ACCENT_COLOR maps — implementation per PATTERNS.md § Card.tsx.
 // bg-surface rounded-xl border-border is the brand frame signature.
 

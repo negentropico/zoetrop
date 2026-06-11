@@ -1,11 +1,11 @@
-<!-- @dsCard group="Zoetrope App" viewport="430x880" name="Zoetrope — mobile app" subtitle="Today, Move, Sleep, Trends · interactive" -->
-<!-- @startingPoint section="Zoetrope App" subtitle="Full wellness tracker — 4 screens, interactive" viewport="430x880" -->
+<!-- @dsCard group="Zoetrop App" viewport="430x880" name="Zoetrop — mobile app" subtitle="Today, Move, Sleep, Trends · interactive" -->
+<!-- @startingPoint section="Zoetrop App" subtitle="Full wellness tracker — 4 screens, interactive" viewport="430x880" -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zoetrope</title>
+<title>Zoetrop</title>
 <link rel="stylesheet" href="../../styles.css">
 <style>
   html, body { margin: 0; height: 100%; }
@@ -72,7 +72,7 @@
 <script type="text/babel" data-presets="react">
   let _tries = 0;
   const ready = () => {
-    const ns = window.ZoetropeDesignSystem_48aebc;
+    const ns = window.ZoetropDesignSystem_48aebc;
     return ns && ns.Button && ns.MetricRing && window.ZApp && window.ZApp.ZApp_Root
       && window.ZApp.TodayScreen && window.ZApp.ZBarChart;
   };
@@ -80,7 +80,7 @@
     if (!ready()) {
       if (_tries++ > 400) { // ~12s: bundle never arrived
         document.getElementById('root').innerHTML =
-          '<div style="padding:80px 28px;font-family:var(--font-text);color:var(--text-muted);text-align:center">Loading Zoetrope\u2026<br><span style="font-size:12px">If this persists, the component bundle is still compiling \u2014 reload in a moment.</span></div>';
+          '<div style="padding:80px 28px;font-family:var(--font-text);color:var(--text-muted);text-align:center">Loading Zoetrop\u2026<br><span style="font-size:12px">If this persists, the component bundle is still compiling \u2014 reload in a moment.</span></div>';
         return;
       }
       setTimeout(mount, 30); return;

@@ -1,5 +1,5 @@
 /* Screens 05 + 06 — Protocol overview & Cessation tracker */
-const PD = window.ZoetropeDesignSystem_48aebc;
+const PD = window.ZoetropDesignSystem_48aebc;
 
 function ProtocolTabs({ active }) {
   const tabs = [

@@ -1,5 +1,5 @@
 /* ============================================================
-   Zoetrope — redesign dataset (M0 static data from the screens)
+   Zoetrop — redesign dataset (M0 static data from the screens)
    Every number here is carried verbatim from the captured screens.
    Ranges (ref/opt) are sensible clinical bands chosen so each
    value lands in its captured status zone.

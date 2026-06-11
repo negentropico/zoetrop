@@ -42,7 +42,7 @@ lockups (Function Health, Practice Better, Heads Up Health).
 
 - **Avoid MAGA-adjacency** — killed both `Magga` and `Marga`.
 - **Any "Zoe-" name is dead** — ZOE (Tim Spector) is the category leader in personalized-nutrition-from-biology.
-  (The codename `Zoetrop` keeps the *tropos*/"turning" half of *zoetrope*, not the *zoe* half — and is
+  (The codename `Zoetrop` keeps the *tropos*/"turning" half of *zoetrop*, not the *zoe* half — and is
   internal-only, so the collision doesn't bite.)
 - Buyer = functional-health practitioners; register = contemplative-premium, practitioner-credible.
 

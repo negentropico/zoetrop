@@ -33,7 +33,7 @@ export function crumbsForPath(pathname: string): CrumbItem[] | null
 - Tree: **Dashboard** (`LayoutGrid`, `/dashboard`, exact) · **Metrics** (`Activity`: "All categories" + 9 from `CATEGORY_INFO`; move `LUCIDE_MAP` here from the dying metrics layout) · **Protocol** (`ListChecks`: Overview/Versions/Supplements/Cessation/Compare) · **Insights** (`GitCompare`: Overview/Correlations/Genetics) · **Import** (`Download`: Overview/WHOOP/Vault) · **Ingest** (`FileUp`: Overview `/ingest` /Upload/Review + `{label:"Consent", to:"/ingest/consent", hidden:true}` for breadcrumbs only).
 - `isChildActive`: exact for `end`; else `path === to || path.startsWith(to + "/")` — so `/metrics/vitamins/:id` highlights Vitamins, `/protocol/versions/:v` highlights Versions.
 - `groupOfPath`: `path === base || path.startsWith(base + "/")` (avoids prefix accidents).
-- `crumbsForPath` (prevents double-titling): `/dashboard` → null · group base → `[zoetrope→/dashboard, Group]` · exact child → `[…, Group→base, Child]` · `/settings` → `[zoetrope, Account settings]` · **anything deeper (param routes) → null** — the 3 pages with loader-derived `Crumb`s keep owning theirs.
+- `crumbsForPath` (prevents double-titling): `/dashboard` → null · group base → `[zoetrop→/dashboard, Group]` · exact child → `[…, Group→base, Child]` · `/settings` → `[zoetrop, Account settings]` · **anything deeper (param routes) → null** — the 3 pages with loader-derived `Crumb`s keep owning theirs.
 
 ## Step 2 — CSS: `app/app.css`
 
@@ -50,7 +50,7 @@ export function crumbsForPath(pathname: string): CrumbItem[] | null
 ## Step 3 — New shell components (`app/components/shell/`)
 
 **`Sidebar.tsx`** — `{ user, collapsed, onToggleCollapsed, mobileOpen, onMobileClose }`
-Port of `_notes/sidebar.jsx`: hash links → react-router `NavLink`/`Link`; prototype `Icon` → direct lucide components; `useLocation()` for path. Single-open accordion (`open` keyed by group id, effect re-opens `groupOfPath(pathname)` on nav). Collapsed rail + **Flyout as a local component** (fixed-position, viewport-clamped `useLayoutEffect`, 180ms close timer, Escape, `zn-fly-backdrop`). `useIsMobile()` hook (matchMedia 760px, `false` during SSR): on mobile always render the **expanded** variant (rail/flyout is desktop-only). Header: `SpiralMark` + "zoetrope." wordmark → `/dashboard` + collapse toggle. Footer: `SidebarAccount`.
+Port of `_notes/sidebar.jsx`: hash links → react-router `NavLink`/`Link`; prototype `Icon` → direct lucide components; `useLocation()` for path. Single-open accordion (`open` keyed by group id, effect re-opens `groupOfPath(pathname)` on nav). Collapsed rail + **Flyout as a local component** (fixed-position, viewport-clamped `useLayoutEffect`, 180ms close timer, Escape, `zn-fly-backdrop`). `useIsMobile()` hook (matchMedia 760px, `false` during SSR): on mobile always render the **expanded** variant (rail/flyout is desktop-only). Header: `SpiralMark` + "zoetrop." wordmark → `/dashboard` + collapse toggle. Footer: `SidebarAccount`.
 
 **`SidebarAccount.tsx`** — `{ user, collapsed }`
 Replaces `AccountMenu` (DropdownMenu opens downward — wrong for a footer; popover needs the right-opening `is-rail` mode). Trigger `.zn-account`: existing `Avatar` + name/role + `ChevronsUpDown`. Popover `.zn-account-menu` (+`is-rail` when collapsed): name/email + role `Badge` (copy `ROLE_TONE`/`ROLE_VARIANT` maps from `AccountMenu.tsx`), `Link` to `/settings`, a Theme row embedding the existing **`<ThemeToggle/>`** (do NOT reimplement the prototype's `useThemeLocal`), and the **`<Form method="post" action="/logout">`** danger Sign out copied verbatim (no-JS signout preserved). Closes on backdrop/Escape/navigation.
@@ -76,7 +76,7 @@ Props: `{ children, user, navCollapsed }`. State: `collapsed` (init from loader;
   <main className="zn-main"><div className="zn-page">
     {crumbs && <Crumb items={crumbsForPath(pathname)} />}
     {children}
-    <footer>…SpiralMark + zoetrope eyebrow…</footer>
+    <footer>…SpiralMark + zoetrop eyebrow…</footer>
   </div></main>
 </div>
 ```
@@ -89,7 +89,7 @@ Remove the five section `layout(…)` wrappers; register all section routes flat
 
 ## Step 7 — Page touch-ups
 
-Prepend `{ label: "zoetrope", to: "/dashboard" }` to the three page-owned Crumbs: `metrics/category.tsx` (~:216), `metrics/detail.tsx` (~:117), `protocol/version-detail.tsx` (~:140). No other page edits — every page already renders its own `PageHeader`; crumb-above-header matches the prototype composition.
+Prepend `{ label: "zoetrop", to: "/dashboard" }` to the three page-owned Crumbs: `metrics/category.tsx` (~:216), `metrics/detail.tsx` (~:117), `protocol/version-detail.tsx` (~:140). No other page edits — every page already renders its own `PageHeader`; crumb-above-header matches the prototype composition.
 
 ## Deletions
 
@@ -126,7 +126,7 @@ Manual (desktop 1440 + mobile 390, light + dark — chrome-devtools MCP: `resize
 - `/dashboard`: no crumb; Dashboard active.
 - `/metrics` → `/metrics/vitamins` → detail: group auto-opens, child highlights on deep routes, **no duplicate crumbs** on the 3 pages with page-owned Crumbs.
 - All protocol/insights/import children; `/ingest` redirect now works (was 404); `/ingest/review?doc=…` selection doesn't close anything.
-- `/settings` via account popover only; crumb "zoetrope / Account settings".
+- `/settings` via account popover only; crumb "zoetrop / Account settings".
 - Collapse → rail + hover flyout (clamped near viewport bottom), Escape closes; **reload preserves collapse with no flash** (`document.cookie` has `zt-nav=1`).
 - Mobile: hamburger opens expanded drawer, backdrop/Escape/navigation closes, scroll locked, no dead 80px at bottom; popover opens upward in drawer.
 - Sign-out Form POST works; ThemeToggle in popover behaves (no double-toggle).

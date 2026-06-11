@@ -145,7 +145,7 @@ export function isChildActive(pathname: string, child: NavChild): boolean {
 }
 
 /** Breadcrumb items for `pathname`, or null when no crumb should render.
- *  Crumbs appear only at depth >= 2 (group + child) — no zoetrope segment,
+ *  Crumbs appear only at depth >= 2 (group + child) — no zoetrop segment,
  *  and single-segment crumbs (/settings, group bases) are suppressed as pure
  *  title duplication. Anything deeper than an exact child (param routes) owns
  *  its loader-derived Crumb. */

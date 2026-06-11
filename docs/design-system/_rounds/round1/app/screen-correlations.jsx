@@ -1,5 +1,5 @@
 /* Screen 07 — Insights · correlations (defines the data-table pattern) */
-const CD = window.ZoetropeDesignSystem_48aebc;
+const CD = window.ZoetropDesignSystem_48aebc;
 const SIG_TONE = { strong: 'vital', moderate: 'focus', weak: 'energy', none: 'neutral' };
 
 function CorrBar({ r }) {

@@ -36,7 +36,7 @@ tone families `"energy" | "vital" | "focus"`.
 | Switch | Toggle switch | `checked?`, `onChange?`, `tone?=focus`, `size?=md`, `label?` |
 | ThemeToggle | Light/dark toggle — writes `zt-theme` localStorage + `data-theme` on `<html>` | (none) |
 | TrendChart | Recharts time-series with range bands, projections, milestones; also exports **TrendSparkline** | `data: DataPoint[]`, `projections?`, `unit`, `optimalRange?`, `referenceRange?`, `height?`, `showMilestones?`; TrendSparkline: `data`, `improvement?` (higher/lower/target) |
-| Wordmark | SpiralMark + "zoetrope." wordmark, links to `/dashboard` | (none) |
+| Wordmark | SpiralMark + "zoetrop." wordmark, links to `/dashboard` | (none) |
 
 ## `app/components/shell/` (4 components + nav data)
 

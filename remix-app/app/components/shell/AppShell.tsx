@@ -97,7 +97,7 @@ export function AppShell({ children, user, navCollapsed }: AppShellProps) {
               style={{ gap: 10 }}
             >
               <SpiralMark size={16} color="var(--text-faint)" />
-              zoetrope
+              zoetrop
             </span>
           </footer>
         </div>

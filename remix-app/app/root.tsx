@@ -11,7 +11,7 @@ import type { Route } from "./+types/root";
 import { useLayoutEffect } from "react";
 import "./app.css";
 
-// Replace Inter with the three Zoetrope brand fonts (D-11).
+// Replace Inter with the three Zoetrop brand fonts (D-11).
 // Weights: Space Grotesk 400/500/600/700 + Hanken Grotesk 300–800 + Space Mono 400/700.
 // Do NOT also import tokens/fonts.css in app.css — that would load fonts twice.
 export const links: Route.LinksFunction = () => [

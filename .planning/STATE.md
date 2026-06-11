@@ -81,7 +81,7 @@ Progress: [██████████] 99%
 
 ### Roadmap Evolution
 
-- Phase 04.1 inserted after Phase 4: Design System Adoption — bridge Zoetrope brand tokens into Tailwind, port signature components to TSX, retrofit M0 screens, commit binding UI-SPEC.md; gated on a claude.ai/design roundtrip (see docs/DESIGN-SYSTEM-ADOPTION.md)
+- Phase 04.1 inserted after Phase 4: Design System Adoption — bridge Zoetrop brand tokens into Tailwind, port signature components to TSX, retrofit M0 screens, commit binding UI-SPEC.md; gated on a claude.ai/design roundtrip (see docs/DESIGN-SYSTEM-ADOPTION.md)
 
 ### Decisions
 
@@ -130,7 +130,7 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260610-q56 | Consolidated left sidebar nav chrome refactor (prototype port: rail+accordion+flyout, cookie collapse, mobile drawer, breadcrumbs, routes flatten + /ingest index fix) — branch `left-nav-refactor` | 2026-06-11 | f585795 | [260610-q56-refactor-app-chrome-to-consolidated-left](./quick/260610-q56-refactor-app-chrome-to-consolidated-left/) |
-| 260610-rj2 | Merge breadcrumb into PageHeader meta row — crumb right-aligned on eyebrow line, ZOETROPE segment dropped, single-segment crumbs suppressed | 2026-06-11 | ee771d4 | [260610-rj2-merge-breadcrumb-into-pageheader-meta-ro](./quick/260610-rj2-merge-breadcrumb-into-pageheader-meta-ro/) |
+| 260610-rj2 | Merge breadcrumb into PageHeader meta row — crumb right-aligned on eyebrow line, ZOETROP segment dropped, single-segment crumbs suppressed | 2026-06-11 | ee771d4 | [260610-rj2-merge-breadcrumb-into-pageheader-meta-ro](./quick/260610-rj2-merge-breadcrumb-into-pageheader-meta-ro/) |
 | 260610-rwg | Unify page headers — PageHeader icon/titleAccessory props; metrics category + detail migrated off hand-rolled headers | 2026-06-11 | 299c488 | [260610-rwg-unify-page-headers-extend-pageheader-ico](./quick/260610-rwg-unify-page-headers-extend-pageheader-ico/) |
 | 260611-j6n | Design-roundtrip integration harness (unbundle/css-delta + RETURN-SPEC protocol) + round2 archive + round3 outbound package | 2026-06-11 | 19cad6e | [260611-j6n-design-roundtrip-integration-harness-rou](./quick/260611-j6n-design-roundtrip-integration-harness-rou/) |
 

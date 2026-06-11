@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-/** Base surface container — the "frame" every Zoetrope module sits in. */
+/** Base surface container — the "frame" every Zoetrop module sits in. */
 export interface CardProps {
   /** Drop shadow depth. @default "sm" */
   elevation?: 'flat' | 'xs' | 'sm' | 'md' | 'lg';

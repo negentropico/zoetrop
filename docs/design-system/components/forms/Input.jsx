@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope Input — text field with optional label, leading icon, and hint/error.
+ * Zoetrop Input — text field with optional label, leading icon, and hint/error.
  */
 export function Input({
   label = null,

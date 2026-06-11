@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope IconButton — square/circular control wrapping a single icon.
+ * Zoetrop IconButton — square/circular control wrapping a single icon.
  * Pass the icon as children (e.g. a Lucide <i> or SVG).
  */
 export function IconButton({

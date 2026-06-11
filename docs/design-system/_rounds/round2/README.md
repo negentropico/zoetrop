@@ -5,7 +5,7 @@
 
 ## What round 2 was
 
-A focused design roundtrip (claude.ai/design + the zoetrope-design skill bundle) on a
+A focused design roundtrip (claude.ai/design + the zoetrop-design skill bundle) on a
 single problem: replace the top-nav + bottom-tab + 5 per-section sub-navs with **one
 consolidated left sidebar**. The return defined the interaction model the app now ships:
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 /**
- * Primary action button for Zoetrope. Pill-shaped, periwinkle accent by default.
+ * Primary action button for Zoetrop. Pill-shaped, periwinkle accent by default.
  *
  * @startingPoint section="Core" subtitle="Pill action button — 5 variants, 3 sizes" viewport="700x160"
  */

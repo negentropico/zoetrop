@@ -1,7 +1,7 @@
 /* Today — the home dashboard: three metric rings + summary cards. */
 
 function TodayScreen() {
-  const NS = window.ZoetropeDesignSystem_48aebc;
+  const NS = window.ZoetropDesignSystem_48aebc;
   const { MetricRing, Card, Stat, Badge, ProgressBar } = NS;
   const { ZSparkline } = window.ZApp;
 

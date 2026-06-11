@@ -1,7 +1,7 @@
 /* ============================================================
-   Zoetrope — Spacing, radius, shadow, motion tokens
+   Zoetrop — Spacing, radius, shadow, motion tokens
    Spacing follows a Fibonacci-flavored progression — a nod to
-   the brand's mathematical/zoetrope motif.
+   the brand's mathematical/zoetrop motif.
    ============================================================ */
 
 :root {
@@ -26,7 +26,7 @@
   --gap-3xl: 3rem;    /* 48 */
 
   /* ---- Radii ------------------------------------------- */
-  /* Zoetrope mixes soft "frame" cards with hard geometric
+  /* Zoetrop mixes soft "frame" cards with hard geometric
      edges. Default cards are gently rounded; pills/rings full. */
   --radius-xs:  4px;
   --radius-sm:  8px;
@@ -53,7 +53,7 @@
   --shadow-ring: 0 0 0 4px rgba(128, 112, 255, 0.18); /* focus ring (periwinkle) */
 
   /* ---- Motion ----------------------------------------
-     Frame-by-frame zoetrope feel: brisk, eased, never bouncy.
+     Frame-by-frame zoetrop feel: brisk, eased, never bouncy.
      Hover = subtle lift + warmth; press = scale-down. */
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* @kind other */

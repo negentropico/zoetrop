@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Zoetrope SegmentedControl — compact tab switch for ranges/views (Day/Week/Month).
+ * Zoetrop SegmentedControl — compact tab switch for ranges/views (Day/Week/Month).
  */
 export function SegmentedControl({ options = [], value, onChange, size = 'md', style = {}, ...rest }) {
   const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o));

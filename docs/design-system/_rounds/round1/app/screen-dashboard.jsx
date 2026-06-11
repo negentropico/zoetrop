@@ -1,5 +1,5 @@
 /* Screen 01 — Dashboard */
-const { Card, MetricRing, Badge, Button } = window.ZoetropeDesignSystem_48aebc;
+const { Card, MetricRing, Badge, Button } = window.ZoetropDesignSystem_48aebc;
 
 function StatTile({ label, value, unit, accent, hint }) {
   return (

@@ -4,7 +4,7 @@ Applies to **every** screen in this package. Per-screen `brief.md` files add
 screen-specific notes on top of this.
 
 The job: take the shipped Zoetrop screens (cool-grey/blue Tailwind dashboard,
-Inter, emoji, gradient bars) and **re-express them in the Zoetrope brand** —
+Inter, emoji, gradient bars) and **re-express them in the Zoetrop brand** —
 warm Paper, the Energy/Vital/Focus palette, Space Grotesk / Hanken / Space Mono
 type, frame cards, pill controls, soft warm shadows, Lucide icons, and the calm
 "quiet coach" voice. Keep the information architecture and data; change the skin,
@@ -121,7 +121,7 @@ multi-column grids reflow, and whether the 393px frame is a genuine target or a
 responsive endpoint.
 
 ### Q5 — Wordmark
-Screens show **"Zoetrop"**; brand shows **"zoetrope."** `Zoetrop` is the internal
+Screens show **"Zoetrop"**; brand shows **"zoetrop."** `Zoetrop` is the internal
 codename; the public brand is **deferred** (do not relitigate naming). Use a
 neutral, easily-swappable wordmark treatment; **flag** the spelling rather than
 hard-committing either way.
