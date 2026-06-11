@@ -135,6 +135,15 @@ export async function extractionWorker(
         }
       }
 
+      // Parse collectionDate string → Date; guard against empty/invalid
+      let collectedAt: Date | null = null;
+      if (extraction.collectionDate && extraction.collectionDate.trim() !== "") {
+        const parsed = new Date(extraction.collectionDate);
+        if (!isNaN(parsed.getTime())) {
+          collectedAt = parsed;
+        }
+      }
+
       await db.insert(labExtractions).values({
         labDocumentId,
         tenantId: doc.tenantId,
@@ -145,6 +154,8 @@ export async function extractionWorker(
         rawUnit: extraction.unit,
         sourceTextSnippet: extraction.sourceTextSnippet,
         pageNumber: extraction.pageNumber,
+        // Specimen collection date (null if not parseable)
+        collectedAt,
         // Validation results
         confidence,
         rangeFlag,
