@@ -386,7 +386,7 @@ html[data-theme="dark"] {
    Only shell elements transition on theme toggle — prevents visual
    churn across 200+ DOM elements during dark/light switch.
    ================================================================ */
-html, body, .zt-topnav, .zt-bottomtab, .zt-theme-toggle {
+html, body, .zn-side, .zn-topbar, .zt-theme-toggle {
   transition: background-color var(--dur-base, 200ms) var(--ease-out, ease),
               border-color var(--dur-base, 200ms) var(--ease-out, ease),
               color var(--dur-base, 200ms) var(--ease-out, ease);
