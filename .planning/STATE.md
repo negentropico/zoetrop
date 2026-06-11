@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: "05-03 code complete (Tasks 1-3); Task 4 E2E UAT pending human verification"
-last_updated: "2026-06-10T23:30:00.000Z"
+status: ready_to_plan
+stopped_at: Phase 05 complete (3/3) — ready to discuss Phase 6
+last_updated: 2026-06-11T02:39:29.444Z
 last_activity: 2026-06-10
 progress:
   total_phases: 9
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 37
   completed_plans: 37
-  percent: 69
+  percent: 78
 ---
 
 # Project State
@@ -21,25 +21,27 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 05 — lab-ingest-pipeline
+**Current focus:** Phase 6 — engine promotion + confidence graded reports
 
 > Note: Phases 1, 2, 3, 3.1, 4, and 4.1 are complete (Phase 4 completed 2026-06-10 with verification passed 4/4). Phase 4.1 (design system) was executed early on 2026-06-08; `phase.complete` for Phase 4 again mis-pointed "next" at the already-complete 4.1 and was corrected by hand — **the next incomplete phase is Phase 5 (Lab Ingest Pipeline)**. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 05 (lab-ingest-pipeline) — EXECUTING
-Plan: 3 of 3 — code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification
-Status: 05-03 code deliverables done (LAB-04/LAB-05/LAB-06 implemented); awaiting owner E2E UAT on Vercel preview, then phase verification (orchestrator)
-Last activity: 2026-06-11 - Completed quick task 260610-rwg: unified page headers (PageHeader icon/titleAccessory; category+detail migrated)
+Phase: 6
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-11
 
-Progress: [██████████] 99%
+Progress: [████████░░] 78%
+
+> ✓ Phase 5 (Lab Ingest Pipeline) complete 2026-06-11 — owner E2E UAT passed on Vercel preview; 4 gap-closures fixed (SSR DOMMatrix, Vercel .data 404, multi-page PDF nav, collection-date+dedup migration 0008). Next incomplete phase is **Phase 6 (Engine Promotion + Confidence-Graded Reports)**.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 39
+- Total plans completed: 42
 - Average duration: —
 - Total execution time: —
 
@@ -53,6 +55,7 @@ Progress: [██████████] 99%
 | 03 | 5 | - | - |
 | 03.1 | 4 | - | - |
 | 04 | 7 | - | - |
+| 05 | 3 | - | - |
 
 **Recent Trend:** No data yet
 
