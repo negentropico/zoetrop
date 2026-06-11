@@ -33,6 +33,7 @@ export interface ExtractionResult {
   unit: string;               // Unit as printed (e.g. "mg/dL", "mIU/L")
   sourceTextSnippet: string;  // Verbatim text from the report containing this value
   pageNumber: number;         // 1-based page index
+  collectionDate: string | null; // ISO 8601 date (YYYY-MM-DD) of specimen collection, or null
 }
 
 // ── Tool definition ────────────────────────────────────────────────────────
@@ -70,6 +71,11 @@ const extractionTool: Anthropic.Tool = {
               type: "integer",
               description: "1-based page index where this value appears",
             },
+            collectionDate: {
+              type: ["string", "null"],
+              description:
+                "Specimen COLLECTION date in ISO 8601 format (YYYY-MM-DD). Read the field labeled 'Collected', 'Date Collected', 'Collection Date', or 'Specimen Collected' — NOT the report/print/received date. If the report shows multiple collection dates, use the one for this specific analyte. Return null if no collection date is determinable.",
+            },
           },
           required: [
             "analyte",
@@ -77,6 +83,7 @@ const extractionTool: Anthropic.Tool = {
             "unit",
             "sourceTextSnippet",
             "pageNumber",
+            "collectionDate",
           ],
           additionalProperties: false,
         },
@@ -97,6 +104,7 @@ For each extracted value:
 - unit: the unit as printed (e.g. "mg/dL", "mIU/L", "x10^3/uL")
 - sourceTextSnippet: copy a short verbatim phrase from the report that includes the value and unit — this MUST be an exact substring of what appears on the document page
 - pageNumber: the 1-based page where this line appears
+- collectionDate: the specimen COLLECTION date in ISO 8601 format (YYYY-MM-DD). Look for fields labeled "Collected", "Date Collected", "Collection Date", or "Specimen Collected". Do NOT use the report date, print date, received date, or result date. If multiple collection dates appear (e.g., multiple panels drawn on different days), use the one specific to each analyte. If no collection date is determinable from the report, return null.
 
 Do not interpret, convert, or normalize values. Do not invent ranges. Extract only what is printed.`;
 
