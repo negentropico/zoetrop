@@ -18,22 +18,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
   // from Better-Auth additionalFields but shell components require `string`.
   // Coerce to "client" as a safe default (read-only role) when unset.
   const u = session.user;
+  // Sidebar collapse preference — zt-nav=1 means collapsed. Strict-regex parse
+  // to a boolean only (T-q56-01: never interpolated, stored, or echoed).
+  // SSR-read so the initial render matches the client (no flash).
+  const cookie = request.headers.get("Cookie") ?? "";
+  const navCollapsed = /(?:^|;\s*)zt-nav=1(?:\s*;|$)/.test(cookie);
   return {
     user: {
       name: u.name,
       email: u.email,
       role: u.role ?? "client",
     },
+    navCollapsed,
   };
 }
 
 // AppShell moves here from root.tsx (Pitfall 3 — never leave AppShell in root
 // where it would wrap public/login routes too).
-// Thread the session user (name, email, role) from loader → AppShell → TopNav → AccountMenu.
+// Thread the session user (name, email, role) + navCollapsed from loader →
+// AppShell → Sidebar/SidebarAccount.
 export default function AppLayout() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user, navCollapsed } = useLoaderData<typeof loader>();
   return (
-    <AppShell user={user}>
+    <AppShell user={user} navCollapsed={navCollapsed}>
       <Outlet />
     </AppShell>
   );
