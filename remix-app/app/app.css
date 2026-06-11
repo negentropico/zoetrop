@@ -204,6 +204,12 @@
   --radius-2xl:  18px;
   --radius-pill: 999px;
 
+  /* Sidebar geometry (consolidated left nav) */
+  --zn-side-w: 264px;
+  --zn-rail-w: 64px;
+  --zn-row-h: 40px;
+  --zn-child-h: 34px;
+
   /* Semantic aliases (built on top of neutral ramp) */
   --surface:        var(--n-0);
   --surface-2:      var(--paper-2);
@@ -544,4 +550,215 @@ h1, h2, h3, h4 {
 /* Text selection */
 ::selection {
   background: var(--focus-100);
+}
+
+/* ================================================================
+   Sidebar shell (zn-*) — consolidated left nav
+   Ported from the left-nav prototype (260610-q56-zn-proto.css
+   lines 65–233 + 238–239) plus mobile-drawer rules and the
+   class-driven desktop content offset (new — not in prototype).
+   z-index map: topbar 40 < mobile backdrop 55 < sidebar 60 <
+   fly-backdrop 70 < flyout 80 < account menu 90.
+   ================================================================ */
+.zn-side {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 60;
+  width: var(--zn-side-w);
+  display: flex; flex-direction: column;
+  background: var(--surface); border-right: 1px solid var(--border);
+  transition: width 220ms var(--ease-out, ease);
+}
+.zn-side.is-collapsed { width: var(--zn-rail-w); }
+.zn-side .zn-label { white-space: nowrap; }
+.zn-side.is-collapsed .zn-label { display: none; }
+
+/* header */
+.zn-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 16px 14px 12px;
+}
+.zn-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.zn-wordmark {
+  font-family: var(--font-display); font-weight: 600; font-size: 1.15rem;
+  letter-spacing: -0.02em; color: var(--ink);
+}
+.zn-collapse {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex: 0 0 auto;
+  border: none; background: none; border-radius: var(--radius-sm);
+  color: var(--text-muted); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-collapse:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-side.is-collapsed .zn-head { flex-direction: column; padding: 16px 0 8px; }
+
+/* nav list */
+.zn-nav {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 6px 12px;
+}
+.zn-side.is-collapsed .zn-nav { padding: 6px 0; gap: 6px; align-items: center; }
+.zn-group { display: flex; flex-direction: column; }
+
+/* tier-1 row */
+.zn-row {
+  position: relative; display: flex; align-items: center; gap: 11px;
+  height: var(--zn-row-h); padding: 0 10px; width: 100%;
+  border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: var(--radius-md);
+  font-family: var(--font-text); font-size: var(--text-sm); font-weight: 500;
+  color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-row:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-row.is-section { color: var(--ink); font-weight: 600; }
+.zn-row.is-active { background: var(--surface-sunken); color: var(--ink); font-weight: 600; }
+.zn-chev {
+  margin-left: auto; display: inline-flex; flex: 0 0 auto;
+  color: var(--text-muted); transition: transform 180ms var(--ease-out);
+}
+
+/* tier-2 children */
+.zn-kids { display: grid; transition: grid-template-rows 220ms var(--ease-out); }
+.zn-kids-inner { overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.zn-child {
+  position: relative; display: flex; align-items: center;
+  height: var(--zn-child-h); flex: 0 0 auto;
+  margin-left: 19px; padding: 0 10px 0 15px;
+  border-left: 1px solid var(--border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--text-sm); color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-child:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-child.is-active { background: var(--surface-sunken); color: var(--ink); font-weight: 600; }
+.zn-child.is-active::before {
+  content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px;
+  border-radius: 2px; background: var(--ink);
+}
+.zn-kids-inner > .zn-child:last-child { margin-bottom: 6px; }
+
+/* collapsed rail */
+.zn-rail-item {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex: 0 0 auto; margin: 0 auto;
+  border: none; background: none; cursor: pointer; padding: 0;
+  border-radius: var(--radius-md); color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-rail-item:hover, .zn-rail-item.is-fly { background: var(--surface-sunken); color: var(--ink); }
+.zn-rail-item.is-active { background: var(--surface-sunken); color: var(--ink); }
+.zn-rail-item.is-active::before {
+  content: ''; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 2px;
+  border-radius: 0 2px 2px 0; background: var(--ink);
+}
+
+/* flyout */
+.zn-flyout {
+  position: fixed; left: calc(var(--zn-rail-w) + 8px); z-index: 80;
+  min-width: 196px; padding: 7px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  animation: znFlyIn 140ms var(--ease-out) both;
+}
+@keyframes znFlyIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .zn-flyout { animation: none; } }
+.zn-flyout-title {
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); padding: 7px 10px 6px;
+}
+.zn-flyout-item {
+  position: relative; display: flex; align-items: center; height: 34px; padding: 0 10px;
+  border-radius: var(--radius-md); font-size: var(--text-sm);
+  color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-flyout-item:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-flyout-item.is-active { background: var(--surface-sunken); color: var(--ink); font-weight: 600; }
+.zn-fly-backdrop { position: fixed; inset: 0; z-index: 70; background: transparent; }
+
+/* footer */
+.zn-foot {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 10px 12px; display: flex; flex-direction: column;
+}
+.zn-side.is-collapsed .zn-foot { padding: 10px 0; align-items: center; }
+.zn-account-wrap { position: relative; }
+.zn-side.is-collapsed .zn-account-wrap { width: 40px; }
+.zn-account {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 7px 8px; border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: var(--radius-md); font-family: var(--font-text); color: var(--text);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.zn-account:hover, .zn-account.is-open { background: var(--surface-sunken); }
+.zn-side.is-collapsed .zn-account { width: 40px; height: 40px; justify-content: center; padding: 0; border-radius: var(--radius-md); }
+.zn-account-chev { margin-left: auto; display: inline-flex; flex: 0 0 auto; color: var(--text-muted); }
+.zn-side.is-collapsed .zn-account-chev { display: none; }
+.zn-avatar {
+  width: 30px; height: 30px; flex: 0 0 auto; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--ink); color: var(--n-50);
+  font-family: var(--font-display); font-weight: 600; font-size: var(--text-sm);
+}
+.zn-account-name { min-width: 0; }
+.zn-account-menu {
+  position: absolute; bottom: calc(100% + 8px); left: 0; right: 0; z-index: 90;
+  min-width: 208px; padding: 7px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+}
+.zn-account-menu.is-rail { left: calc(100% + 14px); right: auto; bottom: 0; width: 224px; }
+.zn-account-head { padding: 8px 10px 10px; }
+.zn-role {
+  display: inline-block; margin-top: 9px; padding: 3px 9px;
+  border-radius: var(--radius-pill); background: var(--focus-50); color: var(--accent);
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.zn-account-sep { height: 1px; background: var(--border); margin: 5px 4px; }
+.zn-menu-item {
+  display: flex; align-items: center; gap: 9px; width: 100%; height: 34px; padding: 0 10px;
+  border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: var(--radius-md); font-family: var(--font-text);
+  font-size: var(--text-sm); color: var(--text-secondary);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-menu-item:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-menu-item.is-danger { color: var(--danger); }
+.zn-menu-item.is-danger:hover { background: var(--danger-bg); color: var(--danger); }
+
+/* content area */
+.zn-main { transition: margin-left 220ms var(--ease-out, ease); }
+.zn-page { max-width: 1180px; margin: 0 auto; padding: var(--gap-3xl) var(--gap-2xl) 80px; }
+
+/* Desktop content offset — class-driven (no inline styles in AppShell) */
+.zn-app .zn-main { margin-left: var(--zn-side-w); }
+.zn-app.is-collapsed .zn-main { margin-left: var(--zn-rail-w); }
+
+/* Mobile top bar — hidden above the drawer breakpoint */
+.zn-topbar { display: none; }
+
+/* Mobile drawer (≤760px — the app's existing breakpoint) */
+@media (max-width: 760px) {
+  .zn-topbar {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 10px;
+    height: 56px; padding: 0 12px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  .zn-side {
+    transform: translateX(-100%);
+    transition: transform 220ms var(--ease-out, ease), width 220ms var(--ease-out, ease);
+  }
+  .zn-side.is-mobile-open { transform: none; box-shadow: var(--shadow-xl); }
+  .zn-collapse { display: none; }
+  .zn-app .zn-main,
+  .zn-app.is-collapsed .zn-main { margin-left: 0 !important; }
+  .zn-mobile-backdrop {
+    position: fixed; inset: 0; z-index: 55;
+    background: color-mix(in srgb, var(--ink) 35%, transparent);
+  }
 }
