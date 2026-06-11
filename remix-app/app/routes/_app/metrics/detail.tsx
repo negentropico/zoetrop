@@ -113,15 +113,16 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Crumb
-        items={[
-          { label: "zoetrope", to: "/dashboard" },
-          { label: "Metrics", to: "/metrics" },
-          { label: categoryInfo.label, to: `/metrics/${category}` },
-          { label: metric.name },
-        ]}
-      />
+      {/* Breadcrumb — right-aligned meta row (matches PageHeader crumbs-only treatment) */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+        <Crumb
+          items={[
+            { label: "Metrics", to: "/metrics" },
+            { label: categoryInfo.label, to: `/metrics/${category}` },
+            { label: metric.name },
+          ]}
+        />
+      </div>
 
       {/* Header */}
       <div

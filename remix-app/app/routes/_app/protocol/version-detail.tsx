@@ -12,7 +12,6 @@ import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Crumb } from "~/components/ui/Crumb";
 import { Button } from "~/components/ui/Button";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -136,17 +135,13 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      {/* Breadcrumb + header */}
-      <Crumb
-        items={[
-          { label: "zoetrope", to: "/dashboard" },
+      {/* Header (crumb renders in the PageHeader meta row) */}
+      <PageHeader
+        crumbs={[
           { label: "Protocol", to: "/protocol" },
           { label: "Versions", to: "/protocol/versions" },
           { label: version.version },
         ]}
-      />
-
-      <PageHeader
         eyebrow="PROTOCOL VERSION"
         title={`Protocol ${version.version}`}
         sub={`Effective ${format(parseISO(version.effectiveDate), "MMMM d, yyyy")}`}
