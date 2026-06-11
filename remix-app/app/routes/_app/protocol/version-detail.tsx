@@ -139,6 +139,7 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
       {/* Breadcrumb + header */}
       <Crumb
         items={[
+          { label: "zoetrope", to: "/dashboard" },
           { label: "Protocol", to: "/protocol" },
           { label: "Versions", to: "/protocol/versions" },
           { label: version.version },
