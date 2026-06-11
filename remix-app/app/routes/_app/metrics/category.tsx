@@ -30,7 +30,7 @@ import { StatusBadge } from "~/components/ui/StatusBadge";
 import { StatusDot } from "~/components/ui/StatusDot";
 import { RangeBar } from "~/components/ui/RangeBar";
 import type { MetricWithRange } from "~/components/ui/RangeBar";
-import { Crumb } from "~/components/ui/Crumb";
+import { PageHeader } from "~/components/ui/PageHeader";
 
 const LUCIDE_MAP: Record<string, LucideIcon> = {
   pill: Pill,
@@ -212,32 +212,13 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      {/* Breadcrumb — right-aligned meta row (matches PageHeader crumbs-only treatment) */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-        <Crumb items={[{ label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]} />
-      </div>
-
-      {/* Category header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: "var(--gap-xl)" }}>
-        {icon && <CatChip icon={icon} family={categoryInfo.family} size={52} />}
-        <div>
-          <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 600 }}>{categoryInfo.label}</h1>
-          <p style={{ margin: "4px 0 0", color: "var(--text-secondary)" }}>{categoryInfo.description}</p>
-        </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 18 }}>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-            }}
-          >
-            {totalCount} tracked
-          </span>
-        </div>
-      </div>
+      <PageHeader
+        icon={icon ? <CatChip icon={icon} family={categoryInfo.family} size={52} /> : undefined}
+        eyebrow={`${totalCount} tracked`}
+        title={categoryInfo.label}
+        sub={categoryInfo.description}
+        crumbs={[{ label: "Metrics", to: "/metrics" }, { label: categoryInfo.label }]}
+      />
 
       <FilterControls />
 
