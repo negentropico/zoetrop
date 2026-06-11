@@ -80,25 +80,7 @@ export function AppShell({ children, user, navCollapsed }: AppShellProps) {
       <main className="zn-main">
         <div className="zn-page">
           {children}
-          <footer
-            style={{
-              borderTop: "1px solid var(--border)",
-              marginTop: 24,
-              padding: "22px 0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              className="zt-eyebrow inline-flex items-center gap-2.5"
-              style={{ gap: 10 }}
-            >
-              <SpiralMark size={16} color="var(--text-faint)" />
-              zoetrope
-            </span>
+          <footer>
           </footer>
         </div>
       </main>

@@ -1,5 +1,4 @@
 // Zoetrope brand wordmark: SpiralMark + "zoetrope." with periwinkle period
-// + "codename Zoetrop" tag (D-08). Rendered only inside the authenticated
 // shell (MobileTopBar), so it links to /dashboard (WR-03 — `/` is the public landing).
 // Source: docs/design-system/_rounds/round1/app/lib.jsx Wordmark (lines 346–355)
 import { Link } from "react-router";
@@ -26,21 +25,7 @@ export function Wordmark() {
         }}
       >
         <span>
-          zoetrope
-          <span style={{ color: "var(--accent)" }}>.</span>
-        </span>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.625rem",
-            fontWeight: 400,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "var(--text-faint)",
-            alignSelf: "center",
-          }}
-        >
-          codename Zoetrop
+          zoetrop
         </span>
       </span>
     </Link>
