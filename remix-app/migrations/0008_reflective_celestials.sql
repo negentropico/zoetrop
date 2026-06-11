@@ -1,0 +1,1 @@
+ALTER TABLE "lab_extractions" ADD COLUMN "collected_at" timestamp;

@@ -313,6 +313,10 @@ export const labExtractions = pgTable('lab_extractions', {
   status: labExtractionStatusEnum('status').notNull().default('pending_review'),
   reviewedAt: timestamp('reviewed_at'),
   reviewedBy: text('reviewed_by').references(() => user.id),
+  // Specimen collection date captured from the lab report (LAB-06-FIX / gap-closure)
+  // Nullable: not every PDF yields a parseable collection date.
+  // Source: LLM extraction reads "Collected"/"Date Collected"/"Collection Date"/"Specimen Collected" field.
+  collectedAt: timestamp('collected_at'),
   // Final approved value (may be edited during review)
   approvedValue: real('approved_value'),
   approvedUnit: varchar('approved_unit', { length: 50 }),
