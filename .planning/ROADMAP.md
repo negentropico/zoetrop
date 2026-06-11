@@ -233,7 +233,7 @@ Plans:
 
 **Wave 3** *(blocked on 05-02)*
 
-- [ ] 05-03-PLAN.md — Review UI: ingest layout/routes, consent form, authed PDF byte stream, `PdfPageViewer` (react-pdf), `/ingest/review` side-by-side per-field approve/edit/reject (no bulk-approve) writing approved-only metrics with `assertSubjectAccess` + auditLog; end-to-end UAT on Vercel preview [LAB-04, LAB-05, LAB-06]
+- [~] 05-03-PLAN.md — Review UI: ingest layout/routes, consent form, authed PDF byte stream, `PdfPageViewer` (react-pdf), `/ingest/review` side-by-side per-field approve/edit/reject (no bulk-approve) writing approved-only metrics with `assertSubjectAccess` + auditLog. **Code complete (Tasks 1-3 committed 301d826/b12692e/6e15a2c; typecheck+build clean, 195 pass/58 skip).** Task 4 end-to-end UAT on Vercel preview is **DEFERRED / pending human verification** (owner-run; infra staged — see 05-03-SUMMARY.md §Task 4) [LAB-04, LAB-05, LAB-06]
 
 ### Phase 6: Engine Promotion + Confidence-Graded Reports
 
@@ -279,7 +279,7 @@ Plans:
 | 3.1. Account & Roles — UX + Authorization *(inserted)* | 4/4 | Complete   | 2026-06-10 |
 | 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
-| 5. Lab Ingest Pipeline | 2/3 | In Progress|  |
+| 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 0/TBD | Not started | - |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
 

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-06-10T22:56:52.507Z"
+stopped_at: "05-03 code complete (Tasks 1-3); Task 4 E2E UAT pending human verification"
+last_updated: "2026-06-10T23:30:00.000Z"
 last_activity: 2026-06-10
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 37
-  completed_plans: 36
-  percent: 67
+  completed_plans: 37
+  percent: 69
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 05 (lab-ingest-pipeline) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
+Plan: 3 of 3 — code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification
+Status: 05-03 code deliverables done (LAB-04/LAB-05/LAB-06 implemented); awaiting owner E2E UAT on Vercel preview, then phase verification (orchestrator)
 Last activity: 2026-06-10
 
-Progress: [██████████] 97%
+Progress: [██████████] 99%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 38
+- Total plans completed: 39
 - Average duration: —
 - Total execution time: —
 
@@ -75,6 +75,7 @@ Progress: [██████████] 97%
 | Phase 03.1 P01 | 15min | 3 tasks | 8 files |
 | Phase 05 P01 | 25min | 4 tasks | 15 files |
 | Phase 05-lab-ingest-pipeline P02 | 6 | 3 tasks | 10 files |
+| Phase 05-lab-ingest-pipeline P03 (code; Task 4 E2E pending UAT) | ~18m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -109,11 +110,15 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 03.1-01]: invites table in schema.ts, hand-corrected 0005 migration (Drizzle snapshot drift from custom 0002-0004), user.tenantId nullable expand-contract, authz helpers RLS-compatible
 - [Phase ?]: [Phase 05-01]: 4 lab-ingest tables (lab_documents/lab_extractions/audit_log/consent_log) applied to live Neon via reviewed migration 0007; data_source enum +lab (D-16); audit_log PHI-free by design (D-13); enum ADD VALUE not in transaction (Pitfall 3 cleared at apply)
 - [Phase ?]: [Phase 05-01]: analyte dictionary is a server-only TS module (D-01) — 101 entries seeded from owner 38 live-Neon analytes + D-03 common panels, no PHI; re-runnable via npm run db:seed-dictionary
+- [Phase 05-03]: Review surface + write-path code complete (LAB-04/LAB-05/LAB-06). routes.ts reconciled (index + documents/:id into existing ingest block — single upload surface); PdfPageViewer (react-pdf, renderTextLayer snippet highlight, worker via import.meta.url, pdfjs-dist peer-dep-only — Pitfall 6); authed PDF byte stream (document.tsx, T-05-DOC); review loader+UI with useFetcher status polling (D-11); per-field approve/edit/reject write path — assertSubjectAccess BEFORE write (D-15/CR-01) + metrics INSERT source='lab' + PHI-free auditLog + pdfBytes purge, all in a Drizzle transaction, NO bulk-approve (T-05-BULK/LAB-04). approve-action.test.ts 14/14 GREEN; full suite 195 pass/58 skip. Commits 301d826/b12692e/6e15a2c + SUMMARY 42e361d.
+- [Phase 05-03][Rule-3 deviation]: dynamic import() of the auditLog table inside the review action tripped React Router's "Server-only module referenced by client" build guard — switched to a static schema import (tx.insert(auditLog)). Pattern: never dynamic-import server modules inside route action bodies.
+- [Phase 05-03][PENDING]: Task 4 E2E UAT on Vercel preview is DEFERRED / pending human verification (owner runs upload→extract→review→approve against a real lab PDF). Infra staged: ANTHROPIC_API_KEY in Vercel Preview+Production, repo negentropico/zoetrop connected (rootDirectory=remix-app), preview built at https://zoetrop-gtpsezj4x-negentropico.vercel.app (SSO-protected). Phase NOT complete until E2E approved + phase verification.
 
 ### Pending Todos
 
 - [Plan 05 / Vercel]: Set OWNER_INVITE_TOKEN in Vercel env (production + preview). ✓ DONE — orchestrator pre-staged OWNER_INVITE_TOKEN to Production + Preview (encrypted; CLI for prod, REST for preview). Do NOT commit the value.
 - [Post-deploy / Vercel — D-05]: After merging `003-remix-foundation` to production + deploying: delete PILOT_BASIC_AUTH from Vercel (Prod+Preview), then `curl -I https://zoetrop.vercel.app/` expects 200 (not 401). Deferred because prod still runs the OLD Basic-Auth code; deleting pre-deploy would expose prod. resolves_phase: 03. See `.planning/todos/pending/delete-pilot-basic-auth-post-deploy.md`.
+- [Phase 05-03 / Owner — E2E UAT]: Run the lab-ingest end-to-end on the Vercel preview (https://zoetrop-gtpsezj4x-negentropico.vercel.app or latest 003-remix-foundation preview): sign in as owner → /ingest/upload → consent → upload a real text-extractable lab PDF → confirm <2s + processing→pending_review (~30-60s, waitUntil) → /ingest/review real PDF + located snippet + per-field-only approve/edit/reject (no bulk) → approve a couple (edit one), reject one → verify approved metrics appear with source='lab', rejected writes none, consentLog row + PHI-free auditLog rows exist. Reply "approved" or describe failures. Steps + acceptance criteria in 05-03-SUMMARY.md §Task 4. Blocks phase-05 completion.
 
 ### Blockers/Concerns
 
@@ -130,6 +135,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-10T22:56:52.500Z
-Stopped at: Completed 05-01-PLAN.md
-Resume file: None
+Last session: 2026-06-10T23:30:00.000Z
+Stopped at: 05-03 code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification on Vercel preview
+Resume file: .planning/phases/05-lab-ingest-pipeline/05-03-SUMMARY.md (§Task 4 — E2E UAT steps + preview URL)
