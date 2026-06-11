@@ -49,6 +49,11 @@ This doc plans that application **without derailing the engine-first roadmap**.
 Nothing is built in `remix-app/` until the roundtrip returns. The package is the
 gating artifact; this doc + the eventual UI-SPEC are the contract.
 
+> **Round protocol (added after round 2):** the repeatable roundtrip workflow, tooling
+> (`unbundle.mjs`, `css-delta.mjs`), and return contract now live at
+> `docs/design-system/_rounds/harness/README.md`; round 3 is prepped at
+> `docs/design-system/_rounds/round3/package/`.
+
 ## 4. The package (input to the roundtrip)
 
 `docs/design-system/uploads/screens-package/` — see its `README.md`. Eight
