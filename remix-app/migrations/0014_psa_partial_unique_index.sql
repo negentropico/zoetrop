@@ -1,0 +1,23 @@
+-- 0014_psa_partial_unique_index.sql
+-- Phase 7 Plan 08 (AUTH-03 CR-02): replace full unique index with PARTIAL unique index
+-- on practitioner_subject_assignments.
+--
+-- WHY: The original idx_psa_active_unique was a FULL unique index on
+-- (tenant_id, practitioner_id, subject_id). A soft-deleted (revoked) row kept
+-- occupying the unique key, making re-assignment of the same triple permanently
+-- impossible — a single revoke permanently broke re-granting access (CR-02).
+--
+-- FIX: A PARTIAL index (WHERE revoked_at IS NULL) means only ACTIVE rows participate
+-- in uniqueness. A revoked row no longer occupies the key, so the assignment lifecycle
+-- is repeatable: assign → revoke → re-assign all work correctly.
+--
+-- IMPACT: This change is non-destructive on the live table — the index is dropped
+-- and recreated atomically. No data is modified. A 23505 unique_violation now means
+-- a genuinely active duplicate, never a stale revoked row.
+--
+-- Reversible: DROP INDEX "idx_psa_active_unique"; CREATE UNIQUE INDEX
+-- "idx_psa_active_unique" ON "practitioner_subject_assignments" USING btree
+-- ("tenant_id","practitioner_id","subject_id"); (removes the WHERE predicate)
+DROP INDEX IF EXISTS "idx_psa_active_unique";
+--> statement-breakpoint
+CREATE UNIQUE INDEX "idx_psa_active_unique" ON "practitioner_subject_assignments" USING btree ("tenant_id","practitioner_id","subject_id") WHERE revoked_at IS NULL;
