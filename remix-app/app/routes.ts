@@ -39,6 +39,10 @@ export default [
     route("ingest/review", "routes/_app/ingest/review.tsx"),
     route("ingest/consent", "routes/_app/ingest/consent.tsx"),
     route("ingest/documents/:id", "routes/_app/ingest/document.tsx"),
+    // Reports (Plan 06-05: flat under _app/layout.tsx, no sub-layout)
+    route("reports", "routes/_app/reports/index.tsx"),
+    route("reports/generate", "routes/_app/reports/generate.tsx"),
+    route("reports/:reportId", "routes/_app/reports/detail.tsx"),
     // Settings
     route("settings", "routes/_app/settings/index.tsx"),
     route("settings/invites/:inviteId/revoke", "routes/_app/settings/invites.ts"),
