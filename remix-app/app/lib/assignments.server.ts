@@ -8,9 +8,12 @@
  *   - All mutations/reads go through withTenantDb: the psa RLS policy (tenant-only
  *     isolation) is active. An app_user cannot read or write a row from another tenant.
  *   - unassignSubject is a soft delete (revokedAt = now()). Hard deletes are not used.
- *   - assignSubject is idempotent against the unique active index (unique on
- *     tenant_id + practitioner_id + subject_id). On unique-violation, returns
+ *   - assignSubject is idempotent against the PARTIAL unique active index (unique on
+ *     tenant_id + practitioner_id + subject_id WHERE revoked_at IS NULL). On
+ *     23505 unique_violation (structured code check), returns
  *     { assigned: true, alreadyExists: true } — the caller treats this as success.
+ *     With the partial index, revoke-then-reassign works: a revoked row no longer
+ *     blocks a fresh active assignment (CR-02).
  *   - Fail-closed: a no-op UPDATE (0 rows changed) in unassignSubject is reported
  *     as { unassigned: false } — the caller can surface "not found" rather than
  *     treating silence as success (mirrors revokeInvite pattern, WR-02).
@@ -29,8 +32,10 @@ import { eq, and, isNull } from "drizzle-orm";
 // ── assignSubject ──────────────────────────────────────────────────────────────
 //
 // Creates an active assignment between a practitioner and a subject in the tenant.
-// Idempotent: if an active assignment already exists (unique index violation),
-// returns { assigned: true, alreadyExists: true } — not an error.
+// Idempotent: if an active assignment already exists (23505 unique_violation), returns
+// { assigned: true, alreadyExists: true } — not an error.
+// With the PARTIAL index (WHERE revoked_at IS NULL), 23505 fires only for a genuinely
+// active duplicate — a previously revoked row does NOT block re-assignment (CR-02).
 // The id is a random UUID; revokedAt is null (active).
 
 export interface AssignSubjectOpts {
@@ -59,10 +64,12 @@ export async function assignSubject(
     });
     return { assigned: true, alreadyExists: false };
   } catch (err) {
-    // Unique constraint violation on (tenantId, practitionerId, subjectId)
-    // means an active assignment already exists — idempotent success.
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("unique") || msg.includes("duplicate") || msg.includes("23505")) {
+    // Structured Postgres error-code check: 23505 = unique_violation.
+    // With the PARTIAL index (WHERE revoked_at IS NULL), this fires ONLY for a
+    // genuinely active duplicate — a revoked row no longer occupies the unique key,
+    // so a revoke-then-reassign cycle never triggers this path (CR-02).
+    // All other errors are re-thrown (fail-closed).
+    if ((err as { code?: string }).code === '23505') {
       return { assigned: true, alreadyExists: true };
     }
     throw err;
