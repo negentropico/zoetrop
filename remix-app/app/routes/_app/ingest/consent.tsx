@@ -19,6 +19,7 @@ import { assertSubjectAccess } from "~/lib/authz.server";
 import type { AppRole } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { checkConsent, insertConsent } from "~/lib/consent.server";
 import { insertAuditLog } from "~/lib/audit.server";
 import { Card } from "~/components/ui/Card";
@@ -31,8 +32,12 @@ import { Form } from "react-router";
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  assertSubjectAccess(user, subject, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, subject, user.tenantId!, assignedIds);
 
   // If consent already exists, redirect to the next destination
   const alreadyConsented = await checkConsent(ctx);
@@ -52,8 +57,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  assertSubjectAccess(user, subject, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, subject, user.tenantId!, assignedIds);
 
   const formData = await request.formData();
   const next = (formData.get("next") as string | null) ?? "/ingest/upload";
