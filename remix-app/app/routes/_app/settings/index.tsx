@@ -1,5 +1,5 @@
 import { useState, useLayoutEffect, useCallback } from "react";
-import { Form, useLoaderData, useActionData, useFetcher } from "react-router";
+import { Form, Link, useLoaderData, useActionData, useFetcher } from "react-router";
 import type { Route } from "./+types/index";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
@@ -40,6 +40,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   // canInviteClient also requires a tenantId (invites are tenant-scoped, T-031-SET-5).
   const canInviteClient = can(user, "invite:client") && !!user.tenantId;
   const canInvitePractitioner = can(user, "invite:practitioner");
+  // Assignments surface is owner-only (AUTH-03, D-07): only owners manage practitioner→subject assignments
+  const canManageAssignments = user.role === "owner" && !!user.tenantId;
 
   // Load invites only for roles that can invite (owner or practitioner) AND
   // that have a tenant. A missing tenantId yields an empty list (fail-closed).
@@ -48,7 +50,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     invites = await listInvites(user.tenantId!);
   }
 
-  return { user, invites, canInviteClient, canInvitePractitioner };
+  return { user, invites, canInviteClient, canInvitePractitioner, canManageAssignments };
 }
 
 // ── Action ────────────────────────────────────────────────────────────────────
@@ -360,7 +362,7 @@ function GeneratedLinkCard({
 // ── Default component ─────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const { user, invites, canInviteClient, canInvitePractitioner } =
+  const { user, invites, canInviteClient, canInvitePractitioner, canManageAssignments } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
@@ -871,7 +873,40 @@ export default function SettingsPage() {
           </Card>
         )}
 
-        {/* ── 4. PREFERENCES ──────────────────────────────────────────────── */}
+        {/* ── 4. ASSIGNMENTS (owner-only) ─────────────────────────────────── */}
+        {canManageAssignments && (
+          <Card elevation="sm" padding="lg">
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
+              ASSIGNMENTS
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 500,
+                fontSize: "var(--text-lg)",
+                marginBottom: 12,
+              }}
+            >
+              Practitioner assignments
+            </div>
+            <p
+              style={{
+                margin: "0 0 16px",
+                color: "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              Assign subjects to practitioners to grant them scoped access (AUTH-03).
+            </p>
+            <Link to="/settings/assignments">
+              <Button variant="secondary" size="sm">
+                Manage assignments
+              </Button>
+            </Link>
+          </Card>
+        )}
+
+        {/* ── 5. PREFERENCES ──────────────────────────────────────────────── */}
         <Card elevation="sm" padding="lg">
           <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
             PREFERENCES
@@ -896,7 +931,7 @@ export default function SettingsPage() {
           />
         </Card>
 
-        {/* ── 5–8. Coming soon placeholders ───────────────────────────────── */}
+        {/* ── 6–9. Coming soon placeholders ───────────────────────────────── */}
         <ComingSoon eyebrow="INTEGRATIONS" heading="Integrations" />
         <ComingSoon eyebrow="DATA EXPORT" heading="Data export" />
         <ComingSoon eyebrow="PRIVACY & CONSENT" heading="Privacy & consent" />
