@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
+status: executing
 stopped_at: Phase 7 context gathered
-last_updated: "2026-06-12T16:05:24.455Z"
-last_activity: "2026-06-12 - Completed quick task 260612-d8s: round3 self-rendering design package + reference screenshots"
+last_updated: "2026-06-12T17:54:29.409Z"
+last_activity: 2026-06-12 -- Phase 07 planning complete
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 8
-  total_plans: 42
+  total_plans: 46
   completed_plans: 42
-  percent: 89
+  percent: 80
 ---
 
 # Project State
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 Phase: 7
 Plan: Not started
-Status: Ready to plan
-Last activity: 2026-06-12 - Completed quick task 260612-d8s: round3 self-rendering design package + reference screenshots
+Status: Ready to execute
+Last activity: 2026-06-12 -- Phase 07 planning complete
 
 Progress: [████████░░] 78%
 
@@ -86,6 +86,8 @@ Progress: [████████░░] 78%
 ### Roadmap Evolution
 
 - Phase 04.1 inserted after Phase 4: Design System Adoption — bridge Zoetrop brand tokens into Tailwind, port signature components to TSX, retrofit M0 screens, commit binding UI-SPEC.md; gated on a claude.ai/design roundtrip (see docs/DESIGN-SYSTEM-ADOPTION.md)
+- Phase 7 edited: re-scoped to RLS + Isolation Engineering on Neon (host-portable GUC RLS; Supabase migration superseded); COMP-02/03 moved out; reqs now TEN-02/03 + AUTH-03/04 — per 07-CONTEXT.md
+- Phase 8 added: Compliance Envelope & Host Gate (pre-client gate, part 2): host cost/BAA comparison + possible migration, Vercel/LLM BAAs, pgAudit + SELECT-logging verification; COMP-02/03
 
 ### Decisions
 
