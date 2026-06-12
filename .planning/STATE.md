@@ -28,21 +28,14 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-<<<<<<< HEAD
 Phase: 7
 Plan: Not started
 Status: Ready to plan
 Last activity: 2026-06-12
-=======
-Phase: 05 (lab-ingest-pipeline) — EXECUTING
-Plan: 3 of 3 — code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification
-Status: 05-03 code deliverables done (LAB-04/LAB-05/LAB-06 implemented); awaiting owner E2E UAT on Vercel preview, then phase verification (orchestrator)
-Last activity: 2026-06-11 - Completed quick task 260611-jq8: repo-wide Zoetrop→Zoetrop rename
->>>>>>> left-nav-refactor
 
 Progress: [████████░░] 78%
 
-> ✓ Phase 5 (Lab Ingest Pipeline) complete 2026-06-11 — owner E2E UAT passed on Vercel preview; 4 gap-closures fixed (SSR DOMMatrix, Vercel .data 404, multi-page PDF nav, collection-date+dedup migration 0008). Next incomplete phase is **Phase 6 (Engine Promotion + Confidence-Graded Reports)**.
+> ✓ Phase 6 (Engine Promotion + Confidence-Graded Reports) complete 2026-06-12 — 5/5 plans, verification 5/5; pure engine.ts, corpus on Neon (30 variant + 22 metric rules, non-null K), deterministic report generator with inline K + K4 disclaimer. Next incomplete phase is **Phase 7 (PHI Compliance Hardening — Pre-Client Gate)**.
 
 ## Performance Metrics
 

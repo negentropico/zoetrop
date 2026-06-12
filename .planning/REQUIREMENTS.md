@@ -31,9 +31,9 @@
 
 ### Engine & Genetics
 
-- [ ] **ENG-01**: The protocol-decision engine is a pure, dependency-free module callable outside route loaders (no Drizzle/Remix imports)
-- [ ] **ENG-02**: Genetic variants and variant→protocol mappings are first-class tables with a non-nullable K1–K4 `confidence` field + evidence/citation
-- [ ] **ENG-03**: The engine derives a confidence-graded protocol for a subject from their metrics + variants
+- [x] **ENG-01**: The protocol-decision engine is a pure, dependency-free module callable outside route loaders (no Drizzle/Remix imports)
+- [x] **ENG-02**: Genetic variants and variant→protocol mappings are first-class tables with a non-nullable K1–K4 `confidence` field + evidence/citation
+- [x] **ENG-03**: The engine derives a confidence-graded protocol for a subject from their metrics + variants
 
 ### Lab Ingest
 
@@ -46,9 +46,9 @@
 
 ### Reports
 
-- [ ] **RPT-01**: A practitioner can generate a confidence-graded lab→protocol report for a subject
-- [ ] **RPT-02**: Every recommendation in the report shows its K1–K4 confidence level in the visible body (not a tooltip)
-- [ ] **RPT-03**: Report language is hedged (evidence-suggesting, never imperative/prescriptive); K4 recommendations carry an explicit disclaimer
+- [x] **RPT-01**: A practitioner can generate a confidence-graded lab→protocol report for a subject
+- [x] **RPT-02**: Every recommendation in the report shows its K1–K4 confidence level in the visible body (not a tooltip)
+- [x] **RPT-03**: Report language is hedged (evidence-suggesting, never imperative/prescriptive); K4 recommendations carry an explicit disclaimer
 
 ### Compliance & Quality
 
@@ -123,12 +123,12 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | LAB-04 | Phase 5 — Lab Ingest Pipeline | Pending |
 | LAB-05 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-06 | Phase 5 — Lab Ingest Pipeline | Complete |
-| ENG-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
-| ENG-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
-| ENG-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
-| RPT-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
-| RPT-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
-| RPT-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Pending |
+| ENG-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
+| ENG-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
+| ENG-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
+| RPT-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
+| RPT-02 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
+| RPT-03 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
 
 ---
 *Requirements defined: 2026-06-07*
