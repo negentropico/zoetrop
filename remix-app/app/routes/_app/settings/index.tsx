@@ -668,34 +668,15 @@ export default function SettingsPage() {
 
             {/* invite panel — Task 2 */}
 
-            {/* Role selector */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            {/* Role selector — zt-pill atoms (round 3: chip → pill) */}
+            <div style={{ display: "flex", gap: 8, marginBottom: "var(--gap-lg)" }}>
               {canInvitePractitioner && (
                 <button
                   type="button"
                   onClick={() => setSelectedRole("practitioner")}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "var(--radius-pill)",
-                    border: "1.5px solid",
-                    borderColor:
-                      selectedRole === "practitioner"
-                        ? "transparent"
-                        : "var(--border-strong)",
-                    background:
-                      selectedRole === "practitioner"
-                        ? "var(--ink)"
-                        : "var(--surface)",
-                    color:
-                      selectedRole === "practitioner"
-                        ? "var(--n-50)"
-                        : "var(--text)",
-                    fontFamily: "var(--font-text)",
-                    fontSize: "var(--text-sm)",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    transition: "background var(--dur-fast) var(--ease-out)",
-                  }}
+                  className={
+                    "zt-pill" + (selectedRole === "practitioner" ? " is-active" : "")
+                  }
                 >
                   Practitioner
                 </button>
@@ -703,24 +684,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedRole("client")}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "var(--radius-pill)",
-                  border: "1.5px solid",
-                  borderColor:
-                    selectedRole === "client"
-                      ? "transparent"
-                      : "var(--border-strong)",
-                  background:
-                    selectedRole === "client" ? "var(--ink)" : "var(--surface)",
-                  color:
-                    selectedRole === "client" ? "var(--n-50)" : "var(--text)",
-                  fontFamily: "var(--font-text)",
-                  fontSize: "var(--text-sm)",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "background var(--dur-fast) var(--ease-out)",
-                }}
+                className={"zt-pill" + (selectedRole === "client" ? " is-active" : "")}
               >
                 Client
               </button>
@@ -804,7 +768,8 @@ export default function SettingsPage() {
                           <th
                             key={col}
                             style={{
-                              padding: "10px 14px",
+                              // Round 3: row rhythm rides the density scale
+                              padding: "var(--gap-row) 14px",
                               textAlign: "left",
                               fontFamily: "var(--font-mono)",
                               fontSize: "var(--text-2xs)",
@@ -829,7 +794,7 @@ export default function SettingsPage() {
                       >
                         <td
                           style={{
-                            padding: "12px 14px",
+                            padding: "var(--gap-row) 14px",
                             fontFamily: "var(--font-mono)",
                             fontSize: "var(--text-sm)",
                             textTransform: "uppercase",
@@ -843,7 +808,7 @@ export default function SettingsPage() {
                         </td>
                         <td
                           style={{
-                            padding: "12px 14px",
+                            padding: "var(--gap-row) 14px",
                             fontFamily: "var(--font-mono)",
                             fontSize: "var(--text-xs)",
                             color: "var(--text-muted)",
@@ -853,7 +818,7 @@ export default function SettingsPage() {
                         </td>
                         <td
                           style={{
-                            padding: "12px 14px",
+                            padding: "var(--gap-row) 14px",
                             fontFamily: "var(--font-mono)",
                             fontSize: "var(--text-xs)",
                             color: "var(--text-muted)",

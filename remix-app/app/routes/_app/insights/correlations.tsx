@@ -3,7 +3,6 @@ import type { Route } from "./+types/correlations";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getCorrelations, getSupplements } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
-import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
 import { DataTable } from "~/components/ui/DataTable";
 import { PageHeader } from "~/components/ui/PageHeader";
@@ -83,57 +82,72 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-// Diverging correlation bar — vital positive, danger negative, center line absolute
+// Diverging r micro-bar (round 3) — structure is NEUTRAL (n-100 track,
+// n-300 center hairline); only the SIGN carries status color
+// (positive → --optimal, negative → --deficient). The figure stays Ink.
 function CorrBar({ r }: { r: number }) {
   const neg = r < 0;
-  const mag = Math.min(1, Math.abs(r));
-  const col = neg ? "var(--danger)" : "var(--vital)";
+  const w = Math.min(1, Math.abs(r)) * 28;
   return (
-    <div
+    <span
       style={{
         position: "relative",
-        width: 120,
-        height: 12,
+        width: 60,
+        height: 4,
         background: "var(--n-100)",
-        borderRadius: "var(--radius-pill)",
+        borderRadius: 2,
+        display: "inline-block",
         flexShrink: 0,
       }}
     >
-      {/* Center divider */}
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: -2,
-          bottom: -2,
-          width: 1,
-          background: "var(--border-strong)",
-        }}
-      />
-      {/* Fill bar */}
-      <div
+      <span
         style={{
           position: "absolute",
           top: 0,
           bottom: 0,
-          height: "100%",
-          borderRadius: "var(--radius-pill)",
-          background: col,
-          width: mag * 50 + "%",
-          left: neg ? 50 - mag * 50 + "%" : "50%",
+          left: neg ? `calc(50% - ${w}px)` : "50%",
+          width: w,
+          background: neg ? "var(--deficient)" : "var(--optimal)",
+          borderRadius: 2,
         }}
       />
-    </div>
+      <span
+        style={{
+          position: "absolute",
+          top: -2,
+          bottom: -2,
+          left: "calc(50% - 0.5px)",
+          width: 1,
+          background: "var(--n-300)",
+        }}
+      />
+    </span>
   );
 }
 
-// Significance tone mapping
-const SIG_TONE: Record<string, "vital" | "focus" | "energy" | "neutral"> = {
-  strong: "vital",
-  moderate: "focus",
-  weak: "energy",
-  none: "neutral",
+// Significance vocabulary — mono colored word (round 3; Badge dropped)
+const SIG_COLOR: Record<string, string> = {
+  strong: "var(--vital-500, var(--vital))",
+  moderate: "var(--energy-500, var(--energy))",
+  weak: "var(--text-muted)",
+  none: "var(--text-faint)",
 };
+
+function SigWord({ significance }: { significance: string }) {
+  return (
+    <span
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: "var(--text-2xs)",
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        color: SIG_COLOR[significance] ?? "var(--text-muted)",
+      }}
+    >
+      {significance}
+    </span>
+  );
+}
 
 // Brand-styled select
 function BrandSelect({
@@ -203,7 +217,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
 
   const supplementNames = [...new Set(correlations.map((c) => c.supplementName))];
 
-  // Ink-active filter pill
+  // Filter pill — shared zt-pill atom (round 3)
   const SigPill = ({
     id,
     label,
@@ -217,34 +231,13 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
     return (
       <button
         key={id}
+        type="button"
         onClick={() => setFilterSignificance(id)}
-        style={{
-          padding: "8px 14px",
-          borderRadius: "var(--radius-pill)",
-          cursor: "pointer",
-          fontFamily: "var(--font-text)",
-          fontWeight: 600,
-          fontSize: "var(--text-sm)",
-          border: `1px solid ${on ? "var(--ink)" : "var(--border)"}`,
-          background: on ? "var(--ink)" : "var(--surface)",
-          color: on ? "var(--n-50)" : "var(--text-secondary)",
-          transition:
-            "background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out)",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-        }}
+        className={"zt-pill" + (on ? " is-active" : "")}
       >
         {label}
         {count != null && (
-          <span
-            className="zt-tnum"
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-xs)",
-              opacity: 0.7,
-            }}
-          >
+          <span className="zt-tnum" style={{ opacity: 0.7 }}>
             {count}
           </span>
         )}
@@ -281,10 +274,10 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
     },
     {
       key: "correlation" as keyof CorrRow & string,
-      label: "Correlation",
+      label: "r",
       render: (c: CorrRow) => (
         <span
-          style={{ display: "inline-flex", alignItems: "center", gap: 12 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 10 }}
         >
           <CorrBar r={c.correlation} />
           <span
@@ -292,8 +285,10 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
             style={{
               fontFamily: "var(--font-mono)",
               fontWeight: 700,
-              color:
-                c.correlation < 0 ? "var(--danger)" : "var(--vital-500)",
+              color: "var(--ink)",
+              minWidth: 52,
+              textAlign: "right",
+              display: "inline-block",
             }}
           >
             {c.correlation > 0 ? "+" : ""}
@@ -305,11 +300,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
     {
       key: "significance" as keyof CorrRow & string,
       label: "Significance",
-      render: (c: CorrRow) => (
-        <Badge tone={SIG_TONE[c.significance] ?? "neutral"}>
-          {c.significance}
-        </Badge>
-      ),
+      render: (c: CorrRow) => <SigWord significance={c.significance} />,
     },
     {
       key: "lagDays" as keyof CorrRow & string,
@@ -354,31 +345,24 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
         sub="See which supplements move which metrics — strength, significance, and lag."
       />
 
-      {/* Stats row */}
-      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-xl)" }}>
-        {[
-          { label: "TOTAL", value: stats.total, tone: null },
-          { label: "STRONG", value: stats.strong, tone: "var(--vital)" },
-          { label: "MODERATE", value: stats.moderate, tone: "var(--focus)" },
-          { label: "p < 0.05", value: stats.significant, tone: "var(--energy)" },
-        ].map(({ label, value, tone }) => (
-          <Card key={label} padding="md" style={{ textAlign: "center" }}>
-            <span
-              className="zt-readout"
-              style={{
-                fontSize: "var(--text-2xl)",
-                display: "block",
-                color: tone ?? "var(--ink)",
-              }}
-            >
-              {value}
-            </span>
-            <span className="zt-eyebrow" style={{ display: "block", marginTop: 6 }}>
-              {label}
-            </span>
-          </Card>
-        ))}
-      </div>
+      {/* Stats — merged into ONE stat-strip card (round 3) */}
+      <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
+        <div className="zt-stat-strip">
+          {[
+            { label: "Total pairs", value: stats.total },
+            { label: "Strong", value: stats.strong },
+            { label: "Moderate", value: stats.moderate },
+            { label: "p < 0.05", value: stats.significant },
+          ].map(({ label, value }) => (
+            <div key={label} className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>{label}</div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Filter pills + selects */}
       <div
@@ -465,7 +449,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
                   fontFamily: "var(--font-mono)",
                   fontWeight: 700,
                   fontSize: "var(--text-lg)",
-                  color: c.correlation < 0 ? "var(--danger)" : "var(--vital-500)",
+                  color: "var(--ink)",
                   flexShrink: 0,
                 }}
               >
@@ -486,9 +470,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
                 color: "var(--text-muted)",
               }}
             >
-              <Badge tone={SIG_TONE[c.significance] ?? "neutral"}>
-                {c.significance}
-              </Badge>
+              <SigWord significance={c.significance} />
               <span>{c.lagDays}d lag</span>
               {c.pValue != null && (
                 <span
@@ -542,11 +524,11 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
             </div>
             {(
               [
-                ["Strong", "|r| ≥ 0.7 — reliable relationship", "vital"],
-                ["Moderate", "|r| 0.4–0.7 — meaningful but variable", "focus"],
-                ["Weak", "|r| 0.2–0.4 — may be influenced by other factors", "energy"],
+                ["Strong", "|r| ≥ 0.7 — reliable relationship", SIG_COLOR.strong],
+                ["Moderate", "|r| 0.4–0.7 — meaningful but variable", SIG_COLOR.moderate],
+                ["Weak", "|r| 0.2–0.4 — may be influenced by other factors", SIG_COLOR.weak],
               ] as [string, string, string][]
-            ).map(([t, d, tone]) => (
+            ).map(([t, d, color]) => (
               <div
                 key={t}
                 style={{
@@ -559,7 +541,7 @@ export default function Correlations({ loaderData }: Route.ComponentProps) {
                 <span
                   style={{
                     fontWeight: 700,
-                    color: `var(--${tone})`,
+                    color,
                     width: 76,
                     flexShrink: 0,
                   }}
