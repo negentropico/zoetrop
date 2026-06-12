@@ -22,7 +22,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrop brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [x] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture (completed 2026-06-11 — 3/3 plans, owner E2E UAT passed; gap-closures: SSR DOMMatrix crash, Vercel bundle .data 404, multi-page PDF nav, collection-date+dedup via migration 0008)
 - [x] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports (completed 2026-06-12)
-- [ ] **Phase 7: PHI Compliance Hardening — RLS + Isolation Engineering** *(pre-client gate, part 1)* — On the existing Neon project, executed now: atomic host-portable RLS enable+policies (GUC-based), `withTenantDb` SET LOCAL wrapper + pool-leak test, cross-tenant isolation tests in CI, practitioner→subject assignments (AUTH-03), immutable auth/access audit log (AUTH-04). BAAs/HIPAA move to Phase 8 (re-scope 2026-06-12 — see 07-CONTEXT.md)
+- [x] **Phase 7: PHI Compliance Hardening — RLS + Isolation Engineering** *(pre-client gate, part 1)* — On the existing Neon project, executed now: atomic host-portable RLS enable+policies (GUC-based), `withTenantDb` SET LOCAL wrapper + pool-leak test, cross-tenant isolation tests in CI, practitioner→subject assignments (AUTH-03), immutable auth/access audit log (AUTH-04). BAAs/HIPAA move to Phase 8 (re-scope 2026-06-12 — see 07-CONTEXT.md) (completed 2026-06-12)
 - [ ] **Phase 8: Compliance Envelope & Host Gate** *(pre-client gate, part 2)* — Before the first external client's PHI: DB-host cost/BAA comparison (+ possible migration), Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit + PHI SELECT-logging verification, PITR/SSL/network hardening, COMPLIANCE-RUNBOOK.md complete — the hard release gate for multi-client launch
 
 ## Phase Details
@@ -299,7 +299,7 @@ Plans:
 
 **Wave 4** *(blocked on 07-01/07-02/07-03)*
 
-- [ ] 07-04-PLAN.md — AUTH-03 per-assignment assertSubjectAccess + assignments.server.ts + owner /settings/assignments UI; AUTH-04 Better-Auth sign-in/out/redemption events into the immutable audit_log [AUTH-03, AUTH-04]
+- [x] 07-04-PLAN.md — AUTH-03 per-assignment assertSubjectAccess + assignments.server.ts + owner /settings/assignments UI; AUTH-04 Better-Auth sign-in/out/redemption events into the immutable audit_log [AUTH-03, AUTH-04]
 
 ### Phase 8: Compliance Envelope & Host Gate (PRE-CLIENT GATE, PART 2)
 
@@ -330,7 +330,7 @@ Plans:
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
-| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 3/4 | In Progress|  |
+| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 4/4 | Complete   | 2026-06-12 |
 | 8. Compliance Envelope & Host Gate *(pre-client gate)* | 0/TBD | Deferred (gate) | - |
 
 ## Backlog
