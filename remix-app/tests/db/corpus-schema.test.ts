@@ -132,6 +132,46 @@ describe.skipIf(!connectionString)(
   }
 );
 
+// ── Non-null K content assertions (06-03 / ROADMAP SC1) ──────────────────────
+//
+// After the corpus seed (06-03) fills the tables, every row in variant_protocol_map
+// and metric_protocol_map must have a non-null evidence_tier (K value). These
+// assertions run against the live seeded rows, confirming ROADMAP SC1.
+//
+// Also asserts that genetic_variants itself is non-empty (rows exist).
+// Becomes GREEN after 06-03 db:seed-corpus is applied.
+
+describe.skipIf(!connectionString)(
+  "corpus tables: non-null evidence_tier in every row (content assertion, 06-03 SC1)",
+  () => {
+    it("variant_protocol_map: COUNT(*) WHERE evidence_tier IS NULL = 0", async () => {
+      const { rows } = await getPool().query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count
+           FROM variant_protocol_map
+          WHERE evidence_tier IS NULL`
+      );
+      expect(rows[0].count).toBe("0");
+    });
+
+    it("metric_protocol_map: COUNT(*) WHERE evidence_tier IS NULL = 0", async () => {
+      const { rows } = await getPool().query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count
+           FROM metric_protocol_map
+          WHERE evidence_tier IS NULL`
+      );
+      expect(rows[0].count).toBe("0");
+    });
+
+    it("genetic_variants: COUNT(*) > 0 (seed has rows)", async () => {
+      const { rows } = await getPool().query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM genetic_variants`
+      );
+      const count = parseInt(rows[0].count, 10);
+      expect(count).toBeGreaterThan(0);
+    });
+  }
+);
+
 // ── evidence_tier enum exists and has k1-k4 values (T-06-ENUM) ───────────────
 
 describe.skipIf(!connectionString)(

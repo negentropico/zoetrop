@@ -797,7 +797,21 @@ async function runSeed() {
 
   // Insert variant rules (geneticVariants + variantProtocolMap)
   for (const rule of corpusSeedData.variantRules) {
-    // Insert parent geneticVariants row — ON CONFLICT DO NOTHING (idempotent)
+    // Check for existing geneticVariants row (idempotent: skip if (gene, genotypePattern) exists)
+    const existingVariant = await db.execute(
+      sql`SELECT id FROM genetic_variants
+          WHERE gene = ${rule.gene}
+            AND COALESCE(genotype_pattern, '') = COALESCE(${rule.genotypePattern ?? null}, '')
+            AND corpus_version = ${CORPUS_VERSION}
+          LIMIT 1`
+    );
+
+    if ((existingVariant as { rows: unknown[] }).rows.length > 0) {
+      console.log(`[seed-corpus] Skipped duplicate variant: ${rule.gene} ${rule.genotypePattern ?? '(any)'}`);
+      continue;
+    }
+
+    // Insert parent geneticVariants row
     const [variant] = await db
       .insert(geneticVariants)
       .values({
@@ -813,7 +827,7 @@ async function runSeed() {
       .returning({ id: geneticVariants.id });
 
     if (!variant) {
-      console.log(`[seed-corpus] Skipped duplicate variant: ${rule.gene} ${rule.genotypePattern ?? '(any)'}`);
+      console.log(`[seed-corpus] Skipped duplicate variant (race): ${rule.gene} ${rule.genotypePattern ?? '(any)'}`);
       continue;
     }
 
