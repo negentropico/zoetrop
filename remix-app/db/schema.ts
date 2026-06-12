@@ -492,5 +492,93 @@ export const consentLogRelations = relations(consentLog, ({ one }) => ({
   }),
 }));
 
+// ── Engine corpus tables (Plan 06-02) ─────────────────────────────────────────
+
+// evidence_tier ('k1'|'k2'|'k3'|'k4') — DISTINCT from confidence_level ('high'|'low')
+// D-05: new non-nullable K enum; named distinctly to avoid collision with confidenceLevelEnum.
+export const evidenceTierEnum = pgEnum('evidence_tier', ['k1', 'k2', 'k3', 'k4']);
+
+// geneticVariants — non-PHI corpus table for population-level gene/variant knowledge.
+// NO tenantId/subjectId — D-06: corpus tables hold non-PHI population-level knowledge.
+// PHI (subject's actual genotype) stays in subject_genotypes.
+// join key: gene (case-sensitive, matches subject_genotypes.gene)
+export const geneticVariants = pgTable('genetic_variants', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  gene: varchar('gene', { length: 100 }).notNull(),
+  rsid: varchar('rsid', { length: 20 }),
+  // Genotype pattern: the specific allele combo this entry applies to (e.g. 'Val/Met', 'A/G').
+  // NULL = gene-level fallback (applies to any variant in this gene).
+  genotypePattern: varchar('genotype_pattern', { length: 50 }),
+  category: varchar('category', { length: 50 }).notNull(),
+  impact: varchar('impact', { length: 50 }).notNull(),
+  clinicalImplication: text('clinical_implication').notNull(),
+  // Non-PHI knowledge source — NOT the subject's assay source (that is in subject_genotypes.assaySource)
+  knowledgeSource: varchar('knowledge_source', { length: 255 }),
+  corpusVersion: varchar('corpus_version', { length: 50 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => [
+  index('idx_genetic_variants_gene').on(t.gene),
+]);
+
+// variantProtocolMap — evidence-tiered finding→action edges for genetic variants.
+// One row per (variant, genotype pattern, action). Non-PHI.
+// D-08: both variant-mapping and metric-rule recommendations carry their own evidence-tier K.
+export const variantProtocolMap = pgTable('variant_protocol_map', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  variantId: integer('variant_id').notNull().references(() => geneticVariants.id),
+  // Evidence tier — non-nullable (ROADMAP SC1, D-05)
+  evidenceTier: evidenceTierEnum('evidence_tier').notNull(),
+  // Pre-hedged, non-imperative recommendation text (authored once in corpus).
+  // Assembled at render time as: "K{N} ({label}): {recommendationText}"
+  recommendationText: text('recommendation_text').notNull(),
+  // Evidence citation (DOI, SR title, or "Expert consensus: IFM 2023")
+  evidenceCitation: text('evidence_citation'),
+  // Optional supplementary action details (dose, timing) stored separately
+  actionDetail: text('action_detail'),
+  corpusVersion: varchar('corpus_version', { length: 50 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => [
+  index('idx_variant_protocol_map_variant').on(t.variantId),
+  index('idx_variant_protocol_map_tier').on(t.evidenceTier),
+]);
+
+// metricProtocolMap — evidence-tiered finding→action edges for lab/metric findings.
+// D-04: the metric→protocol rule layer, the third corpus source beyond the two genetic tables.
+// Non-PHI. Triggered when a subject's metric is in a non-optimal condition.
+// D-08: carries its own evidenceTier K (distinct from detection confidence).
+export const metricProtocolMap = pgTable('metric_protocol_map', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  // Trigger condition: metric name + status combination
+  metricName: varchar('metric_name', { length: 255 }).notNull(),
+  // 'deficient'|'excess'|'borderline'|'any_non_optimal'
+  conditionStatus: varchar('condition_status', { length: 50 }).notNull(),
+  category: metricCategoryEnum('category').notNull(),
+  evidenceTier: evidenceTierEnum('evidence_tier').notNull(),
+  recommendationText: text('recommendation_text').notNull(),
+  evidenceCitation: text('evidence_citation'),
+  actionDetail: text('action_detail'),
+  corpusVersion: varchar('corpus_version', { length: 50 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => [
+  index('idx_metric_protocol_map_name').on(t.metricName),
+  index('idx_metric_protocol_map_category').on(t.category),
+]);
+
+// reports — frozen versioned snapshot per subject report generation.
+// tenantId/subjectId scoped (PHI-adjacent: links to a subject).
+// snapshot is typed as ReportSnapshot (see app/types/report.ts) — immutable after write (D-17).
+export const reports = pgTable('reports', {
+  id: text('id').primaryKey(),                     // crypto.randomUUID() set by caller
+  tenantId: text('tenant_id').notNull().references(() => tenants.id),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  generatedBy: text('generated_by').notNull().references(() => user.id),
+  corpusVersion: varchar('corpus_version', { length: 50 }).notNull(),
+  // Frozen snapshot — contains inputs summary + graded recommendations. No raw PHI values.
+  snapshot: jsonb('snapshot').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => [
+  index('idx_reports_tenant_subject').on(t.tenantId, t.subjectId),
+]);
+
 // Re-export Better-Auth tables so drizzleAdapter can locate them via barrel import
 export * from './auth-schema';

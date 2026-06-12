@@ -22,6 +22,7 @@ import {
   cessationLog,
   subjectGenotypes,
   subjects,
+  reports,
 } from "../../db/schema";
 import type { MetricCategory } from "../types/metrics";
 
@@ -178,4 +179,22 @@ export async function getSubjectGenotypes(tenantId: string, subjectId: string) {
         eq(subjectGenotypes.subjectId, subjectId)
       )
     );
+}
+
+// ── Reports ───────────────────────────────────────────────────────────────────
+
+/** Returns all reports rows scoped by tenant + subject, ordered by createdAt desc. */
+export async function getReports(tenantId: string, subjectId: string) {
+  const db = getDb();
+  return db
+    .select()
+    .from(reports)
+    .where(and(eq(reports.tenantId, tenantId), eq(reports.subjectId, subjectId)));
+}
+
+/** Returns a single report row by id, or null if not found. */
+export async function getReport(id: string) {
+  const db = getDb();
+  const [row] = await db.select().from(reports).where(eq(reports.id, id));
+  return row ?? null;
 }
