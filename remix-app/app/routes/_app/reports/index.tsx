@@ -10,6 +10,7 @@ import type { Route } from "./+types/index";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
 import { getOwnerSubject, getReports } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
 import { KGradeBadge } from "~/components/ui/KGradeBadge";
@@ -30,8 +31,13 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  assertSubjectAccess(user, subject, user.tenantId!);
+  // ctx constructed before assertSubjectAccess so listAssignedSubjectIds can run
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, subject, user.tenantId!, assignedIds);
   const reportsData = await getReports(ctx);
   return { reports: reportsData };
 }

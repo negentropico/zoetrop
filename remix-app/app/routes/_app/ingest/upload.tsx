@@ -25,6 +25,7 @@ import { requireRole } from "~/lib/authz.server";
 import { assertSubjectAccess } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { checkConsent } from "~/lib/consent.server";
 import { insertAuditLog } from "~/lib/audit.server";
 import { extractionWorker } from "~/lib/ingest/ingest.server";
@@ -66,8 +67,12 @@ export async function action({ request }: Route.ActionArgs) {
 
   // Resolve subject from tenant
   const subject = await getOwnerSubject(user.tenantId!);
-  assertSubjectAccess(user, subject, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, subject, user.tenantId!, assignedIds);
 
   // T-05-CONSENT: Consent gate — BEFORE any PHI write (LAB-06/D-08)
   const hasConsent = await checkConsent(ctx);

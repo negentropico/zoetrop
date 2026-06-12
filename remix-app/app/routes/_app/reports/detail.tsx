@@ -16,6 +16,7 @@ import type { Route } from "./+types/detail";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
 import { getOwnerSubject, getReport } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { CATEGORY_INFO } from "~/types/metrics";
 import { VARIANT_CATEGORIES } from "~/types/genetics";
 import type { GradedRecommendation, ReportSnapshot } from "~/types/report";
@@ -60,7 +61,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!report) throw new Response("Not found", { status: 404 });
 
   // D-18/T-06-IDOR: assertSubjectAccess — second layer; 403 for cross-tenant report read (CR-01)
-  assertSubjectAccess(user, { tenantId: report.tenantId }, user.tenantId!);
+  // Pass report.subjectId so Gate 3 can evaluate the practitioner's assignment (AUTH-03)
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(
+    user,
+    { tenantId: report.tenantId, id: report.subjectId },
+    user.tenantId!,
+    assignedIds
+  );
 
   return { report };
 }
