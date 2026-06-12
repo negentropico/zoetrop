@@ -4,9 +4,20 @@
 > look like for round 3? One or two sentences the design side can test
 > every decision against.
 
+## How to view the app for this round
+
+**Open [`prototype/index.html`](./prototype/index.html)** in a browser — it is a
+fully static, build-free prototype that renders every Part A route in the real
+left-nav chrome with the real `app.css` tokens and seeded sample data. No auth,
+no build, no network required. All Part A routes listed below are navigable via
+the sidebar. The basic-auth Vercel preview is not required for round 3 design work.
+
+---
+
 ## Part A — whole-app polish pass
 
-Every UI route, reviewed against the brand **under the new left-nav chrome**:
+Every UI route, reviewed against the brand **under the new left-nav chrome**
+(all routes visible in `prototype/index.html`):
 
 - **Chrome (fixed):** 264px expanded / 64px collapsed icon rail; single-open
   accordion; flyout on the collapsed rail; mobile (≤760px) off-canvas drawer +

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zoetrop — round 3 prototype</title>
+
+<!-- Pre-paint theme: read zt-theme from localStorage, fall back to
+     prefers-color-scheme. Sets data-theme on <html> before first paint
+     to avoid a flash. Mirrors the app's pre-paint script exactly. -->
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('zt-theme');
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+
+<!-- Real app.css token snapshot — same tokens + dark remap the shipped app uses -->
+<link rel="stylesheet" href="app.css" />
+
+<!-- Google Fonts (same as the app) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<!-- CDN UMD scripts — order matters: React → ReactDOM → prop-types → Recharts → Lucide → Babel -->
+
+<!-- React 18.3.1 -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+
+<!-- prop-types (required by Recharts UMD) -->
+<script src="https://unpkg.com/prop-types@15.8.1/prop-types.js" crossorigin></script>
+
+<!-- Recharts 2.x UMD -->
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+
+<!-- Lucide 0.544.0 UMD -->
+<script src="https://unpkg.com/lucide@0.544.0/dist/umd/lucide.min.js" crossorigin></script>
+
+<!-- Babel standalone — transforms JSX at runtime (designer-facing artifact) -->
+<script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js" crossorigin></script>
+
+<style>
+  /* Reset body margin so the sidebar aligns to the viewport edge */
+  body { margin: 0; min-height: 100vh; }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Plain JS — seeded sample dataset on window.ZD (no JSX needed) -->
+<script src="app/data.js"></script>
+
+<!-- Babel-transformed JSX scripts — loaded in dependency order:
+     lib (shell + router + primitives) → screens → main (mount) -->
+<script type="text/babel" src="app/lib.jsx"></script>
+<script type="text/babel" src="app/screens.jsx"></script>
+<script type="text/babel" src="app/main.jsx"></script>
+</body>
+</html>
