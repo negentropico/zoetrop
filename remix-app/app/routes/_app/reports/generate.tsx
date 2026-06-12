@@ -19,6 +19,7 @@ import {
   assertSubjectAccess,
 } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { generateReport } from "~/lib/report-generator.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
@@ -45,9 +46,10 @@ export async function action({ request }: Route.ActionArgs) {
 
   // T-06-IDOR/D-18: Cross-tenant check — 403 for tenant mismatch
   assertSubjectAccess(user, subject, user.tenantId!);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   // D-13/D-17: Generate report — pure deterministic engine, inserts NEW row
-  const reportId = await generateReport(user.tenantId!, subject.id, user.id);
+  const reportId = await generateReport(ctx, user.id);
 
   return redirect(`/reports/${reportId}`);
 }

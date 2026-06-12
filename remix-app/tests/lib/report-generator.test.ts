@@ -34,8 +34,8 @@ vi.mock("~/lib/corpus.server", () => ({
   getMetricRules: vi.fn(),
 }));
 
-vi.mock("~/lib/db.server", () => ({
-  getDb: () => ({
+vi.mock("~/lib/db.server", () => {
+  const mockTx = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     insert: (_table: unknown) => ({
       values: (vals: Record<string, unknown>) => {
@@ -44,8 +44,13 @@ vi.mock("~/lib/db.server", () => ({
         return Promise.resolve(undefined);
       },
     }),
-  }),
-}));
+  };
+  return {
+    getDb: () => mockTx,
+    // withTenantDb: call fn(mockTx) directly — no real DB transaction needed
+    withTenantDb: async (_ctx: unknown, fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx),
+  };
+});
 
 // ── DB-gated skip guard ──────────────────────────────────────────────────────
 const connectionString =
@@ -207,7 +212,7 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
   // report-generator.server, which can exceed 5s under full-suite worker load.
   it("generateReport returns a string reportId", { timeout: 15000 }, async () => {
     const { generateReport } = await import("~/lib/report-generator.server");
-    const reportId = await generateReport("tenant-1", "subject-1", "user-1");
+    const reportId = await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
     expect(typeof reportId).toBe("string");
     expect(reportId.length).toBeGreaterThan(0);
   });
@@ -217,7 +222,7 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
     vi.mocked(getMetricRules).mockResolvedValue([FERRITIN_RULE]);
 
     const { generateReport } = await import("~/lib/report-generator.server");
-    await generateReport("tenant-1", "subject-1", "user-1");
+    await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
 
     expect(mockDbState.capturedInsertValues).not.toBeNull();
     const snapshot = (mockDbState.capturedInsertValues as { snapshot: ReportSnapshot }).snapshot;
@@ -237,7 +242,7 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
     vi.mocked(getMetricRules).mockResolvedValue([ANY_NON_OPTIMAL_RULE]);
 
     const { generateReport } = await import("~/lib/report-generator.server");
-    await generateReport("tenant-1", "subject-1", "user-1");
+    await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
 
     expect(mockDbState.capturedInsertValues).not.toBeNull();
     const snapshot = (mockDbState.capturedInsertValues as { snapshot: ReportSnapshot }).snapshot;
@@ -258,7 +263,7 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
     vi.mocked(getMetricRules).mockResolvedValue([FERRITIN_RULE]);
 
     const { generateReport } = await import("~/lib/report-generator.server");
-    await generateReport("tenant-1", "subject-1", "user-1");
+    await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
 
     expect(mockDbState.capturedInsertValues).not.toBeNull();
     const snapshot = (mockDbState.capturedInsertValues as { snapshot: ReportSnapshot }).snapshot;
@@ -286,7 +291,7 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
     } as unknown as MetricRuleRow]);
 
     const { generateReport } = await import("~/lib/report-generator.server");
-    await generateReport("tenant-1", "subject-1", "user-1");
+    await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
 
     expect(mockDbState.capturedInsertValues).not.toBeNull();
     const snapshot = (mockDbState.capturedInsertValues as { snapshot: ReportSnapshot }).snapshot;
@@ -296,7 +301,7 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
 
   it("snapshot is stamped with CORPUS_VERSION (D-17)", async () => {
     const { generateReport } = await import("~/lib/report-generator.server");
-    await generateReport("tenant-1", "subject-1", "user-1");
+    await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
 
     expect(mockDbState.capturedInsertValues).not.toBeNull();
     const snapshot = (mockDbState.capturedInsertValues as { snapshot: ReportSnapshot }).snapshot;
@@ -307,8 +312,8 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
   it("two generateReport calls produce two distinct reportIds (D-17 — re-gen = new row)", async () => {
     // generateReport returns the UUID it creates; call it twice and compare
     const { generateReport } = await import("~/lib/report-generator.server");
-    const id1 = await generateReport("tenant-1", "subject-1", "user-1");
-    const id2 = await generateReport("tenant-1", "subject-1", "user-1");
+    const id1 = await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
+    const id2 = await generateReport({ userId: "user-1", tenantId: "tenant-1", subjectId: "subject-1" }, "user-1");
 
     // Both calls must produce unique IDs (D-17: re-gen = new row, never mutate)
     expect(id1).not.toBe(id2);

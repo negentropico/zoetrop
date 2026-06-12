@@ -5,8 +5,9 @@
  * and insertConsent (writes the consent record for a subject).
  *
  * Phase 7 withTenantDb retrofit boundary:
- *   getDb() is isolated here. Phase 7 replaces it with withTenantDb() if RLS
- *   is enforced. Route loaders/actions never call getDb() directly.
+ *   Phase 7 COMPLETE: both checkConsent and insertConsent run inside withTenantDb(ctx).
+ *   consent_log is subject-only (no tenant_id column) — the RLS policy keys on
+ *   app.subject_id. TenantCtx.subjectId is used for the WHERE / INSERT.
  *
  * D-08: Consent gate — upload action checks for a consentLog row before any
  * PHI insert. Consent must exist or the upload is redirected to the consent
@@ -15,24 +16,26 @@
  * D-09: Designed generically for future client intake (not pilot-specific).
  */
 
-import { getDb } from "./db.server";
+import { withTenantDb } from "./db.server";
+import type { TenantCtx } from "./db.server";
 import { eq } from "drizzle-orm";
 import { consentLog } from "../../db/schema";
 
 // ── checkConsent ───────────────────────────────────────────────────────────
 //
-// Returns true if a consentLog row exists for the given subjectId, false
+// Returns true if a consentLog row exists for the given subject, false
 // otherwise. Called synchronously in the upload action before any PHI write
 // (LAB-06 / D-08).
 
-export async function checkConsent(subjectId: string): Promise<boolean> {
-  const db = getDb();
-  const [row] = await db
-    .select({ id: consentLog.id })
-    .from(consentLog)
-    .where(eq(consentLog.subjectId, subjectId))
-    .limit(1);
-  return !!row;
+export async function checkConsent(ctx: TenantCtx): Promise<boolean> {
+  return withTenantDb(ctx, async (tx) => {
+    const [row] = await tx
+      .select({ id: consentLog.id })
+      .from(consentLog)
+      .where(eq(consentLog.subjectId, ctx.subjectId))
+      .limit(1);
+    return !!row;
+  });
 }
 
 // ── insertConsent ──────────────────────────────────────────────────────────
@@ -45,15 +48,15 @@ export async function checkConsent(subjectId: string): Promise<boolean> {
 // (e.g. 'v2-client-intake') can be added without schema changes.
 
 export async function insertConsent(
-  subjectId: string,
-  userId: string,
+  ctx: TenantCtx,
   version: string
 ): Promise<void> {
-  const db = getDb();
-  await db.insert(consentLog).values({
-    subjectId,
-    consentedAt: new Date(),
-    consentVersion: version,
-    consentedByUserId: userId,
+  await withTenantDb(ctx, async (tx) => {
+    await tx.insert(consentLog).values({
+      subjectId: ctx.subjectId,
+      consentedAt: new Date(),
+      consentVersion: version,
+      consentedByUserId: ctx.userId,
+    });
   });
 }

@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router";
 import type { Route } from "./+types/compare";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getProtocolVersions, getProtocolChanges } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -21,10 +22,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   const [protocolVersionsRows, protocolChanges] = await Promise.all([
-    getProtocolVersions(user.tenantId!, subject.id),
-    getProtocolChanges(user.tenantId!, subject.id),
+    getProtocolVersions(ctx),
+    getProtocolChanges(ctx),
   ]);
 
   // Normalize timestamps to ISO strings

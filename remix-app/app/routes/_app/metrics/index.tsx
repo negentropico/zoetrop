@@ -9,6 +9,7 @@ import {
 import { getMetricTargets, getMetricStatus } from "~/lib/metrics";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getMetrics } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { dbRowToMetric } from "~/lib/db-mappers.server";
 import {
   Pill,
@@ -54,7 +55,8 @@ type MetricWithChartInfo = Metric & { historyCount: number; hasProjections: bool
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const rows = await getMetrics(user.tenantId!, subject.id);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const rows = await getMetrics(ctx);
   const allMetrics = rows.map(dbRowToMetric);
 
   // Get latest value for each unique metric name

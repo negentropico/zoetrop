@@ -14,7 +14,7 @@
  *          tests/lib/report-generator.test.ts.
  */
 
-import { getDb } from "~/lib/db.server";
+import { withTenantDb } from "~/lib/db.server";
 import { reports } from "../../db/schema";
 import {
   classifyMetricStatus,
@@ -29,6 +29,7 @@ import {
   getMetrics,
   getSubjectGenotypes,
 } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import type { GradedRecommendation, ReportSnapshot } from "~/types/report";
 
 // ── Metric rule → GradedRecommendation mapper ────────────────────────────────
@@ -84,21 +85,20 @@ function toMetricGradedRec(
  * D-17: never mutates existing rows; re-generation = NEW row.
  * D-13: no LLM call; pure engine + corpus text assembly.
  *
- * @param tenantId   - The tenant scoping all reads/writes
- * @param subjectId  - The subject whose data is evaluated
+ * @param ctx        - TenantCtx with userId/tenantId/subjectId
  * @param generatedBy - The user.id who triggered generation (for audit trail)
  * @returns          - The UUID of the newly-written reports row
  */
 export async function generateReport(
-  tenantId: string,
-  subjectId: string,
+  ctx: TenantCtx,
   generatedBy: string
 ): Promise<string> {
-  // 1. Read subject data (PHI-adjacent — scoped by tenant/subject)
+  const { tenantId, subjectId } = ctx;
+  // 1. Read subject data (PHI-adjacent — scoped by tenant/subject via withTenantDb)
   //    D-16: all committed metric categories, no category filter
   const [allMetrics, genotypes, variantMaps, metricRules] = await Promise.all([
-    getMetrics(tenantId, subjectId),
-    getSubjectGenotypes(tenantId, subjectId),
+    getMetrics(ctx),
+    getSubjectGenotypes(ctx),
     getVariantMaps(),
     getMetricRules(),
   ]);
@@ -211,16 +211,18 @@ export async function generateReport(
   };
 
   // 5. Write reports row — D-17: INSERT only, never UPDATE
+  //    withTenantDb ensures the INSERT is RLS-governed (WITH CHECK on tenant_id).
   const reportId = crypto.randomUUID();
-  const db = getDb();
-  await db.insert(reports).values({
-    id: reportId,
-    tenantId,
-    subjectId,
-    generatedBy,
-    corpusVersion: CORPUS_VERSION,
-    snapshot,
-    createdAt: new Date(),
+  await withTenantDb(ctx, async (tx) => {
+    await tx.insert(reports).values({
+      id: reportId,
+      tenantId,
+      subjectId,
+      generatedBy,
+      corpusVersion: CORPUS_VERSION,
+      snapshot,
+      createdAt: new Date(),
+    });
   });
 
   return reportId;

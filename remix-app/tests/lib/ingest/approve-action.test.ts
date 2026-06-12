@@ -65,8 +65,60 @@ const mockState = vi.hoisted(() => ({
   labDocumentsUpdated: [] as Array<{ id: string }>,
 }));
 
+// ── Shared tx factory (used by both getDb().transaction and withTenantDb) ──────
+//
+// Plan 03 retrofit: review.tsx action now uses withTenantDb(ctx, fn) instead of
+// db.transaction(fn). Both paths need the same mock tx shape and state merging.
+
+function makeTxMockAndRun(fn: (tx: unknown) => Promise<unknown>) {
+  const txMetricsInserted: Array<Record<string, unknown>> = [];
+  const txAuditLogInserted: Array<Record<string, unknown>> = [];
+  const txExtractionsUpdated: Array<Record<string, unknown>> = [];
+
+  const tx = {
+    insert: (_table: unknown) => ({
+      values: (data: Record<string, unknown>) => {
+        // Distinguish metrics (has 'source') from auditLog (has 'action')
+        if ("source" in data) {
+          txMetricsInserted.push(data);
+        } else {
+          txAuditLogInserted.push(data);
+        }
+        return Promise.resolve();
+      },
+    }),
+    update: () => ({
+      set: (data: Record<string, unknown>) => ({
+        where: () => {
+          txExtractionsUpdated.push(data);
+          return Promise.resolve();
+        },
+      }),
+    }),
+    select: () => ({
+      from: () => ({
+        where: () => Promise.resolve([]), // no remaining pending_review rows
+      }),
+    }),
+  };
+
+  return fn(tx).then(() => {
+    // Merge into global state
+    mockState.metricsInserted.push(...txMetricsInserted);
+    mockState.auditLogInserted.push(...txAuditLogInserted);
+    mockState.extractionsUpdated.push(
+      ...(txExtractionsUpdated as Array<{ id: number; status: string }>)
+    );
+  });
+}
+
 // Mock the DB module used by review.tsx action
 vi.mock("~/lib/db.server", () => ({
+  // withTenantDb(ctx, fn): Plan 03 retrofit — action now uses this for writes.
+  // Mock: ignore ctx, call fn with the same mock tx, merge results into state.
+  withTenantDb: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    return makeTxMockAndRun(fn);
+  },
   getDb: () => ({
     select: (_cols?: unknown) => {
       // Capture the call count at the time this select() is invoked.
@@ -112,46 +164,9 @@ vi.mock("~/lib/db.server", () => ({
         },
       }),
     }),
+    // transaction kept for backward compat (maybePurgeDocBytes still uses getDb())
     transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
-      const txMetricsInserted: Array<Record<string, unknown>> = [];
-      const txAuditLogInserted: Array<Record<string, unknown>> = [];
-      const txExtractionsUpdated: Array<Record<string, unknown>> = [];
-
-      const tx = {
-        insert: (_table: unknown) => ({
-          values: (data: Record<string, unknown>) => {
-            // Distinguish metrics (has 'source') from auditLog (has 'action')
-            if ("source" in data) {
-              txMetricsInserted.push(data);
-            } else {
-              txAuditLogInserted.push(data);
-            }
-            return Promise.resolve();
-          },
-        }),
-        update: () => ({
-          set: (data: Record<string, unknown>) => ({
-            where: () => {
-              txExtractionsUpdated.push(data);
-              return Promise.resolve();
-            },
-          }),
-        }),
-        select: () => ({
-          from: () => ({
-            where: () => Promise.resolve([]), // no remaining pending_review rows
-          }),
-        }),
-      };
-
-      await fn(tx);
-
-      // Merge into global state
-      mockState.metricsInserted.push(...txMetricsInserted);
-      mockState.auditLogInserted.push(...txAuditLogInserted);
-      mockState.extractionsUpdated.push(
-        ...(txExtractionsUpdated as Array<{ id: number; status: string }>)
-      );
+      return makeTxMockAndRun(fn);
     },
   }),
 }));

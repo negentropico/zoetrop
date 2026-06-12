@@ -8,6 +8,7 @@ import {
   getCessationLog,
   getMilestones,
 } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "~/types/protocol";
 import { differenceInDays, parseISO, format } from "date-fns";
@@ -26,14 +27,13 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const tenantId = user.tenantId!;
-  const subjectId = subject.id;
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   const [protocolVersionsRows, supplements, cessationRows, milestonesRows] = await Promise.all([
-    getProtocolVersions(tenantId, subjectId),
-    getSupplements(tenantId, subjectId),
-    getCessationLog(tenantId, subjectId),
-    getMilestones(tenantId, subjectId),
+    getProtocolVersions(ctx),
+    getSupplements(ctx),
+    getCessationLog(ctx),
+    getMilestones(ctx),
   ]);
 
   // Normalize timestamps to ISO strings

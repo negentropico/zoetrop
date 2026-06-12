@@ -14,7 +14,8 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Route } from "./+types/detail";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
-import { getReport } from "~/lib/data.server";
+import { getOwnerSubject, getReport } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { CATEGORY_INFO } from "~/types/metrics";
 import { VARIANT_CATEGORIES } from "~/types/genetics";
 import type { GradedRecommendation, ReportSnapshot } from "~/types/report";
@@ -48,9 +49,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const reportId = params.reportId;
   if (!reportId) throw new Response("Not found", { status: 404 });
 
+  // getOwnerSubject bootstraps ctx.subjectId for the single-subject pilot.
+  // Needed so withTenantDb can set app.subject_id GUC before the reports SELECT.
+  const subject = await getOwnerSubject(user.tenantId!);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+
   // CR-01: tenant-scope the query itself (defense-in-depth) — cross-tenant id → null → 404,
   // so a foreign report is never loaded into memory before the access check.
-  const report = await getReport(reportId, user.tenantId!);
+  const report = await getReport(reportId, ctx);
   if (!report) throw new Response("Not found", { status: 404 });
 
   // D-18/T-06-IDOR: assertSubjectAccess — second layer; 403 for cross-tenant report read (CR-01)

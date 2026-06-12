@@ -7,6 +7,7 @@ import {
   getSubjectGenotypes,
   getSupplements,
 } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
 import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES, type ConfidenceLevel } from "~/types/genetics";
 import { Badge } from "~/components/ui/Badge";
@@ -33,13 +34,12 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const tenantId = user.tenantId!;
-  const subjectId = subject.id;
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   const [correlationsRows, supplementsRows, genotypeRows, geneticKnowledge] = await Promise.all([
-    getCorrelations(tenantId, subjectId),
-    getSupplements(tenantId, subjectId),
-    getSubjectGenotypes(tenantId, subjectId),
+    getCorrelations(ctx),
+    getSupplements(ctx),
+    getSubjectGenotypes(ctx),
     getGeneticKnowledgeByGene(),
   ]);
 
