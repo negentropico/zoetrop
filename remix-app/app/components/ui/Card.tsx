@@ -69,7 +69,12 @@ export function Card({
     <div
       onClick={onClick}
       className={[
-        "bg-surface rounded-xl border border-border",
+        // zt-frame: style-free structural hook — binds the W0 rule
+        // ".zt-frame .zt-mrow { border-radius: 0 }" (rows inside a frame
+        // card keep straight corners; round-3 "card separation").
+        // zt-card itself isn't adopted: it's unlayered CSS (beats Tailwind
+        // utilities) and would override the padding/elevation props.
+        "zt-frame bg-surface rounded-xl border border-border",
         ELEVATION[elevation] ?? "",
         PADDING[padding] ?? "",
         tone ? (TONE_BG[tone] ?? "") : "",

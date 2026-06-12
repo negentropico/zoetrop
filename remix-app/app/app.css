@@ -592,8 +592,11 @@ h1, h2, h3, h4 {
 .zt-section { margin-bottom: var(--gap-section); }
 
 /* Rows inside a frame card keep straight corners — no nested
-   radius against the card's own curve. */
-.zt-card .zt-mrow { border-radius: 0; }
+   radius against the card's own curve. (.zt-frame = the structural
+   hook emitted by the app's Card.tsx — W2a integration shim; same
+   W0 rule, second binding.) */
+.zt-card .zt-mrow,
+.zt-frame .zt-mrow { border-radius: 0; }
 
 /* ---- Stat strip (borderless stats with hairline dividers) -- */
 .zt-stat-strip {
