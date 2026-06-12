@@ -17,6 +17,41 @@
 
 ---
 
+## Phase 7 Status — RLS + Isolation Engineering (2026-06-12)
+
+**Engineering done. Compliance envelope deferred to Phase 8.**
+
+### What is DONE in Phase 7 (RLS + isolation engineering on Neon)
+
+Delivered on the existing Neon project `orange-paper-97068012`, without a host migration:
+
+- **app_user role** — `NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOINHERIT LOGIN` created in migration `0011_rls_policies.sql`. The app runs all PHI queries as `app_user` (never as `neondb_owner`). `neondb_owner` retains schema-owner rights for migrations and Better-Auth adapter queries.
+- **RLS enable + FORCE on 16 PHI tables** — `ENABLE ROW LEVEL SECURITY` + `FORCE ROW LEVEL SECURITY` applied to: `metrics`, `protocol_versions`, `protocol_changes`, `milestones`, `supplements`, `supplement_log`, `correlations`, `cessation_log`, `subject_genotypes`, `lab_documents`, `lab_extractions`, `reports` (tenant+subject isolation), `subjects` + `practitioner_subject_assignments` (tenant-only isolation), `consent_log` (subject-only isolation), `audit_log` (INSERT+SELECT-only — immutable).
+- **Host-portable GUC policies** — RLS policies use `NULLIF(current_setting('app.tenant_id', true), '')::text` and `NULLIF(current_setting('app.subject_id', true), '')::text` predicates (D-02). These run unchanged on any Postgres host (Neon, Supabase, AWS RDS, DO managed) — the Phase 8 host decision never re-opens the RLS layer.
+- **`withTenantDb(ctx, fn)` transaction wrapper** — exported from `db.server.ts`; issues `set_config('app.tenant_id', ..., true)`, `set_config('app.subject_id', ..., true)`, `set_config('app.user_id', ..., true)` and `SET LOCAL ROLE app_user` atomically at the start of each transaction. `SET LOCAL` (transaction-scoped) prevents GUC bleed across pooled connections (confirmed non-leaking by 01-SPIKE-FINDINGS).
+- **audit_log immutability** — RLS INSERT+SELECT policies only (no UPDATE or DELETE policy for `app_user`); `REVOKE UPDATE, DELETE ON audit_log FROM app_user` as defense-in-depth (AUTH-04 / D-08). Rows written to `audit_log` via `app_user` are immutable at the DB layer.
+- **practitioner_subject_assignments table** — migration `0010_practitioner_assignments.sql`; tenant-scoped; maps which subjects a practitioner is assigned to within a tenant; unique composite index `idx_psa_active_unique` on (tenant_id, practitioner_id, subject_id).
+- **Cross-tenant isolation tests** — `rls-isolation.test.ts` in CI: Tenant A writes, Tenant B reads zero; WITH CHECK rejects mismatched-tenant inserts; pool-reuse non-leak verified (TEN-02 / TEN-03).
+- **Excluded tables** — Better-Auth tables (`user`, `session`, `account`, `verification`, `invites`) and corpus tables (`genetic_variants`, `variant_protocol_map`, `metric_protocol_map`) have NO RLS. `tenants` is admin-only with no `app_user` access. (D-04 / Pitfall 4: adapter queries run pre-context.)
+- **Rehearsal + rollback path** — highest-risk migration rehearsed on a disposable Neon branch first; rollback procedure documented in `0011_rls_policies.sql` header (D-10).
+
+**Compliant-envelope cost today: $0.** n=1 owner data carries no BAA obligation. The ~$950/month-class compliance spend (DB + Vercel + LLM BAAs; see Phase 8) starts at the Phase 8 gate — the month a client funds it (D-06).
+
+### What is DEFERRED to Phase 8 — Compliance Envelope & Host Gate
+
+Phase 8 is the hard release gate for multi-client launch. Trigger: first external client (HIGHER) imminent.
+
+- **All BAAs** — Neon HIPAA-mode + BAA; Vercel HIPAA add-on + BAA; Anthropic HIPAA-Ready API + BAA. (Fills in the per-vendor register sections below.)
+- **HIPAA plan tiers** — Neon Scale plan; Vercel Pro + HIPAA add-on.
+- **pgAudit + PHI SELECT-logging verification** — object-level SELECT audit on PHI tables; Neon Support ticket for log sample confirmation.
+- **PITR / SSL / network restrictions** — connection-string hardening, IP allow-list review, backup / DR verification.
+- **Host cost comparison + possible migration** — Supabase Team+HIPAA vs Neon HIPAA vs AWS RDS vs DO managed (current 2026 pricing + BAA terms). Decision uses `07-RESEARCH.md` migration mechanics if Neon is not chosen.
+- **Self-hosted droplet option: REJECTED (D-03)** — a raw droplet still requires a DO BAA while shifting every HIPAA Security Rule control (encryption, audit, backup/DR, patching, breach response) onto a solo operator with no attestation to show clients. False economy; recorded here so it is not relitigated.
+
+The GUC RLS layer (Phase 7 output) runs unmodified on any host. The Phase 8 host decision never requires reopening or rewriting the RLS policies.
+
+---
+
 ## Pilot Deploy Baseline (Phase 2 — active)
 
 > Lightweight, standard-tier records for the single-user pilot. No HIPAA add-on, no BAAs (those are the Phase 7 registers below). NO SECRETS — record only that env vars are SET.
