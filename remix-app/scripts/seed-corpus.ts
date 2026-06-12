@@ -478,6 +478,46 @@ export const corpusSeedData = {
       evidenceCitation: "Hauger RL et al. International Union of Pharmacology: nomenclature of corticotropin-releasing factor receptors. Pharmacol Rev. 2003;55(1):21-6.",
       actionDetail: null,
     },
+
+    // ── GLUCOSE METABOLISM ────────────────────────────────────────────────────
+
+    {
+      // TCF7L2: transcription factor 7-like 2. PureInsights: 'Glucose Metabolism' Consider Action, 5/5 stars.
+      // ADRA2A (rs553668) and TCF7L2 (rs7903146) both flagged. TCF7L2 is the most replicated T2D GWAS locus,
+      // validated in 100+ cohorts; rs7903146 T allele (risk) increases T2D risk ~40% per allele.
+      // SelfDecode fitfunc: 'Likely better TCF7L2 genetics' — the owner shows better TCF7L2 genotype.
+      // However, PureInsights flags Glucose Metabolism as Consider Action driven by ADRA2A.
+      // TCF7L2 corpus entry uses population-level framing (any subject with the risk genotype).
+      gene: "TCF7L2",
+      genotypePattern: "TC",
+      category: "metabolism",
+      impact: "high",
+      clinicalImplication: "TCF7L2 rs7903146 TC (heterozygous) confers approximately 30–40% increased type 2 diabetes risk per T allele, making it the most consistently replicated T2D genetic risk locus across diverse populations. TCF7L2 regulates Wnt signaling in pancreatic beta cells, affecting insulin secretion and incretin response.",
+      knowledgeSource: "PureInsights 2024; SelfDecode Fitness Functional Report 2024",
+      evidenceTier: "k1",
+      recommendationText: "TCF7L2 T-allele carriers show the strongest lifestyle-mediated risk reduction in the Diabetes Prevention Program (DPP), where structured lifestyle intervention (diet + 150 min/week aerobic exercise, 5–7% weight reduction) reduced T2D incidence by approximately 49% in heterozygotes — greater than in non-carriers. Dietary fiber, reduced refined carbohydrate intake, and avoidance of late-night caloric loads (relevant with co-occurring MTNR1B risk) are additional evidence-supported interventions.",
+      evidenceCitation: "Florez JC et al. TCF7L2 polymorphisms and progression to diabetes in the Diabetes Prevention Program. N Engl J Med. 2006;355(3):241-50.",
+      actionDetail: "Annual fasting glucose and HbA1c monitoring is consistent with ADA recommendations for individuals with elevated genetic T2D risk.",
+    },
+
+    // ── DETOXIFICATION (continued) ────────────────────────────────────────────
+
+    {
+      // NQO1: NAD(P)H quinone oxidoreductase 1. PureInsights: 'Antioxidant Enzymes' Consider Action, 4/5 stars.
+      // rs1800566 (C609T, Pro187Ser) — the well-characterized loss-of-function NQO1 variant.
+      // CC genotype = null enzyme activity; CT = ~75% reduction vs. wild-type.
+      // NQO1 is the third antioxidant enzyme in the GPX1/SOD2/NQO1 cluster flagged by PureInsights.
+      gene: "NQO1",
+      genotypePattern: "CT",
+      category: "detoxification",
+      impact: "moderate",
+      clinicalImplication: "NQO1 rs1800566 CT genotype (Pro187Ser heterozygosity) reduces NQO1 quinone oxidoreductase activity by approximately 75% compared to wild-type. NQO1 is a phase II detox enzyme that neutralizes reactive quinones and maintains CoQ10 redox cycling; reduced activity is associated with higher oxidative burden from quinone-generating exposures.",
+      knowledgeSource: "PureInsights 2024",
+      evidenceTier: "k2",
+      recommendationText: "Sulforaphane (from cruciferous vegetables — broccoli sprouts, broccoli, cauliflower) is among the best-studied dietary inducers of NQO1 via the Nrf2/ARE pathway, with multiple human intervention studies demonstrating NQO1 upregulation. Minimizing exposure to benzene and polycyclic aromatic hydrocarbons (tobacco smoke, charred meats) is a relevant precautionary consideration given reduced quinone-detoxification capacity.",
+      evidenceCitation: "Fahey JW et al. Sulforaphane inhibits extracellular, intracellular, and antibiotic-resistant strains of Helicobacter pylori and prevents benzo[a]pyrene-induced stomach tumors. Proc Natl Acad Sci USA. 2002;99(11):7610-5; Riedl MA et al. Oral sulforaphane increases Phase II antioxidant enzymes in the human upper airway. Clin Immunol. 2009;130(3):244-51.",
+      actionDetail: null,
+    },
   ] as Array<{
     gene: string;
     rsid?: string | null;
