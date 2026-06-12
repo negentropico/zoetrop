@@ -13,6 +13,7 @@ import {
   hashToken,
 } from "./invites.server";
 import { insertAuthAuditLog } from "./audit.server";
+import type { AppRole } from "./authz.server";
 
 // Mirror db.server.ts error-guard idiom for missing env vars.
 // Better-Auth reads BETTER_AUTH_SECRET for session-cookie signing.
@@ -116,7 +117,7 @@ export const auth = betterAuth({
           try {
             const db = getDb();
             const rows = await db
-              .select({ tenantId: userTable.tenantId })
+              .select({ tenantId: userTable.tenantId, role: userTable.role })
               .from(userTable)
               .where(eq(userTable.id, session.userId))
               .limit(1);
@@ -126,6 +127,7 @@ export const auth = betterAuth({
                 userId: session.userId,
                 action: 'sign-in',
                 tenantId,
+                role: rows[0]?.role as AppRole | undefined,
                 entityId: session.id, // session token id — not a PHI value
               });
             }
@@ -140,7 +142,7 @@ export const auth = betterAuth({
           try {
             const db = getDb();
             const rows = await db
-              .select({ tenantId: userTable.tenantId })
+              .select({ tenantId: userTable.tenantId, role: userTable.role })
               .from(userTable)
               .where(eq(userTable.id, session.userId))
               .limit(1);
@@ -150,6 +152,7 @@ export const auth = betterAuth({
                 userId: session.userId,
                 action: 'sign-out',
                 tenantId,
+                role: rows[0]?.role as AppRole | undefined,
                 entityId: session.id,
               });
             }
@@ -226,7 +229,11 @@ export const auth = betterAuth({
               const action = pending && !pending.breakGlass && pending.rawToken
                 ? 'invite-redeemed'
                 : 'sign-up';
-              await insertAuthAuditLog({ userId: id, action, tenantId });
+              // Thread the real role from the invite or break-glass bootstrap.
+              // pending.role is the role injected in user.create.before; it is the
+              // actor's actual role for this sign-up event.
+              const role = pending?.role as AppRole | undefined;
+              await insertAuthAuditLog({ userId: id, action, tenantId, role });
             }
           } catch {
             // Audit best-effort — never fail the signup over it (T-07-17)

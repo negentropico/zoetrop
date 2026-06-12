@@ -139,3 +139,100 @@ describe("per-assignment-wiring — Gate 3 route contract", () => {
     });
   });
 });
+
+// ── document.tsx + consent.tsx Gate-3 route contract ──────────────────────────
+//
+// Pins the assertSubjectAccess wiring for the two newly-hardened routes (Plan 07-07).
+// document.tsx: passes { tenantId: doc.tenantId, id: doc.subjectId } + assignedIds.
+// consent.tsx:  passes subject (from getOwnerSubject, already has id) + assignedIds.
+//
+// The "subject with doc.subjectId" shape is the CRITICAL shape:
+//   - Without id: Gate 3 denies even assigned practitioners (the old document.tsx bug).
+//   - With id ∈ set: passes for assigned practitioners.
+
+describe("document.tsx + consent.tsx Gate-3 route contract", () => {
+  const tenantId = "tenant-a";
+  const docSubjectId = "subject-doc-1";
+
+  // Subject shape as passed by document.tsx (after the fix):
+  //   { tenantId: doc.tenantId, id: doc.subjectId }
+  const docSubjectShape = { tenantId, id: docSubjectId };
+
+  // ── document.tsx scenarios ────────────────────────────────────────────────
+
+  it("document: unassigned practitioner (empty assignedIds) + doc.subjectId present → 403", () => {
+    const user = { role: "practitioner", id: "prac-1" };
+    // Mirrors: const assignedIds = await listAssignedSubjectIds(ctx, user.id) → []
+    const assignedIds = resolveAssignedIds(user.role, []);
+    expect(assignedIds).toEqual([]);
+    expect(canAccess(user, docSubjectShape, tenantId, assignedIds)).toBe(false);
+    expect(getStatus(user, docSubjectShape, tenantId, assignedIds)).toBe(403);
+  });
+
+  it("document: assigned practitioner (subject.id ∈ set) → 200, bytes served", () => {
+    const user = { role: "practitioner", id: "prac-1" };
+    // Mirrors: listAssignedSubjectIds returns [docSubjectId, ...]
+    const assignedIds = resolveAssignedIds(user.role, [docSubjectId, "other-subject"]);
+    expect(canAccess(user, docSubjectShape, tenantId, assignedIds)).toBe(true);
+    expect(getStatus(user, docSubjectShape, tenantId, assignedIds)).toBe(200);
+  });
+
+  it("document: owner (assignedIds undefined via role-conditional) → 200, Gate 3 skipped", () => {
+    const user = { role: "owner", id: "owner-1" };
+    // Mirrors: user.role === "practitioner" ? ... : undefined  → undefined for owner
+    const assignedIds = resolveAssignedIds(user.role, []);
+    expect(assignedIds).toBeUndefined();
+    expect(canAccess(user, docSubjectShape, tenantId, assignedIds)).toBe(true);
+    expect(getStatus(user, docSubjectShape, tenantId, assignedIds)).toBe(200);
+  });
+
+  it("document: subject shape WITHOUT id (old 3-arg bug) + practitioner with non-empty set → 403 (pins the must-pass-doc.subjectId requirement)", () => {
+    const user = { role: "practitioner", id: "prac-1" };
+    // Simulates the pre-fix document.tsx call: { tenantId: doc.tenantId } — no id field.
+    // Gate 3: !subject.id → denied even if practitioner is in assignedIds.
+    const subjectNoId = { tenantId }; // no id — this is the old bug shape
+    const assignedIds = resolveAssignedIds(user.role, [docSubjectId, "other-subject"]);
+    expect(canAccess(user, subjectNoId, tenantId, assignedIds)).toBe(false);
+    expect(getStatus(user, subjectNoId, tenantId, assignedIds)).toBe(403);
+  });
+
+  // ── consent.tsx scenarios ─────────────────────────────────────────────────
+  // consent.tsx uses the full subject from getOwnerSubject (which already has id).
+  // The test mirrors: assertSubjectAccess(user, subject, user.tenantId!, assignedIds)
+  // where subject = { id: subject.id, tenantId: ... } (real subject row from DB).
+
+  it("consent: unassigned practitioner + valid subject (loader) → 403", () => {
+    const user = { role: "practitioner", id: "prac-2" };
+    const consentSubject = { tenantId, id: "subject-consent-1" };
+    // unassigned → assignedIds = []
+    const assignedIds = resolveAssignedIds(user.role, []);
+    expect(canAccess(user, consentSubject, tenantId, assignedIds)).toBe(false);
+    expect(getStatus(user, consentSubject, tenantId, assignedIds)).toBe(403);
+  });
+
+  it("consent: unassigned practitioner + valid subject (action/POST) → 403, no consent written", () => {
+    const user = { role: "practitioner", id: "prac-2" };
+    const consentSubject = { tenantId, id: "subject-consent-1" };
+    // action path: same Gate 3 check as loader — unassigned → 403
+    const assignedIds = resolveAssignedIds(user.role, []);
+    expect(canAccess(user, consentSubject, tenantId, assignedIds)).toBe(false);
+    expect(getStatus(user, consentSubject, tenantId, assignedIds)).toBe(403);
+  });
+
+  it("consent: assigned practitioner → 200 (loader + action proceed)", () => {
+    const user = { role: "practitioner", id: "prac-2" };
+    const consentSubject = { tenantId, id: "subject-consent-1" };
+    const assignedIds = resolveAssignedIds(user.role, ["subject-consent-1"]);
+    expect(canAccess(user, consentSubject, tenantId, assignedIds)).toBe(true);
+    expect(getStatus(user, consentSubject, tenantId, assignedIds)).toBe(200);
+  });
+
+  it("consent: owner → 200 (Gate 3 skipped, tenant-wide consent access retained)", () => {
+    const user = { role: "owner", id: "owner-1" };
+    const consentSubject = { tenantId, id: "subject-consent-1" };
+    const assignedIds = resolveAssignedIds(user.role, []);
+    expect(assignedIds).toBeUndefined();
+    expect(canAccess(user, consentSubject, tenantId, assignedIds)).toBe(true);
+    expect(getStatus(user, consentSubject, tenantId, assignedIds)).toBe(200);
+  });
+});
