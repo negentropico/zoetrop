@@ -31,6 +31,7 @@ import type { AppRole } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
 import { getDb, withTenantDb } from "~/lib/db.server";
 import type { TenantCtx } from "~/lib/db.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { eq, and, sql } from "drizzle-orm";
 import { labDocuments, labExtractions, metrics, auditLog } from "../../../../db/schema";
 import { Card } from "~/components/ui/Card";
@@ -52,7 +53,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     // No docId — show a list of recent documents instead of erroring
     const db = getDb();
     const subject = await getOwnerSubject(user.tenantId!);
-    assertSubjectAccess(user, subject, user.tenantId!);
+    const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+    const assignedIds =
+      user.role === "practitioner"
+        ? await listAssignedSubjectIds(ctx, user.id)
+        : undefined;
+    assertSubjectAccess(user, subject, user.tenantId!, assignedIds);
     const docs = await db
       .select()
       .from(labDocuments)
@@ -76,7 +82,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   // T-05-APPROVE: assertSubjectAccess — 403 for cross-tenant docId
-  assertSubjectAccess(user, { tenantId: doc.tenantId }, user.tenantId!);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: doc.subjectId };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, { tenantId: doc.tenantId, id: doc.subjectId }, user.tenantId!, assignedIds);
 
   const extractions = await db
     .select()
@@ -117,15 +128,25 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   // T-05-APPROVE: assertSubjectAccess BEFORE any write (D-15, CR-01 write-path)
-  assertSubjectAccess(user, { tenantId: extraction.tenantId }, user.tenantId!);
-
   // Build TenantCtx from the extraction row's tenant+subject — used by withTenantDb
   // for the approve/reject write transactions (RLS WITH CHECK validates tenant_id).
+  // ctx is constructed here (before assertSubjectAccess) so listAssignedSubjectIds
+  // can be called to populate the 4th arg — closes AUTH-03 CR-01 dead-code gap.
   const ctx: TenantCtx = {
     userId: user.id,
     tenantId: extraction.tenantId,
     subjectId: extraction.subjectId,
   };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(
+    user,
+    { tenantId: extraction.tenantId, id: extraction.subjectId },
+    user.tenantId!,
+    assignedIds
+  );
 
   const now = new Date();
 
