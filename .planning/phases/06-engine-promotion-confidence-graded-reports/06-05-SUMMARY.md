@@ -141,8 +141,8 @@ completed: 2026-06-12
 
 ---
 
-**Pre-existing out-of-scope issue (not auto-fixed per scope boundary rule):**
-`npm run build` fails with `[commonjs--resolver] Server-only module referenced by client: './engine.server' imported by 'app/lib/metrics.ts'`. Confirmed pre-existing before 06-05 (tested with git stash). Documented in `.planning/phases/06-engine-promotion-confidence-graded-reports/deferred-items.md`.
+**Build issue surfaced here — RESOLVED in-phase (commit `6568e4d`):**
+`npm run build` was failing with `[commonjs--resolver] Server-only module referenced by client: './engine.server' imported by 'app/lib/metrics.ts'` (introduced by 06-01's `.server` suffix on the pure engine). Correctly flagged out-of-scope by this plan per the scope-boundary rule, then resolved during phase finalization by renaming `engine.server.ts` → `engine.ts` (the engine is provably pure / client-safe) and updating all importers + the ESLint purity-rule target + the purity-test path. Build now passes (client + ssr). See updated `deferred-items.md`.
 
 ## Known Stubs
 
