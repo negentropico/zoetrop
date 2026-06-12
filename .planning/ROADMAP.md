@@ -24,7 +24,7 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrop brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [ ] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture
 >>>>>>> left-nav-refactor
-- [ ] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports
+- [x] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports (completed 2026-06-12)
 - [ ] **Phase 7: PHI Compliance Hardening — Pre-Client Gate** *(deferred hardening)* — Before the first external client's PHI: Neon HIPAA-mode + BAA, Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit verification, atomic RLS enable+policies + SET LOCAL wrapper + cross-tenant isolation tests, and PHI read-access (SELECT) logging — the hard release gate for multi-client launch
 
 ## Phase Details
@@ -268,7 +268,7 @@ Plans:
 
 **Wave 3** (blocked on Waves 1–2)
 
-- [ ] 06-05-PLAN.md — Report path: deterministic generateReport (engine+corpus → frozen versioned snapshot → reports row) + /reports/generate (role-gated) + /reports/:reportId (assertSubjectAccess render with inline K) + list + threat model [RPT-01, RPT-02, RPT-03, ENG-03]
+- [x] 06-05-PLAN.md — Report path: deterministic generateReport (engine+corpus → frozen versioned snapshot → reports row) + /reports/generate (role-gated) + /reports/:reportId (assertSubjectAccess render with inline K) + list + threat model [RPT-01, RPT-02, RPT-03, ENG-03]
 
 ### Phase 7: PHI Compliance Hardening — Pre-Client Gate (DEFERRED HARDENING)
 
@@ -299,7 +299,7 @@ Plans:
 | 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
-| 6. Engine Promotion + Confidence-Graded Reports | 4/5 | In Progress|  |
+| 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
 
 ## Backlog
