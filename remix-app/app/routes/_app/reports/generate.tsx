@@ -20,6 +20,7 @@ import {
 } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { generateReport } from "~/lib/report-generator.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
@@ -45,8 +46,13 @@ export async function action({ request }: Route.ActionArgs) {
   const subject = await getOwnerSubject(user.tenantId!);
 
   // T-06-IDOR/D-18: Cross-tenant check — 403 for tenant mismatch
-  assertSubjectAccess(user, subject, user.tenantId!);
+  // ctx constructed before assertSubjectAccess so listAssignedSubjectIds can run
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, subject, user.tenantId!, assignedIds);
 
   // D-13/D-17: Generate report — pure deterministic engine, inserts NEW row
   const reportId = await generateReport(ctx, user.id);
