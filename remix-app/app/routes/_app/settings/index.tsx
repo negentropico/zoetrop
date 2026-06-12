@@ -1,5 +1,5 @@
 import { useState, useLayoutEffect, useCallback, useRef, useEffect } from "react";
-import { Form, Link, useLoaderData, useActionData } from "react-router";
+import { Form, Link, useLoaderData, useActionData, useFetcher } from "react-router";
 import type { Route } from "./+types/index";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
@@ -354,6 +354,31 @@ function CopyLinkRow({ url, onDismiss }: { url: string; onDismiss: () => void })
   );
 }
 
+// ── Revoke action (design: zt-fact, deficient hover) ──────────────────────────
+//
+// Uses a fetcher (NOT a navigating Form) so the POST to the action-only resource
+// route /settings/invites/:inviteId/revoke does not navigate away from /settings
+// to the route's bare JSON response. Mirrors the original InviteTableRowAction
+// fetcher pattern.
+
+function RevokeAction({ inviteId }: { inviteId: string }) {
+  const fetcher = useFetcher();
+  const submitting = fetcher.state !== "idle";
+  return (
+    <fetcher.Form method="post" action={`/settings/invites/${inviteId}/revoke`}>
+      <button
+        type="submit"
+        className="zt-fact"
+        title="Revoke invite"
+        disabled={submitting}
+        style={{ "--fact": "var(--deficient)", "--fact-bg": "var(--deficient-bg)" } as React.CSSProperties}
+      >
+        <X size={15} strokeWidth={2.2} />
+      </button>
+    </fetcher.Form>
+  );
+}
+
 // ── Invites flow (design W4c: inline expanding create row + list + revoke) ─────
 
 function InvitesFlow({
@@ -571,16 +596,7 @@ function InvitesFlow({
                 </div>
                 <RoleChip label={inv.roleLabel} accent={isOwner} />
                 {status === "active" ? (
-                  <Form method="post" action={`/settings/invites/${inv.id}/revoke`}>
-                    <button
-                      type="submit"
-                      className="zt-fact"
-                      title="Revoke invite"
-                      style={{ "--fact": "var(--deficient)", "--fact-bg": "var(--deficient-bg)" } as React.CSSProperties}
-                    >
-                      <X size={15} strokeWidth={2.2} />
-                    </button>
-                  </Form>
+                  <RevokeAction inviteId={inv.id} />
                 ) : (
                   <span style={{ width: 28, textAlign: "center", color: "var(--text-faint)", fontSize: "var(--text-xs)" }}>—</span>
                 )}
