@@ -48,10 +48,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const reportId = params.reportId;
   if (!reportId) throw new Response("Not found", { status: 404 });
 
-  const report = await getReport(reportId);
+  // CR-01: tenant-scope the query itself (defense-in-depth) — cross-tenant id → null → 404,
+  // so a foreign report is never loaded into memory before the access check.
+  const report = await getReport(reportId, user.tenantId!);
   if (!report) throw new Response("Not found", { status: 404 });
 
-  // D-18/T-06-IDOR: assertSubjectAccess — 403 for cross-tenant report read (CR-01)
+  // D-18/T-06-IDOR: assertSubjectAccess — second layer; 403 for cross-tenant report read (CR-01)
   assertSubjectAccess(user, { tenantId: report.tenantId }, user.tenantId!);
 
   return { report };

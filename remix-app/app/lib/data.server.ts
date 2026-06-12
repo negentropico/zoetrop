@@ -11,7 +11,7 @@
  */
 
 import { getDb } from "./db.server";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import {
   metrics,
   protocolVersions,
@@ -189,12 +189,16 @@ export async function getReports(tenantId: string, subjectId: string) {
   return db
     .select()
     .from(reports)
-    .where(and(eq(reports.tenantId, tenantId), eq(reports.subjectId, subjectId)));
+    .where(and(eq(reports.tenantId, tenantId), eq(reports.subjectId, subjectId)))
+    .orderBy(desc(reports.createdAt));
 }
 
-/** Returns a single report row by id, or null if not found. */
-export async function getReport(id: string) {
+/** Returns a single report row by id, scoped to tenant (defense-in-depth — CR-01), or null if not found. */
+export async function getReport(id: string, tenantId: string) {
   const db = getDb();
-  const [row] = await db.select().from(reports).where(eq(reports.id, id));
+  const [row] = await db
+    .select()
+    .from(reports)
+    .where(and(eq(reports.id, id), eq(reports.tenantId, tenantId)));
   return row ?? null;
 }
