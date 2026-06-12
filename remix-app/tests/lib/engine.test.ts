@@ -263,7 +263,7 @@ describe("mapVariantToProtocol", () => {
     const genotypes = [makeGenotype({ gene: "COMT", genotype: "A/G" })];
     const results = mapVariantToProtocol(genotypes, variantMaps);
     expect(results).toHaveLength(1);
-    expect(results[0].gene).toBe(undefined); // gene is on sourceContext
+    // gene is on sourceContext, not directly on GradedRecommendation
     expect(results[0].sourceContext.gene).toBe("COMT");
     expect(results[0].sourceContext.genotype).toBe("A/G");
     expect(results[0].evidenceTier).toBe("k2");

@@ -10,11 +10,11 @@
 //   - getCessationDay / getCurrentCessationPhase (engine fns)
 //   - dailySchedule / avoidList (display constants — generic schedule/avoid rules)
 
-import { CESSATION_PHASES } from "../types/protocol";
-import { differenceInDays, parseISO } from "date-fns";
-
 // =============================================================================
-// CESSATION ENGINE FUNCTIONS (non-PHI — kept per D-06)
+// CESSATION ENGINE FUNCTIONS (non-PHI — ENG-01 Phase 6)
+// getCessationDay / getCessationPhase now live in engine.server.ts (D-01).
+// Re-exported here for backward compatibility — call sites (cessation.ts,
+// protocol-data.test.ts) continue to resolve these names without changes.
 // =============================================================================
 
 /**
@@ -27,28 +27,9 @@ import { differenceInDays, parseISO } from "date-fns";
  */
 export const CESSATION_START_DATE = "2025-12-23T00:00:00.000Z";
 
-/**
- * Calculate current cessation day from the given start date ISO string.
- * @param startDateIso - The cessation start date as an ISO 8601 string (from DB cessation_log.startDate)
- * @param now - The reference "now" date (defaults to current date; injectable for testing)
- */
-export function getCessationDay(startDateIso: string, now: Date = new Date()): number {
-  return differenceInDays(now, parseISO(startDateIso));
-}
-
-/**
- * Get the current cessation phase based on day count
- */
-export function getCurrentCessationPhase(day: number): typeof CESSATION_PHASES[0] {
-  const phase = CESSATION_PHASES.find(
-    (p) => day >= p.dayRange.start && day <= p.dayRange.end
-  );
-  if (phase) return phase;
-  // Before first phase begins → clamp to first (acute); past final range → clamp to last.
-  return day < CESSATION_PHASES[0].dayRange.start
-    ? CESSATION_PHASES[0]
-    : CESSATION_PHASES[CESSATION_PHASES.length - 1];
-}
+// Re-exports from engine.server.ts (ENG-01, D-01)
+export { getCessationDay } from "./engine.server";
+export { getCessationPhase as getCurrentCessationPhase } from "./engine.server";
 
 // =============================================================================
 // DAILY SCHEDULE (non-PHI display constant — kept per D-06)
