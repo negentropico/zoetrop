@@ -6,9 +6,11 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 
 **Pilot-first re-scope (2026-06-08):** Initial work is single-user pilot / prototyping on the owner's own data (n=1). PHI compliance *hardening* — HIPAA-mode + Neon/Vercel/LLM BAAs, pgAudit verification, and RLS enforcement/isolation — is deferred to **Phase 7 (PHI Compliance Hardening — Pre-Client Gate)**, which triggers before the first external client's PHI (multi-client / HIGHER launch). Phases 2–6 build and run on standard-tier infra + the standard subscription API; the tenancy *schema* (tenant/subject columns) is added in Phase 3 so the later RLS retrofit is non-breaking.
 
+**Pre-client-gate split (2026-06-12):** Phase 7 is re-scoped to the **RLS + isolation engineering slice** — executed now, on the existing Neon project, with host-portable GUC-based policies (the Supabase migration intent is superseded; see `07-CONTEXT.md`). The compliance envelope — DB-host cost/BAA comparison + possible migration, Vercel + LLM BAAs, pgAudit/SELECT-logging verification — moves to **Phase 8 (Compliance Envelope & Host Gate)**, the hard release gate before the first external client's PHI.
+
 ## Milestones
 
-- 🚧 **M1 — Engine-First Platform** — Phases 1–6 + inserted 3.1/4.1, gated for multi-client by Phase 7 (in progress)
+- 🚧 **M1 — Engine-First Platform** — Phases 1–7 + inserted 3.1/4.1, gated for multi-client by Phase 8 (in progress)
 
 ## Phases
 
@@ -20,7 +22,8 @@ M1 converts the shipped n=1 instrument into a multi-tenant, RLS-isolated platfor
 - [x] **Phase 4.1: Design System Adoption** *(inserted)* — Bridge the Zoetrop brand tokens into Tailwind `@theme`, port signature components to typed TSX, retrofit the M0 screens in-brand, and commit a binding `UI-SPEC.md` so Phases 5–6 build in-brand. Gated on a claude.ai/design roundtrip (completed 2026-06-08)
 - [x] **Phase 5: Lab Ingest Pipeline** — Upload→LLM-parse→grounding-validate→human-review→approve/commit state machine with audit logging and consent capture (completed 2026-06-11 — 3/3 plans, owner E2E UAT passed; gap-closures: SSR DOMMatrix crash, Vercel bundle .data 404, multi-page PDF nav, collection-date+dedup via migration 0008)
 - [x] **Phase 6: Engine Promotion + Confidence-Graded Reports** — Promote `geneticVariants`/`variantProtocolMap` to first-class schema (non-null K1–K4), extract pure engine module, generate confidence-graded lab→protocol reports (completed 2026-06-12)
-- [ ] **Phase 7: PHI Compliance Hardening — Pre-Client Gate** *(deferred hardening)* — Before the first external client's PHI: Neon HIPAA-mode + BAA, Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit verification, atomic RLS enable+policies + SET LOCAL wrapper + cross-tenant isolation tests, and PHI read-access (SELECT) logging — the hard release gate for multi-client launch
+- [ ] **Phase 7: PHI Compliance Hardening — RLS + Isolation Engineering** *(pre-client gate, part 1)* — On the existing Neon project, executed now: atomic host-portable RLS enable+policies (GUC-based), `withTenantDb` SET LOCAL wrapper + pool-leak test, cross-tenant isolation tests in CI, practitioner→subject assignments (AUTH-03), immutable auth/access audit log (AUTH-04). BAAs/HIPAA move to Phase 8 (re-scope 2026-06-12 — see 07-CONTEXT.md)
+- [ ] **Phase 8: Compliance Envelope & Host Gate** *(pre-client gate, part 2)* — Before the first external client's PHI: DB-host cost/BAA comparison (+ possible migration), Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit + PHI SELECT-logging verification, PITR/SSL/network hardening, COMPLIANCE-RUNBOOK.md complete — the hard release gate for multi-client launch
 
 ## Phase Details
 
@@ -265,21 +268,53 @@ Plans:
 
 - [x] 06-05-PLAN.md — Report path: deterministic generateReport (engine+corpus → frozen versioned snapshot → reports row) + /reports/generate (role-gated) + /reports/:reportId (assertSubjectAccess render with inline K) + list + threat model [RPT-01, RPT-02, RPT-03, ENG-03]
 
-### Phase 7: PHI Compliance Hardening — Pre-Client Gate (DEFERRED HARDENING)
+### Phase 7: PHI Compliance Hardening — RLS + Isolation Engineering (Pre-Client Gate, Part 1)
 
-**Goal**: Before the first external client's identifiable health data enters the system, the full PHI compliance envelope is executed and proven: HIPAA-mode + signed BAAs across every subprocessor (Neon, Vercel, LLM provider), pgAudit verification, atomic RLS enable+policies with SET LOCAL enforcement + a cross-tenant isolation proof, and PHI read-access (SELECT) logging. A hard release gate for multi-client / HIGHER production — not a feature.
-**Gate / Trigger**: Activated before onboarding the first non-owner client (multi-client production launch). Phases 2–6 and the single-user pilot run on standard-tier infra without it. (Re-scope 2026-06-08 — see PROJECT.md Key Decisions; confirm the exact legal trigger with counsel.)
-**Depends on**: Phases 3 (tenancy columns + identity), 4 (live DB), 5 (lab ingest), 6 (reports) — the feature stack is built single-user first, then hardened for external clients here.
-**Requirements**: COMP-02, COMP-03, TEN-02, TEN-03, AUTH-03, AUTH-04
+**Goal**: All tenant/subject-scoped data access is enforced at the database layer on the EXISTING Neon project: atomic RLS enable+policies written host-portably (plain `current_setting('app.tenant_id')`/`('app.subject_id')` GUCs — no Supabase-specific constructs), every tenant-scoped interaction inside `withTenantDb(ctx, fn)` (transaction-scoped SET LOCAL), a cross-tenant isolation proof in CI, per-assignment practitioner authorization, and an immutable audit log carrying auth events. Defer spend, not correctness: the compliance envelope (BAAs, HIPAA tiers, pgAudit verification, host decision) is split to **Phase 8**.
+**Re-scope note (2026-06-12)**: Decisions locked in `07-CONTEXT.md` (D-01…D-11). The Supabase migration intent is **superseded** — stay on Neon; the host choice is a pure pricing/BAA decision deferred to the Phase 8 cost comparison, and the GUC-based RLS layer must run unmodified on any host. `07-RESEARCH.md`'s Supabase mechanics are Phase 8 inputs.
+**Gate / Trigger**: Execute now (engineering slice). The multi-client release gate moves to Phase 8.
+**Depends on**: Phases 3 (tenancy columns + identity), 4 (live DB), 5 (lab ingest), 6 (reports) — the feature stack is built single-user first, then hardened here.
+**Requirements**: TEN-02, TEN-03, AUTH-03, AUTH-04 (COMP-02/COMP-03 moved to Phase 8)
 **Success Criteria** (what must be TRUE):
 
-  1. Neon on the Scale plan with HIPAA mode enabled on the EXISTING project (verified project ID matches the live `DATABASE_URL`); a signed Neon BAA with date recorded in `docs/COMPLIANCE-RUNBOOK.md`
-  2. Vercel HIPAA add-on (self-serve Pro add-on) active + a signed Vercel BAA recorded
-  3. The chosen LLM provider has a signed HIPAA-Ready/BAA covering the extraction use case (ZDR + no-training, D-03), recorded; client-PHI extraction unblocked
-  4. pgAudit verified: a Neon Support sample proves entries record `{user, table, operation, timestamp}` and NOT bind parameters (`log_parameter = off`), recorded in the runbook
-  5. Atomic RLS enable+policies on all 8 tenant-scoped tables; every tenant-scoped DB interaction runs inside `withTenantDb(ctx, fn)` issuing `SET LOCAL app.tenant_id` / `app.subject_id`; a pool-reuse test confirms no context leak; a committed cross-tenant isolation test (Tenant A writes, Tenant B reads zero) runs in CI
-  6. PHI read-access (SELECT) object-level audit logging enabled on PHI tables via Neon Support (the Phase-3-carry-forward recorded in the runbook)
-  7. A practitioner can access only the subjects assigned to them within their tenant (AUTH-03); auth/access events are written to an immutable audit log (AUTH-04)
+  1. Atomic RLS enable+policies on ALL tenant/subject-scoped tables (the 8 original data tables + Phase 5–6 additions: `subject_genotypes`, `lab_documents`, `lab_extractions`, `audit_log`, `consent_log`, `reports`, `subjects`, `invites` — per the `07-RESEARCH.md` RLS map), with both USING and WITH CHECK clauses, written host-portably against `current_setting('app.tenant_id')`/`('app.subject_id')`; rehearsed on a Neon branch before the live apply; Better-Auth tables (`user`, `session`, `account`, `verification`) and non-PHI corpus tables stay RLS-free on the service path
+  2. Every tenant-scoped DB interaction runs inside `withTenantDb(ctx, fn)` issuing transaction-scoped `SET LOCAL`; a pool-reuse test confirms no context leak across pooled connections (TEN-03)
+  3. A committed cross-tenant isolation test (Tenant A writes; Tenant B reads zero; WITH CHECK rejects a mismatched-tenant insert) runs in CI gated on `DATABASE_URL` (TEN-02)
+  4. A `practitioner_subject_assignments` table + RLS policy + a minimal owner-facing assign/unassign UI exist; `assertSubjectAccess` enforces per-assignment access for practitioners while the owner retains tenant-wide access (AUTH-03)
+  5. `audit_log` is immutable via RLS policy shape (INSERT+SELECT policies only — no UPDATE/DELETE path for the app role) and records Better-Auth auth events (sign-in/out, invite redemption, role change) (AUTH-04)
+
+**Plans**: 4 plans in 4 waves
+Plans:
+**Wave 1**
+
+- [ ] 07-01-PLAN.md — Foundation: withTenantDb(ctx) wrapper + TenantCtx in db.server.ts, practitioner_subject_assignments table in schema.ts, RED cross-tenant isolation + pool-leak test [TEN-03, AUTH-03]
+
+**Wave 2** *(blocked on 07-01)*
+
+- [ ] 07-02-PLAN.md — Atomic RLS migration: app_user NOBYPASSRLS role + ENABLE/FORCE + host-portable GUC policies on all 16 PHI tables (audit_log INSERT+SELECT-only, consent_log subject-only); [BLOCKING] Neon-branch rehearsal + rollback verify + live db:migrate; COMPLIANCE-RUNBOOK Phase 7/8 boundary [TEN-02, TEN-03, AUTH-04]
+
+**Wave 3** *(blocked on 07-01/07-02)*
+
+- [ ] 07-03-PLAN.md — Service + call-site retrofit: data/consent/audit wrapped in withTenantDb; 15 loader/action sites pass TenantCtx; review approve-write RLS-governed; admin-path for background/no-subject writes; owner-parity + build gate [TEN-02, TEN-03]
+
+**Wave 4** *(blocked on 07-01/07-02/07-03)*
+
+- [ ] 07-04-PLAN.md — AUTH-03 per-assignment assertSubjectAccess + assignments.server.ts + owner /settings/assignments UI; AUTH-04 Better-Auth sign-in/out/redemption events into the immutable audit_log [AUTH-03, AUTH-04]
+
+### Phase 8: Compliance Envelope & Host Gate (PRE-CLIENT GATE, PART 2)
+
+**Goal**: Before the first external client's identifiable health data enters the system, the compliance envelope is closed with current numbers: a DB-host cost/BAA comparison (Supabase Team+HIPAA vs Neon HIPAA vs AWS RDS vs GCP Cloud SQL vs DO Managed) decides the host — with possible migration per `07-RESEARCH.md` §Decision Area 3 (the Phase 7 GUC-based RLS layer runs unmodified on any host) — plus the Vercel HIPAA add-on + BAA, the LLM-provider (Anthropic) HIPAA-Ready BAA, pgAudit + PHI read-access (SELECT) logging verification, PITR/SSL/network hardening, and a completed `docs/COMPLIANCE-RUNBOOK.md`. The hard release gate for multi-client / HIGHER production — pay for compliance the month a client funds it.
+**Gate / Trigger**: Activated before onboarding the first non-owner client (multi-client production launch); confirm the exact legal trigger with counsel. Plan when the first external client is imminent.
+**Depends on**: Phase 7 (RLS + isolation engineering proven on Neon)
+**Requirements**: COMP-02, COMP-03
+**Success Criteria** (what must be TRUE):
+
+  1. A current-pricing cost/BAA comparison across the DB-host candidates is recorded in `docs/COMPLIANCE-RUNBOOK.md` and the host decision is made; if migrating, data is restored and row-count/enum/FK/index-verified with a rollback path, and the Phase 7 RLS policies + isolation tests pass unmodified on the new host
+  2. The chosen DB host has HIPAA mode/add-on active + a signed BAA with date recorded in the runbook
+  3. Vercel HIPAA add-on (self-serve Pro add-on) active + a signed Vercel BAA recorded
+  4. The LLM provider (Anthropic) has a signed HIPAA-Ready/BAA covering the extraction use case (ZDR + no-training), recorded; external-client PHI extraction unblocked (lifts the Phase 5 D-14 block)
+  5. pgAudit verified on the chosen host: entries record `{user, table, operation, timestamp}` and NOT bind parameters; PHI read-access (SELECT) object-level audit logging enabled on PHI tables; both recorded in the runbook
+  6. PITR/SSL/network restrictions configured per the chosen host's HIPAA requirements; `docs/COMPLIANCE-RUNBOOK.md` complete — the pre-client gate is satisfied
 
 **Plans**: TBD — plan when approaching multi-client launch
 
@@ -295,7 +330,8 @@ Plans:
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
-| 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
+| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 0/TBD | Not started | - |
+| 8. Compliance Envelope & Host Gate *(pre-client gate)* | 0/TBD | Deferred (gate) | - |
 
 ## Backlog
 
