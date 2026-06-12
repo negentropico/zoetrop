@@ -2,7 +2,7 @@
  * tests/lib/data.server.test.ts
  *
  * Unit tests for data.server.ts — verifies the exported function signatures
- * and module-level contracts (Phase 7 retrofit boundary: getDb isolated).
+ * and module-level contracts (Phase 7 Plan 03: withTenantDb retrofit complete).
  *
  * These are static/structural tests that run in Node without a real DB —
  * they assert that all required exports exist and have the right shape.
@@ -11,6 +11,13 @@
  */
 
 import { describe, it, expect } from "vitest";
+import type { TenantCtx } from "../../app/lib/data.server";
+
+const TEST_CTX: TenantCtx = {
+  userId: "user-test",
+  tenantId: "tenant-test",
+  subjectId: "subject-test",
+};
 
 describe("data.server.ts — module contract (DATA-01)", () => {
   it("exports all 9 required read functions", async () => {
@@ -37,16 +44,16 @@ describe("data.server.ts — module contract (DATA-01)", () => {
     await result.catch(() => {});
   });
 
-  it("getMetrics is an async function", async () => {
+  it("getMetrics is an async function (accepts TenantCtx)", async () => {
     const { getMetrics } = await import("../../app/lib/data.server");
-    const result = getMetrics("test-tenant-id", "test-subject-id");
+    const result = getMetrics(TEST_CTX);
     expect(result).toBeInstanceOf(Promise);
     await result.catch(() => {});
   });
 
   it("getMetrics accepts optional category parameter", async () => {
     const { getMetrics } = await import("../../app/lib/data.server");
-    const result = getMetrics("test-tenant-id", "test-subject-id", "vitamins");
+    const result = getMetrics(TEST_CTX, "vitamins");
     expect(result).toBeInstanceOf(Promise);
     await result.catch(() => {});
   });

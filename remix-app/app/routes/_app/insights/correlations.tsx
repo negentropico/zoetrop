@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Route } from "./+types/correlations";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getCorrelations, getSupplements } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
 import { DataTable } from "~/components/ui/DataTable";
@@ -26,12 +27,11 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const tenantId = user.tenantId!;
-  const subjectId = subject.id;
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   const [correlationsRows, supplementsRows] = await Promise.all([
-    getCorrelations(tenantId, subjectId),
-    getSupplements(tenantId, subjectId),
+    getCorrelations(ctx),
+    getSupplements(ctx),
   ]);
 
   // Build supplement id → name map

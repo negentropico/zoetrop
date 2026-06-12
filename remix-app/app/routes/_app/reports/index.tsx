@@ -9,6 +9,7 @@ import { Link } from "react-router";
 import type { Route } from "./+types/index";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
 import { getOwnerSubject, getReports } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
 import { KGradeBadge } from "~/components/ui/KGradeBadge";
@@ -30,7 +31,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
   assertSubjectAccess(user, subject, user.tenantId!);
-  const reportsData = await getReports(user.tenantId!, subject.id);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const reportsData = await getReports(ctx);
   return { reports: reportsData };
 }
 

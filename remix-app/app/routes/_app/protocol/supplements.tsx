@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import type { Route } from "./+types/supplements";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getSupplements } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { SUPPLEMENT_TIERS, type SupplementTier } from "~/types/protocol";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -32,7 +33,8 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const supplements = await getSupplements(user.tenantId!, subject.id);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const supplements = await getSupplements(ctx);
 
   // Group by tier
   const byTier = supplements.reduce((acc, supp) => {

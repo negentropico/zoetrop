@@ -4,7 +4,9 @@
  * Tests checkConsent and insertConsent from lib/consent.server.ts.
  * The DB is mocked via vi.mock so no live Neon connection is required.
  *
- * GREEN since Plan 02.
+ * Updated for Phase 7 Plan 03: checkConsent/insertConsent now accept TenantCtx
+ * and wrap their bodies in withTenantDb(ctx, fn). The mock intercepts withTenantDb
+ * and calls fn(mockTx) synchronously so tests remain unit-level.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -14,7 +16,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // so mockDb references must be created with vi.hoisted() to be available
 // at hoist time (before the import statements in the test file run).
 
-const { mockDb, mockLimit, mockWhere, mockFrom, mockSelect, mockInsertValues, mockInsert } =
+const { mockLimit, mockWhere, mockFrom, mockSelect, mockInsertValues, mockInsert, mockTx } =
   vi.hoisted(() => {
     const mockLimit = vi.fn();
     const mockWhere = vi.fn(() => ({ limit: mockLimit }));
@@ -23,34 +25,43 @@ const { mockDb, mockLimit, mockWhere, mockFrom, mockSelect, mockInsertValues, mo
     const mockInsertValues = vi.fn().mockResolvedValue(undefined);
     const mockInsert = vi.fn(() => ({ values: mockInsertValues }));
 
-    const mockDb = {
+    const mockTx = {
       select: mockSelect,
       insert: mockInsert,
     };
 
     return {
-      mockDb,
       mockLimit,
       mockWhere,
       mockFrom,
       mockSelect,
       mockInsertValues,
       mockInsert,
+      mockTx,
     };
   });
 
 // ── Mock the DB layer ─────────────────────────────────────────────────────
+// withTenantDb is now the entry point; mock it to call fn(mockTx) directly.
 vi.mock("~/lib/db.server", () => ({
-  getDb: () => mockDb,
+  getDb: () => mockTx,
+  withTenantDb: async (_ctx: unknown, fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx),
 }));
 
 // Import after mocks are set up
 import { checkConsent, insertConsent } from "~/lib/consent.server";
+import type { TenantCtx } from "~/lib/db.server";
 
 // ── Tests against assertSubjectAccess (already built in authz.server.ts) ─────
 // These run GREEN immediately.
 
 import { assertSubjectAccess } from "~/lib/authz.server";
+
+const TEST_CTX: TenantCtx = {
+  userId: "user-xyz",
+  tenantId: "tenant-123",
+  subjectId: "subject-123",
+};
 
 describe("LAB-06 consent gate — checkConsent", () => {
   beforeEach(() => {
@@ -66,19 +77,19 @@ describe("LAB-06 consent gate — checkConsent", () => {
 
   it("checkConsent returns false when no consentLog row exists", async () => {
     mockLimit.mockResolvedValue([]); // empty result = no consent
-    const result = await checkConsent("subject-123");
+    const result = await checkConsent({ ...TEST_CTX, subjectId: "subject-123" });
     expect(result).toBe(false);
   });
 
   it("checkConsent returns true when consentLog row exists", async () => {
     mockLimit.mockResolvedValue([{ id: 1 }]); // row exists = has consent
-    const result = await checkConsent("subject-456");
+    const result = await checkConsent({ ...TEST_CTX, subjectId: "subject-456" });
     expect(result).toBe(true);
   });
 
   it("checkConsent passes subjectId to the DB where clause", async () => {
     mockLimit.mockResolvedValue([]);
-    await checkConsent("subject-789");
+    await checkConsent({ ...TEST_CTX, subjectId: "subject-789" });
     // Verify the chain was called
     expect(mockSelect).toHaveBeenCalled();
     expect(mockFrom).toHaveBeenCalled();
@@ -99,7 +110,7 @@ describe("LAB-06 consent gate — insertConsent", () => {
   });
 
   it("insertConsent writes subjectId, userId, and consentVersion", async () => {
-    await insertConsent("subject-abc", "user-xyz", "v1-pilot-self");
+    await insertConsent({ userId: "user-xyz", tenantId: "tenant-123", subjectId: "subject-abc" }, "v1-pilot-self");
     expect(mockInsert).toHaveBeenCalled();
     expect(mockInsertValues).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -112,7 +123,7 @@ describe("LAB-06 consent gate — insertConsent", () => {
 
   it("insertConsent sets consentedAt to current time", async () => {
     const before = new Date();
-    await insertConsent("subject-abc", "user-xyz", "v1-pilot-self");
+    await insertConsent({ userId: "user-xyz", tenantId: "tenant-123", subjectId: "subject-abc" }, "v1-pilot-self");
     const after = new Date();
 
     const callArgs = mockInsertValues.mock.calls[0][0];

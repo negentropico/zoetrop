@@ -8,6 +8,7 @@ import {
   getMilestones,
   getSupplements,
 } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -19,14 +20,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const tenantId = user.tenantId!;
-  const subjectId = subject.id;
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   const [protocolVersionsRows, protocolChangesRows, milestonesRows, supplementsRows] = await Promise.all([
-    getProtocolVersions(tenantId, subjectId),
-    getProtocolChanges(tenantId, subjectId),
-    getMilestones(tenantId, subjectId),
-    getSupplements(tenantId, subjectId),
+    getProtocolVersions(ctx),
+    getProtocolChanges(ctx),
+    getMilestones(ctx),
+    getSupplements(ctx),
   ]);
 
   // Normalize timestamps to ISO strings

@@ -12,6 +12,7 @@ import {
   getSupplements,
   getMetrics,
 } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { dbRowToMetric } from "~/lib/db-mappers.server";
 import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
 import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
@@ -96,8 +97,7 @@ type DerivedVariant = {
 export async function loader({ request }: { request: Request }, now: Date = new Date()) {
   const { user } = await requireUser(request);
   const subject = await getOwnerSubject(user.tenantId!);
-  const tenantId = user.tenantId!;
-  const subjectId = subject.id;
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   const [
     correlationsRows,
@@ -108,12 +108,12 @@ export async function loader({ request }: { request: Request }, now: Date = new 
     metricsRows,
     geneticKnowledge,
   ] = await Promise.all([
-    getCorrelations(tenantId, subjectId),
-    getSupplements(tenantId, subjectId),
-    getSubjectGenotypes(tenantId, subjectId),
-    getCessationLog(tenantId, subjectId),
-    getProtocolVersions(tenantId, subjectId),
-    getMetrics(tenantId, subjectId),
+    getCorrelations(ctx),
+    getSupplements(ctx),
+    getSubjectGenotypes(ctx),
+    getCessationLog(ctx),
+    getProtocolVersions(ctx),
+    getMetrics(ctx),
     getGeneticKnowledgeByGene(),
   ]);
 

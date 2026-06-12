@@ -24,6 +24,7 @@ import { requireUser } from "~/lib/authz.server";
 import { requireRole } from "~/lib/authz.server";
 import { assertSubjectAccess } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
+import type { TenantCtx } from "~/lib/data.server";
 import { checkConsent } from "~/lib/consent.server";
 import { insertAuditLog } from "~/lib/audit.server";
 import { extractionWorker } from "~/lib/ingest/ingest.server";
@@ -66,9 +67,10 @@ export async function action({ request }: Route.ActionArgs) {
   // Resolve subject from tenant
   const subject = await getOwnerSubject(user.tenantId!);
   assertSubjectAccess(user, subject, user.tenantId!);
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   // T-05-CONSENT: Consent gate — BEFORE any PHI write (LAB-06/D-08)
-  const hasConsent = await checkConsent(subject.id);
+  const hasConsent = await checkConsent(ctx);
   if (!hasConsent) {
     return redirect("/ingest/consent?next=/ingest/upload");
   }
