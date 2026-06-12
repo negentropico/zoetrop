@@ -24,7 +24,13 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { useFetcher } from "react-router";
+import { useFetcher, Link } from "react-router";
+import {
+  Check,
+  X,
+  Pencil,
+  ArrowRight,
+} from "lucide-react";
 import type { Route } from "./+types/review";
 import { requireUser, requireRole, assertSubjectAccess } from "~/lib/authz.server";
 import type { AppRole } from "~/lib/authz.server";
@@ -34,10 +40,8 @@ import type { TenantCtx } from "~/lib/db.server";
 import { eq, and, sql } from "drizzle-orm";
 import { labDocuments, labExtractions, metrics, auditLog } from "../../../../db/schema";
 import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
-import { Button } from "~/components/ui/Button";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Input } from "~/components/ui/Input";
+import { StatusBadge } from "~/components/ui/StatusBadge";
 import { PdfPageViewer } from "~/components/ui/PdfPageViewer";
 
 // ── Loader ─────────────────────────────────────────────────────────────────
@@ -295,7 +299,33 @@ async function maybePurgeDocBytes(
   }
 }
 
-// ── Status badge helper ────────────────────────────────────────────────────
+// ── Decision token mapping (BAKED round-4) ──────────────────────────────────
+// review decision → canonical status token:
+//   approved → optimal · edited → borderline · rejected → deficient ·
+//   pending  → neutral (no judgment yet)
+// "edited" is INFERRED: an extraction is approved AND its approvedValue differs
+// from rawValue (the real schema has no separate 'edited' status — there are
+// only pending_review/approved/rejected).
+type Decision = "approved" | "edited" | "rejected" | "pending";
+
+function decisionOf(e: typeof labExtractions.$inferSelect): Decision {
+  if (e.status === "rejected") return "rejected";
+  if (e.status === "approved") {
+    return e.approvedValue != null && e.approvedValue !== e.rawValue
+      ? "edited"
+      : "approved";
+  }
+  return "pending";
+}
+
+const EDGE_COLOR: Record<Decision, string> = {
+  approved: "var(--optimal)",
+  edited: "var(--borderline)",
+  rejected: "var(--deficient)",
+  pending: "var(--n-200)",
+};
+
+// ── Document status banner label ─────────────────────────────────────────────
 
 function StatusBadgeLabel({ status }: { status: string }) {
   const map: Record<string, { label: string; color: string }> = {
@@ -334,36 +364,65 @@ function StatusBadgeLabel({ status }: { status: string }) {
   );
 }
 
-// ── Per-field review row ────────────────────────────────────────────────────
+// ── SSR-safe media query (≤760px Document/Fields tab toggle) ─────────────────
+// CSS owns the ≤1080 stacking (zt-review-grid) and ≤760 stat-strip collapse;
+// only the one-panel-at-a-time tab toggle needs JS. Starts false on server +
+// first client render (no hydration mismatch), then syncs after mount.
 
-function ExtractionRow({
+function useNarrow(maxWidth = 760): boolean {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${maxWidth}px)`);
+    const sync = () => setNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [maxWidth]);
+  return narrow;
+}
+
+// ── Per-field review row (zt-frow idiom) ─────────────────────────────────────
+
+function FieldRow({
   extraction,
   isSelected,
   onSelect,
+  last,
 }: {
   extraction: (typeof labExtractions.$inferSelect);
   isSelected: boolean;
   onSelect: () => void;
+  last: boolean;
 }) {
   const fetcher = useFetcher<typeof action>();
   const [editing, setEditing] = useState(false);
-  const [editedValue, setEditedValue] = useState<string>("");
-  const [editedUnit, setEditedUnit] = useState<string>("");
+  const [draft, setDraft] = useState<string>("");
 
   const isPending = extraction.status === "pending_review";
-  const isApproved = extraction.status === "approved";
   const isRejected = extraction.status === "rejected";
+  const decision = decisionOf(extraction);
 
-  const displayName =
-    extraction.resolvedMetricName ?? extraction.rawAnalyteName;
+  const displayName = extraction.resolvedMetricName ?? extraction.rawAnalyteName;
   const displayValue = extraction.approvedValue ?? extraction.rawValue;
-  const displayUnit = extraction.approvedUnit ?? extraction.resolvedUnit ?? extraction.rawUnit;
+  const displayUnit =
+    extraction.approvedUnit ?? extraction.resolvedUnit ?? extraction.rawUnit;
+  const isEdited = decision === "edited";
 
-  // Detect dedup outcome from the last approve action response
-  const approveResult = fetcher.data && fetcher.data.action === "approve" ? fetcher.data : null;
+  // → catId/metricId mapping line (universal mapping idiom). Unrecognized
+  // analytes have no resolved catId — show the unmapped treatment.
+  const mapping = extraction.resolvedCategory
+    ? `→ ${extraction.resolvedCategory}`
+    : "not tracked · skipped";
+
+  // Confidence readout. GAP: the schema stores confidence as an enum
+  // (high|low), not a numeric float — so the design's "CONF 0.98" becomes
+  // "CONF HIGH" / "CONF LOW · CHECK SOURCE" (mono, borderline when low).
+  const lowConf = extraction.confidence === "low";
+
+  // Dedup note from the last approve response.
+  const approveResult =
+    fetcher.data && fetcher.data.action === "approve" ? fetcher.data : null;
   const wasDeduped = approveResult?.deduped === true;
-
-  // Format collection date for dedup note
   const collectionDateLabel = extraction.collectedAt
     ? new Date(extraction.collectedAt).toLocaleDateString(undefined, {
         year: "numeric",
@@ -372,200 +431,227 @@ function ExtractionRow({
       })
     : null;
 
+  const busy = fetcher.state !== "idle";
+
+  const startEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDraft(String(extraction.rawValue));
+    setEditing(true);
+    onSelect();
+  };
+
   return (
     <div
+      className={"zt-frow" + (isSelected ? " is-selected" : "")}
       onClick={onSelect}
       style={{
-        padding: "14px 16px",
-        borderRadius: "var(--radius-md)",
-        border: `1.5px solid ${isSelected ? "var(--accent)" : "var(--border)"}`,
-        background: isSelected ? "var(--focus-50)" : "var(--surface)",
-        cursor: "pointer",
-        marginBottom: 8,
-        opacity: isRejected ? 0.55 : 1,
+        borderBottom: last ? "none" : "1px solid var(--border)",
+        opacity: isRejected ? 0.6 : 1,
       }}
     >
-      {/* Name + status row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 6,
-        }}
-      >
-        <span style={{ fontWeight: 600, fontSize: "var(--text-sm)" }}>
-          {displayName}
-        </span>
-        <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-          {isApproved
-            ? wasDeduped
-              ? "Approved (linked)"
-              : "Approved"
-            : isRejected
-              ? "Rejected"
-              : extraction.unrecognized
-                ? "Unrecognized"
-                : "Pending"}
-        </span>
-      </div>
+      {/* left edge decision bar */}
+      <span className="zt-frow-edge" style={{ background: EDGE_COLOR[decision] }} />
 
-      {/* Value + unit */}
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "var(--text-md)",
-          fontWeight: 600,
-          color: isRejected ? "var(--text-muted)" : "var(--ink)",
-          marginBottom: isPending ? 12 : 0,
-        }}
-      >
-        {displayValue} {displayUnit}
-        {extraction.confidence === "low" && (
+      {/* name + mapping + confidence */}
+      <div style={{ minWidth: 0, flex: "1 1 auto" }}>
+        <div
+          style={{
+            fontSize: "var(--text-sm)",
+            fontWeight: 500,
+            color: isRejected ? "var(--text-muted)" : "var(--text)",
+            textDecoration: isRejected ? "line-through" : "none",
+          }}
+        >
+          {displayName}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 3,
+            flexWrap: "wrap",
+          }}
+        >
+          <span className="zt-eyebrow" style={{ letterSpacing: "0.06em" }}>
+            {mapping}
+          </span>
           <span
+            className="zt-tnum"
             style={{
-              marginLeft: 8,
-              fontSize: "var(--text-xs)",
-              color: "var(--energy)",
-              fontWeight: 500,
-              fontFamily: "var(--font-text)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-2xs)",
+              color: lowConf ? "var(--borderline)" : "var(--text-faint)",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
             }}
           >
-            low confidence
+            CONF {extraction.confidence}
+            {lowConf ? " · CHECK SOURCE" : ""}
           </span>
+        </div>
+        {/* dedup note */}
+        {wasDeduped && (
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: "var(--text-2xs)",
+              color: "var(--text-faint)",
+              fontStyle: "italic",
+            }}
+          >
+            Already in tracker
+            {collectionDateLabel ? ` for ${collectionDateLabel}` : ""} — not duplicated
+          </div>
         )}
       </div>
 
-      {/* Dedup note: shown when approve returns deduped=true */}
-      {wasDeduped && (
-        <div
-          style={{
-            marginTop: 6,
-            fontSize: "var(--text-xs)",
-            color: "var(--text-muted)",
-            fontStyle: "italic",
-          }}
-        >
-          Already in tracker{collectionDateLabel ? ` for ${collectionDateLabel}` : ""} — not duplicated
-        </div>
-      )}
-
-      {/* Edit form */}
-      {isPending && editing && (
-        <div
-          style={{ display: "flex", gap: 8, marginBottom: 10 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <input
-            type="number"
-            step="any"
-            value={editedValue}
-            onChange={(e) => setEditedValue(e.target.value)}
-            placeholder={String(extraction.rawValue)}
-            style={{
-              flex: 1,
-              padding: "6px 10px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-strong)",
-              background: "var(--surface-2)",
-              color: "var(--ink)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-sm)",
-            }}
-          />
-          <input
-            type="text"
-            value={editedUnit}
-            onChange={(e) => setEditedUnit(e.target.value)}
-            placeholder={displayUnit}
-            style={{
-              width: 80,
-              padding: "6px 10px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-strong)",
-              background: "var(--surface-2)",
-              color: "var(--ink)",
-              fontSize: "var(--text-sm)",
-            }}
-          />
-        </div>
-      )}
-
-      {/* Per-field action buttons — NO bulk-approve control (T-05-BULK / LAB-04) */}
-      {isPending && (
-        <div
-          style={{ display: "flex", gap: 8 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {!editing && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setEditing(true);
-                setEditedValue(String(extraction.rawValue));
-                setEditedUnit(displayUnit);
+      {/* value (or inline edit) */}
+      <div style={{ textAlign: "right", flex: "0 0 auto", minWidth: 84 }}>
+        {editing ? (
+          <span
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <fetcher.Form method="post" style={{ display: "inline-flex", gap: 6 }}>
+              <input type="hidden" name="intent" value="edit-approve" />
+              <input type="hidden" name="extractionId" value={String(extraction.id)} />
+              <input type="hidden" name="editedUnit" value={displayUnit} />
+              <input
+                className="zt-fedit zt-tnum"
+                type="number"
+                step="any"
+                name="editedValue"
+                value={draft}
+                autoFocus
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setEditing(false);
+                }}
+              />
+              <button
+                type="submit"
+                className="zt-fact"
+                title="Save value & approve (edited)"
+                disabled={busy}
+                style={{ ["--fact" as string]: "var(--borderline)", ["--fact-bg" as string]: "var(--borderline-bg)" }}
+              >
+                <Check size={14} strokeWidth={2.2} />
+              </button>
+            </fetcher.Form>
+          </span>
+        ) : (
+          <>
+            <div
+              className="zt-tnum"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                fontSize: "var(--text-sm)",
+                color: isRejected ? "var(--text-faint)" : "var(--ink)",
               }}
             >
-              Edit
-            </Button>
-          )}
+              {displayValue}
+              {isEdited && (
+                <span title={`extracted ${extraction.rawValue}`} style={{ color: "var(--borderline)" }}>
+                  *
+                </span>
+              )}
+            </div>
+            <div
+              style={{
+                fontSize: "var(--text-2xs)",
+                color: "var(--text-faint)",
+                fontFamily: "var(--font-mono)",
+                marginTop: 2,
+              }}
+            >
+              {displayUnit}
+            </div>
+          </>
+        )}
+      </div>
 
-          {editing ? (
-            <>
-              <fetcher.Form method="post" style={{ display: "inline" }}>
-                <input type="hidden" name="intent" value="edit-approve" />
-                <input type="hidden" name="extractionId" value={String(extraction.id)} />
-                <input type="hidden" name="editedValue" value={editedValue} />
-                <input type="hidden" name="editedUnit" value={editedUnit} />
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="primary"
-                  disabled={fetcher.state !== "idle"}
-                  style={{ background: "var(--accent)" }}
-                >
-                  Save & Approve
-                </Button>
-              </fetcher.Form>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setEditing(false)}
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <fetcher.Form method="post" style={{ display: "inline" }}>
-              <input type="hidden" name="intent" value="approve" />
-              <input type="hidden" name="extractionId" value={String(extraction.id)} />
-              <Button
-                type="submit"
-                size="sm"
-                variant="primary"
-                disabled={fetcher.state !== "idle"}
-                style={{ background: "var(--accent)" }}
-              >
-                Approve
-              </Button>
-            </fetcher.Form>
-          )}
+      {/* per-field actions — NO bulk-approve control (T-05-BULK / LAB-04) */}
+      <div
+        style={{ display: "flex", gap: 4, flex: "0 0 auto" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Approve — only actionable while pending; reflects on-state once approved */}
+        {isPending ? (
+          <fetcher.Form method="post">
+            <input type="hidden" name="intent" value="approve" />
+            <input type="hidden" name="extractionId" value={String(extraction.id)} />
+            <button
+              type="submit"
+              className="zt-fact"
+              title="Approve"
+              disabled={busy}
+              style={{ ["--fact" as string]: "var(--optimal)", ["--fact-bg" as string]: "var(--optimal-bg)" }}
+            >
+              <Check size={15} strokeWidth={2.2} />
+            </button>
+          </fetcher.Form>
+        ) : (
+          <span
+            className={"zt-fact" + (decision === "approved" ? " is-on" : "")}
+            title={decision === "approved" ? "Approved" : "Approve"}
+            aria-hidden="true"
+            style={{ ["--fact" as string]: "var(--optimal)", ["--fact-bg" as string]: "var(--optimal-bg)", cursor: "default" }}
+          >
+            <Check size={15} strokeWidth={2.2} />
+          </span>
+        )}
 
-          <fetcher.Form method="post" style={{ display: "inline" }}>
+        {/* Edit — only while pending */}
+        {isPending ? (
+          <button
+            type="button"
+            className={"zt-fact" + (editing ? " is-on" : "")}
+            title="Edit value"
+            disabled={busy}
+            onClick={startEdit}
+            style={{ ["--fact" as string]: "var(--borderline)", ["--fact-bg" as string]: "var(--borderline-bg)" }}
+          >
+            <Pencil size={14} strokeWidth={2} />
+          </button>
+        ) : (
+          <span
+            className={"zt-fact" + (isEdited ? " is-on" : "")}
+            title={isEdited ? "Edited" : "Edit"}
+            aria-hidden="true"
+            style={{ ["--fact" as string]: "var(--borderline)", ["--fact-bg" as string]: "var(--borderline-bg)", cursor: "default" }}
+          >
+            <Pencil size={14} strokeWidth={2} />
+          </span>
+        )}
+
+        {/* Reject — only while pending; reflects on-state once rejected */}
+        {isPending ? (
+          <fetcher.Form method="post">
             <input type="hidden" name="intent" value="reject" />
             <input type="hidden" name="extractionId" value={String(extraction.id)} />
-            <Button
+            <button
               type="submit"
-              size="sm"
-              variant="danger"
-              disabled={fetcher.state !== "idle"}
+              className="zt-fact"
+              title="Reject"
+              disabled={busy}
+              style={{ ["--fact" as string]: "var(--deficient)", ["--fact-bg" as string]: "var(--deficient-bg)" }}
             >
-              Reject
-            </Button>
+              <X size={15} strokeWidth={2.2} />
+            </button>
           </fetcher.Form>
-        </div>
-      )}
+        ) : (
+          <span
+            className={"zt-fact" + (decision === "rejected" ? " is-on" : "")}
+            title={decision === "rejected" ? "Rejected" : "Reject"}
+            aria-hidden="true"
+            style={{ ["--fact" as string]: "var(--deficient)", ["--fact-bg" as string]: "var(--deficient-bg)", cursor: "default" }}
+          >
+            <X size={15} strokeWidth={2.2} />
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -576,6 +662,10 @@ export default function IngestReview({ loaderData }: Route.ComponentProps) {
   const { doc, extractions, docs } = loaderData;
   const pollingFetcher = useFetcher<typeof loader>();
   const [selectedExtractionId, setSelectedExtractionId] = useState<number | null>(null);
+
+  // ≤760px: one panel at a time via the Document/Fields pill toggle.
+  const isNarrow = useNarrow(760);
+  const [tab, setTab] = useState<"fields" | "document">("fields");
 
   // Use polled data if available, fallback to initial loaderData
   const currentDoc = pollingFetcher.data?.doc ?? doc;
@@ -675,12 +765,125 @@ export default function IngestReview({ loaderData }: Route.ComponentProps) {
       ? currentExtractions.find((e) => e.id === selectedExtractionId) ?? currentExtractions[0]
       : currentExtractions[0];
 
+  // Decision counts (the masthead readout + commit gate).
+  const counts = { approved: 0, edited: 0, rejected: 0, pending: 0, total: 0 };
+  for (const e of currentExtractions) {
+    counts[decisionOf(e)]++;
+    counts.total++;
+  }
+  const writable = counts.approved + counts.edited;
+  const allDecided = counts.pending === 0;
+
+  // Masthead right slot — mono decision counts + the commit affordance.
+  // NOTE (real-API gap): there is NO batch commit/finalize action. Each
+  // approve/edit/reject persists immediately and per-field (LAB-05). The
+  // design's "Write N to metrics" button is therefore a completion affordance
+  // that links back to Ingest once every field is decided (gate: pending = 0),
+  // not a deferred write trigger. Approved/edited values are already saved.
+  const progress = (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "var(--gap-lg)",
+        flexWrap: "wrap",
+        justifyContent: "flex-end",
+      }}
+    >
+      <span
+        className="zt-tnum"
+        style={{
+          display: "flex",
+          gap: 12,
+          fontFamily: "var(--font-mono)",
+          fontSize: "var(--text-2xs)",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+        }}
+      >
+        <span style={{ color: "var(--optimal)" }}>✓ {counts.approved}</span>
+        <span style={{ color: "var(--borderline)" }}>~ {counts.edited}</span>
+        <span style={{ color: "var(--deficient)" }}>× {counts.rejected}</span>
+        <span style={{ color: "var(--text-muted)" }}>· {counts.pending} pending</span>
+      </span>
+      {allDecided ? (
+        <Link
+          to="/ingest"
+          className="zt-btn-ink"
+          style={{ textDecoration: "none" }}
+          title={`${writable} field${writable === 1 ? "" : "s"} written to metrics`}
+        >
+          Done — {writable} written
+          <ArrowRight size={15} strokeWidth={2} />
+        </Link>
+      ) : (
+        <button type="button" className="zt-btn-ink" disabled title="Decide every field first">
+          {counts.pending} field{counts.pending === 1 ? "" : "s"} to review
+        </button>
+      )}
+    </div>
+  );
+
+  // Split panels (shared by desktop split + mobile tab toggle).
+  const docPanel = (
+    <Card padding="none" style={{ padding: "var(--gap-card)" }}>
+      <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
+        Source PDF — page {selectedExtraction?.pageNumber ?? 1}
+      </div>
+      <PdfPageViewer
+        pdfUrl={`/ingest/documents/${currentDoc.id}/raw`}
+        pageNumber={selectedExtraction?.pageNumber ?? 1}
+        highlightSnippet={selectedExtraction?.sourceTextSnippet ?? undefined}
+        width={520}
+      />
+    </Card>
+  );
+
+  const drawDateLabel = selectedExtraction?.collectedAt
+    ? new Date(selectedExtraction.collectedAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
+  const fieldsPanel = (
+    <Card padding="none">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "var(--gap-lg)",
+          padding: "var(--gap-row) var(--gap-card)",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <span className="zt-eyebrow">{currentDoc.fileName}</span>
+        <span className="zt-eyebrow zt-tnum">
+          {counts.total} field{counts.total === 1 ? "" : "s"}
+          {drawDateLabel ? ` · ${drawDateLabel}` : ""}
+        </span>
+      </div>
+      {currentExtractions.map((extraction, i) => (
+        <FieldRow
+          key={extraction.id}
+          extraction={extraction}
+          isSelected={extraction.id === selectedExtraction?.id}
+          last={i === currentExtractions.length - 1}
+          onSelect={() => setSelectedExtractionId(extraction.id)}
+        />
+      ))}
+    </Card>
+  );
+
   return (
-    <div>
+    <div data-screen-label="Ingest review">
       <PageHeader
         eyebrow="LAB INGEST"
-        title={`Review: ${currentDoc.fileName}`}
-        sub="Approve, edit, or reject each extracted field. Only approved fields are saved."
+        crumbs={[{ label: "Ingest", to: "/ingest" }, { label: "Review" }]}
+        title="Review extractions"
+        right={currentExtractions.length > 0 ? progress : undefined}
       />
 
       {/* Document status banner */}
@@ -738,72 +941,55 @@ export default function IngestReview({ loaderData }: Route.ComponentProps) {
         </Card>
       )}
 
-      {/* Main review surface — split view */}
+      {/* Main review surface — split view (desktop) / tab toggle (≤760) */}
       {currentExtractions.length > 0 && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "var(--gap-xl)",
-            alignItems: "start",
-          }}
-        >
-          {/* Left: PDF page viewer */}
-          <div>
-            <div
-              className="zt-eyebrow"
-              style={{ marginBottom: 8, fontSize: "var(--text-xs)" }}
-            >
-              Source PDF — page {selectedExtraction?.pageNumber ?? 1}
-            </div>
-            <PdfPageViewer
-              pdfUrl={`/ingest/documents/${currentDoc.id}`}
-              pageNumber={selectedExtraction?.pageNumber ?? 1}
-              highlightSnippet={selectedExtraction?.sourceTextSnippet ?? undefined}
-              width={560}
-            />
-          </div>
-
-          {/* Right: extraction fields list */}
-          <div>
-            <div
-              className="zt-eyebrow"
-              style={{ marginBottom: 8, fontSize: "var(--text-xs)" }}
-            >
-              Extracted fields — {currentExtractions.filter((e) => e.status === "pending_review").length}{" "}
-              pending review
-            </div>
-            <div>
-              {currentExtractions.map((extraction) => (
-                <ExtractionRow
-                  key={extraction.id}
-                  extraction={extraction}
-                  isSelected={extraction.id === selectedExtraction?.id}
-                  onSelect={() => setSelectedExtractionId(extraction.id)}
-                />
+        <>
+          {isNarrow && (
+            <div style={{ display: "flex", gap: 8, marginBottom: "var(--gap-lg)" }}>
+              {(["fields", "document"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={"zt-pill" + (tab === t ? " is-active" : "")}
+                  onClick={() => setTab(t)}
+                >
+                  {t}
+                </button>
               ))}
             </div>
+          )}
+          {isNarrow ? (
+            tab === "document" ? docPanel : fieldsPanel
+          ) : (
+            <div className="zt-review-grid">
+              {docPanel}
+              {fieldsPanel}
+            </div>
+          )}
 
-            {currentExtractions.every((e) => e.status !== "pending_review") && (
-              <div
-                style={{
-                  padding: "14px 16px",
-                  background: "var(--surface-sunken)",
-                  borderRadius: "var(--radius-md)",
-                  fontSize: "var(--text-sm)",
-                  color: "var(--text-muted)",
-                  marginTop: 8,
-                  textAlign: "center",
-                }}
-              >
-                All fields reviewed. Approved metrics have been saved.
-              </div>
-            )}
+          {/* footer note + open-document link */}
+          <div
+            style={{
+              marginTop: "var(--gap-lg)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "var(--gap-lg)",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+              Approved and edited values are written to your metrics as you decide; rejected
+              fields are dropped. Each decision is saved immediately.
+            </span>
+            <Link to={`/ingest/documents/${currentDoc.id}`} className="zt-link">
+              Open document <ArrowRight size={14} strokeWidth={2} />
+            </Link>
           </div>
-        </div>
+        </>
       )}
 
-      {/* Empty state when pending_review but no extractions */}
+      {/* Empty state when pending_review but no extractions (W2-era empty) */}
       {currentDoc.status === "pending_review" && currentExtractions.length === 0 && (
         <Card padding="lg">
           <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", margin: 0 }}>

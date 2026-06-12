@@ -17,7 +17,8 @@
  */
 
 import { useState, useRef } from "react";
-import { redirect } from "react-router";
+import { redirect, Link } from "react-router";
+import { ShieldCheck } from "lucide-react";
 import { waitUntil } from "@vercel/functions";
 import type { Route } from "./+types/upload";
 import { requireUser } from "~/lib/authz.server";
@@ -209,6 +210,16 @@ export default function UploadLabReport() {
         eyebrow="LAB INGEST"
         title="Upload lab report"
         sub="Upload a PDF lab report for AI-assisted extraction and review."
+        right={
+          <Link
+            to="/ingest/consent?next=/ingest/upload"
+            className="zt-pill"
+            style={{ textDecoration: "none" }}
+          >
+            <ShieldCheck size={13} strokeWidth={2} />
+            Consent
+          </Link>
+        }
       />
 
       <div className="zt-grid-split">

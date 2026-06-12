@@ -39,6 +39,10 @@ export default [
     route("ingest/review", "routes/_app/ingest/review.tsx"),
     route("ingest/consent", "routes/_app/ingest/consent.tsx"),
     route("ingest/documents/:id", "routes/_app/ingest/document.tsx"),
+    // Raw PDF byte stream consumed by PdfPageViewer/react-pdf. Kept SEPARATE
+    // from the viewer page so the page can render UI while react-pdf fetches
+    // application/pdf bytes from this resource route (T-05-DOC auth preserved).
+    route("ingest/documents/:id/raw", "routes/_app/ingest/document-raw.tsx"),
     // Reports (Plan 06-05: flat under _app/layout.tsx, no sub-layout)
     route("reports", "routes/_app/reports/index.tsx"),
     route("reports/generate", "routes/_app/reports/generate.tsx"),

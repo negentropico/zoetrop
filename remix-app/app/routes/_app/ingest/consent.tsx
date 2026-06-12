@@ -12,7 +12,9 @@
  * LAB-06: consentVersion 'v1-pilot-self' for the pilot self-consent flow.
  */
 
-import { redirect } from "react-router";
+import { useState } from "react";
+import { redirect, Form, Link } from "react-router";
+import { FileSearch, ClipboardCheck, Archive, Check } from "lucide-react";
 import type { Route } from "./+types/consent";
 import { requireUser } from "~/lib/authz.server";
 import { assertSubjectAccess } from "~/lib/authz.server";
@@ -22,9 +24,8 @@ import type { TenantCtx } from "~/lib/data.server";
 import { checkConsent, insertConsent } from "~/lib/consent.server";
 import { insertAuditLog } from "~/lib/audit.server";
 import { Card } from "~/components/ui/Card";
-import { Button } from "~/components/ui/Button";
+import { CatChip } from "~/components/ui/CatChip";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Form } from "react-router";
 
 // ── Loader ─────────────────────────────────────────────────────────────────
 
@@ -78,93 +79,115 @@ export async function action({ request }: Route.ActionArgs) {
 
 // ── Component ──────────────────────────────────────────────────────────────
 
+// Three plain statements — D-09: generic enough for future client intake.
+const TERMS = [
+  {
+    icon: FileSearch,
+    text: "The document is read by an AI extraction model to lift test names, values and units.",
+  },
+  {
+    icon: ClipboardCheck,
+    text: "Nothing is written to your metrics until you approve each field in review.",
+  },
+  {
+    icon: Archive,
+    text: "The original PDF is stored unmodified, tenant-scoped and audit-logged; consent is per-subject and recorded once.",
+  },
+];
+
 export default function IngestConsent({ loaderData }: Route.ComponentProps) {
   const { next } = loaderData;
+  const [agree, setAgree] = useState(false);
 
   return (
-    <div>
+    <div data-screen-label="Ingest consent">
       <PageHeader
         eyebrow="LAB INGEST"
-        title="Data processing consent"
-        sub="Please review and consent to the processing of your lab data before uploading."
+        crumbs={[{ label: "Ingest", to: "/ingest" }, { label: "Consent" }]}
+        title="Before this document is read"
+        sub="One quiet decision, recorded per subject"
       />
 
-      <div style={{ maxWidth: 640 }}>
-        <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
-          {/* Consent text — D-09: generic for future client intake */}
-          <div
-            className="zt-eyebrow"
-            style={{ marginBottom: 16, color: "var(--text-muted)" }}
-          >
-            What you are consenting to
-          </div>
+      <div style={{ maxWidth: 620 }}>
+        <Card>
+          {TERMS.map((t, i) => (
+            <div
+              key={t.text}
+              style={{
+                display: "flex",
+                gap: "var(--gap-lg)",
+                alignItems: "flex-start",
+                padding: "var(--gap-md) 0",
+                borderBottom: i < TERMS.length - 1 ? "1px solid var(--border)" : "none",
+              }}
+            >
+              <CatChip icon={t.icon} size={34} />
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-secondary)",
+                  textWrap: "pretty",
+                  paddingTop: 6,
+                }}
+              >
+                {t.text}
+              </p>
+            </div>
+          ))}
 
-          <ul
-            style={{
-              margin: "0 0 20px 0",
-              paddingLeft: 20,
-              color: "var(--text-secondary)",
-              fontSize: "var(--text-sm)",
-              lineHeight: "var(--leading-relaxed)",
-            }}
+          {/* Single consent checkbox row — accent when on */}
+          <button
+            type="button"
+            className={"zt-consent-row" + (agree ? " is-on" : "")}
+            aria-pressed={agree}
+            onClick={() => setAgree((a) => !a)}
           >
-            <li>
-              Your lab report PDF will be processed by an AI system to extract
-              numerical analyte values.
-            </li>
-            <li>
-              Extracted values are held for your review and are not saved to
-              your tracker until you individually approve each field.
-            </li>
-            <li>
-              Your data is processed under the same security controls as all
-              other data in this application — tenant-scoped, role-gated, and
-              audit-logged.
-            </li>
-            <li>
-              You may reject any extracted value and it will not be saved.
-            </li>
-          </ul>
+            <span className="zt-consent-box">
+              {agree && <Check size={13} strokeWidth={2.6} />}
+            </span>
+            <span style={{ fontSize: "var(--text-sm)", fontWeight: 500 }}>
+              I consent to AI-assisted extraction of this document
+            </span>
+          </button>
 
-          <div
-            style={{
-              padding: "12px 16px",
-              background: "var(--surface-sunken)",
-              borderRadius: "var(--radius-md)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              marginBottom: 24,
-            }}
-          >
-            Consent version: v1-pilot-self. This consent applies to your own
-            lab data processed through the pilot intake flow. Consent is
-            recorded per-subject and is not required again for subsequent
-            uploads.
-          </div>
-
+          {/* Continue → upload (action persists consent then redirects to next) */}
           <Form method="post">
             <input type="hidden" name="next" value={next} />
-            <Button type="submit" variant="primary" fullWidth>
-              I consent — continue to upload
-            </Button>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "var(--gap-md)",
+                marginTop: "var(--gap-lg)",
+              }}
+            >
+              <Link
+                to="/ingest"
+                className="zt-pill"
+                style={{ color: "var(--text-secondary)", textDecoration: "none" }}
+              >
+                Cancel
+              </Link>
+              <button type="submit" className="zt-btn-ink" disabled={!agree}>
+                Continue to upload
+              </button>
+            </div>
           </Form>
-        </Card>
 
-        {/* Back link */}
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "var(--text-sm)",
-            color: "var(--text-muted)",
-          }}
-        >
-          <a
-            href="/ingest/upload"
-            style={{ color: "var(--text-muted)", textDecoration: "underline" }}
+          <p
+            style={{
+              margin: "var(--gap-lg) 0 0",
+              fontSize: "var(--text-2xs)",
+              color: "var(--text-faint)",
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.04em",
+            }}
           >
-            Cancel
-          </a>
-        </div>
+            Consent version v1-pilot-self · recorded per subject · not required again for
+            subsequent uploads.
+          </p>
+        </Card>
       </div>
     </div>
   );
