@@ -64,6 +64,13 @@
       "when": 1781143731363,
       "tag": "0008_reflective_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781227895681,
+      "tag": "0009_natural_night_thrasher",
+      "breakpoints": true
     }
   ]
 }
