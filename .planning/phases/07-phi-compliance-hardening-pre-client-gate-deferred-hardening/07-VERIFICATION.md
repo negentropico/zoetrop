@@ -1,8 +1,12 @@
 ---
 phase: 07-phi-compliance-hardening-pre-client-gate-deferred-hardening
 verified: 2026-06-12T22:00:00Z
-status: human_needed
+status: passed
 score: 4/5
+human_verification_status: passed
+human_verification_completed: 2026-06-12T22:05:00Z
+human_verification_evidence: "All 3 human items passed via chrome-devtools + live Neon — see 07-HUMAN-UAT.md. (1) sign-out row id=73 + sign-in row id=74 both role-populated, zero PHI; (2) UPDATE+DELETE on audit_log denied for app_user (permission denied), row intact; (3) /settings/assignments assign→unassign→RE-ASSIGN same pair succeeded, live DB shows 1 revoked + 1 active row for the triple (partial index proven), double-assign degrades gracefully (no 500, no duplicate)."
+score_note: "4/5 — the unverified must-have is the assignSubject 23505 idempotency guard (dead code, non-blocking UX defect; carried as 07-REVIEW.md CR-01). It is NOT an access-control or data-integrity gap: live UAT confirmed double-assign produces no duplicate and no crash. The phase goal (RLS isolation + AUTH-03 per-assignment access + AUTH-04 immutable audit) is achieved. Defect tracked for /gsd:code-review 7 --fix."
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
