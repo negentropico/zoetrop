@@ -166,6 +166,7 @@ npx react-router build     # Production build
 
 - **Codename**: `Zoetrop` (internal — matches `zoetrop.vercel.app`). Formalized 2026-05-20, replacing the old "Tracker"/"Wellness Tracker" name. The public brand is **deferred**; the venture-naming hunt is paused with clean survivors recorded in `docs/NAMING.md` (do not relitigate — Sanskrit/Eastern lean, MAGA-adjacency killed, any "Zoe-" name dead).
 - **Direction doc**: `docs/PLATFORM.md` — the product brief. Today = n=1 personal instrument (**M0, done**); the arc is M1 (single practitioner, multi-client + identity/tenancy + lab ingest + report gen) → M2 (client app) → M3 (multi-coach + productize). Engine-first inversion: the confidence-graded protocol-decision engine is the moat; coaching-ops is layered on top.
+- **History doc**: `docs/HISTORY.md` — canonical record of the platform's full evolution (Bwell vault → Tracker → Zoetrop)
 - **Flagship**: commercialized via HIGHER (Tara Garrison) as the M1 proving tenant — see `ngtops/clients/higher/PLATFORM-FOR-HIGHER.md` (outside this repo).
 
 ## Planning Workflow (GSD / superpowers)
