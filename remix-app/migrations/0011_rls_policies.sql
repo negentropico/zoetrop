@@ -16,27 +16,53 @@
 --   tenants
 --
 -- =============================================================================
--- ROLLBACK PROCEDURE
+-- ROLLBACK PROCEDURE (VERIFIED on Neon branch rehearsal, 2026-06-12)
 -- =============================================================================
 -- If this migration needs to be reversed, run the following SQL (on the target
--- Neon project or branch) after connecting as neondb_owner:
+-- Neon project or branch) after connecting as neondb_owner — IN THIS ORDER.
+--
+-- IMPORTANT (rehearsal findings):
+--   * `DROP ROLE app_user` FAILS with "role cannot be dropped because some
+--     objects depend on it" unless ALL grants are revoked first (steps 3-6).
+--   * Do NOT use `DROP OWNED BY app_user` — it is permission-denied on Neon
+--     when connected as neondb_owner.
+--
+-- Step 1: Disable RLS (DISABLE + NO FORCE) on all 16 tables:
 --
 --   ALTER TABLE metrics DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE metrics NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE protocol_versions DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE protocol_versions NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE protocol_changes DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE protocol_changes NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE milestones DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE milestones NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE supplements DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE supplements NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE supplement_log DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE supplement_log NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE correlations DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE correlations NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE cessation_log DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE cessation_log NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE subject_genotypes DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE subject_genotypes NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE lab_documents DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE lab_documents NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE lab_extractions DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE lab_extractions NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE reports DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE reports NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE subjects DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE subjects NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE practitioner_subject_assignments DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE practitioner_subject_assignments NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE consent_log DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE consent_log NO FORCE ROW LEVEL SECURITY;
 --   ALTER TABLE audit_log DISABLE ROW LEVEL SECURITY;
+--   ALTER TABLE audit_log NO FORCE ROW LEVEL SECURITY;
+--
+-- Step 2: Drop every policy in schema public:
 --
 --   DROP POLICY IF EXISTS "tenant_subject_isolation" ON metrics;
 --   DROP POLICY IF EXISTS "tenant_subject_isolation" ON protocol_versions;
@@ -56,9 +82,13 @@
 --   DROP POLICY IF EXISTS "audit_immutable_select" ON audit_log;
 --   DROP POLICY IF EXISTS "audit_insert_only" ON audit_log;
 --
---   REVOKE SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public FROM app_user;
---   REVOKE USAGE ON ALL SEQUENCES IN SCHEMA public FROM app_user;
+-- Steps 3-7: Revoke ALL grants (table, sequence, schema, database) BEFORE
+-- dropping the role — DROP ROLE fails if any grant remains:
+--
+--   REVOKE ALL ON ALL TABLES IN SCHEMA public FROM app_user;
+--   REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM app_user;
 --   REVOKE USAGE ON SCHEMA public FROM app_user;
+--   REVOKE ALL ON DATABASE neondb FROM app_user;
 --   DROP ROLE IF EXISTS app_user;
 --
 -- =============================================================================
