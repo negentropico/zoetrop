@@ -8,6 +8,14 @@ full-page captures, light AND dark themes (via `zt-theme` localStorage +
 **Tooling:** Playwright (locally cached) driving headless Chromium. 50/50
 captures succeeded.
 
+> **This directory is the TRIMMED essential set (10 frames)** curated for the
+> design-session upload: chart-language ground truth (metric-detail + tooltip,
+> correlations + row-hover, cessation timeline, compare), status-color density
+> (dashboard), light-theme parity (dashboard/metric-detail light), and one
+> frame showing the live Reports nav group (settings-dark). The **full 50-frame
+> archive** lives one level up at [`../../screenshots/`](../../screenshots/)
+> with this same capture log. The coverage table below describes the full set.
+
 ## Coverage
 
 Every Part A route from BRIEF.md was visited in both themes:
