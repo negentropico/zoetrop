@@ -71,6 +71,27 @@
       "when": 1781227895681,
       "tag": "0009_natural_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781288075795,
+      "tag": "0010_practitioner_assignments",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1781288200000,
+      "tag": "0011_rls_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781288900000,
+      "tag": "0012_app_user_set_grant",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,22 @@
+-- 0012_app_user_set_grant.sql
+-- Phase 7 fix: allow the migration/owner role to SET ROLE app_user.
+--
+-- ROOT CAUSE (found by rls-isolation.test.ts after the 0011 live apply):
+-- On PostgreSQL 16+, CREATE ROLE grants the creator implicit membership in the
+-- new role WITH ADMIN OPTION but with SET FALSE and INHERIT FALSE (the
+-- `createrole_self_grant` default). `SET LOCAL ROLE app_user` therefore failed
+-- with `permission denied to set role "app_user"` (SQLSTATE 42501) because
+-- neondb_owner's membership lacked the SET option.
+--
+-- FIX: re-grant membership WITH SET TRUE so withTenantDb's
+-- `SET LOCAL ROLE app_user` works. INHERIT FALSE keeps the owner role from
+-- implicitly inheriting app_user's (RLS-restricted) privilege set.
+--
+-- HOST-PORTABLE: `CURRENT_USER` resolves to whatever owner role runs the
+-- migration (neondb_owner on Neon; the equivalent owner role on any other host).
+--
+-- ROLLBACK: membership grants in app_user are removed automatically by
+-- `DROP ROLE app_user` (see the verified rollback procedure in the
+-- 0011_rls_policies.sql header). To reverse only this migration:
+--   REVOKE app_user FROM neondb_owner;
+GRANT app_user TO CURRENT_USER WITH SET TRUE, INHERIT FALSE;
