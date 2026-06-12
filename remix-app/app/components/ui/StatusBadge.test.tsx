@@ -32,25 +32,27 @@ describe("StatusBadge", () => {
     });
   });
 
-  it("renders optimal badge with --success color and --vital-50 background", () => {
+  // Canonical status tokens (round 3, W0): atoms read --optimal/--borderline/
+  // --deficient/--excess (+ -bg), which alias the old success/warning/danger values.
+  it("renders optimal badge with --optimal color and --optimal-bg background", () => {
     const { container } = render(<StatusBadge status="optimal" />);
     const span = container.querySelector("span");
-    expect(span?.style.color).toBe("var(--success)");
-    expect(span?.style.background).toBe("var(--vital-50)");
+    expect(span?.style.color).toBe("var(--optimal)");
+    expect(span?.style.background).toBe("var(--optimal-bg)");
   });
 
-  it("renders borderline badge with --warning color and --energy-50 background", () => {
+  it("renders borderline badge with --borderline color and --borderline-bg background", () => {
     const { container } = render(<StatusBadge status="borderline" />);
     const span = container.querySelector("span");
-    expect(span?.style.color).toBe("var(--warning)");
-    expect(span?.style.background).toBe("var(--energy-50)");
+    expect(span?.style.color).toBe("var(--borderline)");
+    expect(span?.style.background).toBe("var(--borderline-bg)");
   });
 
-  it("renders deficient badge with --danger color and --danger-bg background", () => {
+  it("renders deficient badge with --deficient color and --deficient-bg background", () => {
     const { container } = render(<StatusBadge status="deficient" />);
     const span = container.querySelector("span");
-    expect(span?.style.color).toBe("var(--danger)");
-    expect(span?.style.background).toBe("var(--danger-bg)");
+    expect(span?.style.color).toBe("var(--deficient)");
+    expect(span?.style.background).toBe("var(--deficient-bg)");
   });
 
   it("renders excess badge with --excess color and --excess-bg background", () => {
