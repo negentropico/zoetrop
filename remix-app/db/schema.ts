@@ -368,7 +368,9 @@ export const auditLog = pgTable('audit_log', {
   tableName: varchar('table_name', { length: 100 }),     // 'metrics' | 'lab_documents' | etc.
   operation: varchar('operation', { length: 20 }),       // 'insert' | 'update'
   tenantId: text('tenant_id').notNull().references(() => tenants.id),
-  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  // Nullable (migration 0013): auth events (sign-in/out/sign-up) have NO clinical
+  // subject at write time — NULL is semantically honest. FK validates when non-NULL.
+  subjectId: text('subject_id').references(() => subjects.id),
   // NO PHI columns — only the entity ID (not its value), D-13
   entityId: text('entity_id'),                           // ID of the affected row (not its value or name)
   timestamp: timestamp('timestamp').notNull().defaultNow(),

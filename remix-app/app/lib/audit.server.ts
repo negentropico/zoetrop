@@ -111,8 +111,16 @@ export async function insertAuditLogAdmin(entry: AuditLogEntry): Promise<void> {
 //
 // PHI-free (D-13): only userId / action / tenantId / entityId. No clinical
 // value, analyte name, or subject data ever appears in these rows.
-// The subjectId column is required by the schema; for auth events we use
-// tenantId as the stub value (per 07-PATTERNS.md §insertAuthAuditLog).
+//
+// subjectId is NULL for auth events (migration 0013 made the column nullable):
+// no clinical subject exists at auth time, and NULL is semantically honest.
+// The original 07-PATTERNS.md "tenantId as subjectId stub" was IMPOSSIBLE —
+// audit_log.subject_id has an FK to subjects(id) and no subjects row carries a
+// tenant id (the INSERT violated audit_log_subject_id_subjects_id_fk; found at
+// the Plan 04 checkpoint). RLS note: the audit_log SELECT/INSERT policies are
+// keyed on app.tenant_id ONLY (no subject_id predicate), so NULL-subject rows
+// remain visible to app_user tenant reads; compliance reads use the admin path
+// regardless.
 //
 // Best-effort contract: each call site MUST be wrapped in try/catch so a
 // logging failure never propagates into the auth flow (T-07-17).
@@ -134,7 +142,7 @@ export async function insertAuthAuditLog(entry: AuthAuditEntry): Promise<void> {
     role: 'owner' as AppRole,  // auth events are user-initiated; role resolved post-auth
     action: entry.action,
     tenantId: entry.tenantId,
-    subjectId: entry.tenantId, // stub: no clinical subject at auth time (07-PATTERNS.md)
+    subjectId: null, // auth events have no clinical subject (nullable since migration 0013)
     entityId: entry.entityId,
     timestamp: new Date(),
     // tableName / operation intentionally omitted — not applicable for auth events

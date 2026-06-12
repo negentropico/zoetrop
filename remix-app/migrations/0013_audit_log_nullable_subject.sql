@@ -1,0 +1,18 @@
+-- 0013_audit_log_nullable_subject.sql
+-- Phase 7 Plan 04 (AUTH-04 checkpoint fix): audit_log.subject_id DROP NOT NULL.
+--
+-- WHY: Auth events (sign-in / sign-out / sign-up / invite-redeemed) have NO clinical
+-- subject at write time. The original "tenantId as subjectId stub" pattern
+-- (07-PATTERNS.md) is impossible against the live schema: audit_log.subject_id has an
+-- FK to subjects(id), and no subjects row carries the tenant's id — the INSERT fails
+-- with audit_log_subject_id_subjects_id_fk. NULL is semantically honest: these rows
+-- have no subject. The FK still validates whenever subject_id is non-NULL (PHI
+-- lifecycle events keep their real subject ids).
+--
+-- RLS NOTE: the audit_log SELECT policy predicate is keyed on app.tenant_id only
+-- (audit_immutable_select), so NULL-subject rows remain visible to tenant reads.
+-- Compliance reads use the admin path regardless.
+--
+-- Reversible: ALTER TABLE audit_log ALTER COLUMN subject_id SET NOT NULL;
+-- (requires all NULL rows deleted or backfilled first).
+ALTER TABLE "audit_log" ALTER COLUMN "subject_id" DROP NOT NULL;
