@@ -83,3 +83,45 @@ rather than fabricated — each is a candidate for a future ingest/sync feature:
   rendered as honest, non-functional (no sync/disconnect backend exists). Future:
   wire WHOOP re-import to a real idempotent (date-keyed) write and add a vault
   connector before these become active controls.
+
+## W4c (2026-06-12) — Settings invites flow, data-honesty gaps
+
+The invites flow was built onto the EXISTING real backend with no schema or auth
+changes. A real invite-CREATE action already existed (`generate-invite` intent in
+the settings action → `generateInvite()` in `invites.server.ts`) and a real
+revoke route already existed (`/settings/invites/:inviteId/revoke`). Both were
+reused as-is; no new endpoint was built. Gaps logged:
+
+- **No `email` column on the `invites` table (the central design↔schema gap).**
+  The design's invite rows lead with a mono email + "status · sent" sub-line and
+  the create row has an email field + an "ink Send" button (implying send-to-email).
+  The REAL model (`db/schema.ts` invites, `invites.server.ts`) is a single-use,
+  role-scoped **token delivered by copy-link** — there is no email column and no
+  email-send path (D-09 explicitly defers email send). Decision (no migration,
+  per the W4c brief and the INTEGRATION-PLAN role-name note's "UI labels only, no
+  enum migration" precedent):
+    - **List rows** lead with the only stable per-invite identifier the real
+      model has — a short invite id (`invite · {first 8 chars}`) — with the
+      `status · sent {createdAt}` sub-line, the role chip, and revoke. They do NOT
+      fabricate an email the DB never stored.
+    - **The create-row email field is advisory recipient context** (the design
+      idiom). It gates the Send button (parseable email) per the design contract
+      but is **not persisted** — the action ignores it (no column) and mints a
+      real role-scoped token. The minted **copy-link is surfaced inline** so the
+      owner copies it and sends it to that recipient manually (the real delivery
+      mechanism). The button is therefore NOT a dead client-only form — it posts
+      to the real `generate-invite` action and produces a real, usable artifact.
+  Future: an `invites.email` column + an email-send pipeline (D-09 follow-up)
+  would let the rows show the real recipient and turn "Send invite" into an
+  actual send; the email field is already wired to carry it (named `email` in the
+  form) so the action only needs to start persisting + sending it.
+
+- **No "sent" timestamp distinct from createdAt.** The design's "sent {date}"
+  maps to `invites.createdAt` (invite creation = the only "sent" event in the
+  copy-link model). Honest 1:1; documented so a future email-send adds a real
+  `sentAt`.
+
+- **Status vocabulary mapped, not invented.** The design's free-text status
+  ("accepted" / "pending") maps through the real `deriveInviteStatus` lifecycle
+  (active / consumed / expired / revoked): consumed → "accepted", active →
+  "active", plus expired/revoked. No fabricated states.
