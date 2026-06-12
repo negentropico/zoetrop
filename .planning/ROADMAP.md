@@ -287,7 +287,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 07-01-PLAN.md — Foundation: withTenantDb(ctx) wrapper + TenantCtx in db.server.ts, practitioner_subject_assignments table in schema.ts, RED cross-tenant isolation + pool-leak test [TEN-03, AUTH-03]
+- [x] 07-01-PLAN.md — Foundation: withTenantDb(ctx) wrapper + TenantCtx in db.server.ts, practitioner_subject_assignments table in schema.ts, RED cross-tenant isolation + pool-leak test [TEN-03, AUTH-03]
 
 **Wave 2** *(blocked on 07-01)*
 
@@ -330,7 +330,7 @@ Plans:
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
-| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 0/TBD | Not started | - |
+| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 1/4 | In Progress|  |
 | 8. Compliance Envelope & Host Gate *(pre-client gate)* | 0/TBD | Deferred (gate) | - |
 
 ## Backlog
