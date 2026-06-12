@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router";
 import type { Route } from "./+types/genetics";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getSubjectGenotypes } from "~/lib/data.server";
-import { GENETIC_KNOWLEDGE } from "~/lib/genetics-knowledge.server";
+import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
 import {
   CONFIDENCE_LEVELS,
   VARIANT_CATEGORIES,
@@ -51,18 +51,21 @@ export async function loader({ request }: Route.LoaderArgs) {
   const tenantId = user.tenantId!;
   const subjectId = subject.id;
 
-  const genotypeRows = await getSubjectGenotypes(tenantId, subjectId);
+  const [genotypeRows, geneticKnowledge] = await Promise.all([
+    getSubjectGenotypes(tenantId, subjectId),
+    getGeneticKnowledgeByGene(),
+  ]);
 
-  // Shape C join: DB rows + GENETIC_KNOWLEDGE by gene
+  // Shape C join: DB rows + corpus genetic knowledge by gene
   const variants: DerivedVariant[] = genotypeRows.flatMap((row) => {
-    const knowledge = GENETIC_KNOWLEDGE[row.gene];
+    const knowledge = geneticKnowledge[row.gene];
     if (!knowledge) return [];
     const variant: DerivedVariant = {
       id: row.id,
       gene: row.gene,
       rsid: row.rsid ?? null,
       genotype: row.genotype,
-      confidence: knowledge.confidence,
+      confidence: knowledge.confidence as ConfidenceLevel,
       category: knowledge.category as VariantCategory,
       impact: knowledge.impact,
       clinicalImplication: knowledge.clinicalImplication,

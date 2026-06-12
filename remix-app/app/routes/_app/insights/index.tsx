@@ -7,8 +7,8 @@ import {
   getSubjectGenotypes,
   getSupplements,
 } from "~/lib/data.server";
-import { GENETIC_KNOWLEDGE } from "~/lib/genetics-knowledge.server";
-import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES } from "~/types/genetics";
+import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
+import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES, type ConfidenceLevel } from "~/types/genetics";
 import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
@@ -36,10 +36,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   const tenantId = user.tenantId!;
   const subjectId = subject.id;
 
-  const [correlationsRows, supplementsRows, genotypeRows] = await Promise.all([
+  const [correlationsRows, supplementsRows, genotypeRows, geneticKnowledge] = await Promise.all([
     getCorrelations(tenantId, subjectId),
     getSupplements(tenantId, subjectId),
     getSubjectGenotypes(tenantId, subjectId),
+    getGeneticKnowledgeByGene(),
   ]);
 
   // Build supplement id → name map
@@ -64,16 +65,16 @@ export async function loader({ request }: Route.LoaderArgs) {
     .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation))
     .slice(0, 5);
 
-  // Join genotypes with GENETIC_KNOWLEDGE
+  // Join genotypes with corpus genetic knowledge
   const allVariants = genotypeRows.flatMap((row) => {
-    const knowledge = GENETIC_KNOWLEDGE[row.gene];
+    const knowledge = geneticKnowledge[row.gene];
     if (!knowledge) return [];
     return [{
       id: row.id,
       gene: row.gene,
       rsid: row.rsid ?? null,
       genotype: row.genotype,
-      confidence: knowledge.confidence,
+      confidence: knowledge.confidence as ConfidenceLevel,
       category: knowledge.category,
       impact: knowledge.impact,
       clinicalImplication: knowledge.clinicalImplication,

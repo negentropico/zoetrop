@@ -55,3 +55,72 @@ export async function getMetricRules() {
   const db = getDb();
   return db.select().from(metricProtocolMap);
 }
+
+// ── Genetics knowledge by gene ────────────────────────────────────────────────
+
+/**
+ * GeneticKnowledgeEntry — shape returned by getGeneticKnowledgeByGene.
+ * Mirrors the legacy GENETIC_KNOWLEDGE record shape so loaders require
+ * minimal changes.
+ *
+ *   confidence  — evidence tier, uppercase ("K1"–"K4"), mapped from corpus k1–k4
+ *   protocolAction — actionDetail if present, else first sentence of
+ *                    recommendationText (≤ 140 chars), for compact UI display
+ *   notes       — knowledgeSource field (provenance / assay notes)
+ */
+export interface CorpusGeneticKnowledgeEntry {
+  confidence: string;          // "K1" | "K2" | "K3" | "K4"
+  category: string;
+  impact: string;
+  clinicalImplication: string;
+  protocolAction: string;
+  notes?: string;
+}
+
+/**
+ * Returns corpus genetic knowledge keyed by gene name, suitable as a
+ * drop-in replacement for the legacy GENETIC_KNOWLEDGE static record.
+ *
+ * Join: geneticVariants.gene → variantProtocolMap (1:1 per corpus design).
+ * When a gene has multiple corpus rows (multiple genotype patterns), the
+ * first row encountered is used; the full corpus read is available via
+ * getVariantMaps() for the engine.
+ *
+ * Used by loaders in insights/genetics.tsx, insights/index.tsx, dashboard.tsx.
+ */
+export async function getGeneticKnowledgeByGene(): Promise<Record<string, CorpusGeneticKnowledgeEntry>> {
+  const rows = await getVariantMaps();
+
+  const map: Record<string, CorpusGeneticKnowledgeEntry> = {};
+  for (const row of rows) {
+    const gene = row.genetic_variants.gene;
+    // First row wins (handles multi-pattern genes; engine uses all rows via getVariantMaps)
+    if (map[gene]) continue;
+
+    // Map evidence tier k1→K1, k2→K2, etc.
+    const confidence = row.variant_protocol_map.evidenceTier.toUpperCase();
+
+    // Derive a compact protocolAction for UI display
+    const actionDetail = row.variant_protocol_map.actionDetail;
+    let protocolAction: string;
+    if (actionDetail) {
+      protocolAction = actionDetail;
+    } else {
+      // First sentence of recommendationText, capped at 140 chars
+      const full = row.variant_protocol_map.recommendationText;
+      const firstPeriod = full.indexOf(". ");
+      const sentence = firstPeriod !== -1 ? full.slice(0, firstPeriod + 1) : full;
+      protocolAction = sentence.length <= 140 ? sentence : sentence.slice(0, 137) + "…";
+    }
+
+    map[gene] = {
+      confidence,
+      category: row.genetic_variants.category,
+      impact: row.genetic_variants.impact,
+      clinicalImplication: row.genetic_variants.clinicalImplication,
+      protocolAction,
+      notes: row.genetic_variants.knowledgeSource ?? undefined,
+    };
+  }
+  return map;
+}

@@ -13,7 +13,7 @@ import {
   getMetrics,
 } from "~/lib/data.server";
 import { dbRowToMetric } from "~/lib/db-mappers.server";
-import { GENETIC_KNOWLEDGE } from "~/lib/genetics-knowledge.server";
+import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
 import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { getMetricStatus } from "~/lib/metrics";
 import {
@@ -106,6 +106,7 @@ export async function loader({ request }: { request: Request }, now: Date = new 
     cessationRows,
     protocolVersionsRows,
     metricsRows,
+    geneticKnowledge,
   ] = await Promise.all([
     getCorrelations(tenantId, subjectId),
     getSupplements(tenantId, subjectId),
@@ -113,6 +114,7 @@ export async function loader({ request }: { request: Request }, now: Date = new 
     getCessationLog(tenantId, subjectId),
     getProtocolVersions(tenantId, subjectId),
     getMetrics(tenantId, subjectId),
+    getGeneticKnowledgeByGene(),
   ]);
 
   // Build supplement id → name map
@@ -137,10 +139,10 @@ export async function loader({ request }: { request: Request }, now: Date = new 
     .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation))
     .slice(0, 3);
 
-  // Join genotypes with GENETIC_KNOWLEDGE
+  // Join genotypes with corpus genetic knowledge
   const allVariants: DerivedVariant[] = genotypeRows
     .flatMap((row) => {
-      const knowledge = GENETIC_KNOWLEDGE[row.gene];
+      const knowledge = geneticKnowledge[row.gene];
       if (!knowledge) return [];
       const variant: DerivedVariant = {
         id: row.id,
