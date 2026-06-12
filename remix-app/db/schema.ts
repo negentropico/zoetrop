@@ -261,6 +261,34 @@ export const subjectGenotypes = pgTable('subject_genotypes', {
   index('idx_subject_genotypes_tenant_subject').on(t.tenantId, t.subjectId),
 ]);
 
+// ── Practitioner–Subject assignments (AUTH-03 / Phase 7) ─────────────────────
+// Maps which subjects a practitioner is assigned to within a tenant.
+// RLS policy (Plan 02 migration 0010): tenant-scoped — owner/practitioner can
+// read their own tenant's assignments; app_user cannot cross tenant boundaries.
+// `revokedAt` IS NULL means the assignment is currently active.
+// Unique active index prevents duplicate assignments per (tenant, practitioner, subject).
+export const practitionerSubjectAssignments = pgTable(
+  'practitioner_subject_assignments',
+  {
+    id: text('id').primaryKey(),                                              // crypto.randomUUID()
+    tenantId: text('tenant_id').notNull().references(() => tenants.id),
+    practitionerId: text('practitioner_id').notNull().references(() => user.id),
+    subjectId: text('subject_id').notNull().references(() => subjects.id),
+    assignedBy: text('assigned_by').notNull().references(() => user.id),      // owner who created assignment
+    assignedAt: timestamp('assigned_at').notNull().defaultNow(),
+    revokedAt: timestamp('revoked_at'),                                        // null = active; non-null = revoked (soft-delete)
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (t) => [
+    index('idx_psa_tenant').on(t.tenantId),
+    index('idx_psa_practitioner').on(t.practitionerId),
+    index('idx_psa_subject').on(t.subjectId),
+    // Unique active assignment per (tenant, practitioner, subject).
+    // NOTE: this index prevents duplicate rows; revocation checks revokedAt IS NULL at the app layer.
+    uniqueIndex('idx_psa_active_unique').on(t.tenantId, t.practitionerId, t.subjectId),
+  ]
+);
+
 // ── Lab ingest pipeline tables (Plan 05-01) ────────────────────────────────────
 
 // lab_documents — uploaded PDF files awaiting or completed extraction (LAB-01)
