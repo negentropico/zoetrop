@@ -1,6 +1,7 @@
-import { redirect, useActionData, useSearchParams } from "react-router";
+import { Link, redirect, useActionData, useSearchParams } from "react-router";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { auth } from "~/lib/auth.server";
+import { SpiralMark } from "~/components/ui/SpiralMark";
 
 // Redirect already-authenticated users away from the login / invite-redeem page.
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -126,56 +127,38 @@ const ROLE_LABELS: Record<string, string> = {
   client: "a Client",
 };
 
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontFamily: "var(--font-mono)",
-  fontSize: "var(--text-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  color: "var(--text-muted)",
-  marginBottom: 6,
-};
-
-const inputStyle: React.CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "10px 12px",
-  borderRadius: "var(--radius-md)",
-  border: "1px solid var(--border)",
-  background: "var(--bg)",
-  color: "var(--ink)",
-  fontSize: "var(--text-base)",
-  fontFamily: "var(--font-text)",
-  boxSizing: "border-box",
-};
-
+// design-r35/W5: the field is the W0 `zt-field` idiom — mono eyebrow label
+// over an input with an accent focus border. Name/type/autoComplete and the
+// real `name` attribute (consumed by the action) are unchanged; only markup
+// and classes are restyled. `required` preserved (client-side gate; the
+// action re-validates server-side per WR-04).
 function Field({
   id,
   name,
   type,
   label,
   autoComplete,
+  placeholder,
 }: {
   id: string;
   name: string;
   type: string;
   label: string;
   autoComplete: string;
+  placeholder?: string;
 }) {
   return (
-    <div>
-      <label htmlFor={id} style={labelStyle}>
-        {label}
-      </label>
+    <label className="zt-field" htmlFor={id}>
+      <span className="zt-eyebrow">{label}</span>
       <input
         id={id}
         name={name}
         type={type}
         required
         autoComplete={autoComplete}
-        style={inputStyle}
+        placeholder={placeholder}
       />
-    </div>
+    </label>
   );
 }
 
@@ -188,93 +171,115 @@ export default function LoginPage() {
   const isInvite = !!inviteToken;
   const redirectTo = searchParams.get("redirect") ?? "/dashboard";
 
+  // design-r35/W5: centered frame card on the dot-grain paper, restyled from
+  // screens-public.jsx. Public surface — no AppShell (login lives outside the
+  // _app layout per routes.ts). The form's method/action/field-names/hidden
+  // inputs are PRESERVED verbatim; only the markup + classes changed.
+  // COPY note: the eyebrow + invite note are placeholder/design copy (owner
+  // marketing copy outstanding, logged in round3/deferred-items.md).
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "var(--gap-2xl)",
-        background: "var(--bg)",
-      }}
+      className="zt-public"
+      style={{ display: "flex", flexDirection: "column" }}
     >
-      <div
+      {/* Public topbar (no Sign-in CTA on the login page itself) */}
+      <header className="zt-pub-top">
+        <Link
+          to="/"
+          style={{ display: "inline-flex", alignItems: "center", gap: 9 }}
+        >
+          <SpiralMark size={24} />
+          <span className="zn-wordmark">
+            zoetrop<span style={{ color: "var(--accent)" }}>.</span>
+          </span>
+        </Link>
+      </header>
+
+      <main
         style={{
-          maxWidth: 400,
-          width: "100%",
-          padding: "var(--gap-2xl)",
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid var(--border)",
-          background: "var(--surface)",
-          boxShadow: "var(--shadow-md)",
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "var(--gap-2xl) var(--gap-xl)",
         }}
       >
-        {/* Header */}
-        <div style={{ marginBottom: "var(--gap-xl)", textAlign: "center" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "var(--text-2xl)",
-              letterSpacing: "-0.02em",
-              color: "var(--ink)",
-              marginBottom: 6,
-            }}
-          >
-            Zoetrop
-          </div>
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-            }}
-          >
-            {isInvite ? "Create your account" : "Sign in to continue"}
-          </p>
-          {isInvite && role && ROLE_LABELS[role] && (
-            <p
-              style={{
-                fontFamily: "var(--font-text)",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-muted)",
-                marginTop: 8,
-              }}
-            >
-              You&rsquo;ve been invited as {ROLE_LABELS[role]}.
-            </p>
-          )}
-        </div>
-
-        {/* Error */}
-        {actionData?.error && (
-          <div
-            role="alert"
-            style={{
-              padding: "10px 14px",
-              borderRadius: "var(--radius-md)",
-              background: "var(--danger-50, #fff0f0)",
-              border: "1px solid var(--danger)",
-              color: "var(--danger)",
-              fontSize: "var(--text-sm)",
-              marginBottom: "var(--gap-md)",
-            }}
-          >
-            {actionData.error}
-          </div>
-        )}
-
-        {/* Form */}
-        <form method="post">
+        <div
+          className="zt-frame bg-surface rounded-xl border border-border shadow-lg"
+          style={{
+            width: "100%",
+            maxWidth: 384,
+            padding: "var(--gap-2xl)",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Header — spiral mark, mono eyebrow, display sub */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "var(--gap-md)",
+              alignItems: "center",
+              textAlign: "center",
+              marginBottom: "var(--gap-2xl)",
+            }}
+          >
+            <SpiralMark size={36} />
+            <div
+              className="zt-eyebrow"
+              style={{ marginTop: "var(--gap-lg)" }}
+            >
+              {isInvite ? "Create your account" : "Owner access"}
+            </div>
+            <h1
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "var(--text-lg)",
+                fontWeight: 600,
+                margin: "6px 0 0",
+                color: "var(--ink)",
+              }}
+            >
+              {isInvite ? "Join the sequence" : "Back to the sequence"}
+            </h1>
+            {isInvite && role && ROLE_LABELS[role] && (
+              <p
+                style={{
+                  fontFamily: "var(--font-text)",
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-muted)",
+                  marginTop: 8,
+                }}
+              >
+                You&rsquo;ve been invited as {ROLE_LABELS[role]}.
+              </p>
+            )}
+          </div>
+
+          {/* Error */}
+          {actionData?.error && (
+            <div
+              role="alert"
+              style={{
+                padding: "10px 14px",
+                borderRadius: "var(--radius-md)",
+                background: "var(--danger-bg, var(--deficient-bg))",
+                border: "1px solid var(--danger, var(--deficient))",
+                color: "var(--danger, var(--deficient))",
+                fontSize: "var(--text-sm)",
+                marginBottom: "var(--gap-lg)",
+              }}
+            >
+              {actionData.error}
+            </div>
+          )}
+
+          {/* Form — method/action/field names preserved verbatim */}
+          <form
+            method="post"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--gap-lg)",
             }}
           >
             {isInvite ? (
@@ -287,6 +292,7 @@ export default function LoginPage() {
                   type="text"
                   label="Name"
                   autoComplete="name"
+                  placeholder="Your name"
                 />
                 <Field
                   id="email"
@@ -294,6 +300,7 @@ export default function LoginPage() {
                   type="email"
                   label="Email"
                   autoComplete="email"
+                  placeholder="owner@example.com"
                 />
                 <Field
                   id="password"
@@ -301,6 +308,7 @@ export default function LoginPage() {
                   type="password"
                   label="Password"
                   autoComplete="new-password"
+                  placeholder="••••••••••••"
                 />
               </>
             ) : (
@@ -313,6 +321,7 @@ export default function LoginPage() {
                   type="email"
                   label="Email"
                   autoComplete="email"
+                  placeholder="owner@example.com"
                 />
                 <Field
                   id="password"
@@ -320,33 +329,38 @@ export default function LoginPage() {
                   type="password"
                   label="Password"
                   autoComplete="current-password"
+                  placeholder="••••••••••••"
                 />
               </>
             )}
 
             <button
               type="submit"
+              className="zt-btn-ink"
               style={{
-                display: "block",
                 width: "100%",
-                padding: "11px 0",
-                borderRadius: "var(--radius-md)",
-                background: "var(--ink)",
-                color: "var(--n-50)",
-                fontFamily: "var(--font-display)",
-                fontWeight: 600,
-                fontSize: "var(--text-base)",
-                letterSpacing: "-0.01em",
-                border: "none",
-                cursor: "pointer",
-                marginTop: "var(--gap-sm)",
+                justifyContent: "center",
+                marginTop: 4,
               }}
             >
               {isInvite ? "Create account" : "Sign in"}
             </button>
-          </div>
-        </form>
-      </div>
+          </form>
+
+          {/* Quiet invite note (placeholder/design copy) */}
+          <p
+            style={{
+              margin: "var(--gap-xl) 0 0",
+              textAlign: "center",
+              fontSize: "var(--text-xs)",
+              color: "var(--text-muted)",
+              textWrap: "pretty",
+            }}
+          >
+            Single-owner instrument. New viewers join by invite from Settings.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }
