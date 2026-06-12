@@ -303,8 +303,8 @@ Plans:
 
 **Wave 5** *(gap closure — close AUTH-03 verification blockers found 2026-06-12; depends on 07-01..07-04; the two plans touch disjoint files and run in parallel)*
 
-- [ ] 07-05-PLAN.md — Wire listAssignedSubjectIds into all 5 practitioner-admitting routes (ingest upload/review, reports generate/index/detail) so assertSubjectAccess Gate 3 enforces at runtime; fix review-action + report-detail missing subject.id (closes CR-01 dead code) [AUTH-03]
-- [ ] 07-06-PLAN.md — Add requireSubjectCtx(request) helper; gate all 13 client-readable PHI loaders (dashboard, metrics, insights incl. genetics, protocol) against the client role (closes CR-02 client PHI exposure) [AUTH-03]
+- [x] 07-05-PLAN.md — Wire listAssignedSubjectIds into all 5 practitioner-admitting routes (ingest upload/review, reports generate/index/detail) so assertSubjectAccess Gate 3 enforces at runtime; fix review-action + report-detail missing subject.id (closes CR-01 dead code) [AUTH-03]
+- [x] 07-06-PLAN.md — Add requireSubjectCtx(request) helper; gate all 13 client-readable PHI loaders (dashboard, metrics, insights incl. genetics, protocol) against the client role (closes CR-02 client PHI exposure) [AUTH-03]
 
 ### Phase 8: Compliance Envelope & Host Gate (PRE-CLIENT GATE, PART 2)
 
@@ -335,7 +335,7 @@ Plans:
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
-| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 4/4 | Complete   | 2026-06-12 |
+| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 6/6 | Complete   | 2026-06-12 |
 | 8. Compliance Envelope & Host Gate *(pre-client gate)* | 0/TBD | Deferred (gate) | - |
 
 ## Backlog
