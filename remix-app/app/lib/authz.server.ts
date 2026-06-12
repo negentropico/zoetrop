@@ -5,11 +5,12 @@
  * fail-closed: missing or unknown roles are denied, never granted.
  *
  * RLS-compatible design: requireUser extracts session.user.tenantId so the
- * Phase 7 `SET LOCAL request.jwt.claims` retrofit can mirror these app-layer
- * checks rather than contradict them (01-SPIKE-FINDINGS).
+ * Phase 7 GUC RLS retrofit mirrors these app-layer checks rather than
+ * contradicting them (01-SPIKE-FINDINGS).
  *
- * Out of scope (→ Phase 7): RLS enable + policies, SET LOCAL withTenantDb,
- * per-assignment AUTH-03 scoping, immutable AUTH-04 audit log.
+ * Phase 7 AUTH-03 COMPLETE: assertSubjectAccess extended with optional
+ * assignedSubjectIds parameter for per-assignment practitioner scoping.
+ * The 7 existing owner-context callers are unbroken (parameter is optional).
  */
 
 import { redirect } from "react-router";
@@ -53,25 +54,51 @@ export function requireRole(
 
 // ── assertSubjectAccess ───────────────────────────────────────────────────
 //
-// Tenant-scoped interim authorization gate (D-13).
-// Denies: client role outright; any practitioner/owner whose tenantId differs
-// from the subject's tenantId (no IDOR / cross-tenant access, T-031-AZ-2).
-// Per-assignment AUTH-03 scoping is Phase 7 — do NOT add it here.
+// Tenant + per-assignment authorization gate (D-11/D-13, AUTH-03).
+//
+// Check order:
+//   1. client role → always 403 (clients never access subject data directly)
+//   2. cross-tenant → always 403 (no IDOR, T-031-AZ-2)
+//   3. practitioner + assignedSubjectIds provided → deny unless subject.id ∈ set
+//   4. owner → passes for any same-tenant subject (tenant-wide access retained)
+//
+// The `assignedSubjectIds` parameter is OPTIONAL so the 7 existing owner-context
+// callers (ingest/{consent,document,upload,review}.tsx, reports/{generate,detail,
+// index}.tsx, report-generator.server.ts) remain valid without modification.
+// When `assignedSubjectIds` is undefined the per-assignment check is skipped —
+// those callers are owner-context and own their tenant's data entirely.
+//
+// For practitioner callers: populate `assignedSubjectIds` from
+// `listAssignedSubjectIds(ctx, practitionerId)` in assignments.server.ts.
+// Phase 7 AUTH-03 COMPLETE (Plan 04).
 
 export function assertSubjectAccess(
-  user: { role?: string | null },
-  subject: { tenantId: string },
-  userTenantId: string
+  user: { role?: string | null; id?: string },
+  subject: { tenantId: string; id?: string },
+  userTenantId: string,
+  assignedSubjectIds?: string[]
 ): void {
+  // Gate 1: client role is always denied
   if (user.role === "client") {
     throw new Response("You don't have permission to view this.", {
       status: 403,
     });
   }
+  // Gate 2: cross-tenant — no IDOR
   if (subject.tenantId !== userTenantId) {
     throw new Response("You don't have permission to view this.", {
       status: 403,
     });
+  }
+  // Gate 3: per-assignment check for practitioners
+  // Only applies when assignedSubjectIds is explicitly provided (not undefined).
+  // Owners skip this gate entirely — they retain tenant-wide access (D-07).
+  if (user.role === "practitioner" && assignedSubjectIds !== undefined) {
+    if (!subject.id || !assignedSubjectIds.includes(subject.id)) {
+      throw new Response("You don't have permission to view this.", {
+        status: 403,
+      });
+    }
   }
 }
 
