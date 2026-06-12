@@ -1,9 +1,14 @@
-// PageHeader — meta row (eyebrow left, breadcrumb right) + h1 title + sub
-// paragraph + optional right slot. Crumbs auto-derive from the pathname via
-// crumbsForPath; pass `crumbs` explicitly (or null) to override.
-// Optional `icon` renders an element (e.g. CatChip) beside the title block;
+// PageHeader — round-3 condensed masthead. Meta row (eyebrow left, breadcrumb
+// right) top-aligns with the sidebar logo row (.zn-page padding-top, W0 CSS);
+// the meta row always renders (minHeight keeps the rhythm even when empty).
+// Title drops to --text-xl; `sub` sits inline on the title baseline; the
+// `right` slot shares the title row (no dead band) and can shrink/wrap on
+// mobile (round-5 finding 1: flex 0 1 auto + min-width 0).
+// Crumbs auto-derive from the pathname via crumbsForPath; pass `crumbs`
+// explicitly (or null) to override.
+// Optional `icon` renders an element (e.g. CatChip) beside the title;
 // optional `titleAccessory` renders inline after the h1 (e.g. StatusBadge).
-// Translated from lib.jsx PageHeader (lines 86-97).
+// Translated from round3-return lib.jsx PageHeader (lines 392-417).
 
 import type { ReactNode } from "react";
 import { useLocation } from "react-router";
@@ -15,7 +20,7 @@ export interface PageHeaderProps {
   title: string;
   sub?: string;
   right?: ReactNode;
-  /** Element rendered to the left of the title block (e.g. CatChip). */
+  /** Element rendered to the left of the title (e.g. CatChip). */
   icon?: ReactNode;
   /** Element rendered inline after the h1 (e.g. StatusBadge). */
   titleAccessory?: ReactNode;
@@ -37,62 +42,70 @@ export function PageHeader({
   const resolvedCrumbs = crumbs === undefined ? crumbsForPath(pathname) : crumbs;
   const hasCrumbs = resolvedCrumbs !== null && resolvedCrumbs.length > 0;
 
-  const heading = (
-    <h1
-      style={{
-        fontSize: "var(--text-2xl)",
-        fontWeight: 600,
-        letterSpacing: "-0.02em",
-      }}
-    >
-      {title}
-    </h1>
-  );
+  return (
+    <header style={{ marginBottom: "var(--gap-section)" }}>
+      {/* Meta row — eyebrow left / crumb right. Always rendered so the
+          title row sits at a constant offset (masthead ↔ logo alignment). */}
+      <div
+        className="flex items-center justify-between flex-wrap"
+        style={{ gap: "var(--gap-lg)", marginBottom: 14, minHeight: 17 }}
+      >
+        {eyebrow ? <div className="zt-eyebrow">{eyebrow}</div> : <div />}
+        {hasCrumbs && <Crumb items={resolvedCrumbs} />}
+      </div>
 
-  const titleBlock = (
-    <div>
-      {titleAccessory ? (
-        <div className="flex items-center flex-wrap" style={{ gap: 12 }}>
-          {heading}
-          {titleAccessory}
-        </div>
-      ) : (
-        heading
-      )}
-      {sub && (
-        <p
+      {/* Title row — h1 + inline sub on the baseline; right slot shares
+          the row and shrinks (round-5 mobile fix). */}
+      <div
+        className="flex flex-wrap"
+        style={{ alignItems: "baseline", gap: "var(--gap-lg)" }}
+      >
+        {icon && (
+          <div style={{ alignSelf: "center", flex: "0 0 auto" }}>{icon}</div>
+        )}
+        <h1
           style={{
-            margin: "8px 0 0",
-            color: "var(--text-secondary)",
-            fontSize: "var(--text-md)",
-            maxWidth: 620,
+            fontSize: "var(--text-xl)",
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            margin: 0,
+            lineHeight: 1.1,
           }}
         >
-          {sub}
-        </p>
-      )}
-    </div>
-  );
-
-  return (
-    <div className="mb-8">
-      {(eyebrow || hasCrumbs) && (
-        <div className="flex items-baseline justify-between gap-4 flex-wrap mb-2.5">
-          {eyebrow ? <div className="zt-eyebrow">{eyebrow}</div> : <span />}
-          {hasCrumbs && <Crumb items={resolvedCrumbs} />}
-        </div>
-      )}
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        {icon ? (
-          <div className="flex items-center" style={{ gap: 16 }}>
-            {icon}
-            {titleBlock}
+          {title}
+        </h1>
+        {titleAccessory && (
+          <div style={{ alignSelf: "center", flex: "0 0 auto" }}>
+            {titleAccessory}
           </div>
-        ) : (
-          titleBlock
         )}
-        {right && <div>{right}</div>}
+        {sub && (
+          <p
+            style={{
+              margin: 0,
+              color: "var(--text-muted)",
+              fontSize: "var(--text-sm)",
+              flex: "1 1 auto",
+              minWidth: 0,
+              textWrap: "pretty",
+            }}
+          >
+            {sub}
+          </p>
+        )}
+        {right && (
+          <div
+            style={{
+              marginLeft: "auto",
+              alignSelf: "center",
+              flex: "0 1 auto",
+              minWidth: 0,
+            }}
+          >
+            {right}
+          </div>
+        )}
       </div>
-    </div>
+    </header>
   );
 }
