@@ -71,6 +71,13 @@
       "when": 1781227895681,
       "tag": "0009_natural_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781288075795,
+      "tag": "0010_practitioner_assignments",
+      "breakpoints": true
     }
   ]
 }
