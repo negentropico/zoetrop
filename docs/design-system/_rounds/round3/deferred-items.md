@@ -125,3 +125,43 @@ reused as-is; no new endpoint was built. Gaps logged:
   ("accepted" / "pending") maps through the real `deriveInviteStatus` lifecycle
   (active / consumed / expired / revoked): consumed → "accepted", active →
   "active", plus expired/revoked. No fabricated states.
+
+## W5 (2026-06-12) — Public register (landing + login), outstanding owner inputs
+
+W5 integrated the STRUCTURE of the round-4 public surfaces (`screens-public.jsx`)
+onto the real routes (`routes/landing.tsx`, `routes/auth/login.tsx`), both OUTSIDE
+the `_app` shell per `routes.ts`. The login form's loader/action/field-names/
+hidden-inputs (intent, redirect, inviteToken) and Better-Auth wiring were preserved
+verbatim — only markup + classes changed; real owner login was verified end-to-end
+(owner creds → `/dashboard`). Two owner-input items remain open (these are the
+"structure now, copy later" deferrals the INTEGRATION-PLAN W5 section calls out):
+
+- **Marketing copy is PLACEHOLDER (outstanding owner input #1 — "block nothing
+  except W5 final copy").** Every word on the landing + login is the design's
+  placeholder/design copy, NOT final owner marketing copy. Specifically placeholder:
+    - Landing hero headline "Your bloodwork, one frame at a time.", the eyebrow
+      "Personal health protocol instrument", the sub-paragraph, the "Owner-only ·
+      invites from inside" note, the three capability rows (01 Ingest with a review
+      gate / 02 Protocol as versions / 03 Signals, not alarms) and their bodies,
+      and the footer trust line.
+    - Stat-row LABELS are placeholder and the VALUES are illustrative figures —
+      only "9 Categories" is a real app fact; "46 Markers tracked", "5 Protocol
+      versions", "12 Correlated pairs" are placeholder numbers (not wired to a
+      loader; the landing is public and intentionally loads no data).
+    - Login eyebrow ("Owner access" / "Create your account"), the display sub
+      ("Back to the sequence" / "Join the sequence"), and the quiet invite note.
+  Each placeholder string carries an inline code comment flagging it. Future: the
+  owner supplies real marketing copy; swap the string constants/JSX — no structural
+  change needed. The capability-row and stat-row arrays are hoisted to named
+  constants (`ROWS`, `STATS`) at the top of `landing.tsx` for a one-edit swap.
+
+- **Landing hero chart uses an ILLUSTRATIVE SAMPLE series, NOT owner PHI.** The
+  design pulls a real Vitamin D `TrendChart` from `window.ZD`, but the real landing
+  is PUBLIC (unauthenticated) and MUST NOT load or render the owner's real metric
+  data. The hero card renders `SAMPLE_VITD` — a hand-authored, plausible-but-fake
+  5-point Vitamin D series defined only inside `landing.tsx` — and the card header
+  is labelled "Vitamin D · illustrative sample" so it is never mistaken for real
+  data. No real data loader was added to the public route; nothing in the real data
+  layer (`lib/real-data.ts` etc.) was touched. Future: if the landing ever wants a
+  real demo series it must come from a deliberately-published, non-PHI demo dataset
+  (e.g. a seeded "demo tenant"), never the owner's own readings.
