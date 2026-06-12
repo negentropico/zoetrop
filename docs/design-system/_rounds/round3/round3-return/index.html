@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zoetrop — round 3 return</title>
+
+<!-- Pre-paint theme: read zt-theme from localStorage, fall back to
+     prefers-color-scheme. Mirrors the app's pre-paint script exactly. -->
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('zt-theme');
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+
+<!-- Real app.css token snapshot + round 3 additions (new.css) -->
+<link rel="stylesheet" href="app.css" />
+<link rel="stylesheet" href="new.css" />
+
+<!-- Google Fonts (same as the app) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<!-- CDN UMD scripts — order matters: React → ReactDOM → prop-types → Recharts → Lucide → Babel -->
+<!-- Viewing-artifact only: silence the known React-18 defaultProps
+     deprecation warning emitted from INSIDE the Recharts 2.x UMD
+     (library-internal, not actionable in app code). Nothing else
+     is filtered. -->
+<script>
+  (function () {
+    var orig = console.error;
+    console.error = function () {
+      if (typeof arguments[0] === 'string' && arguments[0].indexOf('Support for defaultProps') !== -1) return;
+      return orig.apply(console, arguments);
+    };
+  })();
+</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/prop-types@15.8.1/prop-types.js" crossorigin></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+<script src="https://unpkg.com/lucide@0.544.0/dist/umd/lucide.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js" crossorigin></script>
+
+<style>
+  body { margin: 0; min-height: 100vh; }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Seeded sample dataset on window.ZD (no JSX needed) -->
+<script src="app/data.js"></script>
+<script src="app/data-r4.js"></script>
+<script src="app/data-r5.js"></script>
+
+<!-- Babel-transformed JSX scripts, in dependency order:
+     tweaks panel shell → lib (shell + primitives) → charts (Part B
+     chart language) → screens → main (mount + tweaks wiring) -->
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="app/lib.jsx"></script>
+<script type="text/babel" src="app/charts.jsx"></script>
+<script type="text/babel" src="app/screens.jsx"></script>
+<script type="text/babel" src="app/screens-ingest.jsx"></script>
+<script type="text/babel" src="app/screens-public.jsx"></script>
+<script type="text/babel" src="app/screens-r4.jsx"></script>
+<script type="text/babel" src="app/screens-r5.jsx"></script>
+<script type="text/babel" src="app/main.jsx"></script>
+</body>
+</html>
