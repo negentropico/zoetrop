@@ -5,6 +5,10 @@ discovering wave; route to the owning wave or a follow-up.
 
 ## W4a (2026-06-12)
 
+- ✅ **RESOLVED (2026-06-12)** — the three assertions now expect the canonical
+  `--optimal/--borderline/--deficient` (+ `-bg`) tokens; StatusBadge suite green
+  (12/12), full suite has no remaining failures. Original note kept below.
+
 - **`StatusBadge.test.tsx` — 3 stale assertions (owned by W2a, not W4a).**
   The W2a commit `0dde43f` ("status atoms read canonical status tokens")
   changed `StatusBadge.tsx` to emit `var(--optimal)/--borderline/--deficient`
