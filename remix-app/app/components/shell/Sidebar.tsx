@@ -290,7 +290,15 @@ export function Sidebar({
 
       {/* nav */}
       <nav className="zn-nav" aria-label="Primary">
-        {railMode ? NAV_TREE.map(renderRailItem) : NAV_TREE.map(renderExpandedGroup)}
+        {railMode
+          ? NAV_TREE.map(renderRailItem)
+          : (isMobile
+              // Mobile drawer: hide mobileHidden groups unless we're currently in that section.
+              // Resolves 6-item BottomTab overflow (RESEARCH Open-Q #3): Import hidden from
+              // mobile primary nav but still visible when active on /import/*.
+              ? NAV_TREE.filter((g) => !g.mobileHidden || groupActive(pathname, g))
+              : NAV_TREE
+            ).map(renderExpandedGroup)}
       </nav>
 
       {/* footer — account only; theme lives inside the popover */}

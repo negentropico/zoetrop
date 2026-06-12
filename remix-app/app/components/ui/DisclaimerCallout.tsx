@@ -9,10 +9,7 @@ import { AlertTriangle } from "lucide-react";
 const K4_DISCLAIMER =
   "This recommendation is speculative (limited evidence). Discuss with a licensed practitioner before acting.";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface DisclaimerCalloutProps {}
-
-export function DisclaimerCallout({}: DisclaimerCalloutProps) {
+export function DisclaimerCallout() {
   return (
     <div
       role="note"
