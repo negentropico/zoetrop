@@ -1,6 +1,9 @@
 // PhaseBar — segmented 4-phase timeline bar
 // completed → var(--vital); current → var(--focus-50) + 2px var(--ink) border; upcoming → var(--n-150)
 // Shared: dashboard cessation card, protocol overview, cessation tracker
+// Round-3 hero rebuild: optional `day` renders a current-day marker tick
+// inside the segment that contains it (Ink tick + surface ring, same idiom
+// as the RangeBar value tick).
 
 export interface Phase {
   id?: string;
@@ -14,14 +17,25 @@ interface PhaseBarProps {
   height?: number;       // default 14
   showLabels?: boolean;  // default true
   compact?: boolean;     // default false
+  /** Current protocol day (1-based) — draws the day marker. */
+  day?: number;
 }
 
-export function PhaseBar({ phases, height = 14, showLabels = true, compact = false }: PhaseBarProps) {
+export function PhaseBar({ phases, height = 14, showLabels = true, compact = false, day }: PhaseBarProps) {
+  // Cumulative day offsets so the marker lands inside the right segment.
+  let cum = 0;
+  const ranges = phases.map((p) => {
+    const start = cum + 1;
+    cum += p.days;
+    return { start, end: cum };
+  });
+  const totalDays = cum;
+
   return (
     <div>
       {/* Segment bar */}
       <div className="flex gap-1" style={{ height }}>
-        {phases.map((p) => {
+        {phases.map((p, i) => {
           const bg =
             p.state === "completed"
               ? "var(--vital)"
@@ -32,6 +46,16 @@ export function PhaseBar({ phases, height = 14, showLabels = true, compact = fal
             p.state === "current"
               ? "2px solid var(--ink)"
               : "2px solid transparent";
+          const r = ranges[i];
+          // Marker renders in the segment containing the day; a day past the
+          // protocol end pins to the final segment edge.
+          const hasMarker =
+            day != null &&
+            day >= r.start &&
+            (day <= r.end || (i === phases.length - 1 && day > totalDays));
+          const markerPct = hasMarker
+            ? Math.min(1, (Math.min(day!, r.end) - r.start + 1) / p.days) * 100
+            : 0;
           return (
             <div
               key={p.id ?? p.name}
@@ -47,6 +71,21 @@ export function PhaseBar({ phases, height = 14, showLabels = true, compact = fal
                   transition: "background var(--dur-base) var(--ease-out)",
                 }}
               />
+              {hasMarker && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    top: -3,
+                    bottom: -3,
+                    left: `calc(${markerPct}% - 1.5px)`,
+                    width: 3,
+                    borderRadius: 2,
+                    background: "var(--ink)",
+                    boxShadow: "0 0 0 2px var(--surface)",
+                  }}
+                />
+              )}
             </div>
           );
         })}

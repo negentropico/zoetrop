@@ -42,7 +42,13 @@ function visibleChildren(g: NavGroup): NavChild[] {
 }
 
 function groupActive(pathname: string, g: NavGroup): boolean {
-  return pathname === g.base || pathname.startsWith(g.base + "/");
+  // Base prefix OR an alias child outside the base (e.g. /import/whoop under
+  // the combined Ingest group — round-3 IA).
+  return (
+    pathname === g.base ||
+    pathname.startsWith(g.base + "/") ||
+    (g.children ?? []).some((c) => isChildActive(pathname, c))
+  );
 }
 
 /* ------------------------------------------------------------------

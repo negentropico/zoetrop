@@ -7,11 +7,10 @@ import {
   getSupplements,
 } from "~/lib/data.server";
 import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
-import { CONFIDENCE_LEVELS, VARIANT_CATEGORIES, type ConfidenceLevel } from "~/types/genetics";
-import { Badge } from "~/components/ui/Badge";
+import { type ConfidenceLevel } from "~/types/genetics";
+import { ArrowRight } from "lucide-react";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Button } from "~/components/ui/Button";
 
 // Significance derivation — survivor presentation helper (non-PHI)
 function getCorrelationSignificance(r: number): "strong" | "moderate" | "weak" | "none" {
@@ -87,6 +86,20 @@ export async function loader({ request }: Route.LoaderArgs) {
     return acc;
   }, {} as Record<string, number>);
 
+  // Variant counts by confidence + compact rows for the genetics card
+  // (round-4 insights section dashboard)
+  const variantsByConfidence = allVariants.reduce((acc, v) => {
+    acc[v.confidence] = (acc[v.confidence] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const variantRows = allVariants.slice(0, 6).map((v) => ({
+    id: v.id,
+    gene: v.gene,
+    rsid: v.rsid,
+    genotype: v.genotype,
+    confidence: v.confidence,
+  }));
+
   // Correlation stats
   const strongCorrelations = allCorrelations.filter((c) => c.significance === "strong");
   const significantCorrelations = allCorrelations.filter((c) => (c.pValue ?? 1) < 0.05);
@@ -95,6 +108,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     topCorrelations,
     highImpactVariants,
     variantsByCategory,
+    variantsByConfidence,
+    variantRows,
     stats: {
       totalCorrelations: allCorrelations.length,
       strongCorrelations: strongCorrelations.length,
@@ -105,216 +120,167 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
+// Confidence-level mono colors (shared vocabulary with /insights/genetics)
+const CONF_COLOR: Record<string, string> = {
+  K1: "var(--vital-500, var(--vital))",
+  K2: "var(--accent)",
+  K3: "var(--energy-500, var(--energy))",
+  K4: "var(--text-muted)",
+};
+
+// Significance mono colors (shared vocabulary with /insights/correlations)
+const SIG_COLOR: Record<string, string> = {
+  strong: "var(--vital-500, var(--vital))",
+  moderate: "var(--energy-500, var(--energy))",
+  weak: "var(--text-muted)",
+  none: "var(--text-faint)",
+};
+
 export default function InsightsIndex({ loaderData }: Route.ComponentProps) {
-  const { topCorrelations, highImpactVariants, variantsByCategory, stats } =
+  const { topCorrelations, highImpactVariants, variantsByConfidence, variantRows, stats } =
     loaderData;
+
+  const strongest = topCorrelations[0];
+  const top4 = topCorrelations.slice(0, 4);
+  const confidenceLevels: ConfidenceLevel[] = ["K1", "K2", "K3", "K4"];
 
   return (
     <div>
       <PageHeader
         eyebrow="INSIGHTS"
         title="Insights"
-        sub="See which supplements move which metrics, and how your genetics shape your protocol."
+        sub="What your markers say about each other — and what your genes say about the protocol."
       />
 
-      {/* Stats overview */}
-      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-xl)" }}>
-        {[
-          { label: "CORRELATIONS", value: stats.totalCorrelations },
-          { label: "STRONG", value: stats.strongCorrelations },
-          { label: "GENETIC VARIANTS", value: stats.totalVariants },
-          { label: "K1 CONFIRMED", value: stats.confirmedVariants },
-        ].map(({ label, value }) => (
-          <Card key={label} padding="md" style={{ textAlign: "center" }}>
-            <span
-              className="zt-readout"
-              style={{ fontSize: "var(--text-2xl)", display: "block" }}
-            >
-              {value}
-            </span>
-            <span
-              className="zt-eyebrow"
-              style={{ display: "block", marginTop: 6 }}
-            >
-              {label}
-            </span>
-          </Card>
-        ))}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-          gap: "var(--gap-xl)",
-        }}
-      >
-        {/* Top correlations */}
+      {/* Stat strip — round-4 section dashboard */}
+      <section className="zt-section">
         <Card padding="lg">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "var(--gap-lg)",
-            }}
-          >
-            <div className="zt-eyebrow">Top correlations</div>
-            <Link
-              to="/insights/correlations"
-              style={{
-                fontSize: "var(--text-sm)",
-                color: "var(--accent)",
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
-            >
-              View all
-            </Link>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {topCorrelations.map((corr) => (
-              <div
-                key={corr.id}
-                className="zt-trow"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px 0",
-                  borderBottom: "1px solid var(--border)",
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontWeight: 500,
-                      fontSize: "var(--text-sm)",
-                    }}
-                  >
-                    {corr.supplementName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "var(--text-xs)",
-                      fontFamily: "var(--font-mono)",
-                      color: "var(--text-muted)",
-                      marginTop: 2,
-                    }}
-                  >
-                    {corr.metricName} · {corr.lagDays}d lag
-                  </div>
-                </div>
-                <span
-                  className="zt-tnum"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontWeight: 700,
-                    color:
-                      corr.correlation < 0
-                        ? "var(--danger)"
-                        : "var(--vital-500)",
-                  }}
-                >
-                  {corr.correlation > 0 ? "+" : ""}
-                  {corr.correlation.toFixed(2)}
-                </span>
+          <div className="zt-stat-strip">
+            <div className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>Pairs analyzed</div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {stats.totalCorrelations}
               </div>
-            ))}
-          </div>
-          <div style={{ marginTop: "var(--gap-lg)" }}>
-            <Link to="/insights/correlations">
-              <Button variant="primary" size="sm">
-                Open correlations
-              </Button>
-            </Link>
+            </div>
+            <div className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>Strong</div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {stats.strongCorrelations}
+              </div>
+            </div>
+            <div className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>Strongest pair</div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {strongest
+                  ? `${strongest.correlation > 0 ? "+" : ""}${strongest.correlation.toFixed(2)}`
+                  : "—"}
+              </div>
+              {strongest && (
+                <div className="zt-eyebrow" style={{ marginTop: 5, color: "var(--text-faint)", letterSpacing: "0.06em" }}>
+                  {strongest.supplementName} ↔ {strongest.metricName}
+                </div>
+              )}
+            </div>
+            <div className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>Variants tracked</div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {stats.totalVariants}
+              </div>
+            </div>
           </div>
         </Card>
+      </section>
 
-        {/* High-impact variants */}
-        <Card padding="lg">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "var(--gap-lg)",
-            }}
-          >
-            <div className="zt-eyebrow">Protocol-defining variants</div>
-            <Link
-              to="/insights/genetics"
-              style={{
-                fontSize: "var(--text-sm)",
-                color: "var(--accent)",
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
-            >
-              View all
+      <div className="zt-grid-2">
+        {/* Strongest correlations — top 4 by |r|, rows link through */}
+        <section>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-lg)" }}>
+            <div className="zt-eyebrow">Strongest correlations</div>
+            <Link to="/insights/correlations" className="zt-link" style={{ fontSize: "var(--text-xs)" }}>
+              All correlations <ArrowRight size={13} strokeWidth={2} />
             </Link>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {highImpactVariants.slice(0, 5).map((variant) => {
-              const confidence = CONFIDENCE_LEVELS[variant.confidence];
-              return (
+          <Card padding="none">
+            {top4.map((corr, i) => (
+              <Link key={corr.id} to="/insights/correlations" style={{ textDecoration: "none", display: "block" }}>
                 <div
-                  key={variant.id}
-                  className="zt-trow"
+                  className="zt-mrow"
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "12px 0",
-                    borderBottom: "1px solid var(--border)",
-                    gap: 12,
+                    gap: "var(--gap-lg)",
+                    padding: "var(--gap-row) var(--gap-card)",
+                    borderBottom: i < top4.length - 1 ? "1px solid var(--border)" : "none",
+                    cursor: "pointer",
                   }}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <span style={{ fontWeight: 600, fontSize: "var(--text-sm)" }}>
-                        {variant.gene}
-                      </span>
-                      <Badge
-                        tone={
-                          variant.confidence === "K1" ? "vital" : "energy"
-                        }
-                      >
-                        {confidence.label}
-                      </Badge>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "var(--text-xs)",
-                        color: "var(--text-muted)",
-                        marginTop: 2,
-                      }}
-                    >
-                      {variant.protocolAction}
-                    </div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: "var(--text-sm)", fontWeight: 500, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {corr.supplementName} <span style={{ color: "var(--text-faint)" }}>↔</span> {corr.metricName}
                   </div>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "var(--text-xs)",
-                      color: "var(--text-muted)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {variant.genotype}
+                  <span className="zt-eyebrow" style={{ color: SIG_COLOR[corr.significance] ?? "var(--text-muted)" }}>
+                    {corr.significance}
+                  </span>
+                  <span className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-sm)", color: "var(--ink)", minWidth: 52, textAlign: "right" }}>
+                    {corr.correlation > 0 ? "+" : ""}
+                    {corr.correlation.toFixed(2)}
                   </span>
                 </div>
-              );
-            })}
+              </Link>
+            ))}
+          </Card>
+        </section>
+
+        {/* Genetics — confidence-dot counts header + per-gene rows */}
+        <section>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-lg)" }}>
+            <div className="zt-eyebrow">Genetics</div>
+            <Link to="/insights/genetics" className="zt-link" style={{ fontSize: "var(--text-xs)" }}>
+              All variants <ArrowRight size={13} strokeWidth={2} />
+            </Link>
           </div>
-        </Card>
+          <Card padding="none">
+            <div style={{ display: "flex", gap: "var(--gap-xl)", flexWrap: "wrap", padding: "var(--gap-row) var(--gap-card)", borderBottom: "1px solid var(--border)" }}>
+              {confidenceLevels.map((k) =>
+                (variantsByConfidence[k] || 0) > 0 ? (
+                  <span key={k} className="zt-tnum" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-secondary)" }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: CONF_COLOR[k], display: "inline-block" }} />
+                    {variantsByConfidence[k]} {k}
+                  </span>
+                ) : null
+              )}
+            </div>
+            {variantRows.map((g, i) => (
+              <Link key={g.id} to="/insights/genetics" style={{ textDecoration: "none", display: "block" }}>
+                <div
+                  className="zt-mrow"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--gap-lg)",
+                    padding: "var(--gap-row) var(--gap-card)",
+                    borderBottom: i < variantRows.length - 1 ? "1px solid var(--border)" : "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-xs)", color: "var(--ink)", flex: "0 0 110px" }}>
+                    {g.gene}
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0, fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {[g.rsid, g.genotype].filter(Boolean).join(" · ")}
+                  </span>
+                  <span className="zt-eyebrow" style={{ color: CONF_COLOR[g.confidence] ?? "var(--text-muted)" }}>
+                    {g.confidence}
+                  </span>
+                </div>
+              </Link>
+            ))}
+            {stats.totalVariants > variantRows.length && (
+              <div style={{ padding: "var(--gap-row) var(--gap-card)", borderTop: "1px solid var(--border)", fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", letterSpacing: "0.06em" }}>
+                +{stats.totalVariants - variantRows.length} MORE VARIANTS
+              </div>
+            )}
+          </Card>
+        </section>
       </div>
 
       {/* Key insights — derived from loader data; no hardcoded health facts */}
@@ -389,37 +355,9 @@ export default function InsightsIndex({ loaderData }: Route.ComponentProps) {
         </div>
       </Card>
 
-      {/* Variants by category */}
-      <Card padding="lg" style={{ marginTop: "var(--gap-lg)" }}>
-        <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-lg)" }}>
-          Variants by category
-        </div>
-        <div className="zt-grid-4">
-          {Object.entries(variantsByCategory).map(([category, count]) => {
-            const info = VARIANT_CATEGORIES[category as keyof typeof VARIANT_CATEGORIES];
-            return (
-              <div key={category} style={{ textAlign: "center" }}>
-                <span
-                  className="zt-readout"
-                  style={{ fontSize: "var(--text-xl)", display: "block" }}
-                >
-                  {count}
-                </span>
-                <span
-                  style={{
-                    fontSize: "var(--text-sm)",
-                    color: "var(--text-muted)",
-                    display: "block",
-                    marginTop: 4,
-                  }}
-                >
-                  {info?.label || category}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+      {/* Variants-by-category breakdown moved to /insights/genetics (the
+          category filter there carries the same counts) — round-4 fold-in
+          keeps this overview to the stat strip + two link-through cards. */}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { Link, useLoaderData } from "react-router";
 import { CATEGORY_INFO, type MetricCategory, type MetricStatus, type Metric } from "~/types/metrics";
 import { CESSATION_PHASES } from "~/types/protocol";
-import { CONFIDENCE_LEVELS } from "~/types/genetics";
 import { requireSubjectCtx } from "~/lib/authz.server";
 import {
   getCorrelations,
@@ -25,15 +24,16 @@ import {
   Dumbbell,
   Droplet,
   Dna,
+  ArrowRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
 import { CatChip } from "~/components/ui/CatChip";
-import { StatusBadge } from "~/components/ui/StatusBadge";
 import { StatusDot } from "~/components/ui/StatusDot";
 import { PhaseBar } from "~/components/ui/PhaseBar";
-import { MetricRing } from "~/components/ui/MetricRing";
+import { Sparkline } from "~/components/ui/Sparkline";
+import { Delta } from "~/components/ui/Delta";
 import type { Phase } from "~/components/ui/PhaseBar";
 
 // Significance derivation — survivor presentation helper (non-PHI)
@@ -90,6 +90,17 @@ type DerivedVariant = {
   impact: string;
   clinicalImplication: string;
   protocolAction: string;
+};
+
+// Highlight shape — latest metrics with sparkline history (round-3 dashboard)
+type Highlight = {
+  name: string;
+  category: MetricCategory;
+  id: string;
+  value: number;
+  unit: string;
+  status: MetricStatus;
+  values: number[]; // oldest first
 };
 
 export async function loader({ request }: { request: Request }, now: Date = new Date()) {
@@ -195,6 +206,33 @@ export async function loader({ request }: { request: Request }, now: Date = new 
   });
   const latestMetrics = Array.from(latestByName.values());
 
+  // History values per metric name (oldest first) — highlight sparklines
+  const historyByName = new Map<string, Array<{ timestamp: string; value: number }>>();
+  allMetrics.forEach((m) => {
+    const arr = historyByName.get(m.name) || [];
+    arr.push({ timestamp: m.timestamp, value: m.value });
+    historyByName.set(m.name, arr);
+  });
+  historyByName.forEach((arr) =>
+    arr.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  );
+
+  // Recent highlights — most recently drawn metrics; prefer ones with a trend
+  const byRecency = [...latestMetrics].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+  const multiPoint = byRecency.filter((m) => (historyByName.get(m.name)?.length ?? 0) >= 2);
+  const singlePoint = byRecency.filter((m) => (historyByName.get(m.name)?.length ?? 0) < 2);
+  const highlights: Highlight[] = [...multiPoint, ...singlePoint].slice(0, 4).map((m) => ({
+    name: m.name,
+    category: m.category,
+    id: m.id,
+    value: m.value,
+    unit: m.unit,
+    status: getMetricStatus(m),
+    values: (historyByName.get(m.name) || []).map((h) => h.value),
+  }));
+
   const byCategory = (Object.keys(CATEGORY_INFO) as MetricCategory[]).reduce(
     (acc, cat) => {
       acc[cat] = latestMetrics.filter((m) => m.category === cat);
@@ -229,7 +267,9 @@ export async function loader({ request }: { request: Request }, now: Date = new 
     byCategory,
     statusCounts,
     totalMetrics: latestMetrics.length,
+    highlights,
     currentVersion: currentVersionObj?.version || "—",
+    totalVersions: sortedVersions.length,
     activeSupplements,
   };
 }
@@ -266,8 +306,8 @@ function StatTile({
   to: string;
 }) {
   return (
-    <Link to={to}>
-      <Card padding="md" interactive style={{ minHeight: 104, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+    <Link to={to} style={{ display: "flex" }}>
+      <Card padding="md" interactive style={{ flex: "1 1 auto", minHeight: 104, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div className="zt-eyebrow">{label}</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 10 }}>
           <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
@@ -287,7 +327,7 @@ function StatTile({
 
 function CorrRow({ c, last }: { c: DerivedCorrelation; last: boolean }) {
   const neg = c.correlation < 0;
-  const col = neg ? "var(--danger)" : "var(--vital-500, var(--vital))";
+  const col = neg ? "var(--deficient)" : "var(--vital-500, var(--vital))";
   const sign = c.correlation >= 0 ? "+" : "";
   return (
     <div
@@ -296,7 +336,7 @@ function CorrRow({ c, last }: { c: DerivedCorrelation; last: boolean }) {
         alignItems: "center",
         justifyContent: "space-between",
         gap: 16,
-        padding: "14px 0",
+        padding: "var(--gap-row) 0",
         borderBottom: last ? "none" : "1px solid var(--border)",
       }}
     >
@@ -325,7 +365,7 @@ function GeneRow({ g, last }: { g: DerivedVariant; last: boolean }) {
         alignItems: "flex-start",
         justifyContent: "space-between",
         gap: 16,
-        padding: "14px 0",
+        padding: "var(--gap-row) 0",
         borderBottom: last ? "none" : "1px solid var(--border)",
       }}
     >
@@ -369,6 +409,10 @@ function GeneRow({ g, last }: { g: DerivedVariant; last: boolean }) {
   );
 }
 
+// Category card — round-4 FRAME STRIP (one status dot per marker + mono
+// "N markers · n optimal" readout; icon tiles kept as the dashboard idiom).
+// Supersedes the round-3 CountDots/ring treatment — rings only ever read
+// true completion, never status share (BAKED).
 function CategoryCardItem({
   category,
   metrics,
@@ -379,55 +423,27 @@ function CategoryCardItem({
   const info = CATEGORY_INFO[category];
   const icon = LUCIDE_MAP[info.icon];
 
-  const statusCounts = metrics.reduce(
-    (acc, m) => {
-      const status = getMetricStatus(m);
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<MetricStatus, number>
-  );
-
-  const statuses: MetricStatus[] = ["optimal", "borderline", "deficient", "excess"];
+  const optimal = metrics.filter((m) => getMetricStatus(m) === "optimal").length;
 
   return (
-    <Link to={`/metrics/${category}`} style={{ height: "100%", display: "block" }}>
-      <Card interactive padding="lg" style={{ height: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 14 }}>
-          {icon && <CatChip icon={icon} family={info.family} size={42} />}
-          <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "var(--text-lg)", letterSpacing: "-0.01em" }}>
+    // W2a card-structure fix: anchors are flex containers, cards flex:1 —
+    // no height:100% inside grid-item anchors.
+    <Link to={`/metrics/${category}`} style={{ display: "flex", textDecoration: "none" }}>
+      <Card interactive padding="md" style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "var(--gap-lg)" }}>
+        {icon && <CatChip icon={icon} family={info.family} size={36} />}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text)" }}>
             {info.label}
           </div>
-        </div>
-        <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "var(--text-sm)", minHeight: 40 }}>
-          {info.description}
-        </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: 16,
-            paddingTop: 14,
-            borderTop: "1px solid var(--border)",
-          }}
-        >
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            {metrics.length} tracked
-          </span>
-          {/* CountDots: inline status dot row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {statuses.map((s) =>
-              (statusCounts[s] || 0) > 0 ? (
-                <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <StatusDot status={s} size={7} />
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
-                    {statusCounts[s]}
-                  </span>
-                </span>
-              ) : null
-            )}
+          <div className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)", marginTop: 2 }}>
+            {metrics.length} markers · {optimal} optimal
           </div>
+        </div>
+        {/* frame strip: one dot per marker */}
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 110 }}>
+          {metrics.map((m) => (
+            <StatusDot key={m.id} status={getMetricStatus(m)} size={10} />
+          ))}
         </div>
       </Card>
     </Link>
@@ -449,13 +465,16 @@ export default function Dashboard() {
     byCategory,
     statusCounts,
     totalMetrics,
+    highlights,
     currentVersion,
+    totalVersions,
     activeSupplements,
   } = loaderData;
 
   const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
   const needLook = (statusCounts.deficient || 0) + (statusCounts.excess || 0);
   const cessationComplete = cessationDay >= targetDay;
+  const pastTarget = cessationDay - targetDay;
   const phaseBarPhases = buildPhaseBarPhases(cessationDay, targetDay);
 
   // Eyebrow date
@@ -470,6 +489,45 @@ export default function Dashboard() {
         title="Dashboard"
         sub="Your signals, one frame at a time. 9 categories, tracked."
       />
+
+      {/* Phasing hero — round-3 rebuild: day readout leads, phase bar
+          carries the current-day marker. */}
+      <Card padding="lg">
+        <div
+          className="zt-hero-grid"
+          style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.5fr)", gap: "var(--gap-2xl)", alignItems: "center" }}
+        >
+          <div>
+            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
+              Phasing · {currentVersion}
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <span className="zt-readout" style={{ fontSize: "var(--text-4xl)", color: "var(--ink)" }}>
+                {cessationDay}
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", letterSpacing: "0.06em" }}>
+                / {targetDay} DAYS
+              </span>
+            </div>
+            <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 12 }}>
+              <strong style={{ color: "var(--ink)", fontWeight: 600 }}>{cessationPhase.label}</strong>
+              {" — "}
+              {cessationPhase.focus}
+            </div>
+            <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              {cessationComplete ? `${pastTarget} days past target` : `${-pastTarget} days to target`}
+            </div>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <PhaseBar phases={phaseBarPhases} height={16} day={cessationDay} />
+            <div style={{ marginTop: 14, textAlign: "right" }}>
+              <Link to="/protocol/cessation" className="zt-link">
+                Full timeline <ArrowRight size={14} strokeWidth={2} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Stat tiles — zt-grid-4 */}
       <div className="zt-grid-4">
@@ -496,49 +554,69 @@ export default function Dashboard() {
           to="/metrics"
         />
         <StatTile label="Active supplements" value={activeSupplements} to="/protocol/supplements" />
-        <StatTile label="Protocol version" value={currentVersion} unit="7 versions" to="/protocol/versions" />
+        <StatTile label="Protocol version" value={currentVersion} unit={`${totalVersions} versions`} to="/protocol/versions" />
       </div>
 
-      {/* Cessation + correlations — zt-grid-2 */}
-      <div className="zt-grid-2" style={{ alignItems: "start" }}>
-        <Card padding="lg">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
-              Cessation protocol
+      {/* Metric status — stat strip (round 4: no ring for status share) */}
+      <Card padding="lg">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-lg)" }}>
+          <div className="zt-eyebrow">Metric status</div>
+          <Link to="/metrics" className="zt-link" style={{ fontSize: "var(--text-xs)" }}>
+            All metrics <ArrowRight size={13} strokeWidth={2} />
+          </Link>
+        </div>
+        <div className="zt-stat-strip">
+          {(["optimal", "borderline", "deficient", "excess"] as MetricStatus[]).map((k) => (
+            <div key={k} className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8, display: "inline-flex", alignItems: "center", gap: 7 }}>
+                <StatusDot status={k} size={8} />
+                {k}
+              </div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {statusCounts[k] || 0}
+              </div>
             </div>
-            <Link
-              to="/protocol/cessation"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
-            >
-              View details →
-            </Link>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span className="zt-readout" style={{ fontSize: "var(--text-3xl)" }}>Day {cessationDay}</span>
-            {cessationComplete ? (
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--vital-500, var(--vital))" }}>· complete</span>
-            ) : (
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>of {targetDay}</span>
-            )}
-          </div>
-          <p style={{ margin: "8px 0 22px", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
-            {cessationComplete
-              ? `${targetDay}-day protocol complete — all phases finished.`
-              : `${cessationPhase.label} phase — ${cessationPhase.focus}.`}
-          </p>
-          <PhaseBar phases={phaseBarPhases} compact />
-        </Card>
+          ))}
+        </div>
+      </Card>
 
+      {/* Recent highlights — figure leads, delta-since-last + status sparkline */}
+      {highlights.length > 0 && (
+        <div>
+          <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-lg)" }}>Recent highlights</div>
+          <div className="zt-grid-4">
+            {highlights.map((m) => (
+              <Link key={m.id} to={`/metrics/${m.category}/${m.id}`} style={{ display: "flex", textDecoration: "none" }}>
+                <Card interactive padding="md" style={{ flex: "1 1 auto" }}>
+                  <div className="zt-eyebrow" style={{ marginBottom: 10 }}>{m.name}</div>
+                  <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)", marginBottom: 8 }}>
+                    {m.value}{" "}
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", fontWeight: 400, color: "var(--text-muted)", letterSpacing: "0.04em" }}>
+                      {m.unit}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8 }}>
+                    <Delta values={m.values} />
+                    {m.values.length >= 2 && (
+                      <Sparkline data={m.values} width={64} height={18} status={m.status} />
+                    )}
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Correlations + genetics — zt-grid-2 */}
+      <div className="zt-grid-2" style={{ alignItems: "start" }}>
         <Card padding="lg">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
               Top correlations
             </div>
-            <Link
-              to="/insights/correlations"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
-            >
-              View all · {stats.totalCorrelations} →
+            <Link to="/insights/correlations" className="zt-link" style={{ fontSize: "var(--text-xs)" }}>
+              View all · {stats.totalCorrelations} <ArrowRight size={13} strokeWidth={2} />
             </Link>
           </div>
           <div>
@@ -550,20 +628,14 @@ export default function Dashboard() {
             {stats.strongCorrelations} strong correlations (|r| ≥ 0.7)
           </div>
         </Card>
-      </div>
 
-      {/* Genetic insights + metric status — zt-grid-2 */}
-      <div className="zt-grid-2">
         <Card padding="lg">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
               Genetic insights
             </div>
-            <Link
-              to="/insights/genetics"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
-            >
-              View all · {stats.totalVariants} →
+            <Link to="/insights/genetics" className="zt-link" style={{ fontSize: "var(--text-xs)" }}>
+              View all · {stats.totalVariants} <ArrowRight size={13} strokeWidth={2} />
             </Link>
           </div>
           {highImpactVariants.map((g, i) => (
@@ -575,56 +647,9 @@ export default function Dashboard() {
             </div>
           )}
         </Card>
-
-        <Card padding="lg">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-md)" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-base)" }}>
-              Metric status
-            </div>
-            <Link
-              to="/metrics"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)" }}
-            >
-              View all →
-            </Link>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
-            <MetricRing
-              value={statusCounts.optimal || 0}
-              max={totalMetrics}
-              tone="vital"
-              size={132}
-              thickness={13}
-              label={statusCounts.optimal || 0}
-              sublabel="optimal"
-            />
-            <div style={{ flex: 1, minWidth: 180, display: "flex", flexDirection: "column", gap: 2 }}>
-              {(["optimal", "borderline", "deficient", "excess"] as MetricStatus[]).map((k) => (
-                <div
-                  key={k}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "8px 0",
-                    borderBottom: "1px solid var(--border)",
-                  }}
-                >
-                  <StatusDot status={k} />
-                  <span style={{ fontSize: "var(--text-sm)", textTransform: "capitalize", color: "var(--text-secondary)" }}>
-                    {k}
-                  </span>
-                  <span className="zt-tnum" style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-md)" }}>
-                    {statusCounts[k] || 0}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
       </div>
 
-      {/* Category grid — zt-grid-3 */}
+      {/* Category grid — zt-grid-3, frame-strip cards */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "var(--gap-lg)" }}>
           <div className="zt-eyebrow">Metric categories</div>

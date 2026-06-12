@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useCallback } from "react";
+import { useState, useLayoutEffect, useCallback, useRef, useEffect } from "react";
 import { Form, Link, useLoaderData, useActionData, useFetcher } from "react-router";
 import type { Route } from "./+types/index";
 import { Card } from "~/components/ui/Card";
@@ -7,7 +7,7 @@ import { Input } from "~/components/ui/Input";
 import { Switch } from "~/components/ui/Switch";
 import { Avatar } from "~/components/ui/Avatar";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Copy, Check, Plus, Trash2 } from "lucide-react";
+import { Copy, Check, Plus, X } from "lucide-react";
 import { requireUser, requireRole, can } from "~/lib/authz.server";
 import { generateInvite, listInvites } from "~/lib/invites.server";
 import { auth } from "~/lib/auth.server";
@@ -15,6 +15,27 @@ import { auth } from "~/lib/auth.server";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type InviteRow = Awaited<ReturnType<typeof listInvites>>[number];
+
+// ── Role-label mapping (W4c, INTEGRATION-PLAN role-name decision) ──────────────
+//
+// The design return proposes invite roles "Viewer" / "Clinician"; the schema enum
+// is owner / practitioner / client (db/schema.ts appRoleEnum). This is a UI-LABEL
+// mapping ONLY — no enum migration. The DB stores owner/practitioner/client; the
+// settings surface displays Owner / Clinician / Viewer.
+//   Clinician → practitioner   ·   Viewer → client   ·   Owner → owner
+const ROLE_LABEL: Record<string, string> = {
+  owner: "Owner",
+  practitioner: "Clinician",
+  client: "Viewer",
+};
+
+// Assignable roles for the inline create picker (never "owner" — owners aren't
+// invited). Each maps the design label to the schema enum the action expects.
+// Ordered Viewer → Clinician to match the design's pill order.
+const ASSIGNABLE_ROLES: { enumValue: "client" | "practitioner"; label: string; desc: string }[] = [
+  { enumValue: "client", label: "Viewer", desc: "Dashboards and trends" },
+  { enumValue: "practitioner", label: "Clinician", desc: "Adds lab documents and protocol detail" },
+];
 
 // ── Meta ──────────────────────────────────────────────────────────────────────
 
@@ -50,7 +71,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     invites = await listInvites(user.tenantId!);
   }
 
-  return { user, invites, canInviteClient, canInvitePractitioner, canManageAssignments };
+  // Map each invite's role enum to its display label here so the (client-rendered)
+  // component renders the designed Viewer/Clinician chips without re-deriving.
+  const inviteRows = invites.map((inv) => ({
+    ...inv,
+    roleLabel: ROLE_LABEL[inv.role] ?? inv.role,
+  }));
+
+  return { user, invites: inviteRows, canInviteClient, canInvitePractitioner, canManageAssignments };
 }
 
 // ── Action ────────────────────────────────────────────────────────────────────
@@ -216,146 +244,374 @@ function deriveInviteStatus(
   return "active";
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  active: "ACTIVE",
-  consumed: "USED",
-  expired: "EXPIRED",
-  revoked: "REVOKED",
+// Compact status word for the invite sub-line (design: "status · sent").
+const STATUS_WORD: Record<string, string> = {
+  active: "active",
+  consumed: "accepted",
+  expired: "expired",
+  revoked: "revoked",
 };
-
-const STATUS_STYLE: Record<
-  string,
-  { bg: string; color: string }
-> = {
-  active:   { bg: "var(--vital-50)",     color: "var(--vital-400)" },
-  consumed: { bg: "var(--surface-sunken)", color: "var(--text-faint)" },
-  expired:  { bg: "var(--surface-sunken)", color: "var(--text-muted)" },
-  revoked:  { bg: "var(--danger-bg)",    color: "var(--danger)" },
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_STYLE[status] ?? STATUS_STYLE.expired;
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        padding: "4px 8px",
-        borderRadius: "var(--radius-pill)",
-        background: s.bg,
-        color: s.color,
-        fontFamily: "var(--font-mono)",
-        fontSize: "var(--text-2xs)",
-        fontWeight: 400,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {STATUS_LABEL[status] ?? status.toUpperCase()}
-    </span>
-  );
-}
 
 function formatDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
 }
 
-// ── Generated link card ───────────────────────────────────────────────────────
+// ── Role chip (design: neutral zt-pill; Owner = accent) ────────────────────────
 
-function GeneratedLinkCard({
-  url,
-  role,
-  onDismiss,
-}: {
-  url: string;
-  role: string;
-  onDismiss: () => void;
-}) {
+function RoleChip({ label, accent = false }: { label: string; accent?: boolean }) {
+  return (
+    <span
+      style={{
+        padding: "4px 11px",
+        background: accent ? "var(--focus-50)" : "var(--surface-sunken)",
+        borderRadius: "var(--radius-pill)",
+        fontFamily: "var(--font-mono)",
+        fontSize: "var(--text-2xs)",
+        color: accent ? "var(--accent)" : "var(--text-secondary)",
+        textTransform: "uppercase",
+        letterSpacing: "0.1em",
+        display: "inline-block",
+        whiteSpace: "nowrap",
+        flex: "0 0 auto",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+// ── Copy-link affordance ───────────────────────────────────────────────────────
+//
+// The real invite model is a single-use, role-scoped TOKEN delivered by
+// copy-link — the invites table has no email column and no email-send path
+// (invites.server.ts / db schema). So "Send invite" mints a real link the owner
+// pastes to the intended recipient. The email field above is advisory recipient
+// context (the design idiom) — it gates the button per the design contract but is
+// not persisted (no column to store it). See deferred-items.md.
+
+function CopyLinkRow({ url, onDismiss }: { url: string; onDismiss: () => void }) {
   const [copied, setCopied] = useState(false);
-
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Fallback: focus the input so user can copy manually
+      /* clipboard unavailable — the link text is still selectable below */
     }
   }, [url]);
 
   return (
     <div
       style={{
-        position: "relative",
-        padding: "16px 20px",
+        display: "flex",
+        alignItems: "center",
+        gap: "var(--gap-md)",
+        padding: "var(--gap-row) var(--gap-card)",
+        borderBottom: "1px solid var(--border)",
         background: "var(--focus-50)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-xl)",
-        marginBottom: "var(--gap-xl)",
+        flexWrap: "wrap",
       }}
     >
-      {/* Dismiss button */}
-      <button
-        type="button"
-        aria-label="Dismiss invite link"
-        onClick={onDismiss}
-        style={{
-          position: "absolute",
-          top: 12,
-          right: 12,
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: "var(--text-muted)",
-          fontSize: 16,
-          lineHeight: 1,
-          padding: 4,
-        }}
-      >
-        ×
-      </button>
-
-      <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
-        INVITE LINK — {role.toUpperCase()} — EXPIRES IN 7 DAYS
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="zt-eyebrow" style={{ marginBottom: 3, color: "var(--accent)" }}>
+          INVITE LINK — COPY &amp; SEND — EXPIRES IN 7 DAYS
+        </div>
+        <div
+          title={url}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-xs)",
+            color: "var(--text)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {url}
+        </div>
       </div>
-
-      {/* URL display */}
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "var(--text-sm)",
-          background: "var(--surface-2)",
-          border: "1.5px solid var(--border-strong)",
-          borderRadius: "var(--radius-md)",
-          padding: "8px 12px",
-          wordBreak: "break-all",
-          color: "var(--text)",
-          marginBottom: 12,
-        }}
-        title={url}
-      >
-        {url}
-      </div>
-
-      {/* aria-live region for copy announcement */}
       <div aria-live="polite" style={{ position: "absolute", left: -9999 }}>
         {copied ? "Invite link copied to clipboard" : ""}
       </div>
-
-      <Button
-        variant="secondary"
-        size="sm"
-        iconLeft={copied ? <Check size={14} style={{ color: "var(--accent)" }} /> : <Copy size={14} />}
+      <button
+        type="button"
+        className="zt-pill"
         onClick={handleCopy}
+        style={{ flex: "0 0 auto" }}
       >
+        {copied ? <Check size={13} /> : <Copy size={13} />}
         {copied ? "Copied" : "Copy link"}
-      </Button>
+      </button>
+      <button type="button" className="zt-fact" title="Dismiss" onClick={onDismiss}>
+        <X size={14} strokeWidth={2} />
+      </button>
     </div>
+  );
+}
+
+// ── Revoke action (design: zt-fact, deficient hover) ──────────────────────────
+//
+// Uses a fetcher (NOT a navigating Form) so the POST to the action-only resource
+// route /settings/invites/:inviteId/revoke does not navigate away from /settings
+// to the route's bare JSON response. Mirrors the original InviteTableRowAction
+// fetcher pattern.
+
+function RevokeAction({ inviteId }: { inviteId: string }) {
+  const fetcher = useFetcher();
+  const submitting = fetcher.state !== "idle";
+  return (
+    <fetcher.Form method="post" action={`/settings/invites/${inviteId}/revoke`}>
+      <button
+        type="submit"
+        className="zt-fact"
+        title="Revoke invite"
+        disabled={submitting}
+        style={{ "--fact": "var(--deficient)", "--fact-bg": "var(--deficient-bg)" } as React.CSSProperties}
+      >
+        <X size={15} strokeWidth={2.2} />
+      </button>
+    </fetcher.Form>
+  );
+}
+
+// ── Invites flow (design W4c: inline expanding create row + list + revoke) ─────
+
+function InvitesFlow({
+  invites,
+  canInvitePractitioner,
+}: {
+  invites: (InviteRow & { roleLabel: string })[];
+  canInvitePractitioner: boolean;
+}) {
+  const actionData = useActionData<typeof action>();
+
+  const [adding, setAdding] = useState(false);
+  const [email, setEmail] = useState("");
+  // role holds the SCHEMA enum value the create action expects (client | practitioner).
+  const [role, setRole] = useState<"client" | "practitioner">("client");
+
+  // Owners may invite both roles; practitioners may invite Viewers (client) only.
+  const roles = canInvitePractitioner
+    ? ASSIGNABLE_ROLES
+    : ASSIGNABLE_ROLES.filter((r) => r.enumValue === "client");
+
+  // Design contract: Send gates on a parseable email (advisory recipient).
+  const valid = /.+@.+\..+/.test(email.trim());
+
+  // The most recent generated copy-link from the action (real backend result).
+  const generated =
+    actionData &&
+    "intent" in actionData &&
+    actionData.intent === "generate-invite" &&
+    actionData.success &&
+    "url" in actionData &&
+    actionData.url
+      ? { url: actionData.url as string }
+      : null;
+
+  const inviteError =
+    actionData &&
+    "intent" in actionData &&
+    actionData.intent === "generate-invite" &&
+    !actionData.success &&
+    "error" in actionData
+      ? (actionData.error as string)
+      : null;
+
+  const [dismissedLink, setDismissedLink] = useState(false);
+  const showLink = generated && !dismissedLink;
+
+  // Collapse the create row + reset its fields once a link is minted.
+  const lastUrlRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (generated && generated.url !== lastUrlRef.current) {
+      lastUrlRef.current = generated.url;
+      setAdding(false);
+      setEmail("");
+      setRole("client");
+      setDismissedLink(false);
+    }
+  }, [generated]);
+
+  return (
+    <section>
+      <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
+        INVITES · {invites.length}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 500,
+          fontSize: "var(--text-lg)",
+          marginBottom: 16,
+        }}
+      >
+        Invites
+      </div>
+
+      <Card padding="none" elevation="sm">
+        {/* inline expanding create row (owner pick, round 5) */}
+        {adding ? (
+          <Form
+            method="post"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--gap-md)",
+              padding: "var(--gap-row) var(--gap-card)",
+              borderBottom: "1px solid var(--border)",
+              flexWrap: "wrap",
+            }}
+          >
+            <input type="hidden" name="_intent" value="generate-invite" />
+            <input type="hidden" name="role" value={role} />
+            <input
+              className="zt-fedit"
+              type="email"
+              name="email"
+              placeholder="email@example.com"
+              aria-label="Invite recipient email"
+              autoFocus
+              value={email}
+              style={{ flex: "1 1 160px", minWidth: 0, width: "auto", textAlign: "left", fontSize: "var(--text-xs)" }}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setAdding(false);
+              }}
+            />
+            <span style={{ display: "flex", gap: 6, flex: "0 0 auto" }}>
+              {roles.map((r) => (
+                <button
+                  key={r.enumValue}
+                  type="button"
+                  className={"zt-pill" + (role === r.enumValue ? " is-active" : "")}
+                  style={{ padding: "4px 11px" }}
+                  title={r.desc}
+                  onClick={() => setRole(r.enumValue)}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </span>
+            <span style={{ display: "flex", gap: 4, alignItems: "center", flex: "0 0 auto" }}>
+              <button
+                type="submit"
+                className="zt-btn-ink"
+                style={{ padding: "6px 14px", fontSize: "var(--text-xs)" }}
+                disabled={!valid}
+              >
+                Send invite
+              </button>
+              <button type="button" className="zt-fact" title="Cancel" onClick={() => setAdding(false)}>
+                <X size={14} strokeWidth={2} />
+              </button>
+            </span>
+          </Form>
+        ) : (
+          <button
+            type="button"
+            className="zt-mrow"
+            onClick={() => setAdding(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              width: "100%",
+              border: "none",
+              borderBottom:
+                invites.length || showLink ? "1px solid var(--border)" : "none",
+              padding: "var(--gap-row) var(--gap-card)",
+              background: "none",
+              cursor: "pointer",
+              font: "inherit",
+              textAlign: "left",
+            }}
+          >
+            <Plus size={16} strokeWidth={2} color="var(--accent)" />
+            <span style={{ fontSize: "var(--text-sm)", fontWeight: 500, color: "var(--accent)" }}>
+              Invite by email
+            </span>
+          </button>
+        )}
+
+        {inviteError && (
+          <div
+            style={{
+              padding: "var(--gap-row) var(--gap-card)",
+              borderBottom: "1px solid var(--border)",
+              color: "var(--danger)",
+              fontSize: "var(--text-xs)",
+            }}
+          >
+            {inviteError}
+          </div>
+        )}
+
+        {/* real minted copy-link (the actual delivery artifact) */}
+        {showLink && (
+          <CopyLinkRow url={generated!.url} onDismiss={() => setDismissedLink(true)} />
+        )}
+
+        {invites.length === 0 ? (
+          <div style={{ padding: "var(--gap-lg) var(--gap-card)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+            No invitations yet.
+          </div>
+        ) : (
+          invites.map((inv, i) => {
+            const status = deriveInviteStatus(inv);
+            const isOwner = inv.role === "owner";
+            return (
+              <div
+                key={inv.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--gap-md)",
+                  padding: "var(--gap-row) var(--gap-card)",
+                  borderBottom: i < invites.length - 1 ? "1px solid var(--border)" : "none",
+                }}
+              >
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    className="zt-tnum"
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "var(--text-xs)",
+                      color: "var(--text)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    invite · {inv.id.slice(0, 8)}
+                  </div>
+                  <div className="zt-eyebrow" style={{ marginTop: 3, letterSpacing: "0.06em", color: "var(--text-faint)" }}>
+                    {STATUS_WORD[status] ?? status} · sent {formatDate(inv.createdAt)}
+                  </div>
+                </div>
+                <RoleChip label={inv.roleLabel} accent={isOwner} />
+                {status === "active" ? (
+                  <RevokeAction inviteId={inv.id} />
+                ) : (
+                  <span style={{ width: 28, textAlign: "center", color: "var(--text-faint)", fontSize: "var(--text-xs)" }}>—</span>
+                )}
+              </div>
+            );
+          })
+        )}
+      </Card>
+
+      {/* PROPOSED role-semantics caption under the card */}
+      <div style={{ marginTop: "var(--gap-md)", fontSize: "var(--text-xs)", color: "var(--text-muted)", textWrap: "pretty" }}>
+        <span className="zt-eyebrow" style={{ marginRight: 6 }}>PROPOSED</span>
+        {ASSIGNABLE_ROLES.map((r) => `${r.label} — ${r.desc.toLowerCase()}`).join(" · ")}
+      </div>
+    </section>
   );
 }
 
@@ -398,30 +654,6 @@ export default function SettingsPage() {
     setDarkMode(next);
   };
 
-  // ── Invite generate state ──────────────────────────────────────────────────
-  const [selectedRole, setSelectedRole] = useState<"practitioner" | "client">(
-    canInvitePractitioner ? "practitioner" : "client"
-  );
-  const [generatedLink, setGeneratedLink] = useState<{
-    url: string;
-    role: string;
-  } | null>(null);
-
-  // Stable reference to generated link from action data
-  const latestGenerated =
-    actionData &&
-    "intent" in actionData &&
-    actionData.intent === "generate-invite" &&
-    actionData.success &&
-    "url" in actionData &&
-    actionData.url &&
-    "role" in actionData &&
-    actionData.role
-      ? { url: actionData.url as string, role: actionData.role as string }
-      : null;
-
-  const activeGenerated = generatedLink ?? latestGenerated;
-
   // ── Derive intent-scoped action results ────────────────────────────────────
   const profileAction =
     actionData && "intent" in actionData && actionData.intent === "update-profile"
@@ -431,587 +663,175 @@ export default function SettingsPage() {
     actionData && "intent" in actionData && actionData.intent === "change-password"
       ? actionData
       : null;
-  const inviteAction =
-    actionData && "intent" in actionData && actionData.intent === "generate-invite"
-      ? actionData
-      : null;
-
-  // ── Coming soon section helper ─────────────────────────────────────────────
-  function ComingSoon({
-    eyebrow,
-    heading,
-  }: {
-    eyebrow: string;
-    heading: string;
-  }) {
-    return (
-      <Card
-        elevation="flat"
-        padding="lg"
-        style={{ background: "var(--surface-sunken)", cursor: "default" }}
-      >
-        <div
-          className="zt-eyebrow"
-          style={{ marginBottom: 8, color: "var(--text-muted)" }}
-        >
-          {eyebrow}
-        </div>
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 500,
-            fontSize: "var(--text-lg)",
-            color: "var(--text-muted)",
-            marginBottom: 12,
-          }}
-        >
-          {heading}
-        </div>
-        <p
-          style={{
-            margin: 0,
-            color: "var(--text-muted)",
-            fontSize: "var(--text-sm)",
-          }}
-        >
-          Coming in a future update.
-        </p>
-      </Card>
-    );
-  }
 
   return (
-    <div>
-      <PageHeader eyebrow="ACCOUNT" title="Account settings" />
+    <div data-screen-label="Settings">
+      <PageHeader eyebrow="ACCOUNT" title="Settings" />
 
-      <div
-        style={{
-          maxWidth: 680,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--gap-2xl)",
-        }}
-      >
-        {/* ── 1. PROFILE ──────────────────────────────────────────────────── */}
-        <Card elevation="sm" padding="lg">
-          <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
-            PROFILE
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 500,
-              fontSize: "var(--text-lg)",
-              marginBottom: 20,
-            }}
-          >
-            Profile
-          </div>
-
-          <Form method="post">
-            <input type="hidden" name="_intent" value="update-profile" />
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {/* Avatar + email row */}
-              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <Avatar name={user.name ?? ""} size={48} />
-                <Input
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={user.email}
-                  disabled
-                  style={{ flex: 1 }}
-                />
-              </div>
-
-              {/* Display name */}
-              <Input
-                label="Display name"
-                name="name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your name"
-              />
-
-              {/* Save feedback */}
-              {profileAction?.success && (
-                <p
-                  style={{
-                    margin: 0,
-                    color: "var(--vital-400)",
-                    fontSize: "var(--text-sm)",
-                  }}
-                >
-                  Changes saved.
-                </p>
-              )}
-              {"error" in (profileAction ?? {}) && profileAction?.error && (
-                <p
-                  style={{
-                    margin: 0,
-                    color: "var(--danger)",
-                    fontSize: "var(--text-sm)",
-                  }}
-                >
-                  {profileAction.error}
-                </p>
-              )}
-
-              <div>
-                <Button variant="primary" type="submit">
-                  Save changes
-                </Button>
-              </div>
-            </div>
-          </Form>
-        </Card>
-
-        {/* ── 2. SECURITY ─────────────────────────────────────────────────── */}
-        <Card elevation="sm" padding="lg">
-          <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
-            SECURITY
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 500,
-              fontSize: "var(--text-lg)",
-              marginBottom: 20,
-            }}
-          >
-            Security
-          </div>
-
-          <Form method="post">
-            <input type="hidden" name="_intent" value="change-password" />
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <Input
-                label="Current password"
-                name="currentPassword"
-                type="password"
-                placeholder="Enter your current password"
-                error={
-                  passwordAction &&
-                  "errorField" in passwordAction &&
-                  passwordAction.errorField === "currentPassword"
-                    ? (passwordAction.error as string)
-                    : null
-                }
-              />
-              <Input
-                label="New password"
-                name="newPassword"
-                type="password"
-                placeholder="At least 8 characters"
-                error={
-                  passwordAction &&
-                  "errorField" in passwordAction &&
-                  passwordAction.errorField === "newPassword"
-                    ? (passwordAction.error as string)
-                    : null
-                }
-              />
-              <Input
-                label="Confirm new password"
-                name="confirmPassword"
-                type="password"
-                placeholder="Repeat your new password"
-                error={
-                  passwordAction &&
-                  "errorField" in passwordAction &&
-                  passwordAction.errorField === "confirmPassword"
-                    ? (passwordAction.error as string)
-                    : null
-                }
-              />
-
-              {passwordAction?.success && (
-                <p
-                  style={{
-                    margin: 0,
-                    color: "var(--vital-400)",
-                    fontSize: "var(--text-sm)",
-                  }}
-                >
-                  Password updated.
-                </p>
-              )}
-
-              <div>
-                <Button variant="primary" type="submit">
-                  Save password
-                </Button>
-              </div>
-            </div>
-          </Form>
-        </Card>
-
-        {/* ── 3. INVITES (Task 2 fills this) ──────────────────────────────── */}
-        {canInviteClient && (
-          <Card elevation="sm" padding="lg">
-            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
-              INVITES
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 500,
-                fontSize: "var(--text-lg)",
-                marginBottom: 20,
-              }}
-            >
-              Invites
-            </div>
-
-            {/* invite panel — Task 2 */}
-
-            {/* Role selector */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              {canInvitePractitioner && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("practitioner")}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "var(--radius-pill)",
-                    border: "1.5px solid",
-                    borderColor:
-                      selectedRole === "practitioner"
-                        ? "transparent"
-                        : "var(--border-strong)",
-                    background:
-                      selectedRole === "practitioner"
-                        ? "var(--ink)"
-                        : "var(--surface)",
-                    color:
-                      selectedRole === "practitioner"
-                        ? "var(--n-50)"
-                        : "var(--text)",
-                    fontFamily: "var(--font-text)",
-                    fontSize: "var(--text-sm)",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    transition: "background var(--dur-fast) var(--ease-out)",
-                  }}
-                >
-                  Practitioner
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setSelectedRole("client")}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "var(--radius-pill)",
-                  border: "1.5px solid",
-                  borderColor:
-                    selectedRole === "client"
-                      ? "transparent"
-                      : "var(--border-strong)",
-                  background:
-                    selectedRole === "client" ? "var(--ink)" : "var(--surface)",
-                  color:
-                    selectedRole === "client" ? "var(--n-50)" : "var(--text)",
-                  fontFamily: "var(--font-text)",
-                  fontSize: "var(--text-sm)",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "background var(--dur-fast) var(--ease-out)",
-                }}
-              >
-                Client
-              </button>
-            </div>
-
-            {/* Generate invite form */}
-            <Form method="post" style={{ marginBottom: 24 }}>
-              <input type="hidden" name="_intent" value="generate-invite" />
-              <input type="hidden" name="role" value={selectedRole} />
-              <Button
-                variant="primary"
-                type="submit"
-                iconLeft={<Plus size={16} />}
-              >
-                Generate invite link
-              </Button>
-              {inviteAction && "error" in inviteAction && inviteAction.error && (
-                <p
-                  style={{
-                    marginTop: 8,
-                    marginBottom: 0,
-                    color: "var(--danger)",
-                    fontSize: "var(--text-sm)",
-                  }}
-                >
-                  {inviteAction.error as string}
-                </p>
-              )}
-            </Form>
-
-            {/* Generated link card */}
-            {activeGenerated && (
-              <GeneratedLinkCard
-                url={activeGenerated.url}
-                role={activeGenerated.role}
-                onDismiss={() => setGeneratedLink(null)}
-              />
-            )}
-
-            {/* Active invites table */}
-            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
-              ACTIVE INVITES
-            </div>
-
-            {invites.length === 0 ? (
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-muted)",
-                  fontSize: "var(--text-sm)",
-                  textAlign: "center",
-                  padding: "24px 0",
-                }}
-              >
-                No active invites. Generate a link to invite a team member.
-              </p>
-            ) : (
-              <div
-                style={{
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-md)",
-                  overflow: "auto",
-                }}
-              >
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: "var(--text-sm)",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid var(--border)",
-                        background: "var(--surface-sunken)",
-                      }}
-                    >
-                      {["ROLE", "STATUS", "EXPIRES", "CREATED", "ACTION"].map(
-                        (col) => (
-                          <th
-                            key={col}
-                            style={{
-                              padding: "10px 14px",
-                              textAlign: "left",
-                              fontFamily: "var(--font-mono)",
-                              fontSize: "var(--text-2xs)",
-                              color: "var(--text-muted)",
-                              fontWeight: 400,
-                            }}
-                          >
-                            {col}
-                          </th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invites.map((invite, i) => (
-                      <tr
-                        key={invite.id}
+      {/* Asymmetric split (account 1 / invites 1.6) via zt-settings-grid (W0). */}
+      <div className="zt-settings-grid">
+        {/* ── LEFT COLUMN — account ───────────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap-xl)" }}>
+          {/* PROFILE */}
+          <section>
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>PROFILE</div>
+            <Card elevation="sm" padding="lg">
+              <Form method="post">
+                <input type="hidden" name="_intent" value="update-profile" />
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <Avatar name={user.name ?? ""} size={48} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontWeight: 600 }}>{user.name || "Owner"}</div>
+                      <div
                         style={{
-                          borderTop:
-                            i > 0 ? "1px solid var(--border)" : "none",
+                          fontSize: "var(--text-sm)",
+                          color: "var(--text-muted)",
+                          fontFamily: "var(--font-mono)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
+                        title={user.email}
                       >
-                        <td
-                          style={{
-                            padding: "12px 14px",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: "var(--text-sm)",
-                            textTransform: "uppercase",
-                            color: "var(--text-secondary)",
-                          }}
-                        >
-                          {invite.role}
-                        </td>
-                        <td style={{ padding: "12px 14px" }}>
-                          <StatusBadge status={deriveInviteStatus(invite)} />
-                        </td>
-                        <td
-                          style={{
-                            padding: "12px 14px",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: "var(--text-xs)",
-                            color: "var(--text-muted)",
-                          }}
-                        >
-                          {formatDate(invite.expiresAt)}
-                        </td>
-                        <td
-                          style={{
-                            padding: "12px 14px",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: "var(--text-xs)",
-                            color: "var(--text-muted)",
-                          }}
-                        >
-                          {formatDate(invite.createdAt)}
-                        </td>
-                        <td style={{ padding: "12px 14px" }}>
-                          <InviteTableRowAction invite={invite} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
+                        {user.email}
+                      </div>
+                    </div>
+                    <RoleChip label={ROLE_LABEL[user.role ?? ""] ?? user.role ?? "—"} accent={user.role === "owner"} />
+                  </div>
+
+                  <Input
+                    label="Display name"
+                    name="name"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Your name"
+                  />
+
+                  {profileAction?.success && (
+                    <p style={{ margin: 0, color: "var(--vital-400)", fontSize: "var(--text-sm)" }}>
+                      Changes saved.
+                    </p>
+                  )}
+                  {"error" in (profileAction ?? {}) && profileAction?.error && (
+                    <p style={{ margin: 0, color: "var(--danger)", fontSize: "var(--text-sm)" }}>
+                      {profileAction.error}
+                    </p>
+                  )}
+
+                  <div>
+                    <Button variant="primary" type="submit">Save changes</Button>
+                  </div>
+                </div>
+              </Form>
+            </Card>
+          </section>
+
+          {/* SECURITY */}
+          <section>
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>SECURITY</div>
+            <Card elevation="sm" padding="lg">
+              <Form method="post">
+                <input type="hidden" name="_intent" value="change-password" />
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <Input
+                    label="Current password"
+                    name="currentPassword"
+                    type="password"
+                    placeholder="Enter your current password"
+                    error={
+                      passwordAction &&
+                      "errorField" in passwordAction &&
+                      passwordAction.errorField === "currentPassword"
+                        ? (passwordAction.error as string)
+                        : null
+                    }
+                  />
+                  <Input
+                    label="New password"
+                    name="newPassword"
+                    type="password"
+                    placeholder="At least 8 characters"
+                    error={
+                      passwordAction &&
+                      "errorField" in passwordAction &&
+                      passwordAction.errorField === "newPassword"
+                        ? (passwordAction.error as string)
+                        : null
+                    }
+                  />
+                  <Input
+                    label="Confirm new password"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Repeat your new password"
+                    error={
+                      passwordAction &&
+                      "errorField" in passwordAction &&
+                      passwordAction.errorField === "confirmPassword"
+                        ? (passwordAction.error as string)
+                        : null
+                    }
+                  />
+
+                  {passwordAction?.success && (
+                    <p style={{ margin: 0, color: "var(--vital-400)", fontSize: "var(--text-sm)" }}>
+                      Password updated.
+                    </p>
+                  )}
+
+                  <div>
+                    <Button variant="primary" type="submit">Save password</Button>
+                  </div>
+                </div>
+              </Form>
+            </Card>
+          </section>
+
+          {/* PREFERENCES */}
+          <section>
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>PREFERENCES</div>
+            <Card elevation="sm" padding="lg">
+              <Switch
+                tone="focus"
+                size="md"
+                checked={darkMode}
+                onChange={handleThemeToggle}
+                label="Dark mode"
+              />
+            </Card>
+          </section>
+
+          {/* ASSIGNMENTS (owner-only) */}
+          {canManageAssignments && (
+            <section>
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>ASSIGNMENTS</div>
+              <Card elevation="sm" padding="lg">
+                <p style={{ margin: "0 0 16px", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+                  Assign subjects to practitioners to grant them scoped access (AUTH-03).
+                </p>
+                <Link to="/settings/assignments">
+                  <Button variant="secondary" size="sm">Manage assignments</Button>
+                </Link>
+              </Card>
+            </section>
+          )}
+        </div>
+
+        {/* ── RIGHT COLUMN — invites (the wider 1.6 track) ────────────────── */}
+        {canInviteClient ? (
+          <InvitesFlow invites={invites} canInvitePractitioner={canInvitePractitioner} />
+        ) : (
+          <section>
+            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>INVITES</div>
+            <Card elevation="sm" padding="lg">
+              <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+                Inviting team members isn&apos;t available for your role.
+              </p>
+            </Card>
+          </section>
         )}
-
-        {/* ── 4. ASSIGNMENTS (owner-only) ─────────────────────────────────── */}
-        {canManageAssignments && (
-          <Card elevation="sm" padding="lg">
-            <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
-              ASSIGNMENTS
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 500,
-                fontSize: "var(--text-lg)",
-                marginBottom: 12,
-              }}
-            >
-              Practitioner assignments
-            </div>
-            <p
-              style={{
-                margin: "0 0 16px",
-                color: "var(--text-secondary)",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              Assign subjects to practitioners to grant them scoped access (AUTH-03).
-            </p>
-            <Link to="/settings/assignments">
-              <Button variant="secondary" size="sm">
-                Manage assignments
-              </Button>
-            </Link>
-          </Card>
-        )}
-
-        {/* ── 5. PREFERENCES ──────────────────────────────────────────────── */}
-        <Card elevation="sm" padding="lg">
-          <div className="zt-eyebrow" style={{ marginBottom: 8 }}>
-            PREFERENCES
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 500,
-              fontSize: "var(--text-lg)",
-              marginBottom: 20,
-            }}
-          >
-            Preferences
-          </div>
-
-          <Switch
-            tone="focus"
-            size="md"
-            checked={darkMode}
-            onChange={handleThemeToggle}
-            label="Dark mode"
-          />
-        </Card>
-
-        {/* ── 6–9. Coming soon placeholders ───────────────────────────────── */}
-        <ComingSoon eyebrow="INTEGRATIONS" heading="Integrations" />
-        <ComingSoon eyebrow="DATA EXPORT" heading="Data export" />
-        <ComingSoon eyebrow="PRIVACY & CONSENT" heading="Privacy & consent" />
-        <ComingSoon eyebrow="UNITS & DISPLAY" heading="Units & display" />
       </div>
     </div>
-  );
-}
-
-// ── InviteTableRowAction (used in Tasks 2/3 — wires revoke inline confirm) ────
-
-function InviteTableRowAction({ invite }: { invite: InviteRow }) {
-  const [confirming, setConfirming] = useState(false);
-  const fetcher = useFetcher();
-  const status = deriveInviteStatus(invite);
-
-  const effectiveStatus =
-    fetcher.data && (fetcher.data as { success?: boolean }).success
-      ? "revoked"
-      : status;
-
-  if (effectiveStatus !== "active") {
-    return (
-      <span
-        style={{
-          fontSize: "var(--text-xs)",
-          color: "var(--text-faint)",
-        }}
-      >
-        —
-      </span>
-    );
-  }
-
-  if (confirming) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <span
-          style={{
-            fontSize: "var(--text-sm)",
-            color: "var(--danger)",
-          }}
-        >
-          Revoke this invite? This cannot be undone.
-        </span>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setConfirming(false)}
-          >
-            Keep invite
-          </Button>
-          <fetcher.Form
-            method="post"
-            action={`/settings/invites/${invite.id}/revoke`}
-          >
-            <Button
-              variant="danger"
-              size="sm"
-              type="submit"
-              onClick={() => setConfirming(false)}
-            >
-              Revoke invite
-            </Button>
-          </fetcher.Form>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      iconLeft={<Trash2 size={13} />}
-      onClick={() => setConfirming(true)}
-      style={{ color: "var(--danger)" }}
-    >
-      Revoke invite
-    </Button>
   );
 }

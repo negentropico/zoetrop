@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/supplements";
 import { requireSubjectCtx } from "~/lib/authz.server";
@@ -58,7 +57,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-// Tier badge using brand tones
+// Tier badge using brand tones (tier-definitions card)
 function TierBadge({ tier }: { tier: SupplementTier }) {
   const toneMap: Record<SupplementTier, "vital" | "focus" | "energy" | "neutral"> = {
     tier1: "vital",
@@ -70,101 +69,69 @@ function TierBadge({ tier }: { tier: SupplementTier }) {
   return <Badge tone={toneMap[tier] || "neutral"}>{info.label}</Badge>;
 }
 
-function SupplementCard({ supplement }: { supplement: DBSupplement }) {
-  const [expanded, setExpanded] = useState(false);
+// Tier color dot — round 3: tier label carries a color dot (the left-border
+// accent treatment is dropped).
+const TIER_DOT: Record<SupplementTier, string> = {
+  tier1: "var(--vital)",
+  tier2: "var(--focus)",
+  tier3: "var(--energy)",
+  as_needed: "var(--n-300)",
+};
 
+// Round-3 tier section sublabels (prototype: "Tier 1 — Core" etc.)
+const TIER_SUB: Record<SupplementTier, string> = {
+  tier1: "Core",
+  tier2: "Targeted",
+  tier3: "Conditional",
+  as_needed: "Situational",
+};
+
+// Supplement row — frame-card list row: name with rationale visible under
+// it (no expansion), mono dose, timing (round 3).
+function SupplementRow({ supplement, last }: { supplement: DBSupplement; last: boolean }) {
+  const rationale = [supplement.notes, supplement.geneticBasis].filter(Boolean).join(" · ");
   return (
-    <Card
-      padding="md"
-      style={{ opacity: supplement.isActive ? 1 : 0.6 }}
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr)",
+        gap: "var(--gap-xl)",
+        padding: "var(--gap-row) var(--gap-card)",
+        borderBottom: last ? "none" : "1px solid var(--border)",
+        alignItems: "center",
+        opacity: supplement.isActive ? 1 : 0.55,
+      }}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <span style={{ fontWeight: 500, color: "var(--ink)", fontSize: "var(--text-sm)" }}>
-              {supplement.name}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontWeight: 500, color: "var(--text)", fontSize: "var(--text-sm)" }}>
+          {supplement.name}
+          {!supplement.isActive && (
+            <span style={{ marginLeft: 8, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              inactive
             </span>
-            <TierBadge tier={supplement.tier as SupplementTier} />
-            {!supplement.isActive && (
-              <Badge tone="neutral">Inactive</Badge>
-            )}
-          </div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-            {supplement.dosage} {supplement.unit} · {supplement.frequency}
-            {supplement.timing && ` · ${supplement.timing}`}
-          </div>
+          )}
         </div>
-        <button
-          onClick={() => setExpanded(!expanded)}
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--border)",
-            background: "var(--surface-2)",
-            color: "var(--text-muted)",
-            cursor: "pointer",
-            fontFamily: "var(--font-mono)",
-            fontSize: "var(--text-base)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            marginLeft: 8,
-          }}
-          aria-label={expanded ? "Collapse" : "Expand"}
-        >
-          {expanded ? "−" : "+"}
-        </button>
+        {rationale && (
+          <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 3, textWrap: "pretty" }}>
+            {rationale}
+          </div>
+        )}
       </div>
-
-      {expanded && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
-          {supplement.geneticBasis && (
-            <div style={{ marginBottom: 8, fontSize: "var(--text-sm)" }}>
-              <span style={{ color: "var(--text-muted)" }}>Genetic basis: </span>
-              <span style={{ color: "var(--ink)" }}>{supplement.geneticBasis}</span>
-            </div>
-          )}
-          {supplement.notes && (
-            <div style={{ marginBottom: 8, fontSize: "var(--text-sm)" }}>
-              <span style={{ color: "var(--text-muted)" }}>Notes: </span>
-              <span style={{ color: "var(--ink)" }}>{supplement.notes}</span>
-            </div>
-          )}
-          <div style={{ display: "flex", gap: 8, paddingTop: 8 }}>
-            <button
-              style={{ padding: "6px 12px", fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", background: "var(--surface-2)", color: "var(--text-secondary)", cursor: "pointer" }}
-            >
-              Edit
-            </button>
-            <button
-              style={{ padding: "6px 12px", fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", background: "var(--surface-2)", color: "var(--text-secondary)", cursor: "pointer" }}
-            >
-              {supplement.isActive ? "Deactivate" : "Activate"}
-            </button>
-          </div>
-        </div>
-      )}
-    </Card>
+      <div className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text)" }}>
+        {supplement.dosage} {supplement.unit} · {supplement.frequency}
+      </div>
+      <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+        {supplement.timing || "—"}
+      </div>
+    </div>
   );
 }
 
 export default function Supplements({ loaderData }: Route.ComponentProps) {
-  const { supplements, byTier, stats } = loaderData;
+  const { byTier, stats } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const tierFilter = searchParams.get("tier") as SupplementTier | null;
   const showInactive = searchParams.get("inactive") === "true";
-
-  // Filter supplements
-  let filtered = supplements as DBSupplement[];
-  if (tierFilter) {
-    filtered = filtered.filter((s) => s.tier === tierFilter);
-  }
-  if (!showInactive) {
-    filtered = filtered.filter((s) => s.isActive);
-  }
 
   const tiers = Object.keys(SUPPLEMENT_TIERS) as SupplementTier[];
 
@@ -173,111 +140,78 @@ export default function Supplements({ loaderData }: Route.ComponentProps) {
       <PageHeader
         eyebrow="SUPPLEMENTS BY TIER"
         title="Supplements"
-        sub="Your active supplement stack, organized by tier."
+        sub="Protocol-graded supplement stack."
+        right={
+          <label className="zt-pill" style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => {
+                const newParams = new URLSearchParams(searchParams);
+                if (e.target.checked) {
+                  newParams.set("inactive", "true");
+                } else {
+                  newParams.delete("inactive");
+                }
+                setSearchParams(newParams);
+              }}
+              style={{ accentColor: "var(--accent)" }}
+            />
+            Show inactive
+          </label>
+        }
       />
 
-      {/* Stats */}
-      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-xl)" }}>
-        {[
-          { label: "Active", value: stats.active },
-          { label: "Daily items", value: stats.dailyCount },
-          { label: "Genetic-based", value: stats.withGenetic },
-          { label: "Tier 1", value: byTier.tier1?.length || 0 },
-        ].map(({ label, value }) => (
-          <Card key={label} padding="md" style={{ minHeight: 90, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            <div className="zt-eyebrow">{label}</div>
-            <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
-              {value}
-            </span>
-          </Card>
-        ))}
-      </div>
-
-      {/* Tier filter pills */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: "var(--gap-xl)" }}>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <button
-            onClick={() => {
-              const newParams = new URLSearchParams(searchParams);
-              newParams.delete("tier");
-              setSearchParams(newParams);
-            }}
-            style={{
-              padding: "9px 14px",
-              borderRadius: "var(--radius-pill)",
-              border: `1px solid ${!tierFilter ? "var(--ink)" : "var(--border)"}`,
-              background: !tierFilter ? "var(--ink)" : "var(--surface)",
-              color: !tierFilter ? "var(--n-50)" : "var(--text-secondary)",
-              fontFamily: "var(--font-text)",
-              fontSize: "var(--text-sm)",
-              fontWeight: !tierFilter ? 600 : 500,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >
-            All tiers
-          </button>
-          {tiers.map((tier) => {
-            const info = SUPPLEMENT_TIERS[tier];
-            const count = byTier[tier]?.filter((s) => showInactive || s.isActive).length || 0;
-            const isActive = tierFilter === tier;
-            return (
-              <button
-                key={tier}
-                onClick={() => {
-                  const newParams = new URLSearchParams(searchParams);
-                  newParams.set("tier", tier);
-                  setSearchParams(newParams);
-                }}
-                style={{
-                  padding: "9px 14px",
-                  borderRadius: "var(--radius-pill)",
-                  border: `1px solid ${isActive ? "var(--ink)" : "var(--border)"}`,
-                  background: isActive ? "var(--ink)" : "var(--surface)",
-                  color: isActive ? "var(--n-50)" : "var(--text-secondary)",
-                  fontFamily: "var(--font-text)",
-                  fontSize: "var(--text-sm)",
-                  fontWeight: isActive ? 600 : 500,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {info.label} ({count})
-              </button>
-            );
-          })}
+      {/* Stats — stat strip card (round 3) */}
+      <Card padding="lg" style={{ marginBottom: "var(--gap-section)" }}>
+        <div className="zt-stat-strip">
+          {[
+            { label: "Active", value: stats.active },
+            { label: "Daily items", value: stats.dailyCount },
+            { label: "Genetic-based", value: stats.withGenetic },
+            { label: "Tier 1", value: byTier.tier1?.length || 0 },
+          ].map(({ label, value }) => (
+            <div key={label} className="zt-stat">
+              <div className="zt-eyebrow" style={{ marginBottom: 8 }}>{label}</div>
+              <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>
+                {value}
+              </div>
+            </div>
+          ))}
         </div>
+      </Card>
 
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", color: "var(--text-secondary)", cursor: "pointer" }}>
-          <input
-            type="checkbox"
-            checked={showInactive}
-            onChange={(e) => {
-              const newParams = new URLSearchParams(searchParams);
-              if (e.target.checked) {
-                newParams.set("inactive", "true");
-              } else {
-                newParams.delete("inactive");
-              }
-              setSearchParams(newParams);
-            }}
-          />
-          Show inactive
-        </label>
-      </div>
-
-      {/* Supplement grid */}
-      <div className="zt-grid-2" style={{ marginBottom: "var(--gap-xl)" }}>
-        {filtered.map((supplement) => (
-          <SupplementCard key={supplement.id} supplement={supplement} />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div style={{ textAlign: "center", padding: "var(--gap-3xl) 0", color: "var(--text-muted)", fontFamily: "var(--font-text)" }}>
-          No supplements match the current filters.
-        </div>
-      )}
+      {/* Tier sections — tier label with color dot (left-border accent
+          dropped); rationale visible under each name; mono doses. */}
+      {tiers.map((tier) => {
+        const info = SUPPLEMENT_TIERS[tier];
+        const tierSupps = ((byTier[tier] as DBSupplement[] | undefined) || []).filter(
+          (s) => showInactive || s.isActive
+        );
+        if (tierSupps.length === 0) return null;
+        return (
+          <section key={tier} className="zt-section">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "var(--gap-lg)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: TIER_DOT[tier], flex: "0 0 auto" }} />
+              <div className="zt-eyebrow" style={{ color: "var(--text-secondary)" }}>
+                {info.label} — {TIER_SUB[tier]}
+              </div>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>
+                {tierSupps.length}
+              </span>
+            </div>
+            <Card padding="none">
+              {tierSupps.map((supplement, i) => (
+                <SupplementRow
+                  key={supplement.id}
+                  supplement={supplement}
+                  last={i === tierSupps.length - 1}
+                />
+              ))}
+            </Card>
+          </section>
+        );
+      })}
 
       {/* Tier definitions */}
       <Card padding="lg">

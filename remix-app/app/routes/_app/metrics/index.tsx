@@ -160,6 +160,10 @@ function FilterPill({
   );
 }
 
+// Round-5 mobile fix (spirit): the old fixed grid
+// (18px/1.4fr/1.6fr/132px) starved the name column at 390px. Columns are
+// now flexible (value column sizes to content) and the range bar drops to
+// its own row under the name at ≤480px (see the style block in the page).
 function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
   const status = getMetricStatus(metric);
   const rangeM = toRangeBarMetric(metric);
@@ -170,13 +174,13 @@ function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
       style={{ textDecoration: "none" }}
     >
       <div
-        className="zt-mrow"
+        className="zt-mrow zt-metric-row"
         style={{
           display: "grid",
-          gridTemplateColumns: "18px minmax(0,1.4fr) minmax(0,1.6fr) 132px",
+          gridTemplateColumns: "18px minmax(0,1.4fr) minmax(0,1.6fr) max-content",
           alignItems: "center",
           gap: 16,
-          padding: "12px 12px",
+          padding: "var(--gap-row) 12px",
         }}
       >
         <StatusDot status={status} />
@@ -192,7 +196,9 @@ function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
         >
           {metric.name}
         </span>
-        {rangeM ? <RangeBar m={rangeM} height={6} /> : <div />}
+        <span className="zt-metric-range" style={{ minWidth: 0 }}>
+          {rangeM ? <RangeBar m={rangeM} height={6} /> : null}
+        </span>
         <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
           <span
             className="zt-tnum"
@@ -204,7 +210,7 @@ function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "var(--text-2xs)",
-              color: "var(--text-muted)",
+              color: "var(--text-faint)",
               marginLeft: 6,
               // No uppercase: preserves case-sensitive units and the micro sign
               // µ (uppercasing maps µ→Μ → "µmol/L" renders as "MMOL/L").
@@ -229,18 +235,14 @@ function CategorySection({
   const icon = LUCIDE_MAP[info.icon];
   if (metrics.length === 0) return null;
 
-  const statusCounts = metrics.reduce(
-    (acc, m) => {
-      const status = getMetricStatus(m);
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<MetricStatus, number>
-  );
+  const optimal = metrics.filter((m) => getMetricStatus(m) === "optimal").length;
 
   return (
     <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
-      {/* Category header */}
+      {/* Category header — round-4 FRAME STRIP (owner pick, exploration A):
+          one status dot per marker + mono "N markers · n optimal" readout.
+          Supersedes the round-3 ring/CountDots treatments — a ring never
+          reads status share (BAKED). */}
       <div
         style={{
           display: "flex",
@@ -252,33 +254,28 @@ function CategorySection({
         }}
       >
         {icon && <CatChip icon={icon} family={info.family} size={34} />}
-        <Link
-          to={`/metrics/${category}`}
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 500,
-            fontSize: "var(--text-lg)",
-            color: "var(--ink)",
-            textDecoration: "none",
-          }}
-        >
-          {info.label}
-        </Link>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>
-          {metrics.length}
-        </span>
-        {/* Status count dots */}
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-          {(["optimal", "borderline", "deficient", "excess"] as MetricStatus[]).map((s) =>
-            (statusCounts[s] || 0) > 0 ? (
-              <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                <StatusDot status={s} size={8} />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
-                  {statusCounts[s]}
-                </span>
-              </span>
-            ) : null
-          )}
+        <div style={{ minWidth: 0 }}>
+          <Link
+            to={`/metrics/${category}`}
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 500,
+              fontSize: "var(--text-lg)",
+              color: "var(--ink)",
+              textDecoration: "none",
+            }}
+          >
+            {info.label}
+          </Link>
+          <div className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)", marginTop: 2 }}>
+            {metrics.length} markers · {optimal} optimal
+          </div>
+        </div>
+        {/* frame strip: one dot per marker */}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 140 }}>
+          {metrics.map((m) => (
+            <StatusDot key={m.id} status={getMetricStatus(m)} size={10} />
+          ))}
         </div>
       </div>
       {/* Metric rows */}
@@ -427,6 +424,21 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
           Value
         </span>
       </div>
+
+      {/* Round-5 mobile fix: at ≤480px the range bar drops to its own row so
+          the metric name keeps usable width at 390px. */}
+      <style>{`
+        @media (max-width: 480px) {
+          .zt-metric-row {
+            grid-template-columns: 18px minmax(0, 1fr) max-content !important;
+            row-gap: 8px !important;
+          }
+          .zt-metric-row > .zt-metric-range {
+            grid-column: 2 / -1;
+            grid-row: 2;
+          }
+        }
+      `}</style>
     </div>
   );
 }

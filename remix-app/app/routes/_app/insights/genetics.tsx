@@ -12,7 +12,6 @@ import {
 } from "~/types/genetics";
 import { Badge } from "~/components/ui/Badge";
 import { Card } from "~/components/ui/Card";
-import { DataTable } from "~/components/ui/DataTable";
 import { PageHeader } from "~/components/ui/PageHeader";
 
 // One tone per confidence level — shared by the stat tiles, the table badges,
@@ -22,6 +21,15 @@ const CONF_TONE: Record<ConfidenceLevel, "vital" | "focus" | "energy" | "neutral
   K2: "focus",
   K3: "energy",
   K4: "neutral",
+};
+
+// Mono-word color per confidence level (gene-row right column; the round-4
+// dark remaps keep vital/energy-500 readable as text on dark cards).
+const CONF_COLOR: Record<ConfidenceLevel, string> = {
+  K1: "var(--vital-500, var(--vital))",
+  K2: "var(--accent)",
+  K3: "var(--energy-500, var(--energy))",
+  K4: "var(--text-muted)",
 };
 
 export function meta({}: Route.MetaArgs) {
@@ -127,86 +135,6 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
 
   const categories = Object.keys(VARIANT_CATEGORIES) as VariantCategory[];
   const confidenceLevels = Object.keys(CONFIDENCE_LEVELS) as ConfidenceLevel[];
-
-  // DataTable columns
-  type VRow = {
-    id: number;
-    gene: string;
-    rsid?: string | null;
-    genotype: string;
-    confidence: ConfidenceLevel;
-    impact: string;
-    category: VariantCategory;
-    clinicalImplication: string;
-    protocolAction: string;
-  };
-
-  const columns = [
-    {
-      key: "gene" as keyof VRow & string,
-      label: "Gene",
-      render: (v: VRow) => (
-        <div>
-          <span style={{ fontWeight: 600 }}>{v.gene}</span>
-          {v.rsid && (
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-2xs)",
-                color: "var(--text-muted)",
-                marginTop: 2,
-              }}
-            >
-              {v.rsid}
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: "genotype" as keyof VRow & string,
-      label: "Genotype",
-      mono: true,
-    },
-    {
-      key: "confidence" as keyof VRow & string,
-      label: "Confidence",
-      render: (v: VRow) => (
-        <Badge tone={CONF_TONE[v.confidence]}>
-          {v.confidence} · {CONFIDENCE_LEVELS[v.confidence].label}
-        </Badge>
-      ),
-    },
-    {
-      key: "category" as keyof VRow & string,
-      label: "Category",
-      render: (v: VRow) => (
-        <span style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
-          {VARIANT_CATEGORIES[v.category].label}
-        </span>
-      ),
-    },
-    {
-      key: "clinicalImplication" as keyof VRow & string,
-      label: "Implication",
-      wrap: true,
-      render: (v: VRow) => (
-        <span style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
-          {v.clinicalImplication}
-        </span>
-      ),
-    },
-    {
-      key: "protocolAction" as keyof VRow & string,
-      label: "Protocol action",
-      wrap: true,
-      render: (v: VRow) => (
-        <span style={{ fontWeight: 500, fontSize: "var(--text-sm)" }}>
-          {v.protocolAction}
-        </span>
-      ),
-    },
-  ];
 
   return (
     <div>
@@ -361,20 +289,64 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
         {filtered.length} of {stats.total} variants
       </div>
 
-      {/* DataTable */}
-      <Card padding="md" style={{ minWidth: 0 }}>
-        <DataTable<VRow>
-          columns={columns}
-          rows={filtered as VRow[]}
-          rowKey={(r) => r.id}
-        />
+      {/* Variant list — round 3: per-variant cards merged into ONE
+          frame-card list. Round-5 mobile fix: zt-gene-row/zt-gene-id stack
+          the gene id above the impact text at 390px (W0 CSS). */}
+      <Card padding="none" style={{ minWidth: 0 }}>
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "var(--gap-3xl) var(--gap-card)", fontSize: "var(--text-sm)" }}>
+            No variants found matching the current filters.
+          </div>
+        ) : (
+          filtered.map((g, i) => (
+            <div
+              key={g.id}
+              className="zt-gene-row"
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "var(--gap-xl)",
+                padding: "var(--gap-row) var(--gap-card)",
+                borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none",
+              }}
+            >
+              {/* flex-basis lives in app.css (.zt-gene-id) so the ≤760px
+                  stack rule can override it — never inline here. */}
+              <div className="zt-gene-id" style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-sm)", color: "var(--ink)", marginBottom: 4 }}>
+                  {g.gene}
+                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
+                  {[g.rsid, g.genotype].filter(Boolean).join(" · ")}
+                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", marginTop: 2 }}>
+                  {VARIANT_CATEGORIES[g.category]?.label ?? g.category}
+                </div>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: 6, textWrap: "pretty" }}>
+                  {g.clinicalImplication}
+                </div>
+                <div style={{ fontSize: "var(--text-sm)", color: "var(--text)", textWrap: "pretty" }}>
+                  {g.protocolAction}
+                </div>
+              </div>
+              <span
+                style={{
+                  flex: "0 0 auto",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-2xs)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  color: CONF_COLOR[g.confidence] ?? "var(--text-muted)",
+                }}
+              >
+                {g.confidence} · {CONFIDENCE_LEVELS[g.confidence].label}
+              </span>
+            </div>
+          ))
+        )}
       </Card>
-
-      {filtered.length === 0 && (
-        <Card padding="lg" style={{ textAlign: "center", color: "var(--text-muted)", marginTop: "var(--gap-md)" }}>
-          No variants found matching the current filters.
-        </Card>
-      )}
 
       {/* Confidence guide */}
       <Card padding="lg" style={{ marginTop: "var(--gap-lg)" }}>
