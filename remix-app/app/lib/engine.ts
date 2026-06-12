@@ -1,5 +1,5 @@
 /**
- * engine.server.ts — Pure, dependency-free decision engine (ENG-01, D-01).
+ * engine.ts — Pure, dependency-free decision engine (ENG-01, D-01).
  *
  * The .server.ts suffix is bundle-hygiene only (Vite client-bundle convention).
  * This module imports nothing server-only and is callable from a bare Node/vitest

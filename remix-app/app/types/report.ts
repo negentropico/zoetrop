@@ -26,7 +26,7 @@ export interface SubjectGenotype {
 
 /**
  * Variant protocol map entry — non-PHI corpus row (variantProtocolMap joined to geneticVariants).
- * Input to mapVariantToProtocol in engine.server.ts.
+ * Input to mapVariantToProtocol in engine.ts.
  */
 export interface VariantMap {
   /** variantProtocolMap row ID */

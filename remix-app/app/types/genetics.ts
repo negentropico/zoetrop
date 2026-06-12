@@ -27,7 +27,7 @@ export interface GeneticVariant {
 // ConfidenceLevelInfo carries evidence-tier semantics (D-07).
 // The detection-oriented `source` and `color` fields are removed:
 //   - `source` was detection-confidence metadata (23andMe/SelfDecode) — now in
-//     GradedRecommendation.sourceContext.detectionConfidence (engine.server.ts)
+//     GradedRecommendation.sourceContext.detectionConfidence (engine.ts)
 //   - `color` was Tailwind classes — KGradeBadge now uses CSS vars per UI-SPEC Pattern 1
 export interface ConfidenceLevelInfo {
   level: ConfidenceLevel;

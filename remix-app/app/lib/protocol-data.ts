@@ -12,7 +12,7 @@
 
 // =============================================================================
 // CESSATION ENGINE FUNCTIONS (non-PHI — ENG-01 Phase 6)
-// getCessationDay / getCessationPhase now live in engine.server.ts (D-01).
+// getCessationDay / getCessationPhase now live in engine.ts (D-01).
 // Re-exported here for backward compatibility — call sites (cessation.ts,
 // protocol-data.test.ts) continue to resolve these names without changes.
 // =============================================================================
@@ -27,9 +27,9 @@
  */
 export const CESSATION_START_DATE = "2025-12-23T00:00:00.000Z";
 
-// Re-exports from engine.server.ts (ENG-01, D-01)
-export { getCessationDay } from "./engine.server";
-export { getCessationPhase as getCurrentCessationPhase } from "./engine.server";
+// Re-exports from engine.ts (ENG-01, D-01)
+export { getCessationDay } from "./engine";
+export { getCessationPhase as getCurrentCessationPhase } from "./engine";
 
 // =============================================================================
 // DAILY SCHEDULE (non-PHI display constant — kept per D-06)

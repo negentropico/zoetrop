@@ -1,5 +1,5 @@
 /**
- * engine.test.ts — Import-purity + behavior tests for engine.server.ts (ENG-01, D-02)
+ * engine.test.ts — Import-purity + behavior tests for engine.ts (ENG-01, D-02)
  *
  * Coverage axes:
  *   1. Import-purity (static fs read — asserts no Drizzle/Remix/DB references)
@@ -21,7 +21,7 @@ import {
   getCessationPhase,
   computePearson,
   mapVariantToProtocol,
-} from "~/lib/engine.server";
+} from "~/lib/engine";
 import type { Metric } from "~/types/metrics";
 import type { SubjectGenotype, VariantMap } from "~/types/report";
 
@@ -77,9 +77,9 @@ function makeGenotype(overrides: Partial<SubjectGenotype> & Pick<SubjectGenotype
 // 1. Import-purity test (D-01 / ROADMAP SC2)
 // =============================================================================
 
-describe("engine.server.ts import purity (D-01)", () => {
+describe("engine.ts import purity (D-01)", () => {
   it("source contains no drizzle-orm, react-router, @react-router, or @neondatabase imports", () => {
-    const enginePath = resolve(__dirname, "../../app/lib/engine.server.ts");
+    const enginePath = resolve(__dirname, "../../app/lib/engine.ts");
     const source = readFileSync(enginePath, "utf-8");
 
     const forbidden = [
@@ -92,7 +92,7 @@ describe("engine.server.ts import purity (D-01)", () => {
     for (const pattern of forbidden) {
       expect(
         source,
-        `engine.server.ts must not import from ${pattern.source}`
+        `engine.ts must not import from ${pattern.source}`
       ).not.toMatch(pattern);
     }
   });

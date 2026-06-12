@@ -19,7 +19,7 @@ import { reports } from "../../db/schema";
 import {
   classifyMetricStatus,
   mapVariantToProtocol,
-} from "~/lib/engine.server";
+} from "~/lib/engine";
 import {
   CORPUS_VERSION,
   getVariantMaps,

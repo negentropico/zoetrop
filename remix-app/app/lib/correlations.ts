@@ -7,13 +7,13 @@
  * No PHI — no measured values, health records, or per-subject data.
  * Safe for import from any module (routes, tests, loaders).
  *
- * Phase 6 (ENG-01): computePearson moved to engine.server.ts (D-01).
+ * Phase 6 (ENG-01): computePearson moved to engine.ts (D-01).
  * Re-exported here under the legacy name for backward compatibility.
  */
 
-// computePearson now lives in engine.server.ts (ENG-01, D-01).
+// computePearson now lives in engine.ts (ENG-01, D-01).
 // Re-exported here under the legacy calculatePearsonCorrelation name.
-export { computePearson as calculatePearsonCorrelation } from "./engine.server";
+export { computePearson as calculatePearsonCorrelation } from "./engine";
 
 /**
  * Classify a Pearson r value into a qualitative significance label.

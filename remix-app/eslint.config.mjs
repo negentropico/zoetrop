@@ -3,8 +3,8 @@
 // All data access goes through data.server.ts (DB) or lib/cessation.ts / lib/metrics.ts
 // (survivor re-exports for non-PHI presentation helpers).
 //
-// ENG-01 gate: engine.server.ts must remain import-pure (no Drizzle/Remix/DB imports).
-// The rule file target below flags any such import added to engine.server.ts.
+// ENG-01 gate: engine.ts must remain import-pure (no Drizzle/Remix/DB imports).
+// The rule file target below flags any such import added to engine.ts.
 //
 // Scope: only the no-restricted-imports rule is enforced. TypeScript parser is
 // configured to allow linting of .ts/.tsx files, but no TS-specific lint rules
@@ -62,12 +62,12 @@ export default [
     },
   },
 
-  // ENG-01 import-correctness gate: engine.server.ts must stay import-pure (D-01 / ROADMAP SC2).
+  // ENG-01 import-correctness gate: engine.ts must stay import-pure (D-01 / ROADMAP SC2).
   // Flags any drizzle-orm, react-router, @react-router/*, or @neondatabase/* import
-  // that gets added to engine.server.ts. The .server.ts suffix is bundle-hygiene only —
+  // that gets added to engine.ts. The .server.ts suffix is bundle-hygiene only —
   // the module must remain callable from a bare Node/vitest context.
   {
-    files: ["app/lib/engine.server.ts"],
+    files: ["app/lib/engine.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -76,22 +76,22 @@ export default [
             {
               group: ["drizzle-orm", "drizzle-orm/*"],
               message:
-                "engine.server.ts must not import drizzle-orm. This module must stay import-pure (D-01 / ROADMAP SC2). Move DB logic to corpus.server.ts or data.server.ts.",
+                "engine.ts must not import drizzle-orm. This module must stay import-pure (D-01 / ROADMAP SC2). Move DB logic to corpus.server.ts or data.server.ts.",
             },
             {
               group: ["react-router", "react-router/*"],
               message:
-                "engine.server.ts must not import react-router. This module must stay import-pure (D-01 / ROADMAP SC2).",
+                "engine.ts must not import react-router. This module must stay import-pure (D-01 / ROADMAP SC2).",
             },
             {
               group: ["@react-router/*"],
               message:
-                "engine.server.ts must not import @react-router/*. This module must stay import-pure (D-01 / ROADMAP SC2).",
+                "engine.ts must not import @react-router/*. This module must stay import-pure (D-01 / ROADMAP SC2).",
             },
             {
               group: ["@neondatabase/*"],
               message:
-                "engine.server.ts must not import @neondatabase/*. This module must stay import-pure (D-01 / ROADMAP SC2). DB connections belong in db.server.ts.",
+                "engine.ts must not import @neondatabase/*. This module must stay import-pure (D-01 / ROADMAP SC2). DB connections belong in db.server.ts.",
             },
           ],
         },

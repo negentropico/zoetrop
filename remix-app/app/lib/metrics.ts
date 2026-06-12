@@ -1,7 +1,7 @@
-// classifyMetricStatus lives in engine.server.ts (ENG-01, D-01).
+// classifyMetricStatus lives in engine.ts (ENG-01, D-01).
 // Re-exported here under the legacy name for backward compatibility.
 // Routes and components that import getMetricStatus from ~/lib/metrics continue to work.
-export { classifyMetricStatus as getMetricStatus } from "./engine.server";
+export { classifyMetricStatus as getMetricStatus } from "./engine";
 
 // ---------------------------------------------------------------------------
 // Metric targets — 2026 Q1 / Q2 goals (non-PHI, static definitions)
