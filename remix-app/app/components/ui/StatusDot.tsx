@@ -3,10 +3,12 @@
 
 import type { Status } from "./StatusBadge";
 
+// Canonical status tokens (round 3, W0): every status atom reads
+// --optimal/--borderline/--deficient/--excess so a future remap is one edit.
 const DOT_COLOR: Record<Status, string> = {
-  optimal:    "var(--success)",
-  borderline: "var(--warning)",
-  deficient:  "var(--danger)",
+  optimal:    "var(--optimal)",
+  borderline: "var(--borderline)",
+  deficient:  "var(--deficient)",
   excess:     "var(--excess)",
 };
 

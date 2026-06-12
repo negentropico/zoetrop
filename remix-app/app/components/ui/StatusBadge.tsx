@@ -4,11 +4,14 @@
 
 export type Status = "optimal" | "borderline" | "deficient" | "excess";
 
+// Canonical status tokens (round 3, W0): every status atom reads
+// --optimal/--borderline/--deficient/--excess (+ -bg) so a future
+// remap is one edit. Values currently alias success/warning/danger.
 const STATUS_CONFIG: Record<Status, { color: string; bg: string; glyph: string; label: string }> = {
-  optimal:    { color: "var(--success)",  bg: "var(--vital-50)",   glyph: "✓", label: "OPTIMAL" },
-  borderline: { color: "var(--warning)",  bg: "var(--energy-50)",  glyph: "~", label: "BORDERLINE" },
-  deficient:  { color: "var(--danger)",   bg: "var(--danger-bg)",  glyph: "↓", label: "DEFICIENT" },
-  excess:     { color: "var(--excess)",   bg: "var(--excess-bg)",  glyph: "↑", label: "EXCESS" },
+  optimal:    { color: "var(--optimal)",    bg: "var(--optimal-bg)",    glyph: "✓", label: "OPTIMAL" },
+  borderline: { color: "var(--borderline)", bg: "var(--borderline-bg)", glyph: "~", label: "BORDERLINE" },
+  deficient:  { color: "var(--deficient)",  bg: "var(--deficient-bg)",  glyph: "↓", label: "DEFICIENT" },
+  excess:     { color: "var(--excess)",     bg: "var(--excess-bg)",     glyph: "↑", label: "EXCESS" },
 };
 
 interface StatusBadgeProps {
