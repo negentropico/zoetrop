@@ -4,9 +4,13 @@ import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getProtocolVersions, getProtocolChanges } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
+import { ArrowRight } from "lucide-react";
 import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
 import { PageHeader } from "~/components/ui/PageHeader";
+import { ChartEmpty } from "~/components/ui/TrendChart";
+import { DiffRowList, DiffSummaryCounts } from "~/components/ui/DiffRows";
+import { netProtocolChanges, diffCounts } from "~/lib/protocol-diff";
+import type { ProtocolChangeEvent } from "~/lib/protocol-diff";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -42,92 +46,47 @@ export async function loader({ request }: Route.LoaderArgs) {
   );
 
   // Default to comparing last two versions if not specified
-  const fromVersion = fromParam
-    ? versions.find((v) => v.version === fromParam)
-    : versions[versions.length - 2];
-  const toVersion = toParam
-    ? versions.find((v) => v.version === toParam)
-    : versions[versions.length - 1];
+  let fromIdx = fromParam ? versions.findIndex((v) => v.version === fromParam) : versions.length - 2;
+  let toIdx = toParam ? versions.findIndex((v) => v.version === toParam) : versions.length - 1;
+  if (fromIdx < 0) fromIdx = Math.max(0, versions.length - 2);
+  if (toIdx < 0) toIdx = versions.length - 1;
+  // Base must precede compare — a reversed pick is normalized.
+  if (fromIdx > toIdx) [fromIdx, toIdx] = [toIdx, fromIdx];
 
-  // Get all changes for the "to" version (changes from previous)
-  const changes = toVersion
-    ? protocolChanges.filter((c) => c.versionId === toVersion.id)
-    : [];
+  const fromVersion = versions[fromIdx] ?? null;
+  const toVersion = versions[toIdx] ?? null;
 
-  // Categorize changes
-  const added = changes.filter((c) => c.changeType === "added");
-  const removed = changes.filter((c) => c.changeType === "removed");
-  const modified = changes.filter(
-    (c) =>
-      c.changeType === "dosage_changed" ||
-      c.changeType === "timing_changed" ||
-      c.changeType === "frequency_changed"
+  // Real-data diff: per-version supplement stacks are not stored, so the
+  // diff is derived from the protocol_changes log — every change event in
+  // the (base, compare] window, netted chronologically (added-then-removed
+  // nets out; repeated dose changes collapse to first-old → last-new).
+  const windowVersionIds = versions.slice(fromIdx + 1, toIdx + 1).map((v) => v.id);
+  const windowChanges = windowVersionIds.flatMap((vid) =>
+    protocolChanges.filter((c) => c.versionId === vid)
   );
+  const events: ProtocolChangeEvent[] = windowChanges.map((c) => ({
+    supplementName: c.supplementName,
+    changeType: c.changeType,
+    oldDosage: c.oldDosage ?? null,
+    newDosage: c.newDosage ?? null,
+  }));
+  const rows = netProtocolChanges(events);
+  const counts = diffCounts(rows);
 
   return {
     versions,
-    fromVersion: fromVersion ?? null,
-    toVersion: toVersion ?? null,
-    changes,
-    added,
-    removed,
-    modified,
+    fromVersion,
+    toVersion,
+    rows,
+    counts,
+    // Raw change rows for the window — kept for loader parity (the glyph
+    // diff renders the netted `rows`).
+    changes: windowChanges,
   };
 }
 
-// Version type inferred from loader return
-type VersionItem = NonNullable<Awaited<ReturnType<typeof loader>>["versions"]>[number];
-
-function VersionSelector({
-  label,
-  value,
-  versions,
-  onChange,
-  excludeVersion,
-}: {
-  label: string;
-  value: string | undefined;
-  versions: VersionItem[];
-  onChange: (version: string) => void;
-  excludeVersion?: string;
-}) {
-  return (
-    <div>
-      <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 500, color: "var(--text-secondary)", marginBottom: 6 }}>
-        {label}
-      </label>
-      <select
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          display: "block",
-          width: "100%",
-          borderRadius: "var(--radius-pill)",
-          border: "1px solid var(--border)",
-          background: "var(--surface)",
-          color: "var(--ink)",
-          padding: "9px 14px",
-          fontSize: "var(--text-sm)",
-          fontFamily: "var(--font-text)",
-          cursor: "pointer",
-          appearance: "none",
-          outline: "none",
-        }}
-      >
-        {versions
-          .filter((v) => v.version !== excludeVersion)
-          .map((version) => (
-            <option key={version.id} value={version.version}>
-              {version.version} ({format(parseISO(version.effectiveDate), "MMM yyyy")})
-            </option>
-          ))}
-      </select>
-    </div>
-  );
-}
-
 export default function Compare({ loaderData }: Route.ComponentProps) {
-  const { versions, fromVersion, toVersion, changes, added, removed, modified } = loaderData;
+  const { versions, fromVersion, toVersion, rows, counts } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const updateVersion = (type: "from" | "to", version: string) => {
@@ -136,192 +95,113 @@ export default function Compare({ loaderData }: Route.ComponentProps) {
     setSearchParams(newParams);
   };
 
+  // Base/compare pill picker (round-3 BAKED interaction pattern)
+  const Picker = ({
+    label,
+    value,
+    exclude,
+    onChange,
+  }: {
+    label: string;
+    value: string | undefined;
+    exclude?: string;
+    onChange: (v: string) => void;
+  }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+      <span className="zt-eyebrow">{label}</span>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {versions.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            onClick={() => onChange(v.version)}
+            disabled={v.version === exclude}
+            className={"zt-pill" + (value === v.version ? " is-active" : "")}
+            style={{ padding: "5px 11px", opacity: v.version === exclude ? 0.4 : 1 }}
+          >
+            {v.version}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <PageHeader
         eyebrow="VERSION COMPARISON"
         title="Compare versions"
-        sub="Pick two protocol versions to see what changed — dose deltas, added and retired supplements, and the metrics that moved across the window between them."
+        sub="Supplement stack diff between two protocol versions."
       />
 
-      {/* Version selectors */}
-      <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
-        <div className="zt-grid-2" style={{ marginBottom: "var(--gap-lg)" }}>
-          <VersionSelector
-            label="From version"
+      {/* Base / compare pill pickers */}
+      <section className="zt-section">
+        <div style={{ display: "flex", gap: "var(--gap-2xl)", flexWrap: "wrap", alignItems: "center" }}>
+          <Picker
+            label="Base"
             value={fromVersion?.version}
-            versions={versions}
+            exclude={toVersion?.version}
             onChange={(v) => updateVersion("from", v)}
-            excludeVersion={toVersion?.version}
           />
-          <VersionSelector
-            label="To version"
+          <ArrowRight size={15} strokeWidth={1.8} color="var(--text-faint)" />
+          <Picker
+            label="Compare"
             value={toVersion?.version}
-            versions={versions}
+            exclude={fromVersion?.version}
             onChange={(v) => updateVersion("to", v)}
-            excludeVersion={fromVersion?.version}
           />
         </div>
-
-        {/* Comparison header */}
         {fromVersion && toVersion && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
-            <div style={{ textAlign: "center" }}>
-              <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
-                {fromVersion.version}
-              </div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                {format(parseISO(fromVersion.effectiveDate), "MMM yyyy")}
-              </div>
-            </div>
-            <span style={{ color: "var(--text-faint)", fontSize: "var(--text-xl)" }}>→</span>
-            <div style={{ textAlign: "center" }}>
-              <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--vital)" }}>
-                {toVersion.version}
-              </div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                {format(parseISO(toVersion.effectiveDate), "MMM yyyy")}
-              </div>
-            </div>
+          <div
+            style={{
+              marginTop: 10,
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-2xs)",
+              color: "var(--text-faint)",
+              letterSpacing: "0.06em",
+            }}
+          >
+            {fromVersion.version} · {format(parseISO(fromVersion.effectiveDate), "MMM yyyy")}
+            {"  →  "}
+            {toVersion.version} · {format(parseISO(toVersion.effectiveDate), "MMM yyyy")}
           </div>
         )}
-      </Card>
+      </section>
 
-      {/* Change summary tiles */}
-      {fromVersion && toVersion && (
-        <div className="zt-grid-3" style={{ marginBottom: "var(--gap-xl)" }}>
-          <Card padding="md" tone="vital" style={{ textAlign: "center" }}>
-            <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--vital)" }}>
-              {added.length}
-            </div>
-            <div className="zt-eyebrow" style={{ marginTop: 4 }}>Added</div>
-          </Card>
-          <Card padding="md" style={{ textAlign: "center" }}>
-            <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: removed.length > 0 ? "var(--danger)" : "var(--ink)" }}>
-              {removed.length}
-            </div>
-            <div className="zt-eyebrow" style={{ marginTop: 4 }}>Removed</div>
-          </Card>
-          <Card padding="md" tone="focus" style={{ textAlign: "center" }}>
-            <div className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--focus)" }}>
-              {modified.length}
-            </div>
-            <div className="zt-eyebrow" style={{ marginTop: 4 }}>Modified</div>
-          </Card>
+      {/* Diff — glyph rows + mono summary counts */}
+      <section className="zt-section">
+        <div style={{ marginBottom: "var(--gap-lg)" }}>
+          <DiffSummaryCounts counts={counts} />
         </div>
-      )}
-
-      {/* Detailed changes */}
-      {changes.length > 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap-lg)" }}>
-          {/* Added */}
-          {added.length > 0 && (
-            <Card padding="md">
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <div className="zt-eyebrow">Added supplements</div>
-                <Badge tone="vital">{added.length}</Badge>
-              </div>
-              <div>
-                {added.map((change, i) => (
-                  <div
-                    key={change.id}
-                    style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "12px 0", borderBottom: i < added.length - 1 ? "1px solid var(--border)" : "none" }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 500, color: "var(--ink)", marginBottom: 4 }}>{change.supplementName}</div>
-                      {change.newDosage && (
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                          {change.newDosage}
-                        </div>
-                      )}
-                      {change.rationale && (
-                        <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: "4px 0 0" }}>{change.rationale}</p>
-                      )}
-                    </div>
-                    <span style={{ color: "var(--vital)", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-lg)", marginLeft: 16 }}>+</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
+        <Card padding="none">
+          {rows.length === 0 ? (
+            <ChartEmpty
+              height={200}
+              title="Nothing changed"
+              body={
+                fromVersion && toVersion
+                  ? `No supplement changes are logged between ${fromVersion.version} and ${toVersion.version}.`
+                  : "Select two versions to compare."
+              }
+            />
+          ) : (
+            <DiffRowList rows={rows} />
           )}
-
-          {/* Removed */}
-          {removed.length > 0 && (
-            <Card padding="md">
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <div className="zt-eyebrow">Removed supplements</div>
-                <Badge tone="danger">{removed.length}</Badge>
-              </div>
-              <div>
-                {removed.map((change, i) => (
-                  <div
-                    key={change.id}
-                    style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "12px 0", borderBottom: i < removed.length - 1 ? "1px solid var(--border)" : "none" }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 500, color: "var(--text-faint)", textDecoration: "line-through", marginBottom: 4 }}>{change.supplementName}</div>
-                      {change.oldDosage && (
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)", textDecoration: "line-through" }}>
-                          {change.oldDosage}
-                        </div>
-                      )}
-                      {change.rationale && (
-                        <p style={{ fontSize: "var(--text-sm)", color: "var(--danger)", margin: "4px 0 0" }}>{change.rationale}</p>
-                      )}
-                    </div>
-                    <span style={{ color: "var(--danger)", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-lg)", marginLeft: 16 }}>−</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Modified */}
-          {modified.length > 0 && (
-            <Card padding="md">
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <div className="zt-eyebrow">Modified supplements</div>
-                <Badge tone="focus">{modified.length}</Badge>
-              </div>
-              <div>
-                {modified.map((change, i) => (
-                  <div
-                    key={change.id}
-                    style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "12px 0", borderBottom: i < modified.length - 1 ? "1px solid var(--border)" : "none" }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 500, color: "var(--ink)", marginBottom: 4 }}>{change.supplementName}</div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)" }}>
-                        {change.oldDosage && (
-                          <span style={{ textDecoration: "line-through", color: "var(--text-faint)" }}>{change.oldDosage}</span>
-                        )}
-                        {change.oldDosage && change.newDosage && (
-                          <span style={{ color: "var(--text-muted)" }}>→</span>
-                        )}
-                        {change.newDosage && (
-                          <span style={{ fontWeight: 600, color: "var(--focus)" }}>{change.newDosage}</span>
-                        )}
-                      </div>
-                      {change.rationale && (
-                        <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: "4px 0 0" }}>{change.rationale}</p>
-                      )}
-                    </div>
-                    <span style={{ color: "var(--focus)", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-lg)", marginLeft: 16 }}>~</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-        </div>
-      ) : (
-        <Card padding="lg" style={{ textAlign: "center" }}>
-          <p style={{ color: "var(--text-muted)" }}>
-            {fromVersion && toVersion
-              ? "No changes recorded between these versions."
-              : "Select two versions to compare."}
-          </p>
         </Card>
-      )}
+        {/* Real-data caveat: the diff reads the change log; unchanged
+            supplements are not enumerable without per-version stacks. */}
+        <p
+          style={{
+            marginTop: 10,
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-2xs)",
+            color: "var(--text-faint)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Derived from the protocol change log — supplements untouched across this window are not listed.
+        </p>
+      </section>
 
       {/* Version notes comparison */}
       {fromVersion && toVersion && (fromVersion.notes || toVersion.notes) && (

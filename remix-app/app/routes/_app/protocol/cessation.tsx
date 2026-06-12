@@ -1,5 +1,4 @@
-import { Link } from "react-router";
-import { Check, Play, Circle, Info, ArrowLeft } from "lucide-react";
+import { Info } from "lucide-react";
 import type { Route } from "./+types/cessation";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getCessationLog } from "~/lib/data.server";
@@ -9,16 +8,15 @@ import { CESSATION_PHASES, type CessationPhase } from "~/types/protocol";
 import { parseISO, format, addDays } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { MetricRing } from "~/components/ui/MetricRing";
 import { PhaseBar } from "~/components/ui/PhaseBar";
-import { ProgressBar } from "~/components/ui/ProgressBar";
-import { Button } from "~/components/ui/Button";
 import type { Phase } from "~/components/ui/PhaseBar";
 
+// Round 3: "Cessation" renamed to "Phasing" — label-only (screen title,
+// eyebrow, dashboard + protocol links); route stays /protocol/cessation.
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Cessation tracker - Zoetrop" },
-    { name: "description", content: "Track FAAH-based cessation protocol progress" },
+    { title: "Phasing - Zoetrop" },
+    { name: "description", content: "Track FAAH-based phasing protocol progress" },
   ];
 }
 
@@ -127,14 +125,6 @@ export async function loader({ request }: Route.LoaderArgs, now: Date = new Date
   };
 }
 
-// Family tints per phase (per UI-SPEC cessation phase families)
-const PHASE_FAMILY: Record<CessationPhase, "energy" | "vital" | "focus" | null> = {
-  acute: "energy",
-  stabilization: "vital",
-  clearing: "vital",
-  optimization: "focus",
-};
-
 // Build PhaseBar phases from CESSATION_PHASES + current day
 function buildPhaseBarPhases(currentDay: number): Phase[] {
   return CESSATION_PHASES.map((p) => {
@@ -151,81 +141,96 @@ function buildPhaseBarPhases(currentDay: number): Phase[] {
   });
 }
 
-// Phase card — family-tinted, calm "you" voice
-function PhaseCard({
+// Round-3 state styling for the sequential timeline list
+const TIMELINE_STATE: Record<
+  "completed" | "current" | "upcoming",
+  { dot: string; bg: string; fg: string }
+> = {
+  completed: { dot: "var(--optimal)", bg: "var(--optimal-bg)", fg: "var(--vital-500, var(--vital))" },
+  current:   { dot: "var(--ink)",     bg: "var(--focus-50)",   fg: "var(--accent)" },
+  upcoming:  { dot: "var(--n-300)",   bg: "var(--n-100)",      fg: "var(--text-muted)" },
+};
+
+// Phase timeline row — rail dot + connector, name · days eyebrow · state
+// pill; the current phase row is tinted --surface-2 with an ink-ring node.
+function PhaseTimelineRow({
   phase,
   status,
-  progress,
+  first,
+  last,
+  startDate,
 }: {
   phase: (typeof CESSATION_PHASES)[0];
   status: "completed" | "current" | "upcoming";
-  progress: number;
+  first: boolean;
+  last: boolean;
+  startDate: string | null;
 }) {
-  const family = PHASE_FAMILY[phase.phase];
   const isCurrent = status === "current";
-  const isCompleted = status === "completed";
-
+  const s = TIMELINE_STATE[status];
+  const phaseStart = startDate ? addDays(parseISO(startDate), phase.dayRange.start - 1) : null;
+  const phaseEnd = startDate ? addDays(parseISO(startDate), phase.dayRange.end - 1) : null;
   return (
-    <Card
-      padding="lg"
-      tone={family ?? undefined}
+    <div
       style={{
-        border: isCurrent ? "2px solid var(--ink)" : "1px solid var(--border)",
-        background: isCurrent ? "var(--focus-50)" : undefined,
+        display: "grid",
+        gridTemplateColumns: "20px minmax(0, 1fr)",
+        gap: "var(--gap-lg)",
+        padding: "var(--gap-lg) var(--gap-card)",
+        borderBottom: !last ? "1px solid var(--border)" : "none",
+        background: isCurrent ? "var(--surface-2)" : "transparent",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {/* timeline rail */}
+      <div style={{ position: "relative" }}>
+        {!first && <span style={{ position: "absolute", left: 9, top: -17, height: 16, width: 1, background: "var(--border)" }} />}
+        {!last && <span style={{ position: "absolute", left: 9, top: 21, bottom: -17, width: 1, background: "var(--border)" }} />}
+        <span
+          style={{
+            position: "absolute",
+            left: 4,
+            top: 5,
+            width: 11,
+            height: 11,
+            borderRadius: "50%",
+            background: isCurrent ? "var(--surface)" : s.dot,
+            border: isCurrent ? "2.5px solid var(--ink)" : "none",
+            boxSizing: "border-box",
+          }}
+        />
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "var(--gap-lg)", flexWrap: "wrap" }}>
+          <span style={{ fontWeight: 600, fontSize: "var(--text-base)", color: "var(--text)" }}>{phase.label}</span>
+          <span className="zt-eyebrow">Days {phase.dayRange.start}–{phase.dayRange.end}</span>
           <span
             style={{
-              width: 26,
-              height: 26,
-              borderRadius: "50%",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: isCompleted ? "var(--vital)" : isCurrent ? "var(--ink)" : "var(--n-150)",
-              color: isCompleted ? "#fff" : isCurrent ? "var(--n-50)" : "var(--text-muted)",
-              flexShrink: 0,
+              marginLeft: "auto",
+              padding: "3px 9px",
+              borderRadius: "var(--radius-pill)",
+              flex: "0 0 auto",
+              background: s.bg,
+              color: s.fg,
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-2xs)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
             }}
           >
-            {isCompleted ? (
-              <Check size={15} strokeWidth={2.4} />
-            ) : isCurrent ? (
-              <Play size={15} strokeWidth={2.4} />
-            ) : (
-              <Circle size={15} strokeWidth={2.4} />
-            )}
-          </span>
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", color: "var(--ink)" }}>
-            {phase.label}
+            {status === "current" ? "current" : status}
           </span>
         </div>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-          Days {phase.dayRange.start}–{phase.dayRange.end}
-        </span>
+        <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 6, textWrap: "pretty" }}>
+          {phase.focus} — {phase.description}
+        </div>
+        <div className="zt-tnum" style={{ marginTop: 6, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", letterSpacing: "0.06em" }}>
+          {phaseStart && phaseEnd
+            ? `${format(phaseStart, "MMM d, yyyy")} → ${format(phaseEnd, "MMM d, yyyy")} · `
+            : ""}
+          {phase.dayRange.end - phase.dayRange.start + 1} days
+        </div>
       </div>
-
-      <p style={{ margin: "12px 0 14px", color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
-        {phase.focus}
-      </p>
-
-      <ProgressBar
-        value={progress}
-        max={100}
-        tone={family ?? "focus"}
-        height={7}
-      />
-
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)" }}>
-        <span>{isCompleted ? "Completed" : isCurrent ? "In progress" : "Upcoming"}</span>
-        <span>{phase.dayRange.end - phase.dayRange.start + 1} days</span>
-      </div>
-
-      <p style={{ margin: "14px 0 0", color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
-        {phase.description}
-      </p>
-    </Card>
+    </div>
   );
 }
 
@@ -267,8 +272,8 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
     return (
       <div>
         <PageHeader
-          eyebrow="PROTOCOL · CESSATION"
-          title="Cessation tracker"
+          eyebrow="PROTOCOL · PHASING"
+          title="Phasing"
           sub="Your FAAH-informed 150-day protocol, one phase at a time."
         />
         <Card padding="lg" style={{ textAlign: "center", marginBottom: "var(--gap-xl)" }}>
@@ -277,22 +282,20 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
           </p>
         </Card>
 
-        {/* Phase overview */}
+        {/* Phase overview — sequential timeline list */}
         <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>PHASES</div>
-        <div className="zt-grid-2">
-          {CESSATION_PHASES.map((phase) => (
-            <Card key={phase.phase} padding="lg">
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-lg)", color: "var(--ink)", marginBottom: 8 }}>
-                {phase.label}
-              </div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginBottom: 10 }}>
-                DAYS {phase.dayRange.start}–{phase.dayRange.end}
-              </div>
-              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>{phase.focus}</p>
-              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: 8 }}>{phase.description}</p>
-            </Card>
+        <Card padding="none">
+          {CESSATION_PHASES.map((phase, i) => (
+            <PhaseTimelineRow
+              key={phase.phase}
+              phase={phase}
+              status="upcoming"
+              first={i === 0}
+              last={i === CESSATION_PHASES.length - 1}
+              startDate={null}
+            />
           ))}
-        </div>
+        </Card>
       </div>
     );
   }
@@ -300,55 +303,45 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
   const overallProgress = Math.min((currentDay / targetDay) * 100, 100);
   const complete = currentDay >= targetDay;
   const phaseBarPhases = buildPhaseBarPhases(currentDay);
+  const protocolStart = startDate ? parseISO(startDate) : null;
+  const protocolEnd = protocolStart ? addDays(protocolStart, targetDay - 1) : null;
 
   return (
     <div>
       <PageHeader
-        eyebrow="PROTOCOL · CESSATION"
-        title="Cessation tracker"
+        eyebrow="PROTOCOL · PHASING"
+        title="Phasing"
         sub="Your FAAH-informed 150-day protocol, one phase at a time."
         right={
-          <Link to="/protocol">
-            <Button variant="secondary" iconLeft={<ArrowLeft size={16} />}>
-              Protocol
-            </Button>
-          </Link>
+          <div style={{ textAlign: "right" }}>
+            <div className="zt-eyebrow" style={{ marginBottom: 4 }}>Current day</div>
+            <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)" }}>{currentDay}</div>
+          </div>
         }
       />
 
-      {/* Hero card — MetricRing + PhaseBar */}
+      {/* Phase bar with current-day marker (unchanged idiom, round 3) */}
       <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
-        <div style={{ display: "flex", gap: 32, alignItems: "center", flexWrap: "wrap" }}>
-          <MetricRing
-            value={overallProgress}
-            max={100}
-            tone="vital"
-            size={150}
-            thickness={15}
-            label={`${Math.round(overallProgress)}%`}
-            sublabel="complete"
-          />
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
-              <span className="zt-readout" style={{ fontSize: "var(--text-3xl)", color: "var(--ink)" }}>
-                Day {currentDay}
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-                {complete
-                  ? `Protocol complete · all ${CESSATION_PHASES.length} phases finished`
-                  : `${currentPhase.label} phase · ${daysInPhase} days in · target ${targetDay}`}
-              </span>
-            </div>
-            <div style={{ marginTop: 22 }}>
-              <PhaseBar phases={phaseBarPhases} height={16} />
-            </div>
-          </div>
+        <PhaseBar phases={phaseBarPhases} height={20} day={currentDay} />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: 12,
+            fontFamily: "var(--font-mono)",
+            fontSize: "var(--text-2xs)",
+            color: "var(--text-faint)",
+            letterSpacing: "0.06em",
+          }}
+        >
+          <span>{protocolStart ? format(protocolStart, "MMM d, yyyy").toUpperCase() : "—"}</span>
+          <span>{protocolEnd ? format(protocolEnd, "MMM d, yyyy").toUpperCase() : "—"}</span>
         </div>
       </Card>
 
       {/* Stat tiles */}
       <div className="zt-grid-4" style={{ marginBottom: "var(--gap-2xl)" }}>
-        <ProtoStat label="Current day" value={currentDay} />
+        <ProtoStat label="Current day" value={currentDay} sub={complete ? "Protocol complete" : `${currentPhase.label} phase · ${daysInPhase} days in`} />
         <ProtoStat
           label="Days remaining"
           value={Math.max(0, targetDay - currentDay)}
@@ -364,26 +357,28 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
         />
       </div>
 
-      {/* Phase cards */}
+      {/* Phases — stacked sequential timeline list in one frame card */}
       <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>PHASES</div>
-      <div className="zt-grid-2" style={{ marginBottom: "var(--gap-2xl)" }}>
-        {CESSATION_PHASES.map((phase) => {
+      <Card padding="none" style={{ marginBottom: "var(--gap-2xl)" }}>
+        {CESSATION_PHASES.map((phase, i) => {
           const pp = phaseProgress.find((p) => p.phase === phase.phase);
           return (
-            <PhaseCard
+            <PhaseTimelineRow
               key={phase.phase}
               phase={phase}
               status={pp?.status || "upcoming"}
-              progress={pp?.progress || 0}
+              first={i === 0}
+              last={i === CESSATION_PHASES.length - 1}
+              startDate={startDate}
             />
           );
         })}
-      </div>
+      </Card>
 
       {/* Timeline + Why 150 days */}
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", gap: "var(--gap-lg)", marginBottom: "var(--gap-lg)" }}>
         <Card padding="lg">
-          <div className="zt-eyebrow" style={{ marginBottom: 12 }}>FAAH CESSATION TIMELINE</div>
+          <div className="zt-eyebrow" style={{ marginBottom: 12 }}>FAAH PHASING TIMELINE</div>
           {[
             { label: "Started", value: startDate ? format(parseISO(startDate), "MMMM d, yyyy") : "—", tone: null },
             { label: "Phase end", value: startDate ? format(addDays(parseISO(startDate), currentPhase.dayRange.end), "MMMM d, yyyy") : "—", tone: null },

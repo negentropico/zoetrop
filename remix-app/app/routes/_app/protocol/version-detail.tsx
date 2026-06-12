@@ -10,10 +10,12 @@ import {
 } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
+import { ArrowRight } from "lucide-react";
 import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Button } from "~/components/ui/Button";
+import { ChartEmpty } from "~/components/ui/TrendChart";
+import { DiffRowList, DiffSummaryCounts } from "~/components/ui/DiffRows";
+import { netProtocolChanges, diffCounts } from "~/lib/protocol-diff";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { version: versionParam } = params;
@@ -54,8 +56,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const changes = protocolChangesRows.filter((c) => c.versionId === version.id);
   const versionMilestones = milestonesList.filter((m) => m.protocolVersion === version.version);
 
-  // Get supplements active during this version
-  // For the current (latest) version, show all supplements
+  // Get supplements active during this version.
+  // Real-data gap: per-version stack snapshots are not stored — only the
+  // CURRENT stack exists (supplements table). The latest version shows it;
+  // older versions render an honest note + the change log below.
   const latestVersion = sortedVersions[sortedVersions.length - 1];
   const versionSupplements =
     version.version === latestVersion?.version ? supplementsRows : [];
@@ -74,6 +78,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     previousVersion,
     nextVersion,
     isLatest: version.version === latestVersion?.version,
+    isFirst: versionIndex === 0,
   };
 }
 
@@ -87,146 +92,204 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-// Change type badge — brand tokens, no raw grays
-function ChangeTypeBadge({ type }: { type: string }) {
-  const toneMap: Record<string, "vital" | "danger" | "focus" | "energy" | "neutral"> = {
-    added: "vital",
-    removed: "danger",
-    dosage_changed: "focus",
-    timing_changed: "energy",
-    frequency_changed: "neutral",
-  };
-
-  const labels: Record<string, string> = {
-    added: "Added",
-    removed: "Removed",
-    dosage_changed: "Dosage changed",
-    timing_changed: "Timing changed",
-    frequency_changed: "Frequency changed",
-  };
-
+// Version chip — mono id tile (round-4 masthead idiom)
+function VersionChip({ id, active }: { id: string; active: boolean }) {
   return (
-    <Badge tone={toneMap[type] || "neutral"}>
-      {labels[type] || type}
-    </Badge>
+    <span
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontWeight: 700,
+        fontSize: "var(--text-sm)",
+        color: active ? "var(--accent)" : "var(--text-muted)",
+        background: active ? "var(--focus-50)" : "var(--surface-sunken)",
+        borderRadius: "var(--radius-sm)",
+        padding: "3px 8px",
+      }}
+    >
+      {id}
+    </span>
   );
 }
 
-// Supplement tier badge
-function TierBadge({ tier }: { tier: string }) {
-  const toneMap: Record<string, "vital" | "focus" | "energy" | "neutral"> = {
-    tier1: "vital",
-    tier2: "focus",
-    tier3: "energy",
-    as_needed: "neutral",
-  };
-  const labels: Record<string, string> = {
-    tier1: "Tier 1",
-    tier2: "Tier 2",
-    tier3: "Tier 3",
-    as_needed: "As needed",
-  };
-  return <Badge tone={toneMap[tier] || "neutral"}>{labels[tier] || tier}</Badge>;
+// Section label — eyebrow + count + optional right action (round-3 idiom)
+function SectionLabel({
+  children,
+  count,
+  action,
+}: {
+  children: React.ReactNode;
+  count?: number;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-lg)" }}>
+      <div className="zt-eyebrow">
+        {children}
+        {count != null && <span style={{ color: "var(--text-faint)" }}>{"  ·  "}{count}</span>}
+      </div>
+      {action}
+    </div>
+  );
 }
 
 export default function VersionDetail({ loaderData }: Route.ComponentProps) {
-  const { version, changes, milestones, supplements, previousVersion, nextVersion, isLatest } =
+  const { version, changes, milestones, supplements, previousVersion, nextVersion, isLatest, isFirst } =
     loaderData;
+
+  // Diff vs previous — the same glyph rows as Compare (shared netProtocolChanges)
+  const diffRows = netProtocolChanges(
+    changes.map((c) => ({
+      supplementName: c.supplementName,
+      changeType: c.changeType,
+      oldDosage: c.oldDosage ?? null,
+      newDosage: c.newDosage ?? null,
+    }))
+  ).filter((r) => r.state !== "same");
+  const counts = diffCounts(diffRows);
 
   return (
     <div>
-      {/* Header (crumb renders in the PageHeader meta row) */}
+      {/* Masthead — version chip + name; sub = date · description; right = status pill */}
       <PageHeader
         crumbs={[
           { label: "Protocol", to: "/protocol" },
           { label: "Versions", to: "/protocol/versions" },
           { label: version.version },
         ]}
-        eyebrow="PROTOCOL VERSION"
+        icon={<VersionChip id={version.version} active={isLatest} />}
         title={`Protocol ${version.version}`}
-        sub={`Effective ${format(parseISO(version.effectiveDate), "MMMM d, yyyy")}`}
+        sub={`${format(parseISO(version.effectiveDate), "MMM d, yyyy")}${version.notes ? ` · ${version.notes}` : ""}`}
         right={
-          <div style={{ display: "flex", gap: 8 }}>
-            {isLatest && <Badge tone="success">Current</Badge>}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-2xs)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: isLatest ? "var(--accent)" : "var(--text-muted)",
+                background: isLatest ? "var(--focus-50)" : "var(--surface-sunken)",
+                padding: "4px 11px",
+                borderRadius: "var(--radius-pill)",
+              }}
+            >
+              {isLatest ? "active" : "superseded"}
+            </span>
             {previousVersion && (
-              <Link to={`/protocol/versions/${previousVersion.version}`}>
-                <Button variant="secondary">
-                  {previousVersion.version}
-                </Button>
+              <Link to={`/protocol/versions/${previousVersion.version}`} className="zt-pill">
+                ← {previousVersion.version}
               </Link>
             )}
             {nextVersion && (
-              <Link to={`/protocol/versions/${nextVersion.version}`}>
-                <Button variant="secondary">
-                  {nextVersion.version}
-                </Button>
+              <Link to={`/protocol/versions/${nextVersion.version}`} className="zt-pill">
+                {nextVersion.version} →
               </Link>
             )}
           </div>
         }
       />
 
-      {/* Notes */}
-      {version.notes && (
-        <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
-          <div className="zt-eyebrow" style={{ marginBottom: 8 }}>Notes</div>
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", margin: 0 }}>
-            {version.notes}
-          </p>
-        </Card>
-      )}
-
-      {/* Changes */}
-      <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
-        <div className="zt-eyebrow" style={{ marginBottom: 16 }}>Changes in this version</div>
-        {changes.length === 0 ? (
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-            Initial version — no changes from previous.
-          </p>
-        ) : (
-          <div>
-            {changes.map((change, i) => (
+      {/* Stack at Pn */}
+      <section className="zt-section">
+        <SectionLabel count={supplements.length > 0 ? supplements.length : undefined}>
+          Stack at {version.version}
+        </SectionLabel>
+        <Card padding="none">
+          {supplements.length > 0 ? (
+            supplements.map((s, i) => (
               <div
-                key={change.id}
+                key={s.id}
                 style={{
                   display: "flex",
-                  alignItems: "flex-start",
-                  gap: 16,
-                  padding: "14px 0",
-                  borderBottom: i < changes.length - 1 ? "1px solid var(--border)" : "none",
+                  alignItems: "center",
+                  gap: "var(--gap-xl)",
+                  padding: "var(--gap-row) var(--gap-card)",
+                  borderBottom: i < supplements.length - 1 ? "1px solid var(--border)" : "none",
+                  opacity: s.isActive ? 1 : 0.55,
                 }}
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                    <ChangeTypeBadge type={change.changeType} />
-                    <span style={{ fontWeight: 500, color: "var(--ink)" }}>{change.supplementName}</span>
-                  </div>
-                  {(change.oldDosage || change.newDosage) && (
-                    <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
-                      {change.oldDosage && (
-                        <span style={{ textDecoration: "line-through", color: "var(--text-faint)" }}>{change.oldDosage}</span>
-                      )}
-                      {change.oldDosage && change.newDosage && <span style={{ margin: "0 6px", color: "var(--text-muted)" }}>→</span>}
-                      {change.newDosage && <span style={{ fontWeight: 500, color: "var(--ink)" }}>{change.newDosage}</span>}
-                    </div>
-                  )}
-                  {change.rationale && (
-                    <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", margin: "4px 0 0" }}>
-                      {change.rationale}
-                    </p>
+                <div style={{ flex: 1, minWidth: 0, fontSize: "var(--text-sm)", fontWeight: 500, color: "var(--text)" }}>
+                  {s.name}
+                  {!s.isActive && (
+                    <span style={{ marginLeft: 8, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                      inactive
+                    </span>
                   )}
                 </div>
+                <div className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-secondary)" }}>
+                  {s.dosage} {s.unit} · {s.frequency}
+                </div>
               </div>
-            ))}
-          </div>
-        )}
-      </Card>
+            ))
+          ) : isFirst ? (
+            <ChartEmpty
+              height={160}
+              title="No supplement stack"
+              body={`${version.version} is the bloodwork baseline — no interventions yet.`}
+            />
+          ) : (
+            // Real-data gap: per-version stack snapshots are not stored —
+            // only the current stack exists. The change log below carries
+            // what moved at this version.
+            <ChartEmpty
+              height={160}
+              title="Stack snapshot not recorded"
+              body={`Per-version stacks aren't stored yet — the current stack lives on the active version. The changes ${version.version} introduced are below.`}
+            />
+          )}
+        </Card>
+      </section>
+
+      {/* Changes vs P(n−1) — reuses the Compare glyph-diff rows */}
+      {previousVersion ? (
+        <section className="zt-section">
+          <SectionLabel
+            count={diffRows.length}
+            action={
+              <Link
+                to={`/protocol/compare?from=${previousVersion.version}&to=${version.version}`}
+                className="zt-link"
+                style={{ fontSize: "var(--text-xs)" }}
+              >
+                Full compare <ArrowRight size={13} strokeWidth={2} />
+              </Link>
+            }
+          >
+            Changes vs {previousVersion.version}
+          </SectionLabel>
+          {diffRows.length > 0 && (
+            <div style={{ marginBottom: "var(--gap-lg)" }}>
+              <DiffSummaryCounts counts={counts} />
+            </div>
+          )}
+          <Card padding="none">
+            {diffRows.length === 0 ? (
+              <ChartEmpty
+                height={140}
+                title="No changes"
+                body={`No supplement changes are logged against ${version.version}.`}
+              />
+            ) : (
+              <DiffRowList rows={diffRows} />
+            )}
+          </Card>
+        </section>
+      ) : (
+        <section className="zt-section">
+          <SectionLabel>Changes</SectionLabel>
+          <Card padding="md">
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", margin: 0 }}>
+              Initial version — no previous version to diff against.
+            </p>
+          </Card>
+        </section>
+      )}
 
       {/* Milestones */}
       {milestones.length > 0 && (
-        <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
-          <div className="zt-eyebrow" style={{ marginBottom: 16 }}>Milestones</div>
-          <div>
+        <section className="zt-section">
+          <SectionLabel count={milestones.length}>Milestones</SectionLabel>
+          <Card padding="none">
             {milestones.map((milestone, i) => (
               <div
                 key={milestone.id}
@@ -234,7 +297,7 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
                   display: "flex",
                   alignItems: "flex-start",
                   gap: 16,
-                  padding: "14px 0",
+                  padding: "var(--gap-row) var(--gap-card)",
                   borderBottom: i < milestones.length - 1 ? "1px solid var(--border)" : "none",
                 }}
               >
@@ -255,59 +318,8 @@ export default function VersionDetail({ loaderData }: Route.ComponentProps) {
                 </div>
               </div>
             ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Supplements (for current version) */}
-      {supplements.length > 0 && (
-        <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div className="zt-eyebrow">Active supplements</div>
-            <Link
-              to="/protocol/supplements"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
-            >
-              Manage all →
-            </Link>
-          </div>
-          <div className="zt-grid-2">
-            {supplements.slice(0, 6).map((supplement) => (
-              <div
-                key={supplement.id}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 12, background: "var(--surface-2)", borderRadius: "var(--radius-md)" }}
-              >
-                <div>
-                  <div style={{ fontWeight: 500, color: "var(--ink)", fontSize: "var(--text-sm)" }}>
-                    {supplement.name}
-                  </div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }}>
-                    {supplement.dosage} {supplement.unit} · {supplement.frequency}
-                  </div>
-                </div>
-                <TierBadge tier={supplement.tier} />
-              </div>
-            ))}
-          </div>
-          {supplements.length > 6 && (
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 12 }}>
-              +{supplements.length - 6} more supplements
-            </p>
-          )}
-        </Card>
-      )}
-
-      {/* Compare link */}
-      {previousVersion && (
-        <div style={{ textAlign: "center", marginTop: "var(--gap-lg)" }}>
-          <Link
-            to={`/protocol/compare?from=${previousVersion.version}&to=${version.version}`}
-          >
-            <Button variant="secondary">
-              Compare with {previousVersion.version}
-            </Button>
-          </Link>
-        </div>
+          </Card>
+        </section>
       )}
     </div>
   );

@@ -11,9 +11,11 @@ import {
 import type { TenantCtx } from "~/lib/data.server";
 import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { CESSATION_PHASES, SUPPLEMENT_TIERS } from "~/types/protocol";
-import { differenceInDays, parseISO, format } from "date-fns";
+import { parseISO, format } from "date-fns";
+import { ArrowRight, GitBranch, Pill, Timer, GitCompare } from "lucide-react";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
+import { PageHeader } from "~/components/ui/PageHeader";
 import { PhaseBar } from "~/components/ui/PhaseBar";
 import type { Phase } from "~/components/ui/PhaseBar";
 
@@ -91,45 +93,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-// Stat tile — Card + .zt-eyebrow + .zt-readout (ProtoStat pattern from screen-protocol.jsx)
-function ProtoStat({
-  label,
-  value,
-  unit,
-  sub,
-  to,
-}: {
-  label: string;
-  value: string | number;
-  unit?: string;
-  sub?: string;
-  to?: string;
-}) {
-  const inner = (
-    <Card padding="md" interactive={!!to} style={{ height: "100%", minHeight: 116, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-      <div className="zt-eyebrow">{label}</div>
-      <div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span className="zt-readout" style={{ fontSize: "var(--text-2xl)", color: "var(--ink)" }}>
-            {value}
-          </span>
-          {unit && (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              {unit}
-            </span>
-          )}
-        </div>
-        {sub && (
-          <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 4 }}>
-            {sub}
-          </div>
-        )}
-      </div>
-    </Card>
-  );
-  return to ? <Link to={to} style={{ textDecoration: "none", display: "block", height: "100%" }}>{inner}</Link> : inner;
-}
-
 // Build PhaseBar phases from CESSATION_PHASES + current day
 function buildPhaseBarPhases(cessationDay: number): Phase[] {
   return CESSATION_PHASES.map((p) => {
@@ -151,7 +114,6 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
     currentVersion,
     activeSupplementCount,
     supplementsByTier,
-    cessation,
     cessationDay,
     cessationPhase,
     latestMilestone,
@@ -159,58 +121,69 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
     protocolVersions,
   } = loaderData;
 
-  const targetDay = 150;
   const phaseBarPhases = buildPhaseBarPhases(cessationDay);
 
   return (
     <div>
-      {/* Stat tiles — 4-up grid */}
-      <div className="zt-grid-4" style={{ marginBottom: "var(--gap-2xl)" }}>
-        <ProtoStat
-          label="Current protocol"
-          value={currentVersion?.version || "—"}
-          unit={`${totalVersions} versions`}
-          sub={`Active since ${currentVersion ? format(parseISO(currentVersion.effectiveDate), "MMM d") : "—"}`}
-          to="/protocol/versions"
-        />
-        <ProtoStat
-          label="Active supplements"
-          value={activeSupplementCount}
-          sub={`${supplementsByTier.tier1 || 0} Tier 1 · ${supplementsByTier.tier2 || 0} Tier 2`}
-          to="/protocol/supplements"
-        />
-        <ProtoStat
-          label="Cessation"
-          value={`Day ${cessationDay}`}
-          sub={`${cessationPhase.label} phase`}
-          to="/protocol/cessation"
-        />
-        <ProtoStat
-          label="Latest milestone"
-          value={latestMilestone?.description.slice(0, 20) || "—"}
-          sub={latestMilestone ? format(parseISO(latestMilestone.date), "MMM d, yyyy") : "—"}
-        />
-      </div>
+      <PageHeader
+        eyebrow="PROTOCOL"
+        title="Protocol overview"
+        sub="Your supplement and phasing protocol, one frame at a time."
+      />
 
-      {/* FAAH Cessation Timeline card */}
-      <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div className="zt-eyebrow">FAAH CESSATION TIMELINE</div>
-          <Link
-            to="/protocol/cessation"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
-          >
-            View tracker →
-          </Link>
+      {/* Active protocol + Phasing — round-3 section-dashboard pair */}
+      <section className="zt-section">
+        <div className="zt-grid-2">
+          <Card padding="lg">
+            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>Active protocol</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+              {/* version chip */}
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 700,
+                  fontSize: "var(--text-sm)",
+                  color: "var(--accent)",
+                  background: "var(--focus-50)",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "3px 8px",
+                }}
+              >
+                {currentVersion?.version || "—"}
+              </span>
+              <div style={{ fontSize: "var(--text-md)", fontWeight: 600, color: "var(--ink)" }}>
+                Active since {currentVersion ? format(parseISO(currentVersion.effectiveDate), "MMM d, yyyy") : "—"}
+              </div>
+            </div>
+            <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "var(--gap-lg)", textWrap: "pretty" }}>
+              {currentVersion?.notes || "No notes on the active version."}
+            </div>
+            {latestMilestone && (
+              <div className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", letterSpacing: "0.06em", marginBottom: "var(--gap-lg)" }}>
+                LATEST MILESTONE · {format(parseISO(latestMilestone.date), "MMM d, yyyy")} — {latestMilestone.description}
+              </div>
+            )}
+            <Link to="/protocol/versions" className="zt-link">
+              Version history · {totalVersions} <ArrowRight size={14} strokeWidth={2} />
+            </Link>
+          </Card>
+
+          <Card padding="lg">
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
+              <div className="zt-eyebrow">Phasing</div>
+              <span className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                DAY {cessationDay} · {cessationPhase.label.toUpperCase()}
+              </span>
+            </div>
+            <div style={{ marginBottom: "var(--gap-xl)" }}>
+              <PhaseBar phases={phaseBarPhases} height={12} compact day={cessationDay} />
+            </div>
+            <Link to="/protocol/cessation" className="zt-link">
+              Full timeline <ArrowRight size={14} strokeWidth={2} />
+            </Link>
+          </Card>
         </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 18 }}>
-          <span className="zt-readout" style={{ fontSize: "var(--text-xl)" }}>{cessationDay}</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-            / {targetDay} days
-          </span>
-        </div>
-        <PhaseBar phases={phaseBarPhases} />
-      </Card>
+      </section>
 
       {/* Version history + Supplements by tier */}
       <div className="zt-grid-2">
@@ -258,7 +231,7 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
         <Card padding="md">
           <div style={{ padding: "4px 8px 8px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div className="zt-eyebrow">SUPPLEMENTS BY TIER</div>
+              <div className="zt-eyebrow">SUPPLEMENTS BY TIER · {activeSupplementCount} ACTIVE</div>
               <Link
                 to="/protocol/supplements"
                 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--accent)", textDecoration: "none" }}
@@ -292,6 +265,21 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
             );
           })}
         </Card>
+      </div>
+
+      {/* Quick links — zt-pill row (round 3) */}
+      <div style={{ display: "flex", gap: "var(--gap-md)", flexWrap: "wrap", marginTop: "var(--gap-section)" }}>
+        {[
+          { label: "Versions", to: "/protocol/versions", Icon: GitBranch },
+          { label: "Supplements", to: "/protocol/supplements", Icon: Pill },
+          { label: "Phasing", to: "/protocol/cessation", Icon: Timer },
+          { label: "Compare", to: "/protocol/compare", Icon: GitCompare },
+        ].map(({ label, to, Icon }) => (
+          <Link key={to} to={to} className="zt-pill">
+            <Icon size={14} strokeWidth={1.8} />
+            {label}
+          </Link>
+        ))}
       </div>
     </div>
   );

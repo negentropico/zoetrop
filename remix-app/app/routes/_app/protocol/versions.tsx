@@ -9,10 +9,9 @@ import {
 } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
+import { ChevronRight } from "lucide-react";
 import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Button } from "~/components/ui/Button";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -49,45 +48,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     (a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
   );
 
-  // Enrich versions with change counts and milestones
-  const versions = sortedVersions.map((version) => {
-    const changes = protocolChangesRows.filter((c) => c.versionId === version.id);
-    const versionMilestones = normalizedMilestones.filter((m) => m.protocolVersion === version.version);
-
-    return {
-      ...version,
-      changeCount: changes.length,
-      milestones: versionMilestones,
-      changes: changes.slice(0, 3), // Preview first 3 changes
-    };
-  });
+  // Enrich versions with change + milestone counts
+  const versions = sortedVersions.map((version) => ({
+    ...version,
+    changeCount: protocolChangesRows.filter((c) => c.versionId === version.id).length,
+    milestoneCount: normalizedMilestones.filter((m) => m.protocolVersion === version.version).length,
+  }));
 
   return { versions: [...versions].reverse() }; // Most recent first
-}
-
-// Change type badge — brand tokens, no raw grays
-function ChangeTypeBadge({ type }: { type: string }) {
-  const toneMap: Record<string, "vital" | "danger" | "focus" | "energy" | "neutral"> = {
-    added: "vital",
-    removed: "danger",
-    dosage_changed: "focus",
-    timing_changed: "energy",
-    frequency_changed: "neutral",
-  };
-
-  const labels: Record<string, string> = {
-    added: "Added",
-    removed: "Removed",
-    dosage_changed: "Dosage",
-    timing_changed: "Timing",
-    frequency_changed: "Frequency",
-  };
-
-  return (
-    <Badge tone={toneMap[type] || "neutral"}>
-      {labels[type] || type}
-    </Badge>
-  );
 }
 
 export default function ProtocolVersions({ loaderData }: Route.ComponentProps) {
@@ -98,98 +66,97 @@ export default function ProtocolVersions({ loaderData }: Route.ComponentProps) {
     <div>
       <PageHeader
         eyebrow="VERSION HISTORY"
-        title="Protocol evolution"
-        sub="Track changes across protocol versions."
+        title="Protocol versions"
+        sub={`${versions.length} versions logged.`}
         right={
-          <Link to="/protocol/compare">
-            <Button variant="secondary">Compare versions</Button>
+          <Link to="/protocol/compare" className="zt-pill">
+            Compare versions
           </Link>
         }
       />
 
-      {/* Version list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap-lg)" }}>
-        {versions.map((version) => {
-          const isLatest = version.version === currentVersion?.version;
+      {/* Round 3: cards merged into ONE frame-card list, newest first;
+          the active row is tinted --surface-2 and carries the focus chip;
+          rows link through (hover + chevron, round 4). */}
+      <Card padding="none">
+        {versions.map((version, i) => {
+          const isActive = version.version === currentVersion?.version;
           return (
             <Link
               key={version.id}
               to={`/protocol/versions/${version.version}`}
-              style={{ textDecoration: "none" }}
+              style={{ textDecoration: "none", display: "block" }}
             >
-              <Card padding="md" interactive>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--text-xl)", color: "var(--ink)" }}>
-                        {version.version}
-                      </span>
-                      {isLatest && <Badge tone="success">Current</Badge>}
-                    </div>
-                    <p style={{ margin: "4px 0 0", fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                      Effective {format(parseISO(version.effectiveDate), "MMMM d, yyyy")}
-                    </p>
+              <div
+                className="zt-mrow"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--gap-xl)",
+                  padding: "var(--gap-row) var(--gap-card)",
+                  borderBottom: i < versions.length - 1 ? "1px solid var(--border)" : "none",
+                  background: isActive ? "var(--surface-2)" : "transparent",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "var(--radius-md)",
+                    background: isActive ? "var(--focus-50)" : "var(--surface-sunken)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flex: "0 0 auto",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontWeight: 700,
+                      fontSize: "var(--text-sm)",
+                      color: isActive ? "var(--accent)" : "var(--text-muted)",
+                    }}
+                  >
+                    {version.version}
+                  </span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: "var(--text-sm)", color: "var(--text)", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {version.notes || `Protocol ${version.version}`}
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "var(--text-sm)", color: "var(--ink)" }}>
-                      {version.changeCount} changes
-                    </div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                      {version.milestones.length} milestones
-                    </div>
+                  <div className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)" }}>
+                    {version.changeCount} changes · {version.milestoneCount} milestones
                   </div>
                 </div>
-
-                {version.notes && (
-                  <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: 12 }}>
-                    {version.notes}
-                  </p>
-                )}
-
-                {/* Preview changes */}
-                {version.changes.length > 0 && (
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-                    {version.changes.map((change) => (
-                      <div
-                        key={change.id}
-                        style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: "var(--text-sm)" }}
-                      >
-                        <ChangeTypeBadge type={change.changeType} />
-                        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{change.supplementName}</span>
-                        {change.oldDosage && change.newDosage && (
-                          <span style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)" }}>
-                            {change.oldDosage} → {change.newDosage}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    {version.changeCount > 3 && (
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                        +{version.changeCount - 3} more changes
-                      </div>
-                    )}
+                <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)", letterSpacing: "0.06em" }}>
+                    {format(parseISO(version.effectiveDate), "MMM d, yyyy")}
                   </div>
-                )}
-
-                {/* Milestones */}
-                {version.milestones.length > 0 && (
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
-                    <div className="zt-eyebrow" style={{ marginBottom: 6 }}>Milestones</div>
-                    {version.milestones.map((milestone) => (
-                      <div
-                        key={milestone.id}
-                        style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: 4 }}
-                      >
-                        {milestone.description}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
+                  {isActive && (
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "var(--text-2xs)",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "var(--accent)",
+                        background: "var(--focus-50)",
+                        padding: "3px 9px",
+                        borderRadius: "var(--radius-pill)",
+                      }}
+                    >
+                      active
+                    </span>
+                  )}
+                </div>
+                <ChevronRight size={16} strokeWidth={1.5} color="var(--text-faint)" />
+              </div>
             </Link>
           );
         })}
-      </div>
+      </Card>
     </div>
   );
 }
