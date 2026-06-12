@@ -295,7 +295,7 @@ Plans:
 
 **Wave 3** *(blocked on 07-01/07-02)*
 
-- [ ] 07-03-PLAN.md — Service + call-site retrofit: data/consent/audit wrapped in withTenantDb; 15 loader/action sites pass TenantCtx; review approve-write RLS-governed; admin-path for background/no-subject writes; owner-parity + build gate [TEN-02, TEN-03]
+- [x] 07-03-PLAN.md — Service + call-site retrofit: data/consent/audit wrapped in withTenantDb; 15 loader/action sites pass TenantCtx; review approve-write RLS-governed; admin-path for background/no-subject writes; owner-parity + build gate [TEN-02, TEN-03]
 
 **Wave 4** *(blocked on 07-01/07-02/07-03)*
 
@@ -330,7 +330,7 @@ Plans:
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
-| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 2/4 | In Progress|  |
+| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 3/4 | In Progress|  |
 | 8. Compliance Envelope & Host Gate *(pre-client gate)* | 0/TBD | Deferred (gate) | - |
 
 ## Backlog
