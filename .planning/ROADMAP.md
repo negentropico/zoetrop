@@ -291,7 +291,7 @@ Plans:
 
 **Wave 2** *(blocked on 07-01)*
 
-- [ ] 07-02-PLAN.md — Atomic RLS migration: app_user NOBYPASSRLS role + ENABLE/FORCE + host-portable GUC policies on all 16 PHI tables (audit_log INSERT+SELECT-only, consent_log subject-only); [BLOCKING] Neon-branch rehearsal + rollback verify + live db:migrate; COMPLIANCE-RUNBOOK Phase 7/8 boundary [TEN-02, TEN-03, AUTH-04]
+- [x] 07-02-PLAN.md — Atomic RLS migration: app_user NOBYPASSRLS role + ENABLE/FORCE + host-portable GUC policies on all 16 PHI tables (audit_log INSERT+SELECT-only, consent_log subject-only); [BLOCKING] Neon-branch rehearsal + rollback verify + live db:migrate; COMPLIANCE-RUNBOOK Phase 7/8 boundary [TEN-02, TEN-03, AUTH-04]
 
 **Wave 3** *(blocked on 07-01/07-02)*
 
@@ -330,7 +330,7 @@ Plans:
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
 | 6. Engine Promotion + Confidence-Graded Reports | 5/5 | Complete   | 2026-06-12 |
-| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 1/4 | In Progress|  |
+| 7. PHI Compliance Hardening — RLS + Isolation Engineering | 2/4 | In Progress|  |
 | 8. Compliance Envelope & Host Gate *(pre-client gate)* | 0/TBD | Deferred (gate) | - |
 
 ## Backlog
