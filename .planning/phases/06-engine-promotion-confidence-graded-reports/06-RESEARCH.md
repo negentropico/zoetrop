@@ -969,19 +969,19 @@ export async function action({ request }: ActionFunctionArgs) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Corpus authoring coordination**
+1. **Corpus authoring coordination** — **RESOLVED:** corpus authoring is a phase task; tables + seed scaffold land in 06-02, the LLM-assisted+human-reviewed seed in 06-03 (checkpoint-gated).
    - What we know: PDFs live in `/Users/mac/vaults/#Bwell/...`; LLM extraction pattern established in `extraction.server.ts`
    - What's unclear: Whether the corpus authoring session (LLM extraction + human review) runs before or during Phase 6 planning. The planner needs to know if corpus content is available at plan time or if Wave 0 must include a corpus authoring task.
    - Recommendation: Treat corpus authoring as Wave 0 (parallel with schema migration) — the seed script and tables can be created before corpus content is finalized; seed runs after authoring is complete.
 
-2. **`genetics-knowledge.server.ts` retirement timing**
+2. **`genetics-knowledge.server.ts` retirement timing** — **RESOLVED:** retired within Phase 6 (06-03 Task 3); the 3 consumers re-point to the corpus read layer.
    - What we know: The 16-entry interim module is superseded by corpus; callers are in `app/routes/_app/insights/genetics.tsx` (via `data.server.ts` loader)
    - What's unclear: Whether the genetics route should be updated to read from `geneticVariants` table (via corpus) or continue using the interim module until a separate phase
    - Recommendation: Retire it within Phase 6 (it's already flagged "retired by Phase 6 engine" in the file header comment line 6) — the genetics route loader updates to use `getVariantMaps()` from `corpus.server.ts`.
 
-3. **Nav extension — BottomTab overflow**
+3. **Nav extension — BottomTab overflow** — **RESOLVED:** "Import" dropped from BottomTab (kept in sidebar rail); reports nav entry added in 06-04 Task 3.
    - What we know: UI-SPEC §Nav Extension flags this: 6 items may require dropping "Import" from bottom tab or adding "More" overflow. Planner decides.
    - What's unclear: Owner's preference between the two options.
    - Recommendation: Drop "Import" from BottomTab (keep in sidebar rail); the ingest flow is a practitioner-only workflow rarely triggered on mobile. This is the simpler implementation.
