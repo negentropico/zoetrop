@@ -30,7 +30,7 @@ import { extractLabValues } from "./extraction.server";
 import { checkGrounding } from "./grounding";
 import { checkRange } from "./range-check";
 import { lookupAnalyte } from "./analyte-dictionary";
-import { insertAuditLog } from "../audit.server";
+import { insertAuditLogAdmin } from "../audit.server";
 
 // ── extractionWorker ───────────────────────────────────────────────────────
 //
@@ -186,7 +186,9 @@ export async function extractionWorker(
       .where(eq(labDocuments.id, labDocumentId));
 
     // 7. Audit log — D-13: no PHI values, only IDs and metadata
-    await insertAuditLog({
+    // extractionWorker runs as a background job (waitUntil, no session) →
+    // admin path (getDb/neondb_owner) bypasses RLS intentionally.
+    await insertAuditLogAdmin({
       userId: doc.uploadedBy,
       role: "owner", // extraction runs server-side; role recorded for audit trail
       action: "extraction-complete",

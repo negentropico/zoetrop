@@ -29,7 +29,8 @@ import type { Route } from "./+types/review";
 import { requireUser, requireRole, assertSubjectAccess } from "~/lib/authz.server";
 import type { AppRole } from "~/lib/authz.server";
 import { getOwnerSubject } from "~/lib/data.server";
-import { getDb } from "~/lib/db.server";
+import { getDb, withTenantDb } from "~/lib/db.server";
+import type { TenantCtx } from "~/lib/db.server";
 import { eq, and, sql } from "drizzle-orm";
 import { labDocuments, labExtractions, metrics, auditLog } from "../../../../db/schema";
 import { Card } from "~/components/ui/Card";
@@ -118,6 +119,14 @@ export async function action({ request }: Route.ActionArgs) {
   // T-05-APPROVE: assertSubjectAccess BEFORE any write (D-15, CR-01 write-path)
   assertSubjectAccess(user, { tenantId: extraction.tenantId }, user.tenantId!);
 
+  // Build TenantCtx from the extraction row's tenant+subject — used by withTenantDb
+  // for the approve/reject write transactions (RLS WITH CHECK validates tenant_id).
+  const ctx: TenantCtx = {
+    userId: user.id,
+    tenantId: extraction.tenantId,
+    subjectId: extraction.subjectId,
+  };
+
   const now = new Date();
 
   if (intent === "approve" || intent === "edit-approve") {
@@ -163,8 +172,9 @@ export async function action({ request }: Route.ActionArgs) {
     const deduped = existingMetric !== null;
     const metricId = deduped ? existingMetric.id : crypto.randomUUID();
 
-    // Drizzle transaction: conditionally INSERT metrics + UPDATE labExtractions + INSERT auditLog
-    await db.transaction(async (tx) => {
+    // withTenantDb transaction: conditionally INSERT metrics + UPDATE labExtractions + INSERT auditLog
+    // ctx was constructed above from extraction.tenantId/subjectId after assertSubjectAccess (D-15).
+    await withTenantDb(ctx, async (tx) => {
       if (!deduped) {
         // INSERT metrics row — source: 'lab' (LAB-05)
         await tx.insert(metrics).values({
@@ -224,7 +234,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "reject") {
-    await db.transaction(async (tx) => {
+    await withTenantDb(ctx, async (tx) => {
       await tx
         .update(labExtractions)
         .set({

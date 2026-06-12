@@ -6,12 +6,25 @@
  * metadata. No clinical value, analyte name, or lab result is ever logged.
  * This is enforced by the AuditLogEntry type definition below (D-13).
  *
- * Phase 7 withTenantDb retrofit boundary:
- *   getDb() is isolated here. Phase 7 replaces it with withTenantDb() if RLS
- *   is enforced.
+ * Phase 7 withTenantDb retrofit (Plan 03 COMPLETE):
+ *   Two exported paths:
+ *
+ *   insertAuditLog(entry) — session-bound path.
+ *     Uses withTenantDb with ctx derived from entry fields. For writes that
+ *     occur within a request-scoped session (upload action, consent action,
+ *     review approve/reject actions). The audit_log INSERT policy (WITH CHECK
+ *     on app.tenant_id) is satisfied by the app_user role set by withTenantDb.
+ *
+ *   insertAuditLogAdmin(entry) — background/no-session path.
+ *     Uses getDb() admin path (neondb_owner). For contexts with no request-
+ *     scoped subject — extractionWorker (waitUntil background job). The worker
+ *     runs outside a request session; its subjectId comes from the doc row,
+ *     not from a live session. The admin path bypasses RLS via neondb_owner.
+ *     Also used for auth events (Plan 04) where no subjectId exists at sign-in.
  */
 
-import { getDb } from "./db.server";
+import { withTenantDb, getDb } from "./db.server";
+import type { TenantCtx } from "./db.server";
 import { auditLog } from "../../db/schema";
 import type { AppRole } from "./authz.server";
 
@@ -19,7 +32,7 @@ import type { AppRole } from "./authz.server";
 //
 // D-13: NO PHI value/name fields. Only IDs, role, action, table metadata,
 // and entity IDs. A clinical result value or analyte name MUST NEVER appear
-// in this type or in any call to insertAuditLog.
+// in this type or in any call to insertAuditLog / insertAuditLogAdmin.
 
 export interface AuditLogEntry {
   userId: string;
@@ -32,12 +45,49 @@ export interface AuditLogEntry {
   entityId?: string;       // ID of the affected row — NOT its value or name (D-13)
 }
 
-// ── insertAuditLog ─────────────────────────────────────────────────────────
+// ── insertAuditLog (session-bound path — withTenantDb) ─────────────────────
 //
-// Inserts an auditLog row with a server-generated timestamp.
-// Called from the upload action, extractionWorker, and the approve action.
+// Uses withTenantDb so the INSERT is RLS-governed for request-scoped sessions.
+// The audit_log RLS policy allows INSERT for app_user (WITH CHECK on
+// app.tenant_id); this path satisfies it.
+//
+// Called from: upload action, consent action, review approve/reject actions.
 
 export async function insertAuditLog(entry: AuditLogEntry): Promise<void> {
+  const ctx: TenantCtx = {
+    userId: entry.userId,
+    tenantId: entry.tenantId,
+    subjectId: entry.subjectId,
+  };
+  await withTenantDb(ctx, async (tx) => {
+    await tx.insert(auditLog).values({
+      userId: entry.userId,
+      role: entry.role,
+      action: entry.action,
+      tableName: entry.tableName,
+      operation: entry.operation,
+      tenantId: entry.tenantId,
+      subjectId: entry.subjectId,
+      entityId: entry.entityId,
+      timestamp: new Date(),
+    });
+  });
+}
+
+// ── insertAuditLogAdmin (background/no-session path — admin getDb()) ────────
+//
+// Uses getDb() (neondb_owner, BYPASSRLS) for contexts where no request-scoped
+// session exists. The extractionWorker runs via waitUntil — it has no HTTP
+// session; its subjectId comes from the doc row, not from a live session.
+//
+// Also used for auth events (Plan 04) where no subjectId exists at sign-in
+// time (auth events use tenantId as the subjectId stub).
+//
+// WARNING: This path bypasses RLS. Only use for:
+//   - Background jobs (extractionWorker) where no session context exists
+//   - Auth events (sign-in, sign-out, invite-redeemed) from Better-Auth hooks
+
+export async function insertAuditLogAdmin(entry: AuditLogEntry): Promise<void> {
   const db = getDb();
   await db.insert(auditLog).values({
     userId: entry.userId,
