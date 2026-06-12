@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/genetics";
-import { requireUser } from "~/lib/authz.server";
-import { getOwnerSubject, getSubjectGenotypes } from "~/lib/data.server";
-import type { TenantCtx } from "~/lib/data.server";
+import { requireSubjectCtx } from "~/lib/authz.server";
+import { getSubjectGenotypes } from "~/lib/data.server";
 import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
 import {
   CONFIDENCE_LEVELS,
@@ -47,9 +46,7 @@ type DerivedVariant = {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
-  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const { ctx } = await requireSubjectCtx(request);
 
   const [genotypeRows, geneticKnowledge] = await Promise.all([
     getSubjectGenotypes(ctx),

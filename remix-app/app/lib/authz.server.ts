@@ -15,6 +15,8 @@
 
 import { redirect } from "react-router";
 import { auth } from "./auth.server";
+import { getOwnerSubject } from "./data.server";
+import type { TenantCtx } from "./data.server";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +57,7 @@ export function requireRole(
 // ── assertSubjectAccess ───────────────────────────────────────────────────
 //
 // Tenant + per-assignment authorization gate (D-11/D-13, AUTH-03).
+// requireSubjectCtx (below) is the canonical caller for PHI read loaders.
 //
 // Check order:
 //   1. client role → always 403 (clients never access subject data directly)
@@ -100,6 +103,46 @@ export function assertSubjectAccess(
       });
     }
   }
+}
+
+// ── requireSubjectCtx ─────────────────────────────────────────────────────
+//
+// Canonical PHI-read entry point (CR-02 fix, Phase 7 Plan 06).
+//
+// Composes requireUser → getOwnerSubject → assertSubjectAccess in one call.
+// All 13 PHI read loaders (dashboard/metrics/insights/protocol) use this
+// helper instead of duplicating the three-line boilerplate.
+//
+// Why this is required: React Router 7 child loaders run independently of
+// _app/layout.tsx — the layout loader gates authentication only. Child loader
+// execution is NOT blocked by the layout gate, so a client-role user who passes
+// authentication can reach every child loader without a role check. This helper
+// closes that gap by running assertSubjectAccess (Gate 1: client → 403) on
+// every PHI read surface. Centralizing the check in one function means a single
+// audit point; tsc forces every PHI loader to the same contract.
+//
+// Import-cycle note: data.server.ts → db.server.ts only; it does NOT import
+// authz.server.ts. This authz → data.server edge introduces no cycle.
+
+export async function requireSubjectCtx(request: Request): Promise<{
+  user: Awaited<ReturnType<typeof requireUser>>["user"];
+  subject: Awaited<ReturnType<typeof getOwnerSubject>>;
+  ctx: TenantCtx;
+}> {
+  // Step 1: authenticate — throws redirect(/login) if no session
+  const { user } = await requireUser(request);
+  // Step 2: resolve the owner subject for this tenant — throws 404 if none
+  const subject = await getOwnerSubject(user.tenantId!);
+  // Step 3: role + tenant gate — Gate 1 throws 403 for client role;
+  //          Gate 2 throws 403 for cross-tenant (defense-in-depth)
+  assertSubjectAccess(user, subject, user.tenantId!);
+  // Step 4: build TenantCtx from validated identity
+  const ctx: TenantCtx = {
+    userId: user.id,
+    tenantId: user.tenantId!,
+    subjectId: subject.id,
+  };
+  return { user, subject, ctx };
 }
 
 // ── CAPABILITIES matrix (D-12) ────────────────────────────────────────────

@@ -1,14 +1,12 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/version-detail";
-import { requireUser } from "~/lib/authz.server";
+import { requireSubjectCtx } from "~/lib/authz.server";
 import {
-  getOwnerSubject,
   getProtocolVersions,
   getProtocolChanges,
   getMilestones,
   getSupplements,
 } from "~/lib/data.server";
-import type { TenantCtx } from "~/lib/data.server";
 import { format, parseISO } from "date-fns";
 import { Card } from "~/components/ui/Card";
 import { Badge } from "~/components/ui/Badge";
@@ -18,9 +16,7 @@ import { Button } from "~/components/ui/Button";
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { version: versionParam } = params;
 
-  const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
-  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const { ctx } = await requireSubjectCtx(request);
 
   const [protocolVersionsRows, protocolChangesRows, milestonesRows, supplementsRows] = await Promise.all([
     getProtocolVersions(ctx),

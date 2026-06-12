@@ -7,9 +7,8 @@ import {
   type Metric,
 } from "~/types/metrics";
 import { getMetricTargets, getMetricStatus } from "~/lib/metrics";
-import { requireUser } from "~/lib/authz.server";
-import { getOwnerSubject, getMetrics } from "~/lib/data.server";
-import type { TenantCtx } from "~/lib/data.server";
+import { requireSubjectCtx } from "~/lib/authz.server";
+import { getMetrics } from "~/lib/data.server";
 import { dbRowToMetric } from "~/lib/db-mappers.server";
 import { TrendSparkline } from "~/components/ui/TrendChart";
 import { format, parseISO } from "date-fns";
@@ -59,9 +58,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const categoryInfo = CATEGORY_INFO[category];
 
-  const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
-  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const { ctx } = await requireSubjectCtx(request);
   const rows = await getMetrics(ctx, category);
   const categoryMetrics = rows.map(dbRowToMetric);
 
