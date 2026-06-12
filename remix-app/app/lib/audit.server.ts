@@ -133,13 +133,14 @@ export interface AuthAuditEntry {
   action: 'sign-in' | 'sign-out' | 'sign-up' | 'invite-redeemed' | 'sign-in-failed' | 'role-changed';
   tenantId: string;
   entityId?: string;  // optional session id or invite id — NOT a PHI value
+  role?: AppRole;     // actor's resolved role; defaults to 'owner' when unavailable (break-glass / role-unavailable path)
 }
 
 export async function insertAuthAuditLog(entry: AuthAuditEntry): Promise<void> {
   const db = getDb();
   await db.insert(auditLog).values({
     userId: entry.userId,
-    role: 'owner' as AppRole,  // auth events are user-initiated; role resolved post-auth
+    role: entry.role ?? 'owner' as AppRole,  // actor's real role; falls back to 'owner' only when unavailable (break-glass / role-unavailable path)
     action: entry.action,
     tenantId: entry.tenantId,
     subjectId: null, // auth events have no clinical subject (nullable since migration 0013)
