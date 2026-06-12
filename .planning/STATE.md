@@ -138,6 +138,7 @@ Recent decisions affecting current work:
 | 260610-rwg | Unify page headers — PageHeader icon/titleAccessory props; metrics category + detail migrated off hand-rolled headers | 2026-06-11 | 299c488 | [260610-rwg-unify-page-headers-extend-pageheader-ico](./quick/260610-rwg-unify-page-headers-extend-pageheader-ico/) |
 | 260611-j6n | Design-roundtrip integration harness (unbundle/css-delta + RETURN-SPEC protocol) + round2 archive + round3 outbound package | 2026-06-11 | 19cad6e | [260611-j6n-design-roundtrip-integration-harness-rou](./quick/260611-j6n-design-roundtrip-integration-harness-rou/) |
 | 260611-jq8 | Repo-wide rename Zoetrop→Zoetrop (all case variants, 95 files + round1 filename; includes wordmark rebrand edit) | 2026-06-11 | 1ed1ba6 | [260611-jq8-repo-wide-rename-zoetrop-to-zoetrop-all](./quick/260611-jq8-repo-wide-rename-zoetrop-to-zoetrop-all/) |
+| 260611-py7 | Canonical platform history doc — docs/HISTORY.md (Bwell vault origins → Tracker/Astro → Remix/Neon → Zoetrop platform pivot → GSD M1) + CLAUDE.md pointer | 2026-06-11 | d90fc96 | [260611-py7-canonical-platform-history-doc-docs-hist](./quick/260611-py7-canonical-platform-history-doc-docs-hist/) |
 
 ## Deferred Items
 
