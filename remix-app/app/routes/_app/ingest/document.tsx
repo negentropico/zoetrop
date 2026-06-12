@@ -17,6 +17,8 @@
 import type { Route } from "./+types/document";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
 import { getDb } from "~/lib/db.server";
+import type { TenantCtx } from "~/lib/db.server";
+import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { eq } from "drizzle-orm";
 import { labDocuments } from "../../../../db/schema";
 
@@ -42,8 +44,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response("Not found", { status: 404 });
   }
 
-  // T-05-DOC: assertSubjectAccess — 403 for cross-tenant docId
-  assertSubjectAccess(user, { tenantId: doc.tenantId }, user.tenantId!);
+  // T-05-DOC / Gate 3: assertSubjectAccess — 403 for cross-tenant docId OR unassigned practitioner.
+  // Build ctx from doc row (post-load, pre-stream) so listAssignedSubjectIds can be called.
+  // Gate 3 fires only for practitioners (assignedIds undefined for owners → Gate 3 skipped).
+  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: doc.subjectId };
+  const assignedIds =
+    user.role === "practitioner"
+      ? await listAssignedSubjectIds(ctx, user.id)
+      : undefined;
+  assertSubjectAccess(user, { tenantId: doc.tenantId, id: doc.subjectId }, user.tenantId!, assignedIds);
 
   // PDF bytes may have been purged after all extractions are resolved
   if (!doc.pdfBytes) {
