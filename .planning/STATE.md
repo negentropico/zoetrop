@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: 07 (phi-compliance-hardening-pre-client-gate-deferred-hardening) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 07
-Last activity: 2026-06-12 -- Phase 07 execution started
+Phase: 07 (phi-compliance-hardening-pre-client-gate-deferred-hardening) — VERIFICATION GAPS FOUND
+Plan: 6 of 6 executed (incl. gap-closure 07-05/07-06); verification 4/5 must-haves, 2 new AUTH-03 blockers
+Status: Phase 07 awaiting second gap-closure round (see 07-VERIFICATION.md)
+Last activity: 2026-06-12 -- Wave 5 (07-05/07-06) merged, build+tests green; re-verification found 2 new blockers (document.tsx Gate 3 bypass; non-partial unique index on practitioner_subject_assignments)
 
 Progress: [████████░░] 78%
 
