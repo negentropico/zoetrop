@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 7 context gathered
-last_updated: "2026-06-12T21:03:02.309Z"
+status: ready_to_plan
+stopped_at: Phase 07 complete (8/8) — ready to discuss Phase 08
+last_updated: 2026-06-12T21:52:55.280Z
 last_activity: 2026-06-12 -- Phase 07 execution started
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 50
-  completed_plans: 48
+  completed_plans: 50
   percent: 80
 ---
 
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 07 — phi-compliance-hardening-pre-client-gate-deferred-hardening
+**Current focus:** Phase 08 — compliance envelope host gate
 
 > Note: Phases 1, 2, 3, 3.1, 4, and 4.1 are complete (Phase 4 completed 2026-06-10 with verification passed 4/4). Phase 4.1 (design system) was executed early on 2026-06-08; `phase.complete` for Phase 4 again mis-pointed "next" at the already-complete 4.1 and was corrected by hand — **the next incomplete phase is Phase 5 (Lab Ingest Pipeline)**. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
 
-Phase: 07 (phi-compliance-hardening-pre-client-gate-deferred-hardening) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 07
-Last activity: 2026-06-12 -- Phase 07 execution started
+Phase: 08
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-12
 
 Progress: [████████░░] 78%
 
@@ -41,7 +41,7 @@ Progress: [████████░░] 78%
 
 **Velocity:**
 
-- Total plans completed: 47
+- Total plans completed: 55
 - Average duration: —
 - Total execution time: —
 
@@ -57,6 +57,7 @@ Progress: [████████░░] 78%
 | 04 | 7 | - | - |
 | 05 | 3 | - | - |
 | 06 | 5 | - | - |
+| 07 | 8 | - | - |
 
 **Recent Trend:** No data yet
 

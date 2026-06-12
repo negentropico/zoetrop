@@ -53,8 +53,8 @@
 ### Compliance & Quality
 
 - [x] **COMP-01**: Engine logic (status classification, cessation phase math with injectable `now`, Pearson correlation) has passing unit tests covering boundary cases
-- [ ] **COMP-02**: PHI infrastructure is BAA-covered (Neon, Vercel, and the chosen LLM provider) before any **external client's** PHI is written — the pre-client hardening gate (Phase 7), not the single-user pilot
-- [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` verified (parameters off) — Phase 7 (pgAudit baseline auto-configures on Neon HIPAA enable; verification is the gate)
+- [ ] **COMP-02**: PHI infrastructure is BAA-covered (the chosen DB host, Vercel, and the LLM provider) before any **external client's** PHI is written — the pre-client hardening gate (Phase 8 — Compliance Envelope & Host Gate; host decided there via cost/BAA comparison), not the single-user pilot
+- [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` verified (parameters off) + PHI read-access (SELECT) object-level logging on PHI tables — Phase 8 (verified on whichever host wins the cost/BAA comparison; verification is the gate)
 
 ### UI / Design System
 
@@ -102,15 +102,15 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 |-------------|-------|--------|
 | DATA-03 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
 | COMP-01 | Phase 1 — Schema Baseline + Engine Tests + Auth Spike | Complete |
-| COMP-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
-| COMP-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| COMP-02 | Phase 8 — Compliance Envelope & Host Gate (Pre-Client Gate) | Deferred (gate) |
+| COMP-03 | Phase 8 — Compliance Envelope & Host Gate (Pre-Client Gate) | Deferred (gate) |
 | AUTH-01 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | AUTH-02 | Phase 3 — Identity + Tenancy Scoping | Complete |
-| AUTH-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
-| AUTH-04 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| AUTH-03 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
+| AUTH-04 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
 | TEN-01 | Phase 3 — Identity + Tenancy Scoping | Complete |
-| TEN-02 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
-| TEN-03 | Phase 7 — PHI Compliance Hardening (Pre-Client Gate) | Deferred |
+| TEN-02 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
+| TEN-03 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
 | TEN-04 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
 | DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
@@ -132,4 +132,4 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 ---
 *Requirements defined: 2026-06-07*
-*Last updated: 2026-06-08 — pilot-first re-scope: COMP-02/COMP-03 (BAAs/pgAudit), TEN-02/TEN-03 (RLS/isolation), AUTH-03/AUTH-04 (subject-scoping/audit-log) deferred from Phases 2–3 to Phase 7 (PHI Compliance Hardening — Pre-Client Gate). Phase 3 retains AUTH-01/02 + TEN-01/04 (tenancy scoping). Coverage still 29/29 mapped.*
+*Last updated: 2026-06-12 — pre-client-gate split: COMP-02/COMP-03 (BAA chain + pgAudit/SELECT-logging) re-mapped to new Phase 8 (Compliance Envelope & Host Gate); TEN-02/TEN-03 + AUTH-03/AUTH-04 stay in re-scoped Phase 7 (RLS + Isolation Engineering, on Neon, executed now). Coverage still 29/29 mapped. Prior: 2026-06-08 — pilot-first re-scope: COMP-02/COMP-03 (BAAs/pgAudit), TEN-02/TEN-03 (RLS/isolation), AUTH-03/AUTH-04 (subject-scoping/audit-log) deferred from Phases 2–3 to Phase 7 (PHI Compliance Hardening — Pre-Client Gate). Phase 3 retains AUTH-01/02 + TEN-01/04 (tenancy scoping). Coverage still 29/29 mapped.*
