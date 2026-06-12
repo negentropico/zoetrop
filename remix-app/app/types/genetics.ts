@@ -24,42 +24,46 @@ export interface GeneticVariant {
   notes?: string;
 }
 
+// ConfidenceLevelInfo carries evidence-tier semantics (D-07).
+// The detection-oriented `source` and `color` fields are removed:
+//   - `source` was detection-confidence metadata (23andMe/SelfDecode) — now in
+//     GradedRecommendation.sourceContext.detectionConfidence (engine.server.ts)
+//   - `color` was Tailwind classes — KGradeBadge now uses CSS vars per UI-SPEC Pattern 1
 export interface ConfidenceLevelInfo {
   level: ConfidenceLevel;
+  /** Evidence tier label (D-07): Established / Probable / Emerging / Speculative */
   label: string;
+  /** Evidence tier description — external/published evidence strength (not measurement certainty) */
   description: string;
-  source: string;
-  color: string;
 }
 
+// CONFIDENCE_LEVELS: relabeled from detection-confidence to evidence tiers (D-07, Phase 6).
+// K values (K1–K4) and the ConfidenceLevel union type are UNCHANGED.
+// Labels now reflect external evidence strength of the finding-to-action link:
+//   K1 Established → multiple RCTs / systematic reviews
+//   K2 Probable    → observational studies / consistent mechanistic evidence
+//   K3 Emerging    → preliminary studies; limited human data
+//   K4 Speculative → expert opinion / case reports / theoretical mechanistic reasoning
 export const CONFIDENCE_LEVELS: Record<ConfidenceLevel, ConfidenceLevelInfo> = {
   K1: {
     level: 'K1',
-    label: 'Confirmed',
-    description: 'Verified in 23andMe raw data',
-    source: 'survey.md',
-    color: 'text-green-600 dark:text-green-400',
+    label: 'Established',
+    description: 'Multiple RCTs or systematic reviews support this finding-to-action link',
   },
   K2: {
     level: 'K2',
-    label: 'Likely',
-    description: 'High confidence from clinical patterns',
-    source: 'Clinical assessment',
-    color: 'text-blue-600 dark:text-blue-400',
+    label: 'Probable',
+    description: 'Observational studies or consistent mechanistic evidence',
   },
   K3: {
     level: 'K3',
-    label: 'Inferred',
-    description: 'Third-party reanalysis (SelfDecode, StrateGene)',
-    source: 'SelfDecode',
-    color: 'text-yellow-600 dark:text-yellow-400',
+    label: 'Emerging',
+    description: 'Preliminary studies; consistent with mechanism but limited human data',
   },
   K4: {
     level: 'K4',
-    label: 'Requires Testing',
-    description: 'Needs specialized panel for confirmation',
-    source: 'Pending',
-    color: 'text-gray-500 dark:text-gray-500',
+    label: 'Speculative',
+    description: 'Expert opinion, case reports, or theoretical mechanistic reasoning only',
   },
 };
 
