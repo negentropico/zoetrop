@@ -283,9 +283,9 @@ export default function WhoopImport() {
   return (
     <div>
       <PageHeader
-        eyebrow="IMPORT"
-        title="Import data"
-        sub="Bring in your signals from WHOOP, bloodwork, and vault files."
+        eyebrow="INGEST"
+        title="WHOOP import"
+        sub="Load the WHOOP Analyzer JSON export."
       />
 
       <div className="zt-grid-split">

@@ -226,9 +226,9 @@ export default function VaultImport() {
   return (
     <div>
       <PageHeader
-        eyebrow="IMPORT"
-        title="Import data"
-        sub="Bring in your signals from WHOOP, bloodwork, and vault files."
+        eyebrow="INGEST"
+        title="Vault import"
+        sub="Import from the Obsidian vault."
       />
 
       <div className="zt-grid-split">
