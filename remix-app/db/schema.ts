@@ -11,7 +11,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { user } from './auth-schema';
 
 // Enums
@@ -283,9 +283,12 @@ export const practitionerSubjectAssignments = pgTable(
     index('idx_psa_tenant').on(t.tenantId),
     index('idx_psa_practitioner').on(t.practitionerId),
     index('idx_psa_subject').on(t.subjectId),
-    // Unique active assignment per (tenant, practitioner, subject).
-    // NOTE: this index prevents duplicate rows; revocation checks revokedAt IS NULL at the app layer.
-    uniqueIndex('idx_psa_active_unique').on(t.tenantId, t.practitionerId, t.subjectId),
+    // PARTIAL unique index — active assignments only (revoked_at IS NULL).
+    // Only active rows participate in uniqueness, so a revoked row no longer
+    // occupies the key and a revoke-then-reassign cycle works correctly (CR-02).
+    // A 23505 unique_violation therefore means a genuinely active duplicate, never
+    // a stale revoked row.
+    uniqueIndex('idx_psa_active_unique').on(t.tenantId, t.practitionerId, t.subjectId).where(sql`revoked_at IS NULL`),
   ]
 );
 
