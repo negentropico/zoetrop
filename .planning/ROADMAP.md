@@ -259,12 +259,12 @@ Plans:
 **Wave 1** (parallel — disjoint files)
 
 - [x] 06-01-PLAN.md — Pure engine extraction: engine.ts (classifyMetricStatus/getCessationDay/getCessationPhase/computePearson/mapVariantToProtocol) + report.ts type contracts + CONFIDENCE_LEVELS relabel + import-purity tests + re-pointed suites [ENG-01]
-- [ ] 06-02-PLAN.md — Schema promotion: evidenceTierEnum + geneticVariants/variantProtocolMap/metricProtocolMap (non-PHI) + reports (tenant-scoped) + corpus read layer + seed scaffold + Wave-0 corpus-lint/DB-schema tests + [BLOCKING] migration 0009 to Neon [ENG-02]
+- [x] 06-02-PLAN.md — Schema promotion: evidenceTierEnum + geneticVariants/variantProtocolMap/metricProtocolMap (non-PHI) + reports (tenant-scoped) + corpus read layer + seed scaffold + Wave-0 corpus-lint/DB-schema tests + [BLOCKING] migration 0009 to Neon [ENG-02]
 
 **Wave 2** (parallel — disjoint files)
 
 - [ ] 06-03-PLAN.md — Corpus authoring: LLM-assisted + human-reviewed owner-complete evidence-tiered corpus, seed to Neon (non-null K), retire genetics-knowledge.server.ts + re-point its 3 consumers [ENG-02, ENG-03]
-- [ ] 06-04-PLAN.md — Report UI components: KGradeBadge + RecommendationBlock + DisclaimerCallout (inline K body, locked K4 disclaimer) + Reports nav entry + BottomTab overflow fix [RPT-02, RPT-03]
+- [x] 06-04-PLAN.md — Report UI components: KGradeBadge + RecommendationBlock + DisclaimerCallout (inline K body, locked K4 disclaimer) + Reports nav entry + BottomTab overflow fix [RPT-02, RPT-03]
 
 **Wave 3** (blocked on Waves 1–2)
 
@@ -299,7 +299,7 @@ Plans:
 | 4. Static-to-DB Data Layer Migration | 7/7 | Complete   | 2026-06-10 |
 | 4.1. Design System Adoption *(inserted)* | 9/9 | Complete   | 2026-06-08 |
 | 5. Lab Ingest Pipeline | 3/3 code (Task-4 E2E UAT pending) | In Progress|  |
-| 6. Engine Promotion + Confidence-Graded Reports | 1/5 | In Progress|  |
+| 6. Engine Promotion + Confidence-Graded Reports | 3/5 | In Progress|  |
 | 7. PHI Compliance Hardening — Pre-Client Gate *(deferred)* | 0/TBD | Deferred | - |
 
 ## Backlog
