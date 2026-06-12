@@ -313,7 +313,9 @@ export default function Genetics({ loaderData }: Route.ComponentProps) {
                 borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none",
               }}
             >
-              <div className="zt-gene-id" style={{ flex: "0 0 200px", minWidth: 0 }}>
+              {/* flex-basis lives in app.css (.zt-gene-id) so the ≤760px
+                  stack rule can override it — never inline here. */}
+              <div className="zt-gene-id" style={{ minWidth: 0 }}>
                 <div style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "var(--text-sm)", color: "var(--ink)", marginBottom: 4 }}>
                   {g.gene}
                 </div>

@@ -1003,7 +1003,11 @@ h1, h2, h3, h4 {
 }
 
 /* Mobile sweep fix: the genetics row's fixed 200px gene column
-   starves the impact column at ≤760 — stack the gene id above. */
+   starves the impact column at ≤760 — stack the gene id above.
+   The desktop flex-basis lives HERE (not inline) so the mobile
+   override can actually win the cascade (W2b: inline style beat
+   the W0 rule and kept the rows overflowing at 390px). */
+.zt-gene-row > .zt-gene-id { flex: 0 0 200px; }
 @media (max-width: 760px) {
   .zt-gene-row { flex-wrap: wrap; }
   .zt-gene-row > .zt-gene-id { flex: 1 1 100%; }
