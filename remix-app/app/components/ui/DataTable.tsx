@@ -35,7 +35,7 @@ export function DataTable<T extends Record<string, unknown>>({
         overflowX: "auto",
         WebkitOverflowScrolling: "touch",
         // min-width:0 lets this scroll container shrink below the table's
-        // minWidth (640) inside any grid/flex/block parent, so the table
+        // minWidth (540) inside any grid/flex/block parent, so the table
         // scrolls WITHIN its card instead of pushing the page wide at mobile
         // (04.1-09 R2: page-overflow on /insights/genetics + /metrics detail).
         minWidth: 0,
@@ -45,7 +45,7 @@ export function DataTable<T extends Record<string, unknown>>({
         style={{
           width: "100%",
           borderCollapse: "collapse",
-          minWidth: 640,
+          minWidth: 540,
         }}
       >
         <thead>
@@ -55,8 +55,10 @@ export function DataTable<T extends Record<string, unknown>>({
                 key={c.key}
                 className="zt-eyebrow border-b border-border"
                 style={{
+                  // Round 3: header + row rhythm ride the density scale
+                  // (--gap-row, compact default) — lib.jsx DataTable.
                   textAlign: c.align ?? "left",
-                  padding: "0 16px 12px",
+                  padding: "var(--gap-row) 16px",
                   whiteSpace: "nowrap",
                   fontWeight: 400,
                 }}
@@ -75,10 +77,15 @@ export function DataTable<T extends Record<string, unknown>>({
               {columns.map((c) => (
                 <td
                   key={c.key}
-                  className="border-b border-border"
                   style={{
                     textAlign: c.align ?? "left",
-                    padding: "15px 16px",
+                    padding: "var(--gap-row) 16px",
+                    // hairline between rows only — last row sits clean
+                    // against the card edge (round 3).
+                    borderBottom:
+                      ri < rows.length - 1
+                        ? "1px solid var(--border)"
+                        : "none",
                     fontFamily: c.mono ? "var(--font-mono)" : "var(--font-text)",
                     fontVariantNumeric: c.mono ? "tabular-nums" : "normal",
                     fontSize: "var(--text-sm)",
