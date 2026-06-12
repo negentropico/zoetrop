@@ -46,5 +46,6 @@ export default [
     // Settings
     route("settings", "routes/_app/settings/index.tsx"),
     route("settings/invites/:inviteId/revoke", "routes/_app/settings/invites.ts"),
+    route("settings/assignments", "routes/_app/settings/assignments.tsx"),
   ]),
 ] satisfies RouteConfig;

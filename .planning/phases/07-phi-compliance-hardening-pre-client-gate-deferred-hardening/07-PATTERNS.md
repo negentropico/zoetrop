@@ -275,6 +275,15 @@ export async function insertAuditLog(entry: AuditLogEntry): Promise<void> {
 **AUTH-04 note:** `audit_log` gets INSERT+SELECT RLS policies only (no UPDATE/DELETE), making it immutable at the DB layer. `insertAuditLog` uses `withTenantDb` for PHI-adjacent writes (the policy allows INSERT for the app role). An **admin path** variant using `getDb()` directly (bypassing RLS) is needed for auth-event writes from Better-Auth hooks where no subject context exists at sign-in time — use `getDb()` for auth events only, `withTenantDb` for ingest lifecycle events.
 
 **Auth-event additions** (D-09) — new exported function beside `insertAuditLog`:
+
+> **CORRECTED at Plan 04 checkpoint:** the original "tenantId as subjectId stub" was
+> impossible against the live schema — `audit_log.subject_id` has an FK to `subjects(id)`
+> and no subjects row carries a tenant id (`audit_log_subject_id_subjects_id_fk` violation).
+> Migration 0013 made `subject_id` nullable; auth events write `subjectId: null`
+> (semantically honest — no clinical subject exists at auth time). The FK still
+> validates when non-NULL. The audit_log RLS policies are keyed on `app.tenant_id`
+> only, so NULL-subject rows remain visible to tenant reads.
+
 ```typescript
 // Auth events: no subjectId at sign-in time; use getDb() admin path (no RLS on these writes)
 // Wired from Better-Auth hooks (databaseHooks.session.create.after, etc.)
@@ -290,7 +299,7 @@ export async function insertAuthAuditLog(entry: {
     role: 'owner',  // auth events are always user-initiated; role resolved from session post-auth
     action: entry.action,
     tenantId: entry.tenantId,
-    subjectId: entry.tenantId,  // placeholder — auth_log rows use tenantId as subjectId stub
+    subjectId: null,  // auth events have no clinical subject (nullable since migration 0013)
     entityId: entry.entityId,
     timestamp: new Date(),
   });

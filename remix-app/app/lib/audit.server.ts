@@ -101,3 +101,50 @@ export async function insertAuditLogAdmin(entry: AuditLogEntry): Promise<void> {
     timestamp: new Date(),
   });
 }
+
+// ── insertAuthAuditLog (AUTH-04 — auth-event admin path) ────────────────────
+//
+// Writes a PHI-free auth-event row to the immutable audit_log.
+// Uses the admin path (getDb() / neondb_owner, BYPASSRLS) because there is no
+// subject context at sign-in/sign-out time — the session create/delete hooks
+// only have userId + tenantId, never a clinical subjectId.
+//
+// PHI-free (D-13): only userId / action / tenantId / entityId. No clinical
+// value, analyte name, or subject data ever appears in these rows.
+//
+// subjectId is NULL for auth events (migration 0013 made the column nullable):
+// no clinical subject exists at auth time, and NULL is semantically honest.
+// The original 07-PATTERNS.md "tenantId as subjectId stub" was IMPOSSIBLE —
+// audit_log.subject_id has an FK to subjects(id) and no subjects row carries a
+// tenant id (the INSERT violated audit_log_subject_id_subjects_id_fk; found at
+// the Plan 04 checkpoint). RLS note: the audit_log SELECT/INSERT policies are
+// keyed on app.tenant_id ONLY (no subject_id predicate), so NULL-subject rows
+// remain visible to app_user tenant reads; compliance reads use the admin path
+// regardless.
+//
+// Best-effort contract: each call site MUST be wrapped in try/catch so a
+// logging failure never propagates into the auth flow (T-07-17).
+//
+// Called from: auth.server.ts databaseHooks (session.create, session.delete,
+// user.create.after for sign-up / invite-redeemed).
+
+export interface AuthAuditEntry {
+  userId: string;
+  action: 'sign-in' | 'sign-out' | 'sign-up' | 'invite-redeemed' | 'sign-in-failed' | 'role-changed';
+  tenantId: string;
+  entityId?: string;  // optional session id or invite id — NOT a PHI value
+}
+
+export async function insertAuthAuditLog(entry: AuthAuditEntry): Promise<void> {
+  const db = getDb();
+  await db.insert(auditLog).values({
+    userId: entry.userId,
+    role: 'owner' as AppRole,  // auth events are user-initiated; role resolved post-auth
+    action: entry.action,
+    tenantId: entry.tenantId,
+    subjectId: null, // auth events have no clinical subject (nullable since migration 0013)
+    entityId: entry.entityId,
+    timestamp: new Date(),
+    // tableName / operation intentionally omitted — not applicable for auth events
+  });
+}
