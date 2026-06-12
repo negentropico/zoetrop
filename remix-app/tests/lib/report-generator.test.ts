@@ -203,7 +203,9 @@ describe("ENG-03: metric-rule evaluation in generateReport (unit, mocked)", () =
     vi.mocked(getSubjectGenotypes).mockResolvedValue([]);
   });
 
-  it("generateReport returns a string reportId", async () => {
+  // First test in the file pays the dynamic-import transform cost for
+  // report-generator.server, which can exceed 5s under full-suite worker load.
+  it("generateReport returns a string reportId", { timeout: 15000 }, async () => {
     const { generateReport } = await import("~/lib/report-generator.server");
     const reportId = await generateReport("tenant-1", "subject-1", "user-1");
     expect(typeof reportId).toBe("string");
