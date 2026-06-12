@@ -6,7 +6,7 @@ import {
   type MetricStatus,
   type Metric,
 } from "~/types/metrics";
-import { getProjections, getMetricTargets, getMetricStatus } from "~/lib/metrics";
+import { getMetricTargets, getMetricStatus } from "~/lib/metrics";
 import { requireUser } from "~/lib/authz.server";
 import { getOwnerSubject, getMetrics } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
@@ -19,7 +19,6 @@ import { RangeBar } from "~/components/ui/RangeBar";
 import type { MetricWithRange } from "~/components/ui/RangeBar";
 import { DataTable } from "~/components/ui/DataTable";
 import { PageHeader } from "~/components/ui/PageHeader";
-import { Badge } from "~/components/ui/Badge";
 
 function isValidCategory(category: string): category is MetricCategory {
   return category in CATEGORY_INFO;
@@ -56,8 +55,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .map((m) => ({ timestamp: m.timestamp, value: m.value }));
 
-  // Get projections (Q1/Q2 targets) for this metric — non-PHI goal targets survivor
-  const projections = getProjections(metric.name);
+  // 2026 targets for this metric — non-PHI goal targets survivor.
+  // (Chart projections are now linear-fit trend projections computed inside
+  // TrendChart per the round-3 chart language; targets render in their card.)
   const targets = getMetricTargets(metric.name);
 
   return {
@@ -65,7 +65,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     categoryInfo,
     metric,
     history,
-    projections,
     targets,
   };
 }
@@ -106,7 +105,7 @@ const DIRECTION_LABELS: Record<string, string> = {
 type HistoryEntry = { timestamp: string; value: number };
 
 export default function MetricDetail({ loaderData }: Route.ComponentProps) {
-  const { category, categoryInfo, metric, history, projections, targets } = loaderData;
+  const { category, categoryInfo, metric, history, targets } = loaderData;
   const status = getMetricStatus(metric);
   const rangeM = toRangeBarMetric(metric);
 
@@ -202,9 +201,6 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
             }}
           >
             <div className="zt-eyebrow">Trend over time</div>
-            {history.length >= 2 && projections.length > 0 && (
-              <Badge tone="focus">With 2026 targets</Badge>
-            )}
           </div>
           {/* A single reading is not a trend — plotting one actual point beside
               the target markers reads as a trajectory that does not exist. Show
@@ -213,7 +209,6 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
           <>
           <TrendChart
             data={history}
-            projections={projections}
             unit={metric.unit}
             optimalRange={metric.optimalRange}
             referenceRange={metric.referenceRange}
@@ -234,15 +229,13 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
             }}
           >
             <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
-              <span style={{ width: 16, height: 2.5, background: "var(--ink)", borderRadius: 2 }} />
+              <span style={{ width: 16, height: 1.5, background: "var(--ink)", borderRadius: 2 }} />
               Actual
             </span>
-            {projections.length > 0 && (
-              <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
-                <span style={{ width: 16, height: 0, borderTop: "2.5px dashed var(--energy-400, var(--energy))" }} />
-                Target
-              </span>
-            )}
+            <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
+              <span style={{ width: 16, height: 0, borderTop: "1.5px dashed var(--ink)", opacity: 0.5 }} />
+              Projected
+            </span>
             <span style={{ display: "inline-flex", gap: 7, alignItems: "center" }}>
               <span style={{ width: 16, height: 9, background: "var(--vital-50)", border: "1px solid var(--vital-200, var(--vital-100))", borderRadius: 2 }} />
               Optimal band

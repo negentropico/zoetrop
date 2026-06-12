@@ -272,7 +272,7 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
                   </div>
                   {/* Sparkline */}
                   {metric.history.length > 1 ? (
-                    <TrendSparkline data={metric.history} width={80} height={32} />
+                    <TrendSparkline data={metric.history} width={80} height={32} status={status} />
                   ) : (
                     <div />
                   )}
