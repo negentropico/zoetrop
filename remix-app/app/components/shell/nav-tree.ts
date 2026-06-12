@@ -1,8 +1,10 @@
 // nav-tree.ts — single source of truth for the consolidated left sidebar,
 // the collapsed-rail flyout, and shell-wide breadcrumbs.
-// Tier 1 = NavGroup (Dashboard / Metrics / Protocol / Insights / Import / Ingest),
+// Tier 1 = NavGroup (Dashboard / Metrics / Protocol / Insights / Reports / Import / Ingest),
 // Tier 2 = NavChild. Hidden children (e.g. Ingest → Consent) exist only so
 // crumbsForPath can title them — they never render in the accordion/flyout.
+// Mobile BottomTab (5 items): Dashboard / Metrics / Protocol / Insights / Reports.
+// Import is mobileHidden=true (reachable via sidebar rail on desktop, drawer on mobile).
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -10,6 +12,7 @@ import {
   Download,
   Droplet,
   Dumbbell,
+  FileText,
   FileUp,
   Flame,
   FlaskConical,
@@ -44,6 +47,8 @@ export interface NavGroup {
   /** Group is a single exact link (no children) — e.g. Dashboard. */
   exact?: boolean;
   children?: NavChild[];
+  /** Hidden from the mobile BottomTab / mobile drawer primary list (still in sidebar rail). */
+  mobileHidden?: boolean;
 }
 
 // Moved from the deleted routes/_app/metrics/layout.tsx — maps CATEGORY_INFO
@@ -103,10 +108,24 @@ export const NAV_TREE: NavGroup[] = [
     ],
   },
   {
+    id: "reports",
+    label: "Reports",
+    icon: FileText,
+    base: "/reports",
+    children: [
+      { label: "All reports", to: "/reports", end: true },
+      { label: "Generate", to: "/reports/generate" },
+    ],
+  },
+  {
     id: "import",
     label: "Import",
     icon: Download,
     base: "/import",
+    // mobileHidden: resolves the 6-item BottomTab overflow (RESEARCH Open-Q #3).
+    // Import stays reachable via the sidebar rail on desktop; mobile users access
+    // it through the "more" drawer (full NAV_TREE visible when drawer opens).
+    mobileHidden: true,
     children: [
       { label: "Overview", to: "/import", end: true },
       { label: "WHOOP", to: "/import/whoop" },
