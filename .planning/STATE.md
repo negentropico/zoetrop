@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-06-12T01:11:27.386Z"
+status: ready_to_plan
+stopped_at: Phase 06 complete (5/5) — ready to discuss Phase 7
+last_updated: 2026-06-12T03:11:13.062Z
 last_activity: 2026-06-12 -- Phase 06 execution started
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 42
-  completed_plans: 37
+  completed_plans: 42
   percent: 78
 ---
 
@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 06 — engine-promotion-confidence-graded-reports
+**Current focus:** Phase 7 — phi compliance hardening — pre client gate (deferred hardening)
 
 > Note: Phases 1, 2, 3, 3.1, 4, and 4.1 are complete (Phase 4 completed 2026-06-10 with verification passed 4/4). Phase 4.1 (design system) was executed early on 2026-06-08; `phase.complete` for Phase 4 again mis-pointed "next" at the already-complete 4.1 and was corrected by hand — **the next incomplete phase is Phase 5 (Lab Ingest Pipeline)**. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 <<<<<<< HEAD
-Phase: 06 (engine-promotion-confidence-graded-reports) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 06
-Last activity: 2026-06-12 -- Phase 06 execution started
+Phase: 7
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-12
 =======
 Phase: 05 (lab-ingest-pipeline) — EXECUTING
 Plan: 3 of 3 — code complete (Tasks 1-3 committed); Task 4 E2E UAT pending human verification
@@ -48,7 +48,7 @@ Progress: [████████░░] 78%
 
 **Velocity:**
 
-- Total plans completed: 42
+- Total plans completed: 47
 - Average duration: —
 - Total execution time: —
 
@@ -63,6 +63,7 @@ Progress: [████████░░] 78%
 | 03.1 | 4 | - | - |
 | 04 | 7 | - | - |
 | 05 | 3 | - | - |
+| 06 | 5 | - | - |
 
 **Recent Trend:** No data yet
 
