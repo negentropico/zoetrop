@@ -1,9 +1,8 @@
 import { Link } from "react-router";
 import { Check, Play, Circle, Info, ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/cessation";
-import { requireUser } from "~/lib/authz.server";
-import { getOwnerSubject, getCessationLog } from "~/lib/data.server";
-import type { TenantCtx } from "~/lib/data.server";
+import { requireSubjectCtx } from "~/lib/authz.server";
+import { getCessationLog } from "~/lib/data.server";
 import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
 import { CESSATION_PHASES, type CessationPhase } from "~/types/protocol";
 import { parseISO, format, addDays } from "date-fns";
@@ -23,9 +22,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader({ request }: Route.LoaderArgs, now: Date = new Date()) {
-  const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
-  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const { ctx } = await requireSubjectCtx(request);
   const cessationRows = await getCessationLog(ctx);
   // Normalize timestamps to ISO strings for JSON serialization
   const cessation = cessationRows[0]
