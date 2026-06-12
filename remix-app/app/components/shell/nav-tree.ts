@@ -1,15 +1,16 @@
 // nav-tree.ts — single source of truth for the consolidated left sidebar,
 // the collapsed-rail flyout, and shell-wide breadcrumbs.
-// Tier 1 = NavGroup (Dashboard / Metrics / Protocol / Insights / Reports / Import / Ingest),
+// Tier 1 = NavGroup (Dashboard / Metrics / Protocol / Insights / Reports / Ingest),
 // Tier 2 = NavChild. Hidden children (e.g. Ingest → Consent) exist only so
 // crumbsForPath can title them — they never render in the accordion/flyout.
-// Mobile BottomTab (5 items): Dashboard / Metrics / Protocol / Insights / Reports.
-// Import is mobileHidden=true (reachable via sidebar rail on desktop, drawer on mobile).
+// Round-3 IA (design-r35/W3): Import + Ingest merged into ONE Ingest group —
+// Overview · Lab PDFs · WHOOP · Vault · Review. /import/whoop and /import/vault
+// keep their routes as aliases under the Ingest group (children may live
+// outside the group's `base` prefix — groupOfPath also matches children).
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Dna,
-  Download,
   Droplet,
   Dumbbell,
   FileText,
@@ -92,7 +93,8 @@ export const NAV_TREE: NavGroup[] = [
       { label: "Overview", to: "/protocol", end: true },
       { label: "Versions", to: "/protocol/versions" },
       { label: "Supplements", to: "/protocol/supplements" },
-      { label: "Cessation", to: "/protocol/cessation" },
+      // Round-3 rename: label-only — route stays /protocol/cessation.
+      { label: "Phasing", to: "/protocol/cessation" },
       { label: "Compare", to: "/protocol/compare" },
     ],
   },
@@ -118,40 +120,33 @@ export const NAV_TREE: NavGroup[] = [
     ],
   },
   {
-    id: "import",
-    label: "Import",
-    icon: Download,
-    base: "/import",
-    // mobileHidden: resolves the 6-item BottomTab overflow (RESEARCH Open-Q #3).
-    // Import stays reachable via the sidebar rail on desktop; mobile users access
-    // it through the "more" drawer (full NAV_TREE visible when drawer opens).
-    mobileHidden: true,
-    children: [
-      { label: "Overview", to: "/import", end: true },
-      { label: "WHOOP", to: "/import/whoop" },
-      { label: "Vault", to: "/import/vault" },
-    ],
-  },
-  {
+    // Combined Ingest group (round-3 IA): every source that writes to metrics
+    // plus the review gate. WHOOP/Vault keep their /import/* routes as aliases.
     id: "ingest",
     label: "Ingest",
     icon: FileUp,
     base: "/ingest",
     children: [
       { label: "Overview", to: "/ingest", end: true },
-      { label: "Upload", to: "/ingest/upload" },
+      { label: "Lab PDFs", to: "/ingest/upload" },
+      { label: "WHOOP", to: "/import/whoop" },
+      { label: "Vault", to: "/import/vault" },
       { label: "Review", to: "/ingest/review" },
       { label: "Consent", to: "/ingest/consent", hidden: true },
     ],
   },
 ];
 
-/** Group owning `pathname` — exact base or base-or-deeper prefix; null when
+/** Group owning `pathname` — exact base, base-or-deeper prefix, or an alias
+ *  child living outside the base (e.g. /import/whoop under Ingest); null when
  *  no group matches (e.g. /settings). */
 export function groupOfPath(pathname: string): NavGroup | null {
   return (
     NAV_TREE.find(
-      (g) => pathname === g.base || pathname.startsWith(g.base + "/"),
+      (g) =>
+        pathname === g.base ||
+        pathname.startsWith(g.base + "/") ||
+        (g.children ?? []).some((c) => isChildActive(pathname, c)),
     ) ?? null
   );
 }
