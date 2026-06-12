@@ -258,7 +258,8 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
                     gridTemplateColumns: "18px minmax(0,1.4fr) 80px minmax(0,1.6fr) 140px",
                     alignItems: "center",
                     gap: 16,
-                    padding: "12px 12px",
+                    // Round 3: row rhythm rides the density scale (compact default)
+                    padding: "var(--gap-row) 12px",
                   }}
                 >
                   <StatusDot status={status} />
@@ -291,7 +292,8 @@ export default function CategoryView({ loaderData }: Route.ComponentProps) {
                         style={{
                           fontFamily: "var(--font-mono)",
                           fontSize: "var(--text-2xs)",
-                          color: "var(--text-muted)",
+                          // Round 3: mono values bolder, units a shade quieter
+                          color: "var(--text-faint)",
                           // No uppercase: preserves case-sensitive units and the
                           // micro sign µ (uppercasing maps µ→Μ → "µmol/L"→"MMOL/L").
                         }}
