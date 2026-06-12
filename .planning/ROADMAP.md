@@ -283,7 +283,7 @@ Plans:
   4. A `practitioner_subject_assignments` table + RLS policy + a minimal owner-facing assign/unassign UI exist; `assertSubjectAccess` enforces per-assignment access for practitioners while the owner retains tenant-wide access (AUTH-03)
   5. `audit_log` is immutable via RLS policy shape (INSERT+SELECT policies only — no UPDATE/DELETE path for the app role) and records Better-Auth auth events (sign-in/out, invite redemption, role change) (AUTH-04)
 
-**Plans**: 6 plans in 5 waves
+**Plans**: 8 plans in 6 waves
 Plans:
 **Wave 1**
 
@@ -305,6 +305,11 @@ Plans:
 
 - [x] 07-05-PLAN.md — Wire listAssignedSubjectIds into all 5 practitioner-admitting routes (ingest upload/review, reports generate/index/detail) so assertSubjectAccess Gate 3 enforces at runtime; fix review-action + report-detail missing subject.id (closes CR-01 dead code) [AUTH-03]
 - [x] 07-06-PLAN.md — Add requireSubjectCtx(request) helper; gate all 13 client-readable PHI loaders (dashboard, metrics, insights incl. genetics, protocol) against the client role (closes CR-02 client PHI exposure) [AUTH-03]
+
+**Wave 6** *(gap closure round 2 — close the two AUTH-03 blockers from re-verification 2026-06-12; depends on 07-01..07-06; the two plans touch disjoint files and run in parallel)*
+
+- [ ] 07-07-PLAN.md — Wire Gate 3 (listAssignedSubjectIds -> assertSubjectAccess) into document.tsx PDF byte stream + consent.tsx loader/action (close CR-01 IDOR on raw lab PDFs); thread real actor role into insertAuthAuditLog (WR-04); extend wiring tests [AUTH-03]
+- [ ] 07-08-PLAN.md — Partial unique index `WHERE revoked_at IS NULL` on practitioner_subject_assignments (schema + migration 0014 + [BLOCKING] live Neon apply) so revoke-then-reassign works; structured 23505 error matching; assign->unassign->assign round-trip regression test (close CR-02) [AUTH-03]
 
 ### Phase 8: Compliance Envelope & Host Gate (PRE-CLIENT GATE, PART 2)
 
