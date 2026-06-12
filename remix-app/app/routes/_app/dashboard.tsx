@@ -2,9 +2,8 @@ import { Link, useLoaderData } from "react-router";
 import { CATEGORY_INFO, type MetricCategory, type MetricStatus, type Metric } from "~/types/metrics";
 import { CESSATION_PHASES } from "~/types/protocol";
 import { CONFIDENCE_LEVELS } from "~/types/genetics";
-import { requireUser } from "~/lib/authz.server";
+import { requireSubjectCtx } from "~/lib/authz.server";
 import {
-  getOwnerSubject,
   getCorrelations,
   getSubjectGenotypes,
   getCessationLog,
@@ -12,7 +11,6 @@ import {
   getSupplements,
   getMetrics,
 } from "~/lib/data.server";
-import type { TenantCtx } from "~/lib/data.server";
 import { dbRowToMetric } from "~/lib/db-mappers.server";
 import { getGeneticKnowledgeByGene } from "~/lib/corpus.server";
 import { getCessationDay, getCurrentCessationPhase } from "~/lib/cessation";
@@ -95,9 +93,7 @@ type DerivedVariant = {
 };
 
 export async function loader({ request }: { request: Request }, now: Date = new Date()) {
-  const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
-  const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
+  const { ctx } = await requireSubjectCtx(request);
 
   const [
     correlationsRows,
