@@ -89,6 +89,16 @@
   --danger-bg:  #fdecec;
   --info:       var(--focus-300);
 
+  /* Canonical status mapping (round 3) — ONE place charts/badges/dots
+     read from; extends the optimal/borderline/deficient/excess status
+     family (--excess / --excess-bg live in Layer 2). */
+  --optimal:       var(--success);
+  --borderline:    var(--warning);
+  --deficient:     var(--danger);
+  --optimal-bg:    var(--vital-50);
+  --borderline-bg: var(--energy-50);
+  --deficient-bg:  var(--danger-bg);
+
   /* Metric tint backgrounds */
   --energy-bg: var(--energy-50);
   --vital-bg:  var(--vital-50);
@@ -162,6 +172,11 @@
   --gap-2xl: 2rem;
   --gap-3xl: 3rem;
 
+  /* Density rhythm (round 3, BAKED: compact is the product default) */
+  --gap-card:    1rem;      /* frame-card padding */
+  --gap-section: 1.5rem;    /* vertical rhythm between page sections */
+  --gap-row:     0.5625rem; /* list/table row vertical padding */
+
   /* Shadows (warm, ink-tinted) */
   --shadow-xs: 0 1px 2px rgba(39, 35, 36, 0.06);
   --shadow-sm: 0 1px 3px rgba(39, 35, 36, 0.08), 0 1px 2px rgba(39, 35, 36, 0.04);
@@ -177,7 +192,7 @@
   --dur-fast:   120ms;
   --dur-base:   200ms;
   --dur-slow:   320ms;
-  --dur-ring:   900ms;
+  --dur-ring:   1600ms; /* round-3 owner pick: slower, calmer sweep (was 900ms) */
 
   /* Layout */
   --container-sm: 480px;
@@ -209,11 +224,20 @@
   --zn-rail-w: 64px;
   --zn-row-h: 40px;
   --zn-child-h: 34px;
+  /* Optical-alignment values, named (round-4 px-lint cleanup; values unchanged) */
+  --zn-page-top:  23px;   /* desktop .zn-page top pad → masthead aligns with logo row */
+  --zn-brand-pad: 19.5px; /* expanded sidebar head left pad → mark centers on icon column */
+  --zn-brand-gap: 8.5px;  /* mark → wordmark gap → wordmark aligns with row labels */
 
   /* Semantic aliases (built on top of neutral ramp) */
   --surface:        var(--n-0);
   --surface-2:      var(--paper-2);
   --surface-sunken: var(--n-100);
+  /* Surface levels for the shell (round 3, surface family):
+     nav rail = level 0 (lowest) < canvas = 1 (paper) < cards = 2 (surface).
+     In light, level 0 borrows the sunken neutral. */
+  --surface-low:    var(--n-100); /* nav rail */
+  --surface-low-2:  var(--n-150); /* hover/active rows on the low surface */
   --border:         var(--n-150);
   --border-strong:  var(--n-300);
 }
@@ -373,6 +397,18 @@ html[data-theme="dark"] {
   --excess:     #e0a92a;
   --excess-bg:  #362c14;
 
+  /* Shell surface levels (round 3) — keeps the ladder:
+     nav 0 < canvas 1 (paper #15110f) < cards 2 (surface #221d1b) */
+  --surface-low:   #0e0b0a;
+  --surface-low-2: #261f1c;
+
+  /* Round-4 dark sweep finding: the -500 family steps are used as TEXT
+     (chart band tags, diff counts, tier labels) and fall below comfortable
+     contrast on the dark card surface. Remap one step brighter in dark
+     only — same families, variable remap only. */
+  --vital-500:  #11c29b;
+  --energy-500: #f0ac1f;
+
   /* Shadows (stronger on dark bg) */
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3);
@@ -464,20 +500,22 @@ h1, h2, h3, h4 {
 /* ================================================================
    Grid helpers (responsive reflow — UI-SPEC §Grid reflow rules)
    ================================================================ */
+/* Card separation (round 3): stacked frame-card corners need clear air
+   between them — grid gaps step up one notch (xl desktop, lg mobile). */
 .zt-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--gap-lg);
+  gap: var(--gap-xl);
 }
 .zt-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--gap-lg);
+  gap: var(--gap-xl);
 }
 .zt-grid-2 {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--gap-lg);
+  gap: var(--gap-xl);
 }
 
 /* Asymmetric primary/secondary split (e.g. import pages: upload + instructions).
@@ -506,8 +544,9 @@ h1, h2, h3, h4 {
 }
 
 @media (max-width: 760px) {
-  .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-md); }
+  .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .zt-grid-3, .zt-grid-2, .zt-grid-split { grid-template-columns: minmax(0, 1fr); }
+  .zt-grid-2, .zt-grid-3, .zt-grid-4 { gap: var(--gap-lg); }
 }
 
 /* ================================================================
@@ -526,6 +565,445 @@ h1, h2, h3, h4 {
 }
 .zt-mrow:hover {
   background: var(--surface-sunken);
+}
+
+/* ================================================================
+   Frame card + page rhythm (round 3)
+   ================================================================ */
+.zt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  padding: var(--gap-card);
+}
+.zt-card-hover {
+  transition: box-shadow var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.zt-card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-strong);
+}
+
+/* Page section rhythm */
+.zt-section { margin-bottom: var(--gap-section); }
+
+/* Rows inside a frame card keep straight corners — no nested
+   radius against the card's own curve. */
+.zt-card .zt-mrow { border-radius: 0; }
+
+/* ---- Stat strip (borderless stats with hairline dividers) -- */
+.zt-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-lg) 0;
+}
+.zt-stat-strip > .zt-stat {
+  min-width: 0;
+  padding: 0 var(--gap-xl);
+  border-left: 1px solid var(--border);
+}
+.zt-stat-strip > .zt-stat:first-child { border-left: none; padding-left: 0; }
+@media (max-width: 760px) {
+  .zt-stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-stat-strip > .zt-stat:nth-child(odd) { border-left: none; padding-left: 0; }
+}
+
+/* ---- Filter pill ------------------------------------------- */
+.zt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.zt-pill:hover { border-color: var(--border-strong); color: var(--ink); }
+.zt-pill.is-active {
+  background: var(--surface-inverse);
+  border-color: var(--surface-inverse);
+  color: var(--text-on-ink);
+}
+
+/* ---- Chart tooltip (Part B — the frame card, baked) --------- */
+.zt-tip-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 13px;
+  box-shadow: var(--shadow-md);
+}
+.zt-tip-frame .zt-tip-date {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.zt-tip-frame .zt-tip-val {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.zt-tip-frame .zt-tip-unit { font-size: var(--text-xs); font-weight: 400; color: var(--text-muted); }
+
+/* ---- Chart empty / loading states (Part B) ------------------ */
+.zt-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  background-image: radial-gradient(var(--n-150) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at center, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 70% at center, #000 30%, transparent 100%);
+}
+.zt-chart-empty .zt-eyebrow { color: var(--text-faint); }
+.zt-chart-empty p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  max-width: 320px;
+}
+
+.zt-chart-skel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100%;
+}
+.zt-chart-skel span {
+  display: block;
+  height: 1px;
+  background: var(--n-150);
+}
+.zt-chart-skel span:nth-child(2) { animation-delay: 120ms; }
+.zt-chart-skel span:nth-child(3) { animation-delay: 240ms; }
+@media (prefers-reduced-motion: no-preference) {
+  .zt-chart-skel span { animation: ztPulse 1.4s var(--ease-in-out) infinite; }
+}
+@keyframes ztPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ---- Drop zone (import / ingest upload) --------------------- */
+.zt-dropzone {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  padding: var(--gap-3xl) var(--gap-xl);
+  text-align: center;
+  color: var(--text-muted);
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.zt-dropzone:hover { border-color: var(--accent); background: var(--surface); }
+
+/* ---- Responsive collapses for round-3 composite grids ------- */
+@media (max-width: 760px) {
+  .zt-hero-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .zt-ranges-grid { grid-template-columns: minmax(0, 1fr) !important; gap: var(--gap-lg) !important; }
+}
+
+/* ---- Inline arrow link -------------------------------------- */
+.zt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+.zt-link:hover { color: var(--accent-hover); }
+
+/* ================================================================
+   Round 4 — ingest review flow, public surfaces
+   ================================================================ */
+
+/* ---- Ink pill button (primary commit action) ----------------- */
+.zt-btn-ink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-inverse);
+  color: var(--text-on-ink);
+  font-family: var(--font-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.zt-btn-ink:hover:not(:disabled) { opacity: 0.88; }
+.zt-btn-ink:active:not(:disabled) { transform: scale(0.97); }
+.zt-btn-ink:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ---- Review split view --------------------------------------- */
+.zt-review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: var(--gap-xl);
+  align-items: start;
+}
+.zt-review-grid > * { min-width: 0; }
+@media (max-width: 1080px) {
+  /* between the breakpoint and full desktop the split is too tight —
+     stack the panels (fields first); ≤760 swaps to the tab toggle */
+  .zt-review-grid { grid-template-columns: minmax(0, 1fr); }
+  .zt-review-grid > :first-child { order: 2; }
+}
+
+/* ---- Document facsimile panel -------------------------------- */
+.zt-docpage {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--gap-lg);
+  overflow-x: auto;
+}
+.zt-docline {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1.9;
+  color: var(--text-secondary);
+  white-space: pre;
+  padding: 0 var(--gap-sm);
+  border-radius: var(--radius-xs);
+}
+.zt-docline.is-hot {
+  background: var(--focus-50);
+  color: var(--text);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* ---- Extraction field rows ----------------------------------- */
+.zt-frow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-lg);
+  padding: var(--gap-row) var(--gap-card);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.zt-frow:hover { background: var(--surface-sunken); }
+.zt-frow.is-selected { background: var(--surface-2); }
+.zt-frow-edge {
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* field decision action (approve / edit / reject) */
+.zt-fact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.zt-fact:hover { color: var(--fact, var(--ink)); background: var(--fact-bg, var(--surface-sunken)); }
+.zt-fact.is-on {
+  color: var(--fact, var(--ink));
+  background: var(--fact-bg, var(--surface-sunken));
+  border-color: color-mix(in srgb, var(--fact, var(--ink)) 35%, transparent);
+}
+
+/* inline value edit */
+.zt-fedit {
+  width: 76px;
+  padding: 5px 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-align: right;
+  outline: none;
+}
+
+/* ---- Consent gate -------------------------------------------- */
+.zt-consent-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  width: 100%;
+  margin-top: var(--gap-lg);
+  padding: var(--gap-md) var(--gap-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-text);
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.zt-consent-row:hover { border-color: var(--border-strong); }
+.zt-consent-row.is-on { border-color: var(--accent); background: var(--focus-50); }
+.zt-consent-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px; flex: 0 0 auto;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--accent-on);
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.zt-consent-row.is-on .zt-consent-box { background: var(--accent); border-color: var(--accent); }
+
+/* ---- Labelled field (login) ----------------------------------- */
+.zt-field { display: flex; flex-direction: column; gap: 7px; }
+.zt-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.zt-field input:focus { border-color: var(--accent); background: var(--surface); box-shadow: none; }
+.zt-field input::placeholder { color: var(--text-faint); }
+
+/* ---- Public surfaces (landing / login) ------------------------ */
+.zt-public {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--n-150) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.zt-pub-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-lg);
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--gap-xl) var(--gap-2xl);
+}
+.zt-pub-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--gap-3xl) var(--gap-2xl) 0;
+}
+.zt-pub-hero { max-width: 640px; padding: var(--gap-2xl) 0 var(--gap-3xl); }
+.zt-pub-h1 {
+  font-size: clamp(2.25rem, 5.5vw, 4rem);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tighter);
+  line-height: var(--leading-tight);
+  margin: 0 0 var(--gap-xl);
+  text-wrap: balance;
+}
+.zt-pub-sub {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0 0 var(--gap-2xl);
+  max-width: 520px;
+  text-wrap: pretty;
+}
+.zt-pub-frame { max-width: 880px; margin: 0 auto; }
+.zt-pub-statrow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-xl);
+  padding: var(--gap-2xl) var(--gap-lg);
+  text-align: center;
+}
+.zt-pub-rows { max-width: 880px; margin: 0 auto; padding-bottom: var(--gap-3xl); }
+.zt-pub-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--gap-xl);
+  align-items: baseline;
+  padding: var(--gap-xl) 0;
+}
+.zt-pub-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: var(--gap-2xl);
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 760px) {
+  .zt-pub-top, .zt-pub-main { padding-left: var(--gap-lg); padding-right: var(--gap-lg); }
+  .zt-pub-hero { padding-top: var(--gap-lg); }
+  .zt-pub-statrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-pub-row { grid-template-columns: 36px minmax(0, 1fr); }
+  .zt-pub-row p { grid-column: 2; }
+}
+
+/* ================================================================
+   Round 5 — import populated states, settings invites, mobile sweep
+   ================================================================ */
+
+/* Settings: account is small, the invites flow needs room — an
+   asymmetric two-column split (account 1 / invites 1.6). */
+.zt-settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: var(--gap-xl);
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .zt-settings-grid { grid-template-columns: minmax(0, 1fr); gap: var(--gap-lg); }
+}
+
+/* Meta stat-strip values (import screens, document viewer):
+   one quiet line on desktop; on mobile the 2-col strip is too
+   narrow for filenames/paths — wrap instead of truncate. */
+.zt-meta-val, .zt-meta-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 760px) {
+  .zt-meta-val, .zt-meta-sub { white-space: normal; overflow: visible; text-overflow: clip; }
+}
+
+/* Mobile sweep fix: the genetics row's fixed 200px gene column
+   starves the impact column at ≤760 — stack the gene id above. */
+@media (max-width: 760px) {
+  .zt-gene-row { flex-wrap: wrap; }
+  .zt-gene-row > .zt-gene-id { flex: 1 1 100%; }
 }
 
 /* ================================================================
@@ -564,12 +1042,27 @@ h1, h2, h3, h4 {
   position: fixed; top: 0; bottom: 0; left: 0; z-index: 60;
   width: var(--zn-side-w);
   display: flex; flex-direction: column;
-  background: var(--surface); border-right: 1px solid var(--border);
+  background: var(--surface-low); border-right: 1px solid var(--border);
   transition: width 220ms var(--ease-out, ease);
 }
 .zn-side.is-collapsed { width: var(--zn-rail-w); }
 .zn-side .zn-label { white-space: nowrap; }
 .zn-side.is-collapsed .zn-label { display: none; }
+
+/* Nav chrome (round 3): the rail reads as a LOWER, dimmer surface than
+   the canvas — sunken neutral instead of raised white. Hover/active rows
+   step to --surface-low-2. Interaction model untouched; popovers (flyout,
+   account menu) stay raised (--surface). */
+.zn-side .zn-row:hover,
+.zn-side .zn-row.is-active,
+.zn-side .zn-child:hover,
+.zn-side .zn-child.is-active,
+.zn-side .zn-rail-item:hover,
+.zn-side .zn-rail-item.is-fly,
+.zn-side .zn-rail-item.is-active,
+.zn-side .zn-collapse:hover {
+  background: var(--surface-low-2);
+}
 
 /* header */
 .zn-head {
@@ -590,6 +1083,12 @@ h1, h2, h3, h4 {
 }
 .zn-collapse:hover { background: var(--surface-sunken); color: var(--ink); }
 .zn-side.is-collapsed .zn-head { flex-direction: column; padding: 16px 0 8px; }
+
+/* Logotype alignment (round 3): the spiral mark optically centers on the
+   nav icon column and the wordmark left-aligns with row labels (x = 52px).
+   Expanded state only — the collapsed rail stays centered. */
+.zn-side:not(.is-collapsed) .zn-head { padding-left: var(--zn-brand-pad); }
+.zn-side:not(.is-collapsed) .zn-brand { gap: var(--zn-brand-gap); }
 
 /* nav list */
 .zn-nav {
@@ -734,6 +1233,14 @@ h1, h2, h3, h4 {
 .zn-main { transition: margin-left 220ms var(--ease-out, ease); }
 .zn-page { max-width: 1180px; margin: 0 auto; padding: var(--gap-3xl) var(--gap-2xl) 80px; }
 
+/* Masthead alignment (round 3): page eyebrow row optically aligns with
+   the sidebar logo row (zn-head: 16px top + 30px row → center ≈31px;
+   17px eyebrow row → 23px top pad). Desktop only; mobile keeps breathing
+   room under the topbar. */
+@media (min-width: 761px) {
+  .zn-page { padding-top: var(--zn-page-top); }
+}
+
 /* Desktop content offset — class-driven (no inline styles in AppShell) */
 .zn-app .zn-main { margin-left: var(--zn-side-w); }
 .zn-app.is-collapsed .zn-main { margin-left: var(--zn-rail-w); }
@@ -747,7 +1254,7 @@ h1, h2, h3, h4 {
     position: sticky; top: 0; z-index: 40;
     display: flex; align-items: center; gap: 10px;
     height: 56px; padding: 0 12px;
-    background: var(--surface); border-bottom: 1px solid var(--border);
+    background: var(--surface-low); border-bottom: 1px solid var(--border);
   }
   .zn-side {
     transform: translateX(-100%);
