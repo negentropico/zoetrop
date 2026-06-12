@@ -74,10 +74,10 @@ export function PageHeader({
         >
           {title}
         </h1>
+        {/* accessory rides the title baseline (round-3 version-chip idiom) —
+            centering drifts when a tall right slot stretches the line box. */}
         {titleAccessory && (
-          <div style={{ alignSelf: "center", flex: "0 0 auto" }}>
-            {titleAccessory}
-          </div>
+          <div style={{ flex: "0 0 auto" }}>{titleAccessory}</div>
         )}
         {sub && (
           <p
