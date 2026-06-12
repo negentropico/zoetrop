@@ -12,6 +12,7 @@ import {
   consumeInviteByToken,
   hashToken,
 } from "./invites.server";
+import { insertAuthAuditLog } from "./audit.server";
 
 // Mirror db.server.ts error-guard idiom for missing env vars.
 // Better-Auth reads BETTER_AUTH_SECRET for session-cookie signing.
@@ -102,7 +103,62 @@ export const auth = betterAuth({
   // create.after: backfill consumedBy with the freshly-created user id (WR-01) — the
   //   id only exists post-create. Single-use integrity is already guaranteed by the
   //   create.before burn; this is the audit-attribution backfill.
+  //   AUTH-04: also writes a 'sign-up' or 'invite-redeemed' auth event (best-effort).
+  //
+  // session.create.after: AUTH-04 — writes a 'sign-in' event (best-effort try/catch).
+  // session.delete.after: AUTH-04 — writes a 'sign-out' event (best-effort try/catch).
   databaseHooks: {
+    session: {
+      create: {
+        async after(session) {
+          // AUTH-04: sign-in audit event. Resolve the user's tenantId via admin path.
+          // Best-effort: a logging failure MUST NOT fail the auth flow (T-07-17).
+          try {
+            const db = getDb();
+            const rows = await db
+              .select({ tenantId: userTable.tenantId })
+              .from(userTable)
+              .where(eq(userTable.id, session.userId))
+              .limit(1);
+            const tenantId = rows[0]?.tenantId;
+            if (tenantId) {
+              await insertAuthAuditLog({
+                userId: session.userId,
+                action: 'sign-in',
+                tenantId,
+                entityId: session.id, // session token id — not a PHI value
+              });
+            }
+          } catch {
+            // Audit best-effort: never propagate into auth flow (T-07-17)
+          }
+        },
+      },
+      delete: {
+        async after(session) {
+          // AUTH-04: sign-out audit event. Best-effort — logging failure must not fail sign-out.
+          try {
+            const db = getDb();
+            const rows = await db
+              .select({ tenantId: userTable.tenantId })
+              .from(userTable)
+              .where(eq(userTable.id, session.userId))
+              .limit(1);
+            const tenantId = rows[0]?.tenantId;
+            if (tenantId) {
+              await insertAuthAuditLog({
+                userId: session.userId,
+                action: 'sign-out',
+                tenantId,
+                entityId: session.id,
+              });
+            }
+          } catch {
+            // Audit best-effort: never propagate into auth flow (T-07-17)
+          }
+        },
+      },
+    },
     user: {
       create: {
         async before(user) {
@@ -151,13 +207,33 @@ export const auth = betterAuth({
           // Clear the slot so a later create in the same request can't re-run this.
           await pendingInvite.set(null);
 
-          // Break-glass has no DB invite row to attribute.
-          if (!pending || pending.breakGlass || !pending.rawToken) return;
-
           const id =
             user && typeof (user as { id?: unknown }).id === "string"
               ? (user as { id: string }).id
               : null;
+
+          // AUTH-04: write sign-up / invite-redeemed audit event (best-effort).
+          // tenantId comes from the pending invite resolved in beforeSignUp.
+          // Break-glass also has a tenantId (OWNER_TENANT_ID), so we can always log.
+          try {
+            // Primary tenantId source: the pending invite (set in beforeSignUp).
+            // Fallback: the user row (Better-Auth injects tenantId via additionalFields).
+            const userAny = user as unknown as Record<string, unknown>;
+            const tenantId =
+              pending?.tenantId ??
+              (typeof userAny?.["tenantId"] === "string" ? userAny["tenantId"] : null);
+            if (id && tenantId) {
+              const action = pending && !pending.breakGlass && pending.rawToken
+                ? 'invite-redeemed'
+                : 'sign-up';
+              await insertAuthAuditLog({ userId: id, action, tenantId });
+            }
+          } catch {
+            // Audit best-effort — never fail the signup over it (T-07-17)
+          }
+
+          // Break-glass has no DB invite row to attribute.
+          if (!pending || pending.breakGlass || !pending.rawToken) return;
           if (!id) return;
 
           try {

@@ -101,3 +101,42 @@ export async function insertAuditLogAdmin(entry: AuditLogEntry): Promise<void> {
     timestamp: new Date(),
   });
 }
+
+// ── insertAuthAuditLog (AUTH-04 — auth-event admin path) ────────────────────
+//
+// Writes a PHI-free auth-event row to the immutable audit_log.
+// Uses the admin path (getDb() / neondb_owner, BYPASSRLS) because there is no
+// subject context at sign-in/sign-out time — the session create/delete hooks
+// only have userId + tenantId, never a clinical subjectId.
+//
+// PHI-free (D-13): only userId / action / tenantId / entityId. No clinical
+// value, analyte name, or subject data ever appears in these rows.
+// The subjectId column is required by the schema; for auth events we use
+// tenantId as the stub value (per 07-PATTERNS.md §insertAuthAuditLog).
+//
+// Best-effort contract: each call site MUST be wrapped in try/catch so a
+// logging failure never propagates into the auth flow (T-07-17).
+//
+// Called from: auth.server.ts databaseHooks (session.create, session.delete,
+// user.create.after for sign-up / invite-redeemed).
+
+export interface AuthAuditEntry {
+  userId: string;
+  action: 'sign-in' | 'sign-out' | 'sign-up' | 'invite-redeemed' | 'sign-in-failed' | 'role-changed';
+  tenantId: string;
+  entityId?: string;  // optional session id or invite id — NOT a PHI value
+}
+
+export async function insertAuthAuditLog(entry: AuthAuditEntry): Promise<void> {
+  const db = getDb();
+  await db.insert(auditLog).values({
+    userId: entry.userId,
+    role: 'owner' as AppRole,  // auth events are user-initiated; role resolved post-auth
+    action: entry.action,
+    tenantId: entry.tenantId,
+    subjectId: entry.tenantId, // stub: no clinical subject at auth time (07-PATTERNS.md)
+    entityId: entry.entityId,
+    timestamp: new Date(),
+    // tableName / operation intentionally omitted — not applicable for auth events
+  });
+}
