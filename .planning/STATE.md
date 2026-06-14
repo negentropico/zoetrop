@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
 **Current focus:** Phase 08 — compliance envelope host gate
 
-> Note: Phases 1, 2, 3, 3.1, 4, and 4.1 are complete (Phase 4 completed 2026-06-10 with verification passed 4/4). Phase 4.1 (design system) was executed early on 2026-06-08; `phase.complete` for Phase 4 again mis-pointed "next" at the already-complete 4.1 and was corrected by hand — **the next incomplete phase is Phase 5 (Lab Ingest Pipeline)**. Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening deferred to new **Phase 7**. Engine-first critical path resumes at **Phase 3 (Identity + Tenancy Scoping)** — no BAA gate.
+> Note: Phases 1–7 are complete (8/8, including out-of-sequence 3.1 and 4.1). Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening landed in **Phase 7** (complete 2026-06-12). **The next incomplete phase is Phase 8 (Compliance Envelope & Host Gate)** — host cost/BAA comparison + possible migration + pgAudit verification.
 > ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
 
 ## Current Position
@@ -35,7 +35,8 @@ Last activity: 2026-06-12
 
 Progress: [████████░░] 78%
 
-> ✓ Phase 6 (Engine Promotion + Confidence-Graded Reports) complete 2026-06-12 — 5/5 plans, verification 5/5; pure engine.ts, corpus on Neon (30 variant + 22 metric rules, non-null K), deterministic report generator with inline K + K4 disclaimer. Next incomplete phase is **Phase 7 (PHI Compliance Hardening — Pre-Client Gate)**.
+> ✓ Phase 6 (Engine Promotion + Confidence-Graded Reports) complete 2026-06-12 — 5/5 plans, verification 5/5; pure engine.ts, corpus on Neon (30 variant + 22 metric rules, non-null K), deterministic report generator with inline K + K4 disclaimer.
+> ✓ Phase 7 (PHI Compliance Hardening — Pre-Client Gate) complete 2026-06-12 — human UAT 3/3 (verified live via Chrome + Neon), verification passed; design-r35 round-3/4/5 adoption merged to main. Next incomplete phase is **Phase 8 (Compliance Envelope & Host Gate)**.
 
 ## Performance Metrics
 
@@ -154,6 +155,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-12T16:05:24.447Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-phi-compliance-hardening-pre-client-gate-deferred-hardening/07-CONTEXT.md
+Last session: 2026-06-13
+Stopped at: Phase 7 complete (8/8). Post-merge housekeeping done — round3 design stash finalized to the 003 archive branch; merged branches (001, 002, local dev) pruned. Ready to discuss Phase 8.
+Resume file: .planning/ROADMAP.md (Phase 8 — Compliance Envelope & Host Gate)
