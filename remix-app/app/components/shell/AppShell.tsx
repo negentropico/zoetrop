@@ -15,9 +15,13 @@ interface AppShellProps {
   user: { name: string; email: string; role: string };
   /** Initial collapse state from the zt-nav cookie (read in the layout loader). */
   navCollapsed: boolean;
+  /** All subjects in the tenant — fed to SubjectChip. Empty for client role. */
+  subjectList: Array<{ id: string; displayName: string }>;
+  /** The active subject id from the zt-subject cookie, or null (owner default). */
+  activeSubjectId: string | null;
 }
 
-export function AppShell({ children, user, navCollapsed }: AppShellProps) {
+export function AppShell({ children, user, navCollapsed, subjectList, activeSubjectId }: AppShellProps) {
   const { pathname, search } = useLocation();
   const [collapsed, setCollapsed] = useState(navCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -69,6 +73,8 @@ export function AppShell({ children, user, navCollapsed }: AppShellProps) {
         onToggleCollapsed={toggleCollapsed}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
+        subjectList={subjectList}
+        activeSubjectId={activeSubjectId}
       />
       {mobileOpen && (
         <div

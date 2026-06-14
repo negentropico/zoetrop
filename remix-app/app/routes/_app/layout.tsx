@@ -2,6 +2,7 @@ import { redirect, Outlet, useLoaderData } from "react-router";
 import type { LoaderFunctionArgs } from "react-router";
 import { auth } from "~/lib/auth.server";
 import { AppShell } from "~/components/shell/AppShell";
+import { listSubjectsForTenant } from "~/lib/subjects.server";
 
 // AUTH-02 — authenticated layout loader.
 // All routes nested under this layout require a valid session.
@@ -23,6 +24,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
   // SSR-read so the initial render matches the client (no flash).
   const cookie = request.headers.get("Cookie") ?? "";
   const navCollapsed = /(?:^|;\s*)zt-nav=1(?:\s*;|$)/.test(cookie);
+
+  // Load subject list for SubjectChip (owner/practitioner only — clients have no chip).
+  // Parse the zt-subject cookie to determine the active subject id.
+  let subjectList: Array<{ id: string; displayName: string }> = [];
+  let activeSubjectId: string | null = null;
+  if (u.tenantId && (u.role === "owner" || u.role === "practitioner")) {
+    const subjectMatch = /(?:^|;\s*)zt-subject=([^;]+)/.exec(cookie);
+    activeSubjectId = subjectMatch?.[1] ?? null;
+    const rows = await listSubjectsForTenant(u.tenantId);
+    subjectList = rows.map((s) => ({ id: s.id, displayName: s.displayName }));
+  }
+
   return {
     user: {
       name: u.name,
@@ -30,6 +43,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       role: u.role ?? "client",
     },
     navCollapsed,
+    subjectList,
+    activeSubjectId,
   };
 }
 
@@ -38,9 +53,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 // Thread the session user (name, email, role) + navCollapsed from loader →
 // AppShell → Sidebar/SidebarAccount.
 export default function AppLayout() {
-  const { user, navCollapsed } = useLoaderData<typeof loader>();
+  const { user, navCollapsed, subjectList, activeSubjectId } = useLoaderData<typeof loader>();
   return (
-    <AppShell user={user} navCollapsed={navCollapsed}>
+    <AppShell
+      user={user}
+      navCollapsed={navCollapsed}
+      subjectList={subjectList}
+      activeSubjectId={activeSubjectId}
+    >
       <Outlet />
     </AppShell>
   );

@@ -7,6 +7,7 @@ import { Link, useLocation } from "react-router";
 import { ChevronDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { SpiralMark } from "../ui/SpiralMark";
 import { SidebarAccount } from "./SidebarAccount";
+import { SubjectChip } from "./SubjectChip";
 import {
   NAV_TREE,
   groupOfPath,
@@ -21,6 +22,10 @@ export interface SidebarProps {
   onToggleCollapsed: () => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  /** All subjects for the SubjectChip — empty for client role. */
+  subjectList: Array<{ id: string; displayName: string }>;
+  /** Active subject id from the zt-subject cookie, or null (owner default). */
+  activeSubjectId: string | null;
 }
 
 /** matchMedia(760px) — false during SSR (harmless: the sidebar is off-canvas
@@ -110,6 +115,8 @@ export function Sidebar({
   onToggleCollapsed,
   mobileOpen,
   onMobileClose,
+  subjectList,
+  activeSubjectId,
 }: SidebarProps) {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
@@ -307,8 +314,15 @@ export function Sidebar({
             ).map(renderExpandedGroup)}
       </nav>
 
-      {/* footer — account only; theme lives inside the popover */}
+      {/* footer — SubjectChip (above) + account (below); theme lives in the account popover */}
       <div className="zn-foot">
+        {subjectList.length > 0 && (
+          <SubjectChip
+            subjects={subjectList}
+            activeSubjectId={activeSubjectId}
+            collapsed={railMode}
+          />
+        )}
         <SidebarAccount user={user} collapsed={railMode} />
       </div>
 
