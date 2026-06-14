@@ -88,6 +88,15 @@ export const cessationPhaseEnum = pgEnum('cessation_phase', [
 
 export const appRoleEnum = pgEnum('app_role', ['owner', 'practitioner', 'client']);
 
+export const biologicalSexEnum = pgEnum('biological_sex', ['male', 'female', 'intersex']);
+
+export const programTypeEnum = pgEnum('program_type', [
+  'cessation',
+  'substance_taper',
+  'lifestyle_modification',
+  'general',
+]);
+
 // ── Invites table (D-06: hand-rolled, single-use, role-scoped, expiring) ─────
 // SECURITY: Only the SHA-256 hex hash of the raw token is stored (D-06 / T-031-INV-2).
 // The raw token NEVER appears in this table. The logical FK from createdBy/consumedBy
@@ -104,6 +113,7 @@ export const invites = pgTable('invites', {
   consumedBy: text('consumed_by').references(() => user.id),
   revokedAt: timestamp('revoked_at'),                // NULL = not revoked
   createdAt: timestamp('created_at').defaultNow(),
+  subjectId: text('subject_id').references(() => subjects.id), // nullable — owner-bootstrap invites have no subject (D-01)
 }, (t) => [
   index('idx_invites_tenant').on(t.tenantId),
   index('idx_invites_token_hash').on(t.tokenHash),
@@ -244,6 +254,15 @@ export const subjects = pgTable('subjects', {
   displayName: varchar('display_name', { length: 255 }).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  // Intake fields (v1.1 ONB-01) — all nullable; forward-looking demographic + program fields
+  dob: timestamp('dob'),
+  biologicalSex: biologicalSexEnum('biological_sex'),
+  contactEmail: varchar('contact_email', { length: 255 }),
+  contactPhone: varchar('contact_phone', { length: 50 }),
+  goals: text('goals'),
+  intakeNotes: text('intake_notes'),
+  programType: programTypeEnum('program_type'),
+  programStartDate: timestamp('program_start_date'),
 });
 
 // Genetic variant profiles per subject/tenant.
