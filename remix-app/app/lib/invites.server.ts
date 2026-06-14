@@ -54,6 +54,7 @@ export interface GenerateInviteOpts {
     tenantId?: string | null;
   };
   role: "practitioner" | "client";
+  subjectId?: string | null;  // NEW — bound to existing subject (D-01); null for practitioner invites
 }
 
 export interface GenerateInviteResult {
@@ -62,6 +63,7 @@ export interface GenerateInviteResult {
   role: "practitioner" | "client";
   tenantId: string;
   expiresAt: Date;
+  subjectId: string | null;  // NEW — mirrors the invite row column (D-01)
 }
 
 /**
@@ -112,10 +114,11 @@ export async function generateInvite(
     createdBy: inviter.id,
     expiresAt,
     createdAt: now,
+    subjectId: opts.subjectId ?? null,  // NEW — nullable FK → subjects.id (D-01)
   });
 
   // Return the raw token exactly once — caller delivers it via copy-link (D-09)
-  return { token: raw, role, tenantId: inviter.tenantId, expiresAt };
+  return { token: raw, role, tenantId: inviter.tenantId, expiresAt, subjectId: opts.subjectId ?? null };
 }
 
 // ── listInvites ───────────────────────────────────────────────────────────────
@@ -182,7 +185,7 @@ export async function revokeInvite(opts: {
  */
 export async function resolveInviteByToken(
   raw: string
-): Promise<{ role: string; tenantId: string } | null> {
+): Promise<{ role: string; tenantId: string; subjectId: string | null } | null> {
   try {
     const tokenHash = hashToken(raw);
     const now = new Date();
@@ -206,7 +209,7 @@ export async function resolveInviteByToken(
 
     // SELECT only — no UPDATE here. The burn happens in consumeInviteByToken,
     // adjacent to the user-row write (CR-01 atomic delivery).
-    return { role: invite.role, tenantId: invite.tenantId };
+    return { role: invite.role, tenantId: invite.tenantId, subjectId: invite.subjectId ?? null };
   } catch {
     return null; // fail closed on any error (T-031-INV-6)
   }
@@ -239,7 +242,7 @@ export async function resolveInviteByToken(
 export async function consumeInviteByToken(
   raw: string,
   consumedBy?: string
-): Promise<{ role: string; tenantId: string } | null> {
+): Promise<{ role: string; tenantId: string; subjectId: string | null } | null> {
   try {
     const tokenHash = hashToken(raw);
     const now = new Date();
@@ -291,7 +294,7 @@ export async function consumeInviteByToken(
       return null;
     }
 
-    return { role: invite.role, tenantId: invite.tenantId };
+    return { role: invite.role, tenantId: invite.tenantId, subjectId: invite.subjectId ?? null };
   } catch {
     // Any lookup error → fail closed (T-031-INV-6): never allow-through on error
     return null;

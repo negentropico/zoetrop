@@ -95,11 +95,11 @@ beforeEach(() => {
 
 describe("resolveInviteByToken — validates without consuming (CR-01)", () => {
   it("returns the invite's role + tenantId on a valid token, with NO update (no consume)", async () => {
-    state.selectRows = [{ role: "practitioner", tenantId: "tenant-xyz" }];
+    state.selectRows = [{ role: "practitioner", tenantId: "tenant-xyz", subjectId: null }];
 
     const result = await resolveInviteByToken("some-valid-raw-token");
 
-    expect(result).toEqual({ role: "practitioner", tenantId: "tenant-xyz" });
+    expect(result).toEqual({ role: "practitioner", tenantId: "tenant-xyz", subjectId: null });
     // The critical assertion: resolve NEVER burns the token — zero UPDATE calls.
     expect(state.updateCalls).toBe(0);
     expect(state.selectCalls).toBe(1);
@@ -117,16 +117,16 @@ describe("resolveInviteByToken — validates without consuming (CR-01)", () => {
   it("CR-01 invariant: resolve-then-fail leaves the token still consumable (resolve never burns)", async () => {
     // Simulate the beforeSignUp gate: VALIDATE the token (resolve), then a downstream
     // signup failure — the token must NOT have been burned, so a later consume succeeds.
-    state.selectRows = [{ role: "client", tenantId: "tenant-q" }];
+    state.selectRows = [{ role: "client", tenantId: "tenant-q", subjectId: "subj-1" }];
 
     const resolved = await resolveInviteByToken("token-q");
-    expect(resolved).toEqual({ role: "client", tenantId: "tenant-q" });
+    expect(resolved).toEqual({ role: "client", tenantId: "tenant-q", subjectId: "subj-1" });
     expect(state.updateCalls).toBe(0); // resolve did NOT burn
 
     // Now the (retried) signup reaches the user-write step and consumes for real.
     state.updateReturning = [{ id: "invite-q" }];
     const burned = await consumeInviteByToken("token-q", "user-q");
-    expect(burned).toEqual({ role: "client", tenantId: "tenant-q" });
+    expect(burned).toEqual({ role: "client", tenantId: "tenant-q", subjectId: "subj-1" });
     expect(state.updateCalls).toBe(1); // exactly one burn, at write time
   });
 });
@@ -137,12 +137,12 @@ describe("resolveInviteByToken — validates without consuming (CR-01)", () => {
 
 describe("consumeInviteByToken — records consumedBy (WR-01)", () => {
   it("sets consumedAt AND consumedBy when a consuming user id is supplied", async () => {
-    state.selectRows = [{ role: "client", tenantId: "tenant-abc" }];
+    state.selectRows = [{ role: "client", tenantId: "tenant-abc", subjectId: "subj-abc" }];
     state.updateReturning = [{ id: "invite-1" }]; // guarded UPDATE matched 1 row
 
     const result = await consumeInviteByToken("valid-token", "new-user-id-123");
 
-    expect(result).toEqual({ role: "client", tenantId: "tenant-abc" });
+    expect(result).toEqual({ role: "client", tenantId: "tenant-abc", subjectId: "subj-abc" });
     // One guarded UPDATE ran, and its payload recorded consumedBy + consumedAt.
     expect(state.updateCalls).toBe(1);
     const payload = state.updateSetPayloads[0];
@@ -152,12 +152,12 @@ describe("consumeInviteByToken — records consumedBy (WR-01)", () => {
   });
 
   it("still consumes (consumedAt) when no user id is supplied, leaving consumedBy unset", async () => {
-    state.selectRows = [{ role: "client", tenantId: "tenant-abc" }];
+    state.selectRows = [{ role: "client", tenantId: "tenant-abc", subjectId: null }];
     state.updateReturning = [{ id: "invite-2" }];
 
     const result = await consumeInviteByToken("valid-token");
 
-    expect(result).toEqual({ role: "client", tenantId: "tenant-abc" });
+    expect(result).toEqual({ role: "client", tenantId: "tenant-abc", subjectId: null });
     const payload = state.updateSetPayloads[0];
     expect(payload.consumedAt).toBeInstanceOf(Date);
     // consumedBy omitted (undefined) when no id is provided.
@@ -165,7 +165,7 @@ describe("consumeInviteByToken — records consumedBy (WR-01)", () => {
   });
 
   it("returns null when the guarded UPDATE matches 0 rows (concurrent double-redeem)", async () => {
-    state.selectRows = [{ role: "client", tenantId: "tenant-abc" }];
+    state.selectRows = [{ role: "client", tenantId: "tenant-abc", subjectId: null }];
     state.updateReturning = []; // race: another request already consumed it
 
     const result = await consumeInviteByToken("valid-token", "user-x");
