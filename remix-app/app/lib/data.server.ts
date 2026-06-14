@@ -63,6 +63,51 @@ export async function getOwnerSubject(tenantId: string) {
   return subject;
 }
 
+/**
+ * Returns the active subject for the request.
+ * Reads the httpOnly `zt-subject` session cookie; validates it is within
+ * the tenant. Falls back to the owner (first-created) subject if the cookie
+ * is absent, invalid, or refers to a deleted/cross-tenant subject (self-healing,
+ * Pitfall 8 — attacker-controlled cookie value never resolves cross-tenant).
+ *
+ * Uses the admin db path (getDb()) intentionally — same reason as getOwnerSubject:
+ * this bootstraps subjectId before TenantCtx can be constructed.
+ * Must live in data.server.ts (.server.ts suffix) — never import in client
+ * components (build-gate landmine, Pitfall 7). Thread subject to client as
+ * loader props only (D-04 — no subjectId in URLs).
+ */
+export async function getActiveSubject(request: Request, tenantId: string) {
+  const cookieHeader = request.headers.get("Cookie") ?? "";
+  const match = /(?:^|;\s*)zt-subject=([^;]+)/.exec(cookieHeader);
+  const activeSubjectId = match?.[1] ?? null;
+
+  const db = getDb();
+
+  if (activeSubjectId) {
+    // Validate: subject must belong to this tenant (cross-tenant self-heal)
+    const [candidate] = await db
+      .select()
+      .from(subjects)
+      .where(and(eq(subjects.id, activeSubjectId), eq(subjects.tenantId, tenantId)))
+      .limit(1);
+    if (candidate) return candidate; // validated: same tenant, not deleted
+  }
+
+  // Fallback: owner subject (first created in tenant, ordered by createdAt ASC).
+  // In v1.1 the owner subject is always the first row (created at bootstrap).
+  // RESEARCH Open Question 2: createdAt ascending = oldest = owner.
+  const [owner] = await db
+    .select()
+    .from(subjects)
+    .where(eq(subjects.tenantId, tenantId))
+    .orderBy(subjects.createdAt)
+    .limit(1);
+  if (!owner) {
+    throw new Response("Subject not found", { status: 404 });
+  }
+  return owner;
+}
+
 // ── Metrics ────────────────────────────────────────────────────────────────────
 
 /**
