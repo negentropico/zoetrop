@@ -59,16 +59,19 @@ export async function loader({ request }: Route.LoaderArgs) {
     ? normalizedMilestones[normalizedMilestones.length - 1]
     : null;
 
-  // Calculate cessation progress using DB cessation log + survivor engine fns
-  const cessationDay = cessation
+  // Calculate cessation progress using DB cessation log + survivor engine fns.
+  // hasCessationProgram guards against a misleading "Day 0 · Acute" for subjects
+  // with no cessation_log row (Pitfall 6 — same guard as dashboard.tsx).
+  const hasCessationProgram = cessation !== null;
+  const cessationDay = hasCessationProgram
     ? getCessationDay(
-        cessation.startDate instanceof Date
-          ? cessation.startDate.toISOString()
-          : (cessation.startDate as unknown as string),
+        cessation!.startDate instanceof Date
+          ? cessation!.startDate.toISOString()
+          : (cessation!.startDate as unknown as string),
         new Date()
       )
-    : 0;
-  const cessationPhase = getCurrentCessationPhase(cessationDay);
+    : null;
+  const cessationPhase = hasCessationProgram ? getCurrentCessationPhase(cessationDay!) : null;
 
   // Group supplements by tier
   const supplementsByTier = activeSupplements.reduce((acc, supp) => {
@@ -81,6 +84,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     activeSupplementCount: activeSupplements.length,
     supplementsByTier,
     cessation,
+    hasCessationProgram,
     cessationDay,
     cessationPhase,
     latestMilestone,
@@ -110,6 +114,7 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
     currentVersion,
     activeSupplementCount,
     supplementsByTier,
+    hasCessationProgram,
     cessationDay,
     cessationPhase,
     latestMilestone,
@@ -117,7 +122,10 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
     protocolVersions,
   } = loaderData;
 
-  const phaseBarPhases = buildPhaseBarPhases(cessationDay);
+  const phaseBarPhases =
+    hasCessationProgram && cessationDay !== null
+      ? buildPhaseBarPhases(cessationDay)
+      : [];
 
   return (
     <div>
@@ -165,18 +173,41 @@ export default function ProtocolOverview({ loaderData }: Route.ComponentProps) {
           </Card>
 
           <Card padding="lg">
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
-              <div className="zt-eyebrow">Phasing</div>
-              <span className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)", letterSpacing: "0.08em" }}>
-                DAY {cessationDay} · {cessationPhase.label.toUpperCase()}
-              </span>
-            </div>
-            <div style={{ marginBottom: "var(--gap-xl)" }}>
-              <PhaseBar phases={phaseBarPhases} height={12} compact day={cessationDay} />
-            </div>
-            <Link to="/protocol/cessation" className="zt-link">
-              Full timeline <ArrowRight size={14} strokeWidth={2} />
-            </Link>
+            {hasCessationProgram && cessationDay !== null && cessationPhase !== null ? (
+              <>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
+                  <div className="zt-eyebrow">Phasing</div>
+                  <span className="zt-tnum" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                    DAY {cessationDay} · {cessationPhase.label.toUpperCase()}
+                  </span>
+                </div>
+                <div style={{ marginBottom: "var(--gap-xl)" }}>
+                  <PhaseBar phases={phaseBarPhases} height={12} compact day={cessationDay} />
+                </div>
+                <Link to="/protocol/cessation" className="zt-link">
+                  Full timeline <ArrowRight size={14} strokeWidth={2} />
+                </Link>
+              </>
+            ) : (
+              /* No-program placeholder — same copy as dashboard guard (UI-SPEC locked) */
+              <div>
+                <div className="zt-eyebrow" style={{ marginBottom: 12 }}>PROGRAM</div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 600,
+                    fontSize: "var(--text-lg)",
+                    color: "var(--ink)",
+                    marginBottom: 10,
+                  }}
+                >
+                  No program started
+                </div>
+                <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", margin: 0 }}>
+                  Program details will appear here once a program start date is set for this client.
+                </p>
+              </div>
+            )}
           </Card>
         </div>
       </section>

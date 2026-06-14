@@ -273,13 +273,28 @@ export default function Cessation({ loaderData }: Route.ComponentProps) {
           title="Phasing"
           sub="Your FAAH-informed 150-day protocol, one phase at a time."
         />
-        <Card padding="lg" style={{ textAlign: "center", marginBottom: "var(--gap-xl)" }}>
-          <p style={{ color: "var(--text-secondary)", marginBottom: 16 }}>
-            Nothing logged yet. Your first frame starts when you begin.
+        {/* No-program placeholder — locked copy from UI-SPEC Dashboard cessation guard section.
+            Replaces the old "Nothing logged yet" copy so the same honest message appears
+            on both the dashboard and the dedicated phasing route (Pitfall 6 / hasCessationProgram). */}
+        <Card padding="lg" style={{ marginBottom: "var(--gap-xl)" }}>
+          <div className="zt-eyebrow" style={{ marginBottom: 12 }}>PROGRAM</div>
+          <div
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 600,
+              fontSize: "var(--text-lg)",
+              color: "var(--ink)",
+              marginBottom: 10,
+            }}
+          >
+            No program started
+          </div>
+          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", margin: 0 }}>
+            Program details will appear here once a program start date is set for this client.
           </p>
         </Card>
 
-        {/* Phase overview — sequential timeline list */}
+        {/* Phase overview — sequential timeline list (upcoming previews remain useful) */}
         <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-md)" }}>PHASES</div>
         <Card padding="none">
           {CESSATION_PHASES.map((phase, i) => (

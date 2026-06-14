@@ -175,15 +175,20 @@ export async function loader({ request }: { request: Request }, now: Date = new 
 
   // Cessation data
   const cessation = cessationRows[0] ?? null;
-  const cessationDay = cessation
+  // hasCessationProgram: false for client subjects with no cessation_log row.
+  // Prevents the misleading "Day 0 · Acute" hero for subjects with no program (Pitfall 6).
+  const hasCessationProgram = cessation !== null;
+  // cessationDay + cessationPhase are null (not 0) when no program exists —
+  // distinguishes "no program" from "program just started at day 0".
+  const cessationDay = hasCessationProgram
     ? getCessationDay(
-        cessation.startDate instanceof Date
-          ? cessation.startDate.toISOString()
-          : (cessation.startDate as unknown as string),
+        cessation!.startDate instanceof Date
+          ? cessation!.startDate.toISOString()
+          : (cessation!.startDate as unknown as string),
         now
       )
-    : 0;
-  const cessationPhase = getCurrentCessationPhase(cessationDay);
+    : null;
+  const cessationPhase = hasCessationProgram ? getCurrentCessationPhase(cessationDay!) : null;
   const targetDay = 150;
 
   // Protocol versions — sorted ascending, pick latest
@@ -261,6 +266,7 @@ export async function loader({ request }: { request: Request }, now: Date = new 
       totalVariants: allVariants.length,
       confirmedVariants: allVariants.filter((v) => v.confidence === "K1").length,
     },
+    hasCessationProgram,
     cessationDay,
     cessationPhase,
     targetDay,
@@ -459,6 +465,7 @@ export default function Dashboard() {
     highImpactVariants,
     k3Variants,
     stats,
+    hasCessationProgram,
     cessationDay,
     cessationPhase,
     targetDay,
@@ -473,9 +480,12 @@ export default function Dashboard() {
 
   const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
   const needLook = (statusCounts.deficient || 0) + (statusCounts.excess || 0);
-  const cessationComplete = cessationDay >= targetDay;
-  const pastTarget = cessationDay - targetDay;
-  const phaseBarPhases = buildPhaseBarPhases(cessationDay, targetDay);
+  // cessationDay is null when no program exists — guard before arithmetic
+  const cessationComplete = hasCessationProgram && cessationDay !== null && cessationDay >= targetDay;
+  const pastTarget = cessationDay !== null ? cessationDay - targetDay : 0;
+  const phaseBarPhases = hasCessationProgram && cessationDay !== null
+    ? buildPhaseBarPhases(cessationDay, targetDay)
+    : [];
 
   // Eyebrow date
   const now = new Date();
@@ -491,42 +501,65 @@ export default function Dashboard() {
       />
 
       {/* Phasing hero — round-3 rebuild: day readout leads, phase bar
-          carries the current-day marker. */}
+          carries the current-day marker. Guard: hasCessationProgram prevents
+          a misleading "Day 0 · Acute" for client subjects with no program (Pitfall 6). */}
       <Card padding="lg">
-        <div
-          className="zt-hero-grid"
-          style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.5fr)", gap: "var(--gap-2xl)", alignItems: "center" }}
-        >
+        {hasCessationProgram && cessationDay !== null && cessationPhase !== null ? (
+          <div
+            className="zt-hero-grid"
+            style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.5fr)", gap: "var(--gap-2xl)", alignItems: "center" }}
+          >
+            <div>
+              <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
+                Phasing · {currentVersion}
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                <span className="zt-readout" style={{ fontSize: "var(--text-4xl)", color: "var(--ink)" }}>
+                  {cessationDay}
+                </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", letterSpacing: "0.06em" }}>
+                  / {targetDay} DAYS
+                </span>
+              </div>
+              <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 12 }}>
+                <strong style={{ color: "var(--ink)", fontWeight: 600 }}>{cessationPhase.label}</strong>
+                {" — "}
+                {cessationPhase.focus}
+              </div>
+              <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {cessationComplete ? `${pastTarget} days past target` : `${-pastTarget} days to target`}
+              </div>
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <PhaseBar phases={phaseBarPhases} height={16} day={cessationDay} />
+              <div style={{ marginTop: 14, textAlign: "right" }}>
+                <Link to="/protocol/cessation" className="zt-link">
+                  Full timeline <ArrowRight size={14} strokeWidth={2} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Placeholder — shown when the active subject has no cessation program (Pitfall 6).
+             Copy locked by UI-SPEC Dashboard cessation guard section. */
           <div>
-            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>
-              Phasing · {currentVersion}
+            <div className="zt-eyebrow" style={{ marginBottom: 12 }}>PROGRAM</div>
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 600,
+                fontSize: "var(--text-lg)",
+                color: "var(--ink)",
+                marginBottom: 10,
+              }}
+            >
+              No program started
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-              <span className="zt-readout" style={{ fontSize: "var(--text-4xl)", color: "var(--ink)" }}>
-                {cessationDay}
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", letterSpacing: "0.06em" }}>
-                / {targetDay} DAYS
-              </span>
-            </div>
-            <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginTop: 12 }}>
-              <strong style={{ color: "var(--ink)", fontWeight: 600 }}>{cessationPhase.label}</strong>
-              {" — "}
-              {cessationPhase.focus}
-            </div>
-            <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: "var(--text-2xs)", color: "var(--text-faint)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              {cessationComplete ? `${pastTarget} days past target` : `${-pastTarget} days to target`}
-            </div>
+            <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", margin: 0 }}>
+              Program details will appear here once a program start date is set for this client.
+            </p>
           </div>
-          <div style={{ minWidth: 0 }}>
-            <PhaseBar phases={phaseBarPhases} height={16} day={cessationDay} />
-            <div style={{ marginTop: 14, textAlign: "right" }}>
-              <Link to="/protocol/cessation" className="zt-link">
-                Full timeline <ArrowRight size={14} strokeWidth={2} />
-              </Link>
-            </div>
-          </div>
-        </div>
+        )}
       </Card>
 
       {/* Stat tiles — zt-grid-4 */}
