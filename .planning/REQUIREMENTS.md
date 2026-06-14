@@ -1,75 +1,72 @@
-# Requirements: Zoetrop v1.1 — M1 Operations
+# Requirements: Zoetrop v1.1 — First Client (practitioner-operated)
 
-**Milestone goal:** Invert the single-owner foundation into a practitioner-operated product — one coach onboards and runs one real client end-to-end (intake → customized protocol → tracking → 4-week iteration). This is the true M1 exit.
+**Milestone goal:** The owner, acting as practitioner, onboards **one real client end-to-end** with the tools actually used in practice — create the client, ingest PureInsight genetics + WHOOP + labs (all practitioner-entered, in-app upload), curate the engine library as needed, and produce a report + protocol. Single real client, practitioner does all data entry, no client self-service. Sharpen the instrument on real data before the multi-client inversion (v1.2).
 
-> Builds on v1.0 — M1 Foundations (auth + roles, tenant/subject RLS isolation, live data layer, lab ingest, engine + reports). The v1.0 platform scopes everything to a hardwired owner subject; v1.1's spine is "subjects become real." See `milestones/v1.0-REQUIREMENTS.md` for the shipped foundation.
+> Builds on v1.0 — M1 Foundations. The heavy multi-client operations (scale, self-service, switcher UX, cadence, Apple Watch/Oura, compliance gate) are parked in `v1.2-OPERATIONS-PLAN.md`.
+>
+> **Explicitly skipped in v1.1** (per scoping 2026-06-14): Google Drive doc storage/import; PureInsight API (manual portal + report import instead); Apple Watch + Oura (WHOOP only); client self-service.
 
 ## v1 Requirements
 
-### Subject Lifecycle
+### Client Onboarding (practitioner-operated)
 
-- [ ] **OPS-01**: A practitioner can create and manage a subject (client) record — create with intake basics, edit, and archive/deactivate
-- [ ] **OPS-02**: Redeeming a client invite creates (or links to) a `subjects` row, so a client account is never orphaned from a subject
-- [ ] **OPS-03**: A practitioner can select/switch the active subject, and every PHI surface (all 13 loaders + ingest + reports) scopes to the selected subject (replacing the hardwired `getOwnerSubject`); practitioner→subject assignments (AUTH-03) now carry real traffic
+- [ ] **ONB-01**: A practitioner can create a client (subject) record with intake basics
+- [ ] **ONB-02**: A practitioner can invite/provision a client account linked to that subject (reusing the existing per-invite role-scoped tokens)
+- [ ] **ONB-03**: A practitioner can select the active subject (owner or the client) and all PHI surfaces — ingest, report, protocol — scope to it (minimal context for 2 subjects; the at-scale switcher is v1.2)
+- [ ] **ONB-04**: An onboarding surface tracks each client's required inputs (genetics, labs, WHOOP) as a practitioner checklist/status
 
-### Client Data Entry
+### Data Ingest (single real subject, practitioner-entered)
 
-- [ ] **OPS-04**: A practitioner can enter a subject's genetic variants — by manual entry and/or by uploading a DNA report through the ingest pipeline
-- [ ] **OPS-05**: A practitioner can manually enter a metric value for a subject (the escape hatch when there is no lab PDF)
+- [ ] **ING-01**: A practitioner can upload a PureInsight (or SelfDecode) DNA report and have it parsed → reviewed → approved into the subject's `geneticVariants` (lab-ingest pattern; no PureInsight API)
+- [ ] **ING-02**: A practitioner can import WHOOP data → subject-scoped metrics with dedup (collection-date, Phase-5 ingest patterns)
+- [ ] **ING-03**: A practitioner can manually enter a metric value for a subject (the escape hatch when there is no document)
 
-### Protocol Authoring & Cadence
+### Per-Client Protocol
 
-- [ ] **OPS-06**: A practitioner can author and edit a protocol version for a subject (the per-subject `protocol_versions` lineage write path), with per-client supplement assignment and change history
-- [ ] **OPS-07**: The system surfaces cadence state — which clients are review-due, and a "new version per 4-week cycle" flow + a practitioner monitoring view
+- [ ] **PRO-01**: A practitioner can author and edit a protocol version for the client from their report (the per-subject `protocol_versions` lineage write path), with supplement assignment and change history
 
-### Instrument Continuity
+### Library / Corpus Curation
 
-- [ ] **OPS-08**: WHOOP import persists subject-scoped metrics with dedup (specimen/collection-date + dedup, using the Phase-5 ingest patterns) — the owner's living instrument flows again, per-subject
+- [ ] **LIB-01**: A practitioner can curate the SNP library (`geneticVariants`): list / create / edit / version / moderate, with K1–K4 evidence-tier authoring
+- [ ] **LIB-02**: A practitioner can curate supplement stacks (the supplement library)
+- [ ] **LIB-03**: A practitioner can curate protocol rules — the variant→protocol (`variantProtocolMap`) and metric→protocol (`metricProtocolMap`) mappings the engine applies
 
-### Proof Slice
+### Proof & Polish
 
-- [ ] **OPS-09**: A practitioner can run one client end-to-end — invite → intake/consent → labs uploaded → genotype entered → report generated → protocol v1 authored → 4-week iteration simulated — with cross-subject isolation extended to n≥2 real subjects
-
-### Compliance (carried from v1.0 — the release gate)
-
-- [ ] **COMP-02**: PHI infrastructure is BAA-covered (the chosen DB host, Vercel, and the LLM provider) before any external client's PHI is written — host decided via cost/BAA comparison (+ possible migration)
-- [ ] **COMP-03**: PHI access is audit-logged with `pgAudit` verified (parameters off) + PHI read-access (SELECT) object-level logging on PHI tables, on whichever host wins the comparison
+- [ ] **PROOF-01**: A practitioner onboards one real client end-to-end — create → genetics + labs + WHOOP ingested → report generated → protocol authored — with no manual DB intervention (the v1.1 exit)
+- [ ] **POL-01**: Tools / workflows / interactions / visuals are tuned from the real run — the deferred design round-3/4/5 items, import-honesty gaps, and the two Phase-7 security warnings (WR-02 open-redirect in `consent.tsx`, WR-03 BYPASSRLS `pdfBytes` read in `document.tsx`)
 
 ## Carried-Forward Verification & Tech Debt
 
-Not new requirements — verification/quality debt inherited from v1.0, to close within the relevant v1.1 phase:
+- **Phase 03.1 residual UAT** (gets real traffic in ONB-02/03): invite-redemption end-to-end in a private window; client-role 403 with a real client account.
+- **Phase-7 review warnings:** WR-01 audit-log `?? 'owner'` role fallback; WR-02/WR-03 (security — folded into POL-01); CR-01 `assignSubject` 23505 idempotency dead code (`/gsd:code-review`).
 
-- **Phase 03.1 residual UAT** (gets real traffic in OPS-01/02/03): invite-redemption end-to-end in a private window; client-role 403 with a real client account.
-- **Phase-7 review warnings:** WR-01 audit-log `?? 'owner'` role fallback; **WR-02 (security)** open redirect via unvalidated `next` in `consent.tsx`; **WR-03 (security)** `document.tsx` reads `pdfBytes` via BYPASSRLS before the authz gate; CR-01 `assignSubject` 23505 idempotency dead code. Fold the two security items into the compliance gate; clear the rest via `/gsd:code-review`.
+## Future Requirements (deferred → v1.2+)
 
-## Future Requirements (deferred)
-
-- Per-client cadence automation / reminders beyond review-due surfacing — after the manual loop is proven
-- Bulk subject import — after single-subject onboarding is solid
+See `v1.2-OPERATIONS-PLAN.md`: multi-client at scale, client self-service, subject-switcher UX, cadence/monitoring, Apple Watch + Oura ingest, Google Drive doc storage, PureInsight API, the compliance envelope & host gate (COMP-02/03).
 
 ## Out of Scope (M2/M3 — over-build guard)
 
-- **M2 client-facing app** (branded client experience, messaging, 4-week-cadence client UI) — beyond a possible minimal read-only report view; deferred until M1 proves with a paying tenant
-- **Delivery-surface modules** (Training / Nutrition / Modalities / Life-coaching) — M2+ surfaces on the spine
-- **CRM / scheduling / billing / payments parity** — commodity; external tools or link-outs suffice (protect engine focus)
-- **M3 multi-coach within a tenant + multi-tenant productization + engine-as-product** — needs M1 traction first
-- **External integrations beyond lab + DNA ingest** (CGM, Trainerize/Kajabi/JotForm) — M2+
+- **M2 client-facing app** beyond a possible minimal read-only report view; **delivery-surface modules** (Training/Nutrition/Modalities); **CRM/scheduling/billing parity**; **M3 multi-coach + productization** — held firm.
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OPS-01 | Phase 1 — Client Lifecycle | Pending |
-| OPS-02 | Phase 1 — Client Lifecycle | Pending |
-| OPS-03 | Phase 1 — Client Lifecycle | Pending |
-| OPS-04 | Phase 2 — Onboard-a-Client Data Paths | Pending |
-| OPS-05 | Phase 2 — Onboard-a-Client Data Paths | Pending |
-| OPS-06 | Phase 3 — Protocol Authoring + Cadence | Pending |
-| OPS-07 | Phase 3 — Protocol Authoring + Cadence | Pending |
-| OPS-08 | Phase 4 — Instrument Continuity | Pending |
-| OPS-09 | Phase 5 — M1 Proof Slice UAT | Pending |
-| COMP-02 | Phase 6 — Compliance Envelope & Host Gate | Pending |
-| COMP-03 | Phase 6 — Compliance Envelope & Host Gate | Pending |
+| ONB-01 | Phase 1 — Client Onboarding | Pending |
+| ONB-02 | Phase 1 — Client Onboarding | Pending |
+| ONB-03 | Phase 1 — Client Onboarding | Pending |
+| ONB-04 | Phase 1 — Client Onboarding | Pending |
+| ING-01 | Phase 2 — Data Ingest | Pending |
+| ING-02 | Phase 2 — Data Ingest | Pending |
+| ING-03 | Phase 2 — Data Ingest | Pending |
+| PRO-01 | Phase 4 — Per-Client Protocol Authoring | Pending |
+| LIB-01 | Phase 3 — Library / Corpus Curation | Pending |
+| LIB-02 | Phase 3 — Library / Corpus Curation | Pending |
+| LIB-03 | Phase 3 — Library / Corpus Curation | Pending |
+| PROOF-01 | Phase 5 — First-Client Proof + Polish | Pending |
+| POL-01 | Phase 5 — First-Client Proof + Polish | Pending |
 
 ---
-*Requirements defined: 2026-06-14 — v1.1 M1 Operations. OPS-01..09 (new family) + COMP-02/03 (carried from v1.0). True M1 exit: one coach runs one real client end-to-end. Traceability filled 2026-06-14 (roadmap creation).*
+*Requirements defined: 2026-06-14 — v1.1 First Client (practitioner-operated). ONB / ING / PRO / LIB + PROOF/POL. Recut from the multi-client "M1 Operations" plan (now parked as v1.2) to prove the practice loop on one real client first, with WHOOP + PureInsight (manual) lead, no Drive/API.*
+*Traceability filled: 2026-06-14 — 5-phase roadmap (Phase 1: ONB-01..04 / Phase 2: ING-01..03 / Phase 3: LIB-01..03 / Phase 4: PRO-01 / Phase 5: PROOF-01, POL-01). 12/12 requirements mapped.*

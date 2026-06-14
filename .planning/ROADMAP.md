@@ -3,9 +3,10 @@
 ## Milestones
 
 - ✅ **v1.0 — M1 Foundations** — Phases 1–7 + inserted 3.1/4.1 (shipped 2026-06-14) — full detail: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md)
-- 🚧 **v1.1 — M1 Operations** — "a practitioner runs a real client" (in progress — Phase 1 next)
+- 🚧 **v1.1 — First Client (practitioner-operated)** — one real client end-to-end, practitioner does all data entry, no self-service (in progress — Phase 1 next)
+- 📋 **v1.2 — M1 Operations (parked)** — multi-client at scale, client self-service, cadence/monitoring, Apple Watch + Oura, compliance gate — see [`v1.2-OPERATIONS-PLAN.md`](v1.2-OPERATIONS-PLAN.md)
 
-> **M1 arc:** v1.0 built the engine-first platform *foundation* on the owner's own data (n=1). v1.1 inverts it from a single-owner instrument to a practitioner-operated product — subjects become real, a coach onboards and runs a real client end-to-end — converging on the true M1 exit, then opens the compliance gate before the first external client's PHI.
+> **M1 arc:** v1.0 built the engine-first platform *foundation* on the owner's own data (n=1). v1.1 sharpens the instrument on one real client — a practitioner runs a single client end-to-end with actual tools (PureInsight genetics, WHOOP, labs) before the multi-client inversion. v1.2 scales it: multi-client operations, self-service, the compliance gate.
 
 ## Phases
 
@@ -26,106 +27,86 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
 
 </details>
 
-### 🚧 v1.1 — M1 Operations
+### 🚧 v1.1 — First Client (practitioner-operated)
 
-- [ ] **Phase 1: Client Lifecycle — Subjects Become Real** — subject creation/management UI; invite→subject linkage; selected-subject context replacing hardwired `getOwnerSubject` across all 13 PHI surfaces
-- [ ] **Phase 2: Onboard-a-Client Data Paths** — per-subject genotype entry (manual + DNA-report upload); manual metric entry; intake consolidating consent + baseline
-- [ ] **Phase 3: Per-Client Protocol Authoring + 4-Week Cadence** — write path for per-subject protocol-version lineage; supplement assignment + change history; review-due surfacing + practitioner monitoring view
-- [ ] **Phase 4: Instrument Continuity (WHOOP Import Persists)** — wire `import/whoop` to write subject-scoped metrics with dedup using Phase-5 ingest patterns
-- [ ] **Phase 5: M1 Proof Slice — End-to-End UAT** — scripted run-through with a second real or synthetic client: invite → intake/consent → labs → genotype → report → protocol v1 → 4-week iteration simulated
-- [ ] **Phase 6: Compliance Envelope & Host Gate** — DB-host cost/BAA comparison (+ possible migration), Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit + PHI SELECT-logging verification, PITR/SSL/network hardening, COMPLIANCE-RUNBOOK.md complete
+- [ ] **Phase 1: Client Onboarding (practitioner-operated)** — create client/subject, invite→subject link, minimal active-subject context (owner + one client), onboarding checklist
+- [ ] **Phase 2: Data Ingest (genetics + WHOOP + manual)** — PureInsight/SelfDecode DNA report → review/approve → `geneticVariants`; WHOOP → subject-scoped metrics with dedup; manual metric entry
+- [ ] **Phase 3: Library / Corpus Curation** — in-app CRUD for SNP library, supplement stacks, and protocol rules with K1–K4 evidence-tier authoring
+- [ ] **Phase 4: Per-Client Protocol Authoring** — write/edit a protocol version for the client from their report; per-subject `protocol_versions` lineage; supplement assignment + change history
+- [ ] **Phase 5: First-Client Proof + Polish** — onboard one real client end-to-end (create → genetics + labs + WHOOP → report → protocol) with no manual DB intervention; friction polish + resolve WR-02/WR-03 security warnings
 
 ## Phase Details
 
-### Phase 1: Client Lifecycle — Subjects Become Real
-**Goal**: A practitioner can create, manage, and switch between client subjects, with every PHI surface scoping to the selected subject
+### Phase 1: Client Onboarding (practitioner-operated)
+**Goal**: A practitioner can create a real client, link them via invite, and operate on either the owner or the client — with every PHI surface scoping to whichever subject is active
 **Depends on**: Nothing (first v1.1 phase; builds on v1.0 foundation)
-**Requirements**: OPS-01, OPS-02, OPS-03
+**Requirements**: ONB-01, ONB-02, ONB-03, ONB-04
 **Success Criteria** (what must be TRUE):
-  1. A practitioner signs in and sees a client list surface (empty or populated)
-  2. A practitioner can create a new subject record with intake basics and it persists to the DB
-  3. Redeeming a client invite creates or links a `subjects` row — no orphaned client accounts
-  4. A practitioner can switch the active subject and every authenticated route (all 13 PHI loaders + ingest + reports) returns data scoped to the selected subject only
-  5. Cross-subject isolation holds: n≥2 real subjects cannot see each other's PHI (isolation tests extended)
+  1. A practitioner can create a client (subject) record with intake basics and it persists to the DB
+  2. A practitioner can invite a client; redeeming the invite creates or links a `subjects` row with no orphaned accounts
+  3. A practitioner can select the active subject (owner or client) and every PHI surface — ingest, report, protocol — returns data scoped to that subject only
+  4. An onboarding checklist surface shows each client's required-input status (genetics, labs, WHOOP) so the practitioner knows what is still missing
+  5. Phase 03.1 residual UAT closes: invite-redemption works end-to-end in a private window; client-role 403 fires correctly with a real client account
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 2: Onboard-a-Client Data Paths
-**Goal**: A practitioner can bring a brand-new subject to "report-ready" without touching a seed script
+### Phase 2: Data Ingest (genetics + WHOOP + manual)
+**Goal**: A practitioner can bring a client to "report-ready" by ingesting their DNA report, WHOOP stream, and any ad-hoc metric values — all scoped to the correct subject
 **Depends on**: Phase 1
-**Requirements**: OPS-04, OPS-05
+**Requirements**: ING-01, ING-02, ING-03
 **Success Criteria** (what must be TRUE):
-  1. A practitioner can manually enter a metric value for a subject and it appears in that subject's metrics views
-  2. A practitioner can enter genetic variant data for a subject via a manual entry surface
-  3. A practitioner can upload a DNA report through the existing ingest pipeline and the resulting variants are attributed to the correct subject
-  4. After completing intake (consent + baseline data entry), a subject's record has enough data to generate a report without any seed-script intervention
+  1. A practitioner can upload a PureInsight or SelfDecode DNA report and it flows through parse → review → approve into the subject's `geneticVariants` with no manual DB intervention
+  2. A practitioner can import WHOOP data and the resulting metrics are written to the DB attributed to the selected subject; re-running the same import does not create duplicates (dedup by collection-date)
+  3. A practitioner can manually enter a metric value for a subject and it appears in that subject's metrics views immediately
+  4. All three ingest paths (DNA, WHOOP, manual) write data scoped to the active subject only — no cross-subject bleed
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 3: Per-Client Protocol Authoring + 4-Week Cadence
-**Goal**: The PLATFORM §4 practice loop is executable — a practitioner can author a protocol for a client and track the 4-week iteration cadence
-**Depends on**: Phase 2
-**Requirements**: OPS-06, OPS-07
+### Phase 3: Library / Corpus Curation
+**Goal**: A practitioner can author and maintain the SNP library, supplement stacks, and protocol rules the engine applies — so the engine can correctly interpret real client genetics
+**Depends on**: Phase 1 (subject context required for meaningful curation); can parallelize with Phase 2
+**Requirements**: LIB-01, LIB-02, LIB-03
 **Success Criteria** (what must be TRUE):
-  1. A practitioner can author a new protocol version for a specific subject and save it to that subject's `protocol_versions` lineage
-  2. A practitioner can assign supplements to a client protocol and the assignment is persisted with change history
-  3. The practitioner monitoring view shows which clients are review-due (past their 4-week cycle)
-  4. A practitioner can initiate a "new version per cycle" flow that creates a new protocol version linked to the previous one
+  1. A practitioner can list, create, edit, and version SNP entries in the `geneticVariants` library with a K1–K4 evidence-tier field required on every record
+  2. A practitioner can curate the supplement library — create, edit, and retire supplement stack entries used by protocol authoring
+  3. A practitioner can author and edit variant→protocol (`variantProtocolMap`) and metric→protocol (`metricProtocolMap`) rules the engine applies at report generation
+  4. The engine produces a report that reflects the curated library state — a rule change is visible in the next report generated
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 4: Instrument Continuity (WHOOP Import Persists)
-**Goal**: The owner's WHOOP biometric stream flows again, persisted per-subject into the live data layer
-**Depends on**: Phase 1
-**Requirements**: OPS-08
+### Phase 4: Per-Client Protocol Authoring
+**Goal**: A practitioner can author a protocol version for a client derived from their report, with supplement assignment and a change history that preserves the lineage
+**Depends on**: Phase 2 (ingest must produce data), Phase 3 (library must have rules for the engine to apply)
+**Requirements**: PRO-01
 **Success Criteria** (what must be TRUE):
-  1. A practitioner can trigger the WHOOP import flow from `import/whoop` and the resulting metrics are written to the DB attributed to the selected subject
-  2. Re-running the same import does not create duplicate metric rows (dedup by specimen/collection-date, using Phase-5 ingest patterns)
-  3. Imported WHOOP metrics appear in the subject's metrics views with `data_source = 'whoop'`
+  1. A practitioner can create a new protocol version for a specific subject, linked to that subject's `protocol_versions` lineage, and the record persists to the DB
+  2. A practitioner can assign supplements to a client protocol version and edit the assignment; the full change history is preserved
+  3. The protocol version is seeded from the client's confidence-graded report — the practitioner edits from a generated draft, not a blank slate
+  4. Two subjects have independent protocol-version lineages — one client's protocol cannot appear in another's view
 **Plans**: TBD
+**UI hint**: yes
 
-### Phase 5: M1 Proof Slice — End-to-End UAT
-**Goal**: The M1 milestone sentence is demonstrably true — a practitioner runs one client end-to-end through the full practice loop
-**Depends on**: Phase 3, Phase 4
-**Requirements**: OPS-09
+### Phase 5: First-Client Proof + Polish
+**Goal**: The v1.1 milestone sentence is demonstrably true — a practitioner completes the full client loop (create → ingest → report → protocol) on one real client with no manual DB intervention, and friction surfaced during that run is resolved
+**Depends on**: Phase 4 (full pipeline must be wired)
+**Requirements**: PROOF-01, POL-01
 **Success Criteria** (what must be TRUE):
-  1. A practitioner can complete the full sequence without any step requiring manual DB intervention: invite → intake/consent → labs uploaded → genotype entered → report generated → protocol v1 authored → 4-week iteration simulated
-  2. The second client's data is fully isolated from the owner-subject's data across all surfaces (cross-subject isolation confirmed at n≥2)
-  3. Phase 03.1 residual UAT is closed: invite-redemption works end-to-end in a private window; client-role 403 fires correctly with a real client account
-  4. All defects surfaced during the scripted run are identified, triaged, and either fixed or explicitly deferred with rationale
+  1. A practitioner completes the full sequence without any step requiring manual DB intervention: create client → ingest genetics + WHOOP + labs → generate report → author protocol v1
+  2. The real client's data is fully isolated from the owner-subject's data across all surfaces (cross-subject isolation confirmed at n≥2)
+  3. WR-02 (open-redirect via unvalidated `next` in `consent.tsx`) and WR-03 (BYPASSRLS `pdfBytes` read in `document.tsx`) are resolved and verified
+  4. Tools, workflows, interactions, and visuals tuned from the real run — deferred design round-3/4/5 items and import-honesty gaps addressed; any remaining defects are either fixed or explicitly deferred with rationale
 **Plans**: TBD
-
-### Phase 6: Compliance Envelope & Host Gate
-**Goal**: All PHI infrastructure is BAA-covered and audit-logged before any external client's data is written
-**Depends on**: Phase 5
-**Requirements**: COMP-02, COMP-03
-**Success Criteria** (what must be TRUE):
-  1. A DB-host cost/BAA comparison is completed and the host decision is recorded; if migration is required it is executed and verified
-  2. Vercel HIPAA add-on is activated and the Vercel BAA is signed
-  3. The LLM provider (Anthropic) HIPAA-Ready BAA is obtained and on record
-  4. pgAudit is verified active on the chosen host (parameters confirmed: `log_parameter=off`; PHI SELECT-level object logging on all PHI tables confirmed live)
-  5. COMPLIANCE-RUNBOOK.md is complete: all three vendor BAA registers filled, pgAudit status confirmed, PITR/SSL/network hardening documented, WR-02 (open-redirect) and WR-03 (BYPASSRLS pdf read) security items resolved
-**Plans**: TBD
+**UI hint**: yes
 
 ## Progress
 
-| Phase | Milestone | Plans | Status | Completed |
-|-------|-----------|-------|--------|-----------|
-| 1. Schema/Engine/Auth-spike | v1.0 | 5/5 | Complete | 2026-06-08 |
-| 2. Vercel cutover | v1.0 | 4/4 | Complete | 2026-06-08 |
-| 3. Identity + tenancy | v1.0 | 5/5 | Complete | 2026-06-10 |
-| 3.1 Account & roles | v1.0 | 4/4 | Complete | 2026-06-10 |
-| 4. Static→DB data layer | v1.0 | 7/7 | Complete | 2026-06-10 |
-| 4.1 Design system | v1.0 | 9/9 | Complete | 2026-06-08 |
-| 5. Lab ingest | v1.0 | 3/3 | Complete | 2026-06-11 |
-| 6. Engine + reports | v1.0 | 5/5 | Complete | 2026-06-12 |
-| 7. RLS + isolation | v1.0 | 8/8 | Complete | 2026-06-12 |
-| **v1.1 — 1. Client lifecycle** | v1.1 | 0/TBD | Not started | — |
-| **v1.1 — 2. Onboard-a-client data** | v1.1 | 0/TBD | Not started | — |
-| **v1.1 — 3. Protocol authoring + cadence** | v1.1 | 0/TBD | Not started | — |
-| **v1.1 — 4. Instrument continuity** | v1.1 | 0/TBD | Not started | — |
-| **v1.1 — 5. M1 proof slice UAT** | v1.1 | 0/TBD | Not started | — |
-| **v1.1 — 6. Compliance envelope & host gate** | v1.1 | 0/TBD | Not started | — |
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Client Onboarding | 0/TBD | Not started | — |
+| 2. Data Ingest | 0/TBD | Not started | — |
+| 3. Library / Corpus Curation | 0/TBD | Not started | — |
+| 4. Per-Client Protocol Authoring | 0/TBD | Not started | — |
+| 5. First-Client Proof + Polish | 0/TBD | Not started | — |
 
 ## Backlog
 

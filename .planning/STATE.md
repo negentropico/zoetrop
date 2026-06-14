@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: M1 Operations
-status: active
+milestone_name: First Client (practitioner-operated)
+status: planning
 last_updated: "2026-06-14"
 last_activity: 2026-06-14
 progress:
-  total_phases: 6
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,20 +20,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** v1.1 — M1 Operations — Phase 1: Client Lifecycle (next)
+**Current focus:** v1.1 — First Client (practitioner-operated) — Phase 1: Client Onboarding (next)
 
 > ✅ **v1.0 — M1 Foundations shipped 2026-06-14.** 9 phases / 50 plans / 116 tasks; 27/29 requirements satisfied (COMP-02/03 deferred to the v1.1 compliance gate). Live at **https://zoetrop.vercel.app** (Vercel `zoetrop`/negentropico, standard Pro) on Neon `orange-paper-97068012`. Archived to `.planning/milestones/v1.0-*`; audit at `milestones/v1.0-MILESTONE-AUDIT.md`; tag `v1.0`. Gates green; integration 5/5 flows; prod healthy.
-> **v1.1 roadmap created 2026-06-14.** 6 phases, 11 requirements (OPS-01..09 + COMP-02/03). Spine: subjects become real (Phase 1) → onboard-a-client data (Phase 2) → per-client protocol authoring + cadence (Phase 3) → WHOOP persist (Phase 4) → E2E proof slice (Phase 5) → compliance gate (Phase 6).
+> **v1.1 roadmap RECUT 2026-06-14.** 5 phases, 12 requirements (ONB-01..04, ING-01..03, PRO-01, LIB-01..03, PROOF-01, POL-01). Replaces the stale "M1 Operations" (OPS-01..09 + COMP-02/03) plan, now parked as `v1.2-OPERATIONS-PLAN.md`. Spine: client onboarding (Phase 1) → data ingest (Phase 2) → library curation (Phase 3, parallelizable) → per-client protocol authoring (Phase 4) → first-client proof + polish (Phase 5).
 
 ## Current Position
 
-Phase: 1 — Client Lifecycle: Subjects Become Real
+Phase: 1 — Client Onboarding (practitioner-operated)
 Plan: —
 Status: Not started
-Last activity: 2026-06-14 — v1.1 roadmap created
+Last activity: 2026-06-14 — v1.1 roadmap recut (5 phases, 12 requirements)
 
 ```
-v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/6 phases)
+v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/5 phases)
 ```
 
 ## Performance Metrics
@@ -53,7 +53,6 @@ v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (
 | 03 | — | — | — |
 | 04 | — | — | — |
 | 05 | — | — | — |
-| 06 | — | — | — |
 
 **Recent Trend:** No v1.1 data yet
 
@@ -64,34 +63,36 @@ v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (
 ### Roadmap Evolution
 
 - v1.0 archived 2026-06-14: 9 phases (1–7 + 3.1/4.1), 50 plans, 116 tasks, 27/29 reqs. Full record in `milestones/v1.0-ROADMAP.md`.
-- v1.1 roadmap created 2026-06-14: 6 phases, 11 requirements (OPS-01..09 + COMP-02/03). Phase numbering reset to 1. Phase sequence determined by the user (authoritative); roadmapper formalized goals/criteria/coverage.
-- Phase 4 (instrument continuity) is parallelizable with Phases 2–3 — depends only on Phase 1.
-- Phase 6 (compliance gate) can only fire after Phase 5 (proof slice) — coherent because a real client must exist before the pre-client gate triggers.
-- Phase 03.1 residual UAT (invite-redemption private-window + client-403) carries into Phase 1 and closes when real client traffic flows.
-- Phase-7 security warnings WR-02 (open-redirect) and WR-03 (BYPASSRLS pdf read) fold into Phase 6 compliance gate; WR-01 and CR-01 to clear via `/gsd:code-review`.
+- v1.1 roadmap created 2026-06-14 (first pass): 6 phases, 11 requirements (OPS-01..09 + COMP-02/03). Stale — replaced below.
+- v1.1 roadmap RECUT 2026-06-14: replaced the multi-client "M1 Operations" plan. 5 phases, 12 requirements (ONB/ING/PRO/LIB/PROOF/POL). Multi-client work parked as v1.2; compliance gate (COMP-02/03) deferred into v1.2 (no longer a v1.1 phase). Phase numbering reset to 1.
+- Phase 3 (library curation) is parallelizable with Phase 2 (data ingest) — both depend only on Phase 1 subject context.
+- Phase 4 (protocol authoring) depends on both Phase 2 (ingest data) and Phase 3 (library rules) before the engine can produce a meaningful report draft.
+- Phase 5 (first-client proof) depends on Phase 4 (full pipeline wired). WR-02/WR-03 security items fold into Phase 5 polish (not held to a separate compliance gate).
+- Phase 03.1 residual UAT (invite-redemption private-window + client-role 403) gets real traffic in Phase 1 and closes there.
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-- [2026-06-14 MILESTONE CLOSE]: Close v1.0 as M1 Foundations; open v1.1 M1 Operations. Phase 8 (compliance envelope) re-homes as v1.1 Phase 6 — coherent because the gate can only fire once a real client can exist (after the proof slice).
-- [Carried from v1.0]: Pilot-first PHI hardening: standard-tier infra + subscription API until Phase 6. HIPAA/BAA/RLS enforcement gate fires before the first external client's PHI (now v1.1 Phase 6).
-- [Carried from v1.0]: LLM provider BAA (Anthropic) deferred to Phase 6. External-client PHI extraction blocked until then.
-- [Carried from v1.0]: Neon host: stay on Neon for v1.1 with host-portable GUC RLS. Host/BAA comparison (Phase 6) decides whether to migrate before the first external client.
+- [2026-06-14 ROADMAP RECUT]: v1.1 recut from multi-client "M1 Operations" to "First Client (practitioner-operated)". Multi-client operations (OPS scale/self-service/cadence/wearables), compliance gate (COMP-02/03), and the v1.1 compliance phase all parked to v1.2.
+- [2026-06-14 MILESTONE CLOSE]: Close v1.0 as M1 Foundations; open v1.1 M1 Operations. (Still valid — just recut scope.)
+- [Carried from v1.0]: Pilot-first PHI hardening: standard-tier infra + subscription API for the v1.1 single real client pilot. Compliance gate deferred to v1.2 (before first *external* client's PHI under a formal arrangement).
+- [Carried from v1.0]: LLM provider BAA (Anthropic) deferred to v1.2 compliance gate. PHI extraction in v1.1 is for the owner acting as practitioner on one pilot client.
 - [Carried from v1.0]: `SET LOCAL` + NOBYPASSRLS `app_user` RLS pattern is the tenancy mechanism (proven in v1.0 Phase 7).
 
 ### Pending Todos
 
-- [Phase 1]: Parameterize the hardwired `getOwnerSubject` call across all 13 PHI loaders + ingest + reports — largest surface change in v1.1.
+- [Phase 1]: Minimal active-subject context — practitioner can select owner or the one client; all PHI loaders scope to selected subject. (Thin slice — NOT the at-scale switcher.)
 - [Phase 1 carry-forward]: Phase 03.1 residual UAT — invite-redemption end-to-end (private window) + client-role 403 (real client). Close when Phase 1 has real client traffic.
-- [Phase 6 carry-forward]: WR-02 open-redirect (unvalidated `next` in `consent.tsx`) and WR-03 BYPASSRLS pdf read (`document.tsx`) — security items; fold into Phase 6 compliance gate.
-- [Phase 6 carry-forward]: WR-01 audit-log `?? 'owner'` role fallback + CR-01 `assignSubject` 23505 dead code — clear via `/gsd:code-review` before or during Phase 6.
+- [Phase 5]: WR-02 open-redirect (unvalidated `next` in `consent.tsx`) and WR-03 BYPASSRLS pdf read (`document.tsx`) — resolve during polish phase.
+- [Code review — any phase]: WR-01 audit-log `?? 'owner'` role fallback + CR-01 `assignSubject` 23505 dead code — clear via `/gsd:code-review`.
 
 ### Blockers/Concerns
 
-- [Phase 1 risk]: Parameterizing `getOwnerSubject` across 13 PHI loaders is broad; ensures no loader is missed and isolation tests confirm correctness.
-- [Phase 6 gate]: LLM provider BAA (Anthropic HIPAA-Ready) + Neon/Vercel BAAs + pgAudit verification + host decision — all required before first external client PHI. NOT a blocker for the single-user pilot or v1.1 Phases 1–5.
-- [Phase 4 note]: Vault import (`import/vault`) decision deferred in v1.1 — Phase 4 decides whether to include or defer.
+- [Phase 1 scope]: ONB-03 minimal active-subject context is a thin 2-subject slice — reuses existing per-invite tokens + subjects table. The at-scale subject-switcher UX is v1.2 scope; do not over-build here.
+- [Phase 2 + 3 parallelize]: These phases share the same dependency (Phase 1) and can run concurrently if separate plans are tracked carefully.
+- [Phase 4 dependency]: Protocol authoring requires both an ingested client record (Phase 2) and a curated library (Phase 3) before the engine can seed the draft. Plan Phase 4 after both are in place.
+- [v1.2 carry]: COMP-02/03 compliance envelope (BAAs, pgAudit, host gate) still required before first *external* client's PHI — tracked in `v1.2-OPERATIONS-PLAN.md`, not here.
 
 ### Quick Tasks Completed
 
@@ -109,10 +110,14 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| v1.1 Phase 6 | COMP-02/03 — compliance envelope & host gate (BAAs, host cost/BAA, pgAudit/SELECT-logging) | Active — v1.1 Phase 6 | v1.0 close |
+| v1.2 | COMP-02/03 — compliance envelope & host gate (BAAs, host cost/BAA, pgAudit/SELECT-logging) | Parked → v1.2 | v1.1 recut 2026-06-14 |
 | v1.1 Phase 1 | Phase 03.1 invite-redemption E2E (private window) + client-role 403 (real client) | Active — close in Phase 1 when real traffic flows | v1.0 close |
-| v1.1 Phase 6 | WR-02 open-redirect, WR-03 BYPASSRLS pdf read (security) | Active — fold into Phase 6 | v1.0 close |
-| v1.1 code-review | WR-01 audit-log role fallback, CR-01 assignSubject dead code | Active — clear via code-review | v1.0 close |
+| v1.1 Phase 5 | WR-02 open-redirect, WR-03 BYPASSRLS pdf read (security) | Active — resolve in Phase 5 polish | v1.0 close |
+| code-review | WR-01 audit-log role fallback, CR-01 assignSubject dead code | Active — clear via /gsd:code-review | v1.0 close |
+| v1.2 | Multi-client at scale, subject-switcher UX, client self-service | Parked → v1.2 | v1.1 recut 2026-06-14 |
+| v1.2 | Cadence + monitoring (review-due surfacing, 4-week iteration flow) | Parked → v1.2 | v1.1 recut 2026-06-14 |
+| v1.2 | Apple Watch + Oura ingest | Parked → v1.2 | v1.1 recut 2026-06-14 |
+| v1.2 | Google Drive doc storage, PureInsight API | Parked → v1.2 | v1.1 recut 2026-06-14 |
 | nyquist | Partial/missing VALIDATION.md (phases 02/03/04.1/05/03.1/07) | Discovery-only; optional retro-fill | v1.0 close |
 | M2 | Client-facing branded app | Deferred | M1 scope definition |
 | M2+ | Training / Nutrition / Modalities delivery surfaces | Deferred | M1 scope definition |
@@ -121,9 +126,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-06-14
-Stopped at: v1.1 roadmap created — 6 phases, 11 requirements. ROADMAP.md, STATE.md, REQUIREMENTS.md (traceability) all written.
-Resume file: .planning/ROADMAP.md (v1.1 Phase 1 — Client Lifecycle: Subjects Become Real — next)
+Stopped at: v1.1 roadmap RECUT — 5 phases, 12 requirements (ONB/ING/PRO/LIB/PROOF/POL). ROADMAP.md, STATE.md, REQUIREMENTS.md (traceability) all written.
+Resume file: .planning/ROADMAP.md (v1.1 Phase 1 — Client Onboarding — next)
 
 ## Operator Next Steps
 
-- `/gsd:plan-phase 1` — plan Phase 1 (Client Lifecycle: Subjects Become Real)
+- `/gsd:plan-phase 1` — plan Phase 1 (Client Onboarding: practitioner-operated)

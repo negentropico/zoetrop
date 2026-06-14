@@ -8,19 +8,18 @@ Zoetrop is a confidence-graded functional-health **protocol-decision engine**. A
 
 The confidence-graded protocol-decision engine: turning heterogeneous diagnostics + wearables + genetics into a personalized, evidence-weighted protocol — and re-deriving it as the data changes — while showing the uncertainty honestly (K1 strong … K4 speculative) instead of faking certainty. This is the moat. If everything else fails, this must work.
 
-## Current Milestone: v1.1 — M1 Operations
+## Current Milestone: v1.1 — First Client (practitioner-operated)
 
-**Goal:** Invert the single-owner foundation into a practitioner-operated product — one coach onboards and runs one real client end-to-end (intake → customized protocol → tracking → 4-week iteration). This is the true M1 exit.
+**Goal:** The owner, acting as practitioner, onboards **one real client end-to-end** with the tools used in practice — create the client, ingest PureInsight genetics + WHOOP + labs (practitioner-entered, in-app upload), curate the engine library, produce a report + protocol. Single real client, practitioner does all data entry, no client self-service. Sharpen the instrument on real data before the multi-client inversion (v1.2).
 
-**Target features (OPS-\*):**
-- Subject lifecycle: creation/management UI, invite→subject linkage, selected-subject context replacing hardwired `getOwnerSubject` across all PHI surfaces
-- Onboard-a-client data paths: per-subject genotype entry (manual + DNA-report upload), manual metric entry, intake (consent + baseline)
-- Per-client protocol authoring + the 4-week cadence loop (write path for the per-subject version lineage, supplement assignment, review-due surfacing)
-- Instrument continuity: WHOOP import persists subject-scoped metrics (dedup, Phase-5 patterns)
-- M1 proof slice: a scripted end-to-end run with a second real/synthetic client
-- Compliance Envelope & Host Gate (carried from v1.0 Phase 8, COMP-02/03) — fires before the first external client's PHI
+**Target features:**
+- **Client onboarding (practitioner-operated):** create client/subject, invite→subject link, minimal active-subject context (owner + the one client), onboarding checklist — *ONB*
+- **Data ingest:** PureInsight/SelfDecode DNA report → variants; WHOOP → subject metrics (dedup); manual metric entry — *ING* (lead WHOOP + PureInsight)
+- **Per-client protocol authoring** from the report — *PRO*
+- **Library / corpus curation:** SNPs, supplement stacks, protocol rules — *LIB*
+- **First-client proof** end-to-end + polish (tools/workflows/interactions/visuals) woven through — *PROOF/POL*
 
-**Key context:** The v1.0 platform scopes everything to a hardwired owner subject; "subjects become real" is the spine of v1.1. Phase 8 re-homes here coherently — the gate can only fire once a real client can exist. Also carried in: Phase 03.1 residual UAT (invite-redemption private-window + client-403 with a real client) and the 4 Phase-7 review warnings (WR-01/02/03 + CR-01; two are security). Out of scope held firm: M2 client-facing app, delivery-surface modules, CRM/scheduling/billing parity, M3 productization.
+**Key context (scoping 2026-06-14):** Recut from the multi-client "M1 Operations" plan, now parked as `v1.2-OPERATIONS-PLAN.md`. **Explicitly skipped in v1.1 → v1.2:** Google Drive doc storage (PHI → Workspace BAA), PureInsight API (manual portal + report import instead), Apple Watch + Oura (WHOOP only), client self-service, the compliance gate. v1.1 pulls a *thin* slice of operations forward (one client + invite + minimal subject context) but stays practitioner-operated with no scale.
 
 ## Requirements
 
@@ -48,16 +47,17 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 
 ### Active
 
-<!-- v1.1 — M1 Operations: a practitioner runs a real client. Formalized via /gsd:new-milestone (OPS-* family). -->
+<!-- v1.1 — First Client (practitioner-operated). Full requirements in REQUIREMENTS.md. -->
 
-The single-owner foundation (v1.0) is shipped. v1.1 inverts it to a practitioner-operated product — see ROADMAP.md "v1.1 — M1 Operations (Planned)" and define the OPS-\* requirements via `/gsd:new-milestone`:
+v1.0 foundation shipped. v1.1 = onboard one real client end-to-end, practitioner-operated (single client, no self-service). See `.planning/REQUIREMENTS.md`:
 
-- [ ] **OPS** — subject lifecycle (creation/management; invite→subject linkage; selected-subject context replacing hardwired `getOwnerSubject` across all PHI surfaces)
-- [ ] **OPS** — onboard-a-client data paths (per-subject genotype entry, manual metric entry, intake)
-- [ ] **OPS** — per-client protocol authoring + the 4-week cadence loop
-- [ ] **OPS** — instrument continuity (WHOOP import persists subject-scoped metrics)
-- [ ] **OPS** — M1 proof slice: one coach runs one real client end-to-end
-- [ ] **Compliance Envelope & Host Gate** (carried from v1.0 Phase 8): Vercel HIPAA add-on + BAAs, LLM-provider BAA, host cost/BAA comparison + possible migration, pgAudit + PHI SELECT-logging (COMP-02/03) — the gate before the first external client's PHI
+- [ ] **ONB** — client onboarding: create client/subject, invite→subject link, minimal active-subject context, onboarding checklist
+- [ ] **ING** — data ingest: PureInsight/SelfDecode DNA report → variants; WHOOP → subject metrics (dedup); manual metric entry
+- [ ] **PRO** — per-client protocol authoring from the report
+- [ ] **LIB** — library/corpus curation: SNPs, supplement stacks, protocol rules
+- [ ] **PROOF / POL** — first-client end-to-end proof + tools/workflows/interactions/visuals polish
+
+Deferred → v1.2 (`v1.2-OPERATIONS-PLAN.md`): multi-client at scale, client self-service, subject-switcher, cadence, Apple Watch + Oura, Google Drive, PureInsight API, the compliance gate (COMP-02/03).
 
 ### Out of Scope
 
