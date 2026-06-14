@@ -27,7 +27,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
-import { getOwnerSubject } from "~/lib/data.server";
+import { getActiveSubject } from "~/lib/data.server";
 import { getDb } from "~/lib/db.server";
 import { labDocuments, labExtractions } from "../../../../db/schema";
 import { Card } from "~/components/ui/Card";
@@ -46,11 +46,11 @@ export function meta({}: Route.MetaArgs) {
 
 // ── Loader ─────────────────────────────────────────────────────────────────
 // Same tenant/subject scoping sequence as review.tsx (requireUser →
-// getOwnerSubject → assertSubjectAccess → scoped selects).
+// getActiveSubject → assertSubjectAccess → scoped selects).
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
+  const subject = await getActiveSubject(request, user.tenantId!);
   assertSubjectAccess(user, subject, user.tenantId!);
 
   const db = getDb();

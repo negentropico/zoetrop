@@ -8,7 +8,7 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/index";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
-import { getOwnerSubject, getReports } from "~/lib/data.server";
+import { getActiveSubject, getReports } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { Card } from "~/components/ui/Card";
@@ -30,7 +30,7 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
+  const subject = await getActiveSubject(request, user.tenantId!);
   // ctx constructed before assertSubjectAccess so listAssignedSubjectIds can run
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
   const assignedIds =

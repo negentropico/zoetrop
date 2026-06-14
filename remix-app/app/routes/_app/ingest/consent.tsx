@@ -19,7 +19,7 @@ import type { Route } from "./+types/consent";
 import { requireUser } from "~/lib/authz.server";
 import { assertSubjectAccess } from "~/lib/authz.server";
 import type { AppRole } from "~/lib/authz.server";
-import { getOwnerSubject } from "~/lib/data.server";
+import { getActiveSubject } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { checkConsent, insertConsent } from "~/lib/consent.server";
@@ -32,7 +32,7 @@ import { PageHeader } from "~/components/ui/PageHeader";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
+  const subject = await getActiveSubject(request, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
   const assignedIds =
     user.role === "practitioner"
@@ -57,7 +57,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const { user } = await requireUser(request);
-  const subject = await getOwnerSubject(user.tenantId!);
+  const subject = await getActiveSubject(request, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
   const assignedIds =
     user.role === "practitioner"

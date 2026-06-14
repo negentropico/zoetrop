@@ -34,7 +34,7 @@ import {
 import type { Route } from "./+types/review";
 import { requireUser, requireRole, assertSubjectAccess } from "~/lib/authz.server";
 import type { AppRole } from "~/lib/authz.server";
-import { getOwnerSubject } from "~/lib/data.server";
+import { getActiveSubject } from "~/lib/data.server";
 import { getDb, withTenantDb } from "~/lib/db.server";
 import type { TenantCtx } from "~/lib/db.server";
 import { listAssignedSubjectIds } from "~/lib/assignments.server";
@@ -56,7 +56,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (!docId) {
     // No docId — show a list of recent documents instead of erroring
     const db = getDb();
-    const subject = await getOwnerSubject(user.tenantId!);
+    const subject = await getActiveSubject(request, user.tenantId!);
     const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
     const assignedIds =
       user.role === "practitioner"

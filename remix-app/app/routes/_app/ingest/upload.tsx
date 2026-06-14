@@ -24,7 +24,7 @@ import type { Route } from "./+types/upload";
 import { requireUser } from "~/lib/authz.server";
 import { requireRole } from "~/lib/authz.server";
 import { assertSubjectAccess } from "~/lib/authz.server";
-import { getOwnerSubject } from "~/lib/data.server";
+import { getActiveSubject } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { checkConsent } from "~/lib/consent.server";
@@ -66,8 +66,8 @@ export async function action({ request }: Route.ActionArgs) {
   const { user } = await requireUser(request);
   requireRole(user, ["owner", "practitioner"]);
 
-  // Resolve subject from tenant
-  const subject = await getOwnerSubject(user.tenantId!);
+  // Resolve active subject (cookie-aware, falls back to owner)
+  const subject = await getActiveSubject(request, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
   const assignedIds =
     user.role === "practitioner"

@@ -14,7 +14,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Route } from "./+types/detail";
 import { requireUser, assertSubjectAccess } from "~/lib/authz.server";
-import { getOwnerSubject, getReport } from "~/lib/data.server";
+import { getActiveSubject, getReport } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { CATEGORY_INFO } from "~/types/metrics";
@@ -50,9 +50,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const reportId = params.reportId;
   if (!reportId) throw new Response("Not found", { status: 404 });
 
-  // getOwnerSubject bootstraps ctx.subjectId for the single-subject pilot.
+  // getActiveSubject bootstraps ctx.subjectId (cookie-aware, falls back to owner).
   // Needed so withTenantDb can set app.subject_id GUC before the reports SELECT.
-  const subject = await getOwnerSubject(user.tenantId!);
+  const subject = await getActiveSubject(request, user.tenantId!);
   const ctx: TenantCtx = { userId: user.id, tenantId: user.tenantId!, subjectId: subject.id };
 
   // CR-01: tenant-scope the query itself (defense-in-depth) — cross-tenant id → null → 404,

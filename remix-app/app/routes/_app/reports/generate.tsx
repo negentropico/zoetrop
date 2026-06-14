@@ -3,7 +3,7 @@
  *
  * Security:
  *   T-06-EOP: requireRole(['owner','practitioner']) — client role → 403
- *   T-06-INPUT: validate subjectId via getOwnerSubject (resolves from tenant, not raw form value)
+ *   T-06-INPUT: validate subjectId via getActiveSubject (cookie-aware; resolves from tenant, not raw form value)
  *   T-06-IDOR/D-18: assertSubjectAccess guards the generate action
  *
  * D-13: NO LLM in this path.
@@ -18,7 +18,7 @@ import {
   requireRole,
   assertSubjectAccess,
 } from "~/lib/authz.server";
-import { getOwnerSubject } from "~/lib/data.server";
+import { getActiveSubject } from "~/lib/data.server";
 import type { TenantCtx } from "~/lib/data.server";
 import { listAssignedSubjectIds } from "~/lib/assignments.server";
 import { generateReport } from "~/lib/report-generator.server";
@@ -42,8 +42,8 @@ export async function action({ request }: Route.ActionArgs) {
   const { user } = await requireUser(request);
   requireRole(user, ["owner", "practitioner"]);
 
-  // T-06-INPUT: Resolve subject via tenant (not trusting raw form subjectId)
-  const subject = await getOwnerSubject(user.tenantId!);
+  // T-06-INPUT: Resolve active subject (cookie-aware, falls back to owner — not trusting raw form subjectId)
+  const subject = await getActiveSubject(request, user.tenantId!);
 
   // T-06-IDOR/D-18: Cross-tenant check — 403 for tenant mismatch
   // ctx constructed before assertSubjectAccess so listAssignedSubjectIds can run
@@ -94,7 +94,7 @@ export default function GenerateReport() {
             >
               Subject
             </label>
-            {/* Subject is resolved from tenant via getOwnerSubject — no user input needed */}
+            {/* Subject is resolved via getActiveSubject (cookie-aware) — no user input needed */}
             <div
               id="subject-label"
               style={{
