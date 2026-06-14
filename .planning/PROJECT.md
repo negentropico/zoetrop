@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Zoetrop is a confidence-graded functional-health **protocol-decision engine**. Today it is an n=1 personal instrument that consolidates WHOOP biometrics, blood panels, DEXA body-comp, and genetic variants into evidence-weighted protocol decisions (graded K1–K4 by confidence). The direction is to grow it into a multi-tenant **operations platform** for functional-health practitioners (coaches/nutritionists/trainers) who run client practices on top of that engine.
+Zoetrop is a confidence-graded functional-health **protocol-decision engine**. As of **v1.0 (M1 Foundations)** it is a single-operator platform *foundation* — auth + tenant/subject isolation (RLS), a live Neon data layer, and a lab-ingest → grounded-review → confidence-graded (K1–K4) lab→protocol report pipeline — running on the owner's own data (n=1), consolidating WHOOP biometrics, blood panels, DEXA body-comp, and genetic variants. The direction (**v1.1+ M1 Operations**) is to invert it into a multi-tenant **operations platform** for functional-health practitioners (coaches/nutritionists/trainers) who run client practices on top of that engine.
 
 ## Core Value
 
@@ -21,19 +21,29 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 - ✓ WHOOP JSON + Obsidian-vault import parsers (parse + preview only) — existing (M0)
 - ✓ Remix (React Router 7) + Neon/Drizzle schema (8 tables) + Netlify CI/CD, TS strict — existing (M0)
 
+<!-- v1.0 M1 Foundations — shipped 2026-06-14 (27/29 requirements). Locked. -->
+
+- ✓ Identity + auth with owner/practitioner/client roles — Better-Auth sign-in + per-invite role-scoped tokens + account surface/`/settings` (AUTH-01/02) — v1.0 (P3/3.1)
+- ✓ Tenant + subject scoping on all data tables, isolated via Postgres RLS (host-portable GUC; NOBYPASSRLS `app_user`; `withTenantDb` SET LOCAL + cross-tenant isolation tests) + practitioner→subject assignments + immutable auth/access audit log (TEN-01/02/03/04, AUTH-03/04) — v1.0 (P3/P7)
+- ✓ Live Neon data layer at runtime (no static-TS data; owner M0 data migrated; PHI out of the bundle; Drizzle migrations baseline) (DATA-01..05) — v1.0 (P1/P4)
+- ✓ Engine promoted to first-class schema: pure `engine.ts` + `geneticVariants`/`variantProtocolMap` with non-null K1–K4 evidence tier (ENG-01/02/03) — v1.0 (P6)
+- ✓ Lab-ingest pipeline: upload → async LLM parse → grounding/range validation → human per-field review → only-approved metrics, consent at intake (LAB-01..06) — v1.0 (P5)
+- ✓ Confidence-graded lab→protocol report generation, deterministic, with inline K + K4 disclaimer (RPT-01/02/03) — v1.0 (P6)
+- ✓ Engine test harness (Vitest: status classification, injectable-`now` cessation math, Pearson) (COMP-01) — v1.0 (P1)
+- ✓ Zoetrop design system adopted across all screens (UI-01) — v1.0 (P4.1)
+
 ### Active
 
-<!-- M1: single practitioner, multi-client. The engine-first proving ground. Hypotheses until shipped. -->
+<!-- v1.1 — M1 Operations: a practitioner runs a real client. Formalized via /gsd:new-milestone (OPS-* family). -->
 
-- [x] Identity + auth layer with roles (owner / practitioner / client) — *Phase 3 ✓: Better-Auth email/password sign-in + invite-only `beforeSignUp` gate + `role` additional field (`input:false`); authenticated layout gates all app routes (AUTH-01/AUTH-02). **Phase 3.1 ✓:** account surface (AccountMenu + logout UI + `/settings` hub), per-invite single-use role-scoped tokens (hash-at-rest; generate/list/revoke; atomic fail-closed redemption on `/login`) replacing the shared `OWNER_INVITE_TOKEN`, and an enforced owner/practitioner/client authz model (`requireRole`/`can`/`assertSubjectAccess`) that feeds the Phase 7 RLS gate*
-- [ ] Tenant + subject scoping on every data table, isolated via Postgres RLS — *Phase 3 ✓ (scoping): `tenant_id`/`subject_id` NOT NULL + composite index on all 8 tables, owner backfilled in live Neon (TEN-01); RLS enable+policies + SET LOCAL isolation deferred to Phase 7*
-- [ ] Per-client (per-subject) protocol version lineage (P0–P6 becomes per-client; 4-week iteration = new version) — *Phase 3 ✓ (schema): `UNIQUE(tenant_id, subject_id, version)` on `protocol_versions`, old global unique dropped (TEN-04); per-client lineage behavior lands with the data layer (Phase 4+)*
-- [ ] Promote the engine to first-class schema: `geneticVariants` + `variantProtocolMap` with `confidence` (K1–K4) + evidence/citation field
-- [ ] Lab-ingest pipeline: upload panel → LLM-assisted parse → **human review** → structured `metrics`
-- [ ] Confidence-graded lab→protocol report generation (the proof slice)
-- [x] Wire the app to Neon at runtime (replace the static-TypeScript data layer; commit a Drizzle migrations baseline) — *Phase 1 ✓: migrations baseline committed (DATA-03) + schema applied to Neon. **Phase 4 ✓ (2026-06-10):** all 13 `_app` loaders read live Neon via tenant-scoped `data.server.ts`; owner M0 data seeded (DATA-02); PHI removed from TS source + client bundle, build-artifact-verified (DATA-04); sync vestiges + `as any` casts retired (DATA-05); CI lint gate blocks `*-data.ts` imports from routes (DATA-01); verification passed 4/4*
-- [ ] Test harness (Vitest) covering the engine (status classification, cessation phase math, Pearson) and the ingest parsers — *Phase 1 ✓: engine harness done (COMP-01, 39 tests); ingest-parser tests deferred to Phase 5*
-- [ ] PHI security posture: encryption at rest/in transit, RBAC, audit trail, consent capture at intake — *full hardening + BAAs deferred to Phase 7 (pre-client gate); single-user pilot uses standard-tier infra (2026-06-08 re-scope)*
+The single-owner foundation (v1.0) is shipped. v1.1 inverts it to a practitioner-operated product — see ROADMAP.md "v1.1 — M1 Operations (Planned)" and define the OPS-\* requirements via `/gsd:new-milestone`:
+
+- [ ] **OPS** — subject lifecycle (creation/management; invite→subject linkage; selected-subject context replacing hardwired `getOwnerSubject` across all PHI surfaces)
+- [ ] **OPS** — onboard-a-client data paths (per-subject genotype entry, manual metric entry, intake)
+- [ ] **OPS** — per-client protocol authoring + the 4-week cadence loop
+- [ ] **OPS** — instrument continuity (WHOOP import persists subject-scoped metrics)
+- [ ] **OPS** — M1 proof slice: one coach runs one real client end-to-end
+- [ ] **Compliance Envelope & Host Gate** (carried from v1.0 Phase 8): Vercel HIPAA add-on + BAAs, LLM-provider BAA, host cost/BAA comparison + possible migration, pgAudit + PHI SELECT-logging (COMP-02/03) — the gate before the first external client's PHI
 
 ### Out of Scope
 
@@ -49,7 +59,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 ## Context
 
 - **Brownfield.** M0 instrument shipped; Astro→Remix migration complete (old app in `.archive/astro/`, gitignored). Full codebase analysis in `.planning/codebase/`.
-- **Current-state gaps to resolve early (from `.planning/codebase/CONCERNS.md`):** the app reads entirely from static TS modules — `db.server.ts` is wired but never called at runtime; import routes parse but never persist; no `migrations/` directory; zero tests; all 8 tables are single-subject (no `userId`/`tenantId`/`subjectId`); vestigial `syncStatus`/`syncVersion` columns; pervasive `subcategory: ... as any` casts; genetics/labs live in seed data, not first-class tables.
+- **Current-state gaps (captured at M1 start; ALL RESOLVED in v1.0):** static-TS data layer → live Neon (P4); `migrations/` baseline committed (P1); engine + boundary tests (P1/P6); tenant/subject scoping on all tables + RLS (P3/P7); `syncStatus`/`syncVersion` + `as any` casts removed (P4); genetics/labs promoted to first-class tables (P5/P6). Original source: `.planning/codebase/CONCERNS.md`.
 - **Direction & constraint docs:** `docs/PLATFORM.md` (product brief + M0→M3 roadmap), `docs/PRINCIPLES.md` (engineering constraints extracted from the retired spec-kit constitution), `docs/NAMING.md` (codename rationale).
 - **Flagship:** commercialized via HIGHER (Tara Garrison) as the first M1 tenant; diagnostic-pilot entry pattern. Founder lineage: Basis (physiological signal → behavior change, →Intel).
 
@@ -67,13 +77,14 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Engine-first inversion: M1 before M2/M3 | the hard confidence-graded decision engine is the moat — ship it before delivery surfaces | — Pending |
+| Engine-first inversion: M1 before M2/M3 | the hard confidence-graded decision engine is the moat — ship it before delivery surfaces | ✓ Good — v1.0 M1 Foundations shipped the engine + platform foundation (27/29 reqs, lab→report E2E) |
 | Server-authoritative Postgres (drop local-first) | PHI + multi-tenancy can't live in the browser | — Pending |
 | Retire spec-kit, adopt GSD | spec-kit constitution went stale (Astro-era); GSD drives phased execution | — Pending |
 | `Zoetrop` internal codename, public brand deferred | functional-health naming space is saturated; ship now, brand later | — Pending |
 | HIGHER as first M1 tenant | real practice as the proving ground; diagnostic-pilot pattern, traction before generalization | — Pending |
 | Tenancy via SET LOCAL `request.jwt.claims` + RLS (not JWK-native) | Phase 1 spike: pg_session_jwt v0.5.0 is available but the JWK-native path needs Neon's Authorize feature; SET LOCAL under a NOBYPASSRLS role is proven, role-agnostic, sufficient for M1 (D-04) | Phase 1 ✓ — drives Phase 3 |
 | Pilot-first: defer PHI hardening to a pre-client gate (Phase 7) | Initial work is single-user pilot on the owner's own data (n=1); HIPAA/BAA obligations attach to *others'* PHI. Build Phases 2–6 on standard-tier infra + the subscription API; add tenant/subject columns in Phase 3 so the RLS retrofit is non-breaking | 2026-06-08 — re-scoped Phase 2 → "Vercel Cutover + Pilot Deploy Baseline", decoupled the gate from Phases 3/5, added Phase 7 |
+| Close v1.0 as **M1 Foundations**; open v1.1 **M1 Operations** | the foundation (auth/tenancy/live data/engine/lab/reports) is verified-complete on n=1, but it's still a single-owner instrument — the next slice (subjects become real; a practitioner runs a real client end-to-end) needs a fresh **OPS-\*** requirement family + a Core-Value recheck the milestone boundary forces. Phase 8 (compliance envelope & host gate) carries into v1.1 unchanged as its final gate — coherent now because it can only fire once a real client can exist | 2026-06-14 — v1.0 archived (27/29 reqs; COMP-02/03 deferred); v1.1 to be defined via `/gsd:new-milestone` |
 
 ## Evolution
 
@@ -93,6 +104,6 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-12 after Phase 6 (Engine Promotion + Confidence-Graded Reports) complete — 5/5 plans, verification 5/5. Pure `engine.ts` decision module (ESLint + import-purity-test enforced); genetics/rule corpus promoted to first-class Neon tables with non-null evidence-tier K (30 variant + 22 metric rules, owner-authored from PDFs, PHI-scrubbed); deterministic `generateReport` (no LLM) writing frozen tenant/subject-scoped report snapshots; `/reports` + `/reports/generate` (role-gated) + `/reports/:reportId` (assertSubjectAccess) with inline K body + K4 disclaimer. ENG-01/02/03 + RPT-01/02/03 satisfied. Build + 260 tests green. Next incomplete phase: Phase 7 (PHI Compliance Hardening — Pre-Client Gate). Carry-forward: the `assertSubjectAccess` coverage gap from the Phase 4 CR-01 note now has callers on the reports path (06-05); broader loader coverage + RLS is the Phase 7 hardening scope.*
+*Last updated: 2026-06-14 after **v1.0 — M1 Foundations** milestone complete (full review). 9 phases / 50 plans / 116 tasks; 27/29 requirements satisfied (COMP-02/03 deferred to the v1.1 compliance gate). Shipped: auth + roles, tenant/subject RLS isolation, live Neon data layer, lab-ingest→grounded-review→approve pipeline, pure engine + first-class genetics/rule corpus, and deterministic confidence-graded reports. Gates green (typecheck, vitest 296p, build no .server leaks); integration 5/5 flows wired; prod live at zoetrop.vercel.app. Archived to `milestones/v1.0-*`. Next: v1.1 — M1 Operations (a practitioner runs a real client), via `/gsd:new-milestone`.*
 
-*Prior: Phase 5 (Lab Ingest Pipeline) complete 2026-06-11 — upload→LLM-parse→grounding-validate→human-review→commit state machine, owner E2E UAT passed.*
+*Prior: Phase 6 complete 2026-06-12 (pure `engine.ts`, first-class corpus, deterministic `generateReport`). Phase 5 complete 2026-06-11 (lab-ingest state machine, owner E2E UAT passed).*

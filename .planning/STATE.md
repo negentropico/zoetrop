@@ -1,42 +1,37 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 07 complete (8/8) — ready to discuss Phase 08
-last_updated: 2026-06-12T21:52:55.280Z
-last_activity: 2026-06-12 -- Phase 07 execution started
+milestone_name: M1 Foundations
+status: Awaiting next milestone
+stopped_at: "v1.0 — M1 Foundations milestone complete + archived (2026-06-14). 9 phases / 50 plans / 116 tasks; 27/29 reqs (COMP-02/03 deferred to the v1.1 compliance gate). Archived to .planning/milestones/v1.0-*; tag v1.0; PROJECT.md evolved; REQUIREMENTS.md removed (fresh for v1.1). main ahead of origin (unpushed). Next: define v1.1 — M1 Operations via /gsd:new-milestone."
+last_updated: "2026-06-14T07:57:57.658Z"
+last_activity: 2026-06-14 — Milestone v1.0 completed and archived
 progress:
   total_phases: 10
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 50
   completed_plans: 50
-  percent: 80
+  percent: 90
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-07)
+See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** Phase 08 — compliance envelope host gate
+**Current focus:** v1.1 — M1 Operations (next milestone — define via `/gsd:new-milestone`)
 
-> Note: Phases 1–7 are complete (8/8, including out-of-sequence 3.1 and 4.1). Phase 2 was re-scoped (pilot-first, 2026-06-08) to "Vercel Cutover + Pilot Deploy Baseline" and closed: the app is **live at https://zoetrop.vercel.app** (Vercel project `zoetrop` on team negentropico, standard Pro — no HIPAA add-on) against the existing Neon project `orange-paper-97068012` (8 M0 tables, connectivity confirmed). PHI/BAA/HIPAA/RLS hardening landed in **Phase 7** (complete 2026-06-12). **The next incomplete phase is Phase 8 (Compliance Envelope & Host Gate)** — host cost/BAA comparison + possible migration + pgAudit verification.
-> ✓ 04.1-09 grid-blowout gap-closure complete + **browser-verified** (16/16 routes overflow-free; R3 by concurrent session; 04.1-HUMAN-UAT recorded).
+> ✅ **v1.0 — M1 Foundations shipped 2026-06-14.** 9 phases / 50 plans / 116 tasks; 27/29 requirements satisfied (COMP-02/03 deferred to the v1.1 compliance gate). Live at **https://zoetrop.vercel.app** (Vercel `zoetrop`/negentropico, standard Pro) on Neon `orange-paper-97068012`. Archived to `.planning/milestones/v1.0-*`; audit at `milestones/v1.0-MILESTONE-AUDIT.md`; tag `v1.0`. Gates green; integration 5/5 flows; prod healthy.
+> **Next:** v1.1 — M1 Operations ("a practitioner runs a real client"): subject lifecycle → onboard-a-client data → per-client protocol authoring + 4-week cadence → WHOOP persist → E2E proof slice → compliance gate (carried Phase 8). See ROADMAP.md.
 
 ## Current Position
 
-Phase: 08
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-06-12
-
-Progress: [████████░░] 78%
-
-> ✓ Phase 6 (Engine Promotion + Confidence-Graded Reports) complete 2026-06-12 — 5/5 plans, verification 5/5; pure engine.ts, corpus on Neon (30 variant + 22 metric rules, non-null K), deterministic report generator with inline K + K4 disclaimer.
-> ✓ Phase 7 (PHI Compliance Hardening — Pre-Client Gate) complete 2026-06-12 — human UAT 3/3 (verified live via Chrome + Neon), verification passed; design-r35 round-3/4/5 adoption merged to main. Next incomplete phase is **Phase 8 (Compliance Envelope & Host Gate)**.
+Phase: Milestone v1.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-14 — Milestone v1.0 completed and archived
 
 ## Performance Metrics
 
@@ -147,14 +142,25 @@ Recent decisions affecting current work:
 
 ## Deferred Items
 
+Acknowledged and deferred at v1.0 milestone close (2026-06-14); detail in MILESTONES.md "Known deferred items at close":
+
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
+| v1.1 gate | COMP-02/03 — compliance envelope & host gate (BAAs, host cost/BAA, pgAudit/SELECT-logging) | Carried to v1.1 (final phase) | v1.0 close |
+| v1.1 UAT | Phase 03.1 invite-redemption E2E (private window) + client-role 403 (real client) | Carried to v1.1 (get real traffic) | v1.0 close |
+| tech-debt | Phase-7 review warnings WR-01/02/03 + CR-01 (2 are security: open-redirect, BYPASSRLS pdf read) | Fold into v1.1 compliance gate / code-review 7 --fix | v1.0 close |
+| nyquist | Partial/missing VALIDATION.md (phases 02/03/04.1/05/03.1/07) | Discovery-only; optional retro-fill | v1.0 close |
+| quick-tasks | 7 completed quick tasks lack a status field (tracking noise, work done) | No action — done | v1.0 close |
 | M2 | Client-facing branded app | Deferred | M1 scope definition |
 | M2+ | Training / Nutrition / Modalities delivery surfaces | Deferred | M1 scope definition |
 | M3 | Multi-tenant productization / engine-as-product | Deferred | M1 scope definition |
 
 ## Session Continuity
 
-Last session: 2026-06-13
-Stopped at: M1 build verified-green — typecheck ✓, vitest 296 passed/80 skipped ✓, build ✓ (no .server leaks); prod healthy (/ 200, /login 200, /dashboard 302→/login). Phases 1–7 all closed (Phase 03 UAT now 2/2 — PILOT_BASIC_AUTH item verified; Phase 05 E2E confirmed passed). Phase 8 is the only open phase — a deferred pre-external-client compliance gate, not build work. Repo: main + 003(archive) only. ⚠ .planning/v1.0-MILESTONE-AUDIT.md is STALE (dated 2026-06-08) — regenerate before completing.
-Resume file: .planning/handoffs/2026-06-13-milestone-completion-handoff.md (→ final milestone verify + Phase 8 execute-vs-defer decision + complete milestone)
+Last session: 2026-06-14
+Stopped at: v1.0 — M1 Foundations milestone COMPLETE + archived. ROADMAP/REQUIREMENTS/audit → milestones/v1.0-*; MILESTONES.md curated; PROJECT.md fully evolved; REQUIREMENTS.md removed (fresh for v1.1); tag v1.0 created (local). 27/29 reqs satisfied. main ahead of origin — UNPUSHED (push triggers Vercel prod deploy; owner's call).
+Resume file: .planning/ROADMAP.md (v1.1 — M1 Operations, Planned) + .planning/MILESTONES.md. Next: `/gsd:new-milestone` to define v1.1.
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
