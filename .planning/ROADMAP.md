@@ -52,7 +52,7 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
   - [x] 01-02-PLAN.md — getActiveSubject resolver + zt-subject cookie + /subject-switch route + requireSubjectCtx swap + 7 Pattern-B loader swaps [ONB-03]
   - [x] 01-03-PLAN.md — subjects.server.ts + checklist.server.ts backend services (honest 3-state) [ONB-01, ONB-04]
   - [x] 01-04-PLAN.md — invites.subjectId thread + Better-Auth redemption-hook wiring [ONB-02]
-  - [ ] 01-05-PLAN.md — SubjectChip in app shell + layout loader + cessation null-guard [ONB-03 / D-05]
+  - [x] 01-05-PLAN.md — SubjectChip in app shell + layout loader + cessation null-guard [ONB-03 / D-05]
   - [ ] 01-06-PLAN.md — /clients page: list + checklist strip + create-client intake form + invite generation UI [ONB-01, ONB-02, ONB-04]
   - [ ] 01-07-PLAN.md — SC-5 / 03.1 residual UAT (private-window redemption + client-role 403) + final full-suite gate
 **UI hint**: yes
