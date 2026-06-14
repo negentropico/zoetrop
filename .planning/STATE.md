@@ -126,7 +126,7 @@ Recent decisions affecting current work:
 
 - [Plan 05 / Vercel]: Set OWNER_INVITE_TOKEN in Vercel env (production + preview). ✓ DONE — orchestrator pre-staged OWNER_INVITE_TOKEN to Production + Preview (encrypted; CLI for prod, REST for preview). Do NOT commit the value.
 - [Post-deploy / Vercel — D-05]: Delete PILOT_BASIC_AUTH from Vercel + verify prod 200. ✓ DONE (2026-06-13) — prod serves the new auth code: `/` → 200 (no `www-authenticate` header), `/login` → 200, `/dashboard` → 302 `/login?redirect=…`. PILOT_BASIC_AUTH env var confirmed absent from Vercel (Prod+Preview); basic-auth code already removed (D-05). Todo archived to `.planning/todos/completed/delete-pilot-basic-auth-post-deploy.md`. resolves_phase: 03.
-- [Phase 05-03 / Owner — E2E UAT]: Run the lab-ingest end-to-end on the Vercel preview (https://zoetrop-gtpsezj4x-negentropico.vercel.app or latest 003-remix-foundation preview): sign in as owner → /ingest/upload → consent → upload a real text-extractable lab PDF → confirm <2s + processing→pending_review (~30-60s, waitUntil) → /ingest/review real PDF + located snippet + per-field-only approve/edit/reject (no bulk) → approve a couple (edit one), reject one → verify approved metrics appear with source='lab', rejected writes none, consentLog row + PHI-free auditLog rows exist. Reply "approved" or describe failures. Steps + acceptance criteria in 05-03-SUMMARY.md §Task 4. Blocks phase-05 completion.
+- [Phase 05-03 / Owner — E2E UAT]: Run the lab-ingest end-to-end on the Vercel preview. ✓ DONE — owner ran the full E2E on the 003-remix-foundation preview 2026-06-11; all behaviors confirmed (05-HUMAN-UAT.md status: passed; ROADMAP Phase 5 [x]). Runtime defects surfaced + fixed during UAT (DOMMatrix SSR crash, `.data` 404, multi-page nav, collection-date+dedup migration 0008). Phase 5 closed.
 
 ### Blockers/Concerns
 
@@ -156,5 +156,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-13
-Stopped at: Phase 7 complete (8/8). Post-merge housekeeping done — round3 design stash finalized to the 003 archive branch; merged branches (001, 002, local dev) pruned. Ready to discuss Phase 8.
-Resume file: .planning/ROADMAP.md (Phase 8 — Compliance Envelope & Host Gate)
+Stopped at: M1 build verified-green — typecheck ✓, vitest 296 passed/80 skipped ✓, build ✓ (no .server leaks); prod healthy (/ 200, /login 200, /dashboard 302→/login). Phases 1–7 all closed (Phase 03 UAT now 2/2 — PILOT_BASIC_AUTH item verified; Phase 05 E2E confirmed passed). Phase 8 is the only open phase — a deferred pre-external-client compliance gate, not build work. Repo: main + 003(archive) only. ⚠ .planning/v1.0-MILESTONE-AUDIT.md is STALE (dated 2026-06-08) — regenerate before completing.
+Resume file: .planning/handoffs/2026-06-13-milestone-completion-handoff.md (→ final milestone verify + Phase 8 execute-vs-defer decision + complete milestone)
