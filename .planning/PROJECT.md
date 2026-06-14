@@ -8,6 +8,20 @@ Zoetrop is a confidence-graded functional-health **protocol-decision engine**. A
 
 The confidence-graded protocol-decision engine: turning heterogeneous diagnostics + wearables + genetics into a personalized, evidence-weighted protocol — and re-deriving it as the data changes — while showing the uncertainty honestly (K1 strong … K4 speculative) instead of faking certainty. This is the moat. If everything else fails, this must work.
 
+## Current Milestone: v1.1 — M1 Operations
+
+**Goal:** Invert the single-owner foundation into a practitioner-operated product — one coach onboards and runs one real client end-to-end (intake → customized protocol → tracking → 4-week iteration). This is the true M1 exit.
+
+**Target features (OPS-\*):**
+- Subject lifecycle: creation/management UI, invite→subject linkage, selected-subject context replacing hardwired `getOwnerSubject` across all PHI surfaces
+- Onboard-a-client data paths: per-subject genotype entry (manual + DNA-report upload), manual metric entry, intake (consent + baseline)
+- Per-client protocol authoring + the 4-week cadence loop (write path for the per-subject version lineage, supplement assignment, review-due surfacing)
+- Instrument continuity: WHOOP import persists subject-scoped metrics (dedup, Phase-5 patterns)
+- M1 proof slice: a scripted end-to-end run with a second real/synthetic client
+- Compliance Envelope & Host Gate (carried from v1.0 Phase 8, COMP-02/03) — fires before the first external client's PHI
+
+**Key context:** The v1.0 platform scopes everything to a hardwired owner subject; "subjects become real" is the spine of v1.1. Phase 8 re-homes here coherently — the gate can only fire once a real client can exist. Also carried in: Phase 03.1 residual UAT (invite-redemption private-window + client-403 with a real client) and the 4 Phase-7 review warnings (WR-01/02/03 + CR-01; two are security). Out of scope held firm: M2 client-facing app, delivery-surface modules, CRM/scheduling/billing parity, M3 productization.
+
 ## Requirements
 
 ### Validated

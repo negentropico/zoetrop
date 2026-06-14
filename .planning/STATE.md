@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: M1 Foundations
-status: Awaiting next milestone
-stopped_at: "v1.0 — M1 Foundations milestone complete + archived (2026-06-14). 9 phases / 50 plans / 116 tasks; 27/29 reqs (COMP-02/03 deferred to the v1.1 compliance gate). Archived to .planning/milestones/v1.0-*; tag v1.0; PROJECT.md evolved; REQUIREMENTS.md removed (fresh for v1.1). main ahead of origin (unpushed). Next: define v1.1 — M1 Operations via /gsd:new-milestone."
-last_updated: "2026-06-14T07:57:57.658Z"
-last_activity: 2026-06-14 — Milestone v1.0 completed and archived
+milestone: v1.1
+milestone_name: M1 Operations
+status: planning
+last_updated: "2026-06-14T08:16:10.490Z"
+last_activity: 2026-06-14
 progress:
-  total_phases: 10
-  completed_phases: 9
-  total_plans: 50
-  completed_plans: 50
-  percent: 90
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 
 ## Current Position
 
-Phase: Milestone v1.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-14 — Milestone v1.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-06-14 — Milestone v1.1 started
 
 ## Performance Metrics
 
