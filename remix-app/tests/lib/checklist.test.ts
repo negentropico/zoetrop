@@ -22,7 +22,8 @@
 import { describe, it, expect, beforeAll } from "vitest";
 
 // ── DB availability guard ───────────────────────────────────────────────────
-const hasDb = !!(
+// DB_URL_STUBBED=1 → skip even if DATABASE_URL is set (it's the test-setup stub)
+const hasDb = !process.env["DB_URL_STUBBED"] && !!(
   process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL
 );
 
