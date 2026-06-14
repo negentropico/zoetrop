@@ -11,14 +11,14 @@
 
 - [x] **AUTH-01**: A user can sign in with email + password and stay signed in across sessions
 - [x] **AUTH-02**: Each user has a role (owner / practitioner / client) that gates what they can access
-- [ ] **AUTH-03**: A practitioner can access only the subjects (clients) assigned to them within their tenant
-- [ ] **AUTH-04**: Authentication and access events are written to an immutable audit log
+- [x] **AUTH-03**: A practitioner can access only the subjects (clients) assigned to them within their tenant
+- [x] **AUTH-04**: Authentication and access events are written to an immutable audit log
 
 ### Multi-Tenancy & Isolation
 
 - [x] **TEN-01**: Every health-data table is scoped by `tenantId` + `subjectId`
-- [ ] **TEN-02**: Postgres RLS prevents any query from returning another tenant's or subject's rows (proven by an automated cross-tenant isolation test)
-- [ ] **TEN-03**: Tenant/subject context is set per-request via `SET LOCAL` inside a transaction, with no leakage across pooled connections
+- [x] **TEN-02**: Postgres RLS prevents any query from returning another tenant's or subject's rows (proven by an automated cross-tenant isolation test)
+- [x] **TEN-03**: Tenant/subject context is set per-request via `SET LOCAL` inside a transaction, with no leakage across pooled connections
 - [x] **TEN-04**: Protocol version lineage (P0–P6) is per-subject, unique on `(tenantId, subjectId, version)`
 
 ### Data Layer
@@ -40,7 +40,7 @@
 - [x] **LAB-01**: A practitioner can upload a lab document (PDF) for a subject
 - [x] **LAB-02**: An asynchronous extraction job parses the document into structured candidate metrics (does not block the request)
 - [x] **LAB-03**: Extracted values are validated (grounded to source text + physiological-range sanity + per-field confidence) before reaching review
-- [ ] **LAB-04**: A practitioner reviews extracted fields side-by-side with the source document and can approve, edit, or reject each
+- [x] **LAB-04**: A practitioner reviews extracted fields side-by-side with the source document and can approve, edit, or reject each
 - [x] **LAB-05**: Only practitioner-approved metrics are written to the subject's record, each producing an audit-log entry
 - [x] **LAB-06**: Client consent is captured at intake before any client PHI is stored
 
@@ -106,11 +106,11 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | COMP-03 | Phase 8 — Compliance Envelope & Host Gate (Pre-Client Gate) | Deferred (gate) |
 | AUTH-01 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | AUTH-02 | Phase 3 — Identity + Tenancy Scoping | Complete |
-| AUTH-03 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
-| AUTH-04 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
+| AUTH-03 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Complete (2026-06-12) |
+| AUTH-04 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Complete (2026-06-12) |
 | TEN-01 | Phase 3 — Identity + Tenancy Scoping | Complete |
-| TEN-02 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
-| TEN-03 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Active |
+| TEN-02 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Complete (2026-06-12) |
+| TEN-03 | Phase 7 — PHI Compliance Hardening (RLS + Isolation Engineering) | Complete (2026-06-12) |
 | TEN-04 | Phase 3 — Identity + Tenancy Scoping | Complete |
 | DATA-01 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
 | DATA-02 | Phase 4 — Static-to-DB Data Layer Migration | Complete (2026-06-10) |
@@ -120,7 +120,7 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 | LAB-01 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-02 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-03 | Phase 5 — Lab Ingest Pipeline | Complete |
-| LAB-04 | Phase 5 — Lab Ingest Pipeline | Pending |
+| LAB-04 | Phase 5 — Lab Ingest Pipeline | Complete (E2E UAT 2026-06-11) |
 | LAB-05 | Phase 5 — Lab Ingest Pipeline | Complete |
 | LAB-06 | Phase 5 — Lab Ingest Pipeline | Complete |
 | ENG-01 | Phase 6 — Engine Promotion + Confidence-Graded Reports | Complete |
@@ -132,4 +132,4 @@ Deferred to later milestones (M2/M3). Tracked, not in this roadmap.
 
 ---
 *Requirements defined: 2026-06-07*
-*Last updated: 2026-06-12 — pre-client-gate split: COMP-02/COMP-03 (BAA chain + pgAudit/SELECT-logging) re-mapped to new Phase 8 (Compliance Envelope & Host Gate); TEN-02/TEN-03 + AUTH-03/AUTH-04 stay in re-scoped Phase 7 (RLS + Isolation Engineering, on Neon, executed now). Coverage still 29/29 mapped. Prior: 2026-06-08 — pilot-first re-scope: COMP-02/COMP-03 (BAAs/pgAudit), TEN-02/TEN-03 (RLS/isolation), AUTH-03/AUTH-04 (subject-scoping/audit-log) deferred from Phases 2–3 to Phase 7 (PHI Compliance Hardening — Pre-Client Gate). Phase 3 retains AUTH-01/02 + TEN-01/04 (tenancy scoping). Coverage still 29/29 mapped.*
+*Last updated: 2026-06-14 — milestone-close truth reconciliation: AUTH-03/04 + TEN-02/03 marked Complete (Phase 7 verified passed 2026-06-12) and LAB-04 marked Complete (Phase 5 owner E2E UAT passed 2026-06-11) — they were stale `[ ]`/Active/Pending. 27/29 satisfied; COMP-02/03 remain deferred to the compliance gate (carried into the next milestone). Prior: 2026-06-12 — pre-client-gate split: COMP-02/COMP-03 (BAA chain + pgAudit/SELECT-logging) re-mapped to new Phase 8 (Compliance Envelope & Host Gate); TEN-02/TEN-03 + AUTH-03/AUTH-04 stay in re-scoped Phase 7 (RLS + Isolation Engineering, on Neon, executed now). Coverage still 29/29 mapped. Prior: 2026-06-08 — pilot-first re-scope: COMP-02/COMP-03 (BAAs/pgAudit), TEN-02/TEN-03 (RLS/isolation), AUTH-03/AUTH-04 (subject-scoping/audit-log) deferred from Phases 2–3 to Phase 7 (PHI Compliance Hardening — Pre-Client Gate). Phase 3 retains AUTH-01/02 + TEN-01/04 (tenancy scoping). Coverage still 29/29 mapped.*
