@@ -47,6 +47,9 @@ export default [
     route("reports", "routes/_app/reports/index.tsx"),
     route("reports/generate", "routes/_app/reports/generate.tsx"),
     route("reports/:reportId", "routes/_app/reports/detail.tsx"),
+    // Clients (Phase 1 — practitioner client management, ONB-01/ONB-02/ONB-04)
+    route("clients", "routes/_app/clients/index.tsx"),
+    route("clients/new", "routes/_app/clients/new.tsx"),
     // Settings
     route("settings", "routes/_app/settings/index.tsx"),
     route("settings/invites/:inviteId/revoke", "routes/_app/settings/invites.ts"),
