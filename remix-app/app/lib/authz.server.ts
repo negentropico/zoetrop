@@ -15,7 +15,7 @@
 
 import { redirect } from "react-router";
 import { auth } from "./auth.server";
-import { getOwnerSubject } from "./data.server";
+import { getOwnerSubject, getActiveSubject } from "./data.server";
 import type { TenantCtx } from "./data.server";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ export function assertSubjectAccess(
 //
 // Canonical PHI-read entry point (CR-02 fix, Phase 7 Plan 06).
 //
-// Composes requireUser → getOwnerSubject → assertSubjectAccess in one call.
+// Composes requireUser → getActiveSubject → assertSubjectAccess in one call.
 // All 13 PHI read loaders (dashboard/metrics/insights/protocol) use this
 // helper instead of duplicating the three-line boilerplate.
 //
@@ -131,8 +131,9 @@ export async function requireSubjectCtx(request: Request): Promise<{
 }> {
   // Step 1: authenticate — throws redirect(/login) if no session
   const { user } = await requireUser(request);
-  // Step 2: resolve the owner subject for this tenant — throws 404 if none
-  const subject = await getOwnerSubject(user.tenantId!);
+  // Step 2: resolve the active subject for this tenant — reads zt-subject cookie;
+  //          falls back to owner subject if absent/invalid/cross-tenant (self-healing)
+  const subject = await getActiveSubject(request, user.tenantId!);
   // Step 3: role + tenant gate — Gate 1 throws 403 for client role;
   //          Gate 2 throws 403 for cross-tenant (defense-in-depth)
   assertSubjectAccess(user, subject, user.tenantId!);

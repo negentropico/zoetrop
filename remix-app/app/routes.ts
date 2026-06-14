@@ -51,5 +51,7 @@ export default [
     route("settings", "routes/_app/settings/index.tsx"),
     route("settings/invites/:inviteId/revoke", "routes/_app/settings/invites.ts"),
     route("settings/assignments", "routes/_app/settings/assignments.tsx"),
+    // Subject switch resource route (action-only, Phase 1 — sets zt-subject cookie)
+    route("subject-switch", "routes/_app/subject-switch.ts"),
   ]),
 ] satisfies RouteConfig;
