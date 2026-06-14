@@ -57,10 +57,19 @@ Not new requirements — verification/quality debt inherited from v1.0, to close
 
 ## Traceability
 
-_Filled by the roadmapper when phases are created._
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| OPS-01 | Phase 1 — Client Lifecycle | Pending |
+| OPS-02 | Phase 1 — Client Lifecycle | Pending |
+| OPS-03 | Phase 1 — Client Lifecycle | Pending |
+| OPS-04 | Phase 2 — Onboard-a-Client Data Paths | Pending |
+| OPS-05 | Phase 2 — Onboard-a-Client Data Paths | Pending |
+| OPS-06 | Phase 3 — Protocol Authoring + Cadence | Pending |
+| OPS-07 | Phase 3 — Protocol Authoring + Cadence | Pending |
+| OPS-08 | Phase 4 — Instrument Continuity | Pending |
+| OPS-09 | Phase 5 — M1 Proof Slice UAT | Pending |
+| COMP-02 | Phase 6 — Compliance Envelope & Host Gate | Pending |
+| COMP-03 | Phase 6 — Compliance Envelope & Host Gate | Pending |
 
 ---
-*Requirements defined: 2026-06-14 — v1.1 M1 Operations. OPS-01..09 (new family) + COMP-02/03 (carried from v1.0). True M1 exit: one coach runs one real client end-to-end.*
+*Requirements defined: 2026-06-14 — v1.1 M1 Operations. OPS-01..09 (new family) + COMP-02/03 (carried from v1.0). True M1 exit: one coach runs one real client end-to-end. Traceability filled 2026-06-14 (roadmap creation).*

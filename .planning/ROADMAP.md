@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 — M1 Foundations** — Phases 1–7 + inserted 3.1/4.1 (shipped 2026-06-14) — full detail: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md)
-- 🚧 **v1.1 — M1 Operations** — "a practitioner runs a real client" (planned — formalize via `/gsd:new-milestone`)
+- 🚧 **v1.1 — M1 Operations** — "a practitioner runs a real client" (in progress — Phase 1 next)
 
 > **M1 arc:** v1.0 built the engine-first platform *foundation* on the owner's own data (n=1). v1.1 inverts it from a single-owner instrument to a practitioner-operated product — subjects become real, a coach onboards and runs a real client end-to-end — converging on the true M1 exit, then opens the compliance gate before the first external client's PHI.
 
@@ -26,20 +26,86 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
 
 </details>
 
-### 🚧 v1.1 — M1 Operations (Planned)
+### 🚧 v1.1 — M1 Operations
 
-**Goal:** Invert from a single-owner instrument to a practitioner-operated product — one coach onboards and runs one real client end-to-end (intake → customized protocol → tracking → 4-week iteration). Needs a new **OPS-\*** requirement family. **To be formalized via `/gsd:new-milestone`** (the structural drift analysis + this sequence are the input context).
+- [ ] **Phase 1: Client Lifecycle — Subjects Become Real** — subject creation/management UI; invite→subject linkage; selected-subject context replacing hardwired `getOwnerSubject` across all 13 PHI surfaces
+- [ ] **Phase 2: Onboard-a-Client Data Paths** — per-subject genotype entry (manual + DNA-report upload); manual metric entry; intake consolidating consent + baseline
+- [ ] **Phase 3: Per-Client Protocol Authoring + 4-Week Cadence** — write path for per-subject protocol-version lineage; supplement assignment + change history; review-due surfacing + practitioner monitoring view
+- [ ] **Phase 4: Instrument Continuity (WHOOP Import Persists)** — wire `import/whoop` to write subject-scoped metrics with dedup using Phase-5 ingest patterns
+- [ ] **Phase 5: M1 Proof Slice — End-to-End UAT** — scripted run-through with a second real or synthetic client: invite → intake/consent → labs → genotype → report → protocol v1 → 4-week iteration simulated
+- [ ] **Phase 6: Compliance Envelope & Host Gate** — DB-host cost/BAA comparison (+ possible migration), Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit + PHI SELECT-logging verification, PITR/SSL/network hardening, COMPLIANCE-RUNBOOK.md complete
 
-Intended phase sequence (high-level; new-milestone refines):
+## Phase Details
 
-- [ ] **Phase 1 — Client lifecycle: subjects become real** — subject creation/management UI; invite→subject linkage (close the orphan-client hole); selected-subject context replacing hardwired `getOwnerSubject`, parameterizing all 13 PHI loaders + ingest + reports (assignments/AUTH-03 get real traffic). *OPS-01/02/03*
-- [ ] **Phase 2 — Onboard-a-client data paths** — per-subject genotype entry (manual and/or DNA-report upload through ingest); manual metric entry; intake flow consolidating consent + baseline. *OPS-04/05*
-- [ ] **Phase 3 — Per-client protocol authoring + 4-week cadence** — write path for the per-subject protocol-version lineage; per-client supplement assignment + change history; review-due surfacing + monitoring view. *OPS-06/07*
-- [ ] **Phase 4 — Instrument continuity** — wire `import/whoop` (decide on vault) to write subject-scoped metrics with dedup using the Phase-5 patterns. *OPS-08*
-- [ ] **Phase 5 — M1 proof slice, end-to-end UAT** — scripted run with a second real/synthetic client: invite → intake/consent → labs → genotype → report → protocol v1 → 4-week iteration. *OPS-09*
-- [ ] **Phase 6 — Compliance Envelope & Host Gate** *(carried from v1.0 Phase 8, unchanged)* — before the first external client's PHI: DB-host cost/BAA comparison (+ possible migration), Vercel HIPAA add-on + BAA, LLM-provider HIPAA-Ready BAA, pgAudit + PHI SELECT-logging verification, PITR/SSL/network hardening, COMPLIANCE-RUNBOOK.md complete. **COMP-02/03.** The realignment makes this gate coherent — it can only fire once a real client can exist (after Phase 5).
+### Phase 1: Client Lifecycle — Subjects Become Real
+**Goal**: A practitioner can create, manage, and switch between client subjects, with every PHI surface scoping to the selected subject
+**Depends on**: Nothing (first v1.1 phase; builds on v1.0 foundation)
+**Requirements**: OPS-01, OPS-02, OPS-03
+**Success Criteria** (what must be TRUE):
+  1. A practitioner signs in and sees a client list surface (empty or populated)
+  2. A practitioner can create a new subject record with intake basics and it persists to the DB
+  3. Redeeming a client invite creates or links a `subjects` row — no orphaned client accounts
+  4. A practitioner can switch the active subject and every authenticated route (all 13 PHI loaders + ingest + reports) returns data scoped to the selected subject only
+  5. Cross-subject isolation holds: n≥2 real subjects cannot see each other's PHI (isolation tests extended)
+**Plans**: TBD
+**UI hint**: yes
 
-> Explicitly still out of scope (over-build guard): client-facing app beyond a possible minimal report view (M2), delivery-surface modules, CRM/scheduling/billing parity, multi-coach/productization (M3).
+### Phase 2: Onboard-a-Client Data Paths
+**Goal**: A practitioner can bring a brand-new subject to "report-ready" without touching a seed script
+**Depends on**: Phase 1
+**Requirements**: OPS-04, OPS-05
+**Success Criteria** (what must be TRUE):
+  1. A practitioner can manually enter a metric value for a subject and it appears in that subject's metrics views
+  2. A practitioner can enter genetic variant data for a subject via a manual entry surface
+  3. A practitioner can upload a DNA report through the existing ingest pipeline and the resulting variants are attributed to the correct subject
+  4. After completing intake (consent + baseline data entry), a subject's record has enough data to generate a report without any seed-script intervention
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 3: Per-Client Protocol Authoring + 4-Week Cadence
+**Goal**: The PLATFORM §4 practice loop is executable — a practitioner can author a protocol for a client and track the 4-week iteration cadence
+**Depends on**: Phase 2
+**Requirements**: OPS-06, OPS-07
+**Success Criteria** (what must be TRUE):
+  1. A practitioner can author a new protocol version for a specific subject and save it to that subject's `protocol_versions` lineage
+  2. A practitioner can assign supplements to a client protocol and the assignment is persisted with change history
+  3. The practitioner monitoring view shows which clients are review-due (past their 4-week cycle)
+  4. A practitioner can initiate a "new version per cycle" flow that creates a new protocol version linked to the previous one
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 4: Instrument Continuity (WHOOP Import Persists)
+**Goal**: The owner's WHOOP biometric stream flows again, persisted per-subject into the live data layer
+**Depends on**: Phase 1
+**Requirements**: OPS-08
+**Success Criteria** (what must be TRUE):
+  1. A practitioner can trigger the WHOOP import flow from `import/whoop` and the resulting metrics are written to the DB attributed to the selected subject
+  2. Re-running the same import does not create duplicate metric rows (dedup by specimen/collection-date, using Phase-5 ingest patterns)
+  3. Imported WHOOP metrics appear in the subject's metrics views with `data_source = 'whoop'`
+**Plans**: TBD
+
+### Phase 5: M1 Proof Slice — End-to-End UAT
+**Goal**: The M1 milestone sentence is demonstrably true — a practitioner runs one client end-to-end through the full practice loop
+**Depends on**: Phase 3, Phase 4
+**Requirements**: OPS-09
+**Success Criteria** (what must be TRUE):
+  1. A practitioner can complete the full sequence without any step requiring manual DB intervention: invite → intake/consent → labs uploaded → genotype entered → report generated → protocol v1 authored → 4-week iteration simulated
+  2. The second client's data is fully isolated from the owner-subject's data across all surfaces (cross-subject isolation confirmed at n≥2)
+  3. Phase 03.1 residual UAT is closed: invite-redemption works end-to-end in a private window; client-role 403 fires correctly with a real client account
+  4. All defects surfaced during the scripted run are identified, triaged, and either fixed or explicitly deferred with rationale
+**Plans**: TBD
+
+### Phase 6: Compliance Envelope & Host Gate
+**Goal**: All PHI infrastructure is BAA-covered and audit-logged before any external client's data is written
+**Depends on**: Phase 5
+**Requirements**: COMP-02, COMP-03
+**Success Criteria** (what must be TRUE):
+  1. A DB-host cost/BAA comparison is completed and the host decision is recorded; if migration is required it is executed and verified
+  2. Vercel HIPAA add-on is activated and the Vercel BAA is signed
+  3. The LLM provider (Anthropic) HIPAA-Ready BAA is obtained and on record
+  4. pgAudit is verified active on the chosen host (parameters confirmed: `log_parameter=off`; PHI SELECT-level object logging on all PHI tables confirmed live)
+  5. COMPLIANCE-RUNBOOK.md is complete: all three vendor BAA registers filled, pgAudit status confirmed, PITR/SSL/network hardening documented, WR-02 (open-redirect) and WR-03 (BYPASSRLS pdf read) security items resolved
+**Plans**: TBD
 
 ## Progress
 
@@ -54,8 +120,13 @@ Intended phase sequence (high-level; new-milestone refines):
 | 5. Lab ingest | v1.0 | 3/3 | Complete | 2026-06-11 |
 | 6. Engine + reports | v1.0 | 5/5 | Complete | 2026-06-12 |
 | 7. RLS + isolation | v1.0 | 8/8 | Complete | 2026-06-12 |
-| v1.1 (M1 Operations) | v1.1 | — | Planned | — |
+| **v1.1 — 1. Client lifecycle** | v1.1 | 0/TBD | Not started | — |
+| **v1.1 — 2. Onboard-a-client data** | v1.1 | 0/TBD | Not started | — |
+| **v1.1 — 3. Protocol authoring + cadence** | v1.1 | 0/TBD | Not started | — |
+| **v1.1 — 4. Instrument continuity** | v1.1 | 0/TBD | Not started | — |
+| **v1.1 — 5. M1 proof slice UAT** | v1.1 | 0/TBD | Not started | — |
+| **v1.1 — 6. Compliance envelope & host gate** | v1.1 | 0/TBD | Not started | — |
 
 ## Backlog
 
-_No open backlog items. (999.1 Account & Roles promoted to Phase 3.1 on 2026-06-09.)_
+_No open backlog items._
