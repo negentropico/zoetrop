@@ -43,6 +43,7 @@ interface PendingInvite {
   rawToken: string;
   role: string;
   tenantId: string;
+  subjectId: string | null;  // NEW — from D-01; null for practitioner invites + break-glass
   // true → break-glass bootstrap (no DB invite row to burn or attribute).
   breakGlass: boolean;
 }
@@ -218,6 +219,10 @@ export const auth = betterAuth({
           // AUTH-04: write sign-up / invite-redeemed audit event (best-effort).
           // tenantId comes from the pending invite resolved in beforeSignUp.
           // Break-glass also has a tenantId (OWNER_TENANT_ID), so we can always log.
+          // ONB-02: pending?.subjectId carries the subject this invite was bound to (D-01).
+          // null for practitioner invites and break-glass. No extra table write at redemption
+          // needed in v1.1 — the practitioner operates on subjects directly.
+          // (RESEARCH.md "Correct v1.1 wiring": subject association recorded on invite row.)
           try {
             // Primary tenantId source: the pending invite (set in beforeSignUp).
             // Fallback: the user row (Better-Auth injects tenantId via additionalFields).
@@ -233,6 +238,9 @@ export const auth = betterAuth({
               // pending.role is the role injected in user.create.before; it is the
               // actor's actual role for this sign-up event.
               const role = pending?.role as AppRole | undefined;
+              // ONB-02: pending.subjectId available — subject association logged via invite row.
+              // auth_audit_log.subjectId is null for auth events; subject link lives on the
+              // invite's subject_id column (no extra table write needed for v1.1, D-03).
               await insertAuthAuditLog({ userId: id, action, tenantId, role });
             }
           } catch {
@@ -326,6 +334,7 @@ export const auth = betterAuth({
             rawToken: "",
             role: "owner",
             tenantId: ownerTenantId,
+            subjectId: null,  // NEW — break-glass has no subject binding
             breakGlass: true,
           });
           return;
@@ -335,7 +344,7 @@ export const auth = betterAuth({
         // resolveInviteByToken does the full fail-closed check (unknown / consumed /
         // revoked / expired → null) WITHOUT marking the invite consumed. The burn
         // happens later in user.create.before so a failed signup never wastes it.
-        let invite: { role: string; tenantId: string } | null = null;
+        let invite: { role: string; tenantId: string; subjectId: string | null } | null = null;
         if (typeof token === "string") {
           try {
             invite = await resolveInviteByToken(token);
@@ -354,6 +363,7 @@ export const auth = betterAuth({
           rawToken: token as string,
           role: invite.role,
           tenantId: invite.tenantId,
+          subjectId: invite.subjectId ?? null,  // NEW — thread through from resolveInviteByToken
           breakGlass: false,
         });
       }
