@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: First Client (practitioner-operated)
 status: executing
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-06-14T19:23:25.066Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-06-14T19:30:30.901Z"
 last_activity: 2026-06-14
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 ## Current Position
 
 Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-06-14
 
@@ -60,6 +60,7 @@ v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (
 *Updated after each plan completion*
 | Phase 01 P01 | 25 | 3 tasks | 8 files |
 | Phase 01 P02 | 6 | 3 tasks | 12 files |
+| Phase 01-client-onboarding-practitioner-operated P03 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Carried from v1.0]: Pilot-first PHI hardening: standard-tier infra + subscription API for the v1.1 single real client pilot. Compliance gate deferred to v1.2 (before first *external* client's PHI under a formal arrangement).
 - [Carried from v1.0]: LLM provider BAA (Anthropic) deferred to v1.2 compliance gate. PHI extraction in v1.1 is for the owner acting as practitioner on one pilot client.
 - [Carried from v1.0]: `SET LOCAL` + NOBYPASSRLS `app_user` RLS pattern is the tenancy mechanism (proven in v1.0 Phase 7).
+- [Phase ?]: InferInsertModel<typeof subjects> for CreateSubjectData — enforces enum literals for biologicalSex/programType at compile time
+- [Phase ?]: consentLog has no tenantId column — subjectId-only scope is correct for consent reads in checklist
+- [Phase ?]: Invite lookup uses getDb() inside withTenantDb callback — intentional admin-path mixing; invites not subject-scoped under RLS
 
 ### Pending Todos
 
@@ -128,8 +132,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-14T19:23:25.061Z
-Stopped at: Phase 1 UI-SPEC approved
+Last session: 2026-06-14T19:30:30.897Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

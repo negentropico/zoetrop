@@ -50,7 +50,7 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
 **Plans**: 7 plans (4 waves)
   - [x] 01-01-PLAN.md — Schema delta (subjects intake + invites.subjectId) + [BLOCKING] migration + Wave-0 RED test stubs
   - [x] 01-02-PLAN.md — getActiveSubject resolver + zt-subject cookie + /subject-switch route + requireSubjectCtx swap + 7 Pattern-B loader swaps [ONB-03]
-  - [ ] 01-03-PLAN.md — subjects.server.ts + checklist.server.ts backend services (honest 3-state) [ONB-01, ONB-04]
+  - [x] 01-03-PLAN.md — subjects.server.ts + checklist.server.ts backend services (honest 3-state) [ONB-01, ONB-04]
   - [ ] 01-04-PLAN.md — invites.subjectId thread + Better-Auth redemption-hook wiring [ONB-02]
   - [ ] 01-05-PLAN.md — SubjectChip in app shell + layout loader + cessation null-guard [ONB-03 / D-05]
   - [ ] 01-06-PLAN.md — /clients page: list + checklist strip + create-client intake form + invite generation UI [ONB-01, ONB-02, ONB-04]
@@ -109,7 +109,7 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Client Onboarding | 2/7 | In Progress|  |
+| 1. Client Onboarding | 3/7 | In Progress|  |
 | 2. Data Ingest | 0/TBD | Not started | — |
 | 3. Library / Corpus Curation | 0/TBD | Not started | — |
 | 4. Per-Client Protocol Authoring | 0/TBD | Not started | — |
