@@ -40,3 +40,4 @@ coverage/
 # Local Claude Code tooling + design scratch (not repo content)
 .claude/
 _notes/
+.vercel
