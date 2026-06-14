@@ -17,22 +17,13 @@
 import { getDb } from "./db.server";
 import { subjects } from "../../db/schema";
 import { eq, and, ne } from "drizzle-orm";
+import type { InferInsertModel } from "drizzle-orm";
 
 // ── createSubject ─────────────────────────────────────────────────────────────
 
-export interface CreateSubjectData {
-  id: string;
-  tenantId: string;
-  displayName: string;
-  dob?: Date | null;
-  biologicalSex?: string | null;
-  contactEmail?: string | null;
-  contactPhone?: string | null;
-  goals?: string | null;
-  intakeNotes?: string | null;
-  programType?: string | null;
-  programStartDate?: Date | null;
-}
+// Use Drizzle's inferred insert type so biologicalSex / programType accept only
+// the enum literals the schema declares (Rule 1 — type-exact contract).
+export type CreateSubjectData = InferInsertModel<typeof subjects>;
 
 /**
  * Inserts a new subject row with all intake fields and returns the created row.
