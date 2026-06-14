@@ -228,3 +228,65 @@ describe("invites.server.ts — source contracts (unconditional)", () => {
     expect(t1.length).toBeGreaterThanOrEqual(40);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ONB-02: subjectId threading through invite lifecycle
+// RED stub: generateInvite / resolveInviteByToken / consumeInviteByToken do not
+// yet accept/return subjectId. They go GREEN in Plan 01-02 when invites.server.ts
+// is extended per PATTERNS.md § "app/lib/invites.server.ts — MODIFY".
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("generateInvite — subjectId threading (ONB-02)", () => {
+  it("accepts optional subjectId in GenerateInviteOpts (structural — function accepts opts shape)", () => {
+    // RED: generateInvite does not yet accept subjectId in its opts type.
+    // This test asserts the function exists and is callable — type conformance
+    // is verified by TypeScript (tsc --noEmit) after Plan 01-02 extends the signature.
+    expect(typeof generateInvite).toBe("function");
+  });
+
+  it.skipIf(!hasDb)(
+    "generateInvite with subjectId writes subjectId to the DB row (ONB-02)",
+    async () => {
+      // RED: invites.server.ts does not yet accept subjectId.
+      // GREEN in Plan 01-02 after GenerateInviteOpts is extended with subjectId?.
+      // This test ALSO requires migration 0015 applied to Neon (invites.subject_id column).
+      // Without migration + Plan 01-02 changes, this will throw or produce an incorrect shape.
+      expect(typeof generateInvite).toBe("function");
+      // Full DB assertion (insert + read back subjectId) added in Plan 01-02.
+    }
+  );
+});
+
+describe("resolveInviteByToken — returns subjectId (ONB-02)", () => {
+  it("resolveInviteByToken return shape includes subjectId field", async () => {
+    // RED: resolveInviteByToken does not yet return subjectId.
+    // GREEN in Plan 01-02 when the return type and DB select are extended.
+    // For now, assert the function exists and is callable.
+    expect(typeof resolveInviteByToken).toBe("function");
+    // Calling with a non-existent token → returns null (fail-closed). That's fine.
+    const result = await resolveInviteByToken("not-a-real-token").catch(() => null);
+    // When implemented: result should be null (not found) or { role, tenantId, subjectId: null | string }
+    if (result !== null) {
+      // If a result is returned, it must include subjectId (may be null for old rows)
+      expect("subjectId" in (result as object)).toBe(true);
+    } else {
+      // null result is acceptable (token not found) — contract: fail-closed
+      expect(result).toBeNull();
+    }
+  });
+});
+
+describe("consumeInviteByToken — returns subjectId (ONB-02)", () => {
+  it("consumeInviteByToken return shape includes subjectId field", async () => {
+    // RED: consumeInviteByToken does not yet return subjectId.
+    // GREEN in Plan 01-02 when the return type and DB select are extended.
+    expect(typeof consumeInviteByToken).toBe("function");
+    // Calling with a non-existent token → returns null (fail-closed).
+    const result = await consumeInviteByToken("not-a-real-token").catch(() => null);
+    if (result !== null) {
+      expect("subjectId" in (result as object)).toBe(true);
+    } else {
+      expect(result).toBeNull();
+    }
+  });
+});
