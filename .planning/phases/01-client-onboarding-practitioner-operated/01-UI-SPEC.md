@@ -82,17 +82,18 @@ Project's full type scale (all available; phase uses the subset below):
 | `--text-lg` | 1.375rem | 22px |
 | `--text-xl` | 1.75rem | 28px |
 
-**Phase 1 active subset:**
+**Phase 1 active subset — exactly 4 sizes (28 / 22 / 14 / 11), exactly 2 weights (400 / 600):**
 
 | Role | Token | px | Family | Weight | Line-height | Usage |
 |------|-------|----|--------|--------|-------------|-------|
 | Page heading | `--text-xl` | 28px | `--font-display` (Space Grotesk) | 600 (`--fw-semibold`) | 1.1 (`--leading-snug`) | PageHeader `h1` on `/clients` |
-| Section / card title | `--text-lg` | 22px | `--font-display` | 500 (`--fw-medium`) | 1.18 | Card section headings, form header |
+| Section / card title | `--text-lg` | 22px | `--font-display` | 600 (`--fw-semibold`) | 1.18 | Card section headings, form header |
 | Body / label | `--text-sm` | 14px | `--font-text` (Hanken Grotesk) | 400 (`--fw-regular`) | 1.5 (`--leading-normal`) | Form labels, table cells, checklist items, chip label |
-| Data / meta | `--text-xs` | 12px | `--font-mono` (Space Mono) | 400 | 1.5 | Checklist step abbrev row (`intake✓ gen•`), timestamps, invite token |
-| Eyebrow / cap label | `--text-2xs` | 11px | `--font-mono` | 400 | 1 | Section eyebrows (`.zt-eyebrow` class), table column headers, badge text, chip subline role label |
+| Eyebrow / data / meta | `--text-2xs` | 11px | `--font-mono` (Space Mono) | 400 | 1 | Section eyebrows (`.zt-eyebrow` class), table column headers, badge text, chip subline role label, checklist abbrev row, timestamps, invite token |
 
-**Weights in use this phase: 400 (regular) and 600 (semibold). The 500 (medium) weight appears in card section headings — consistent with the existing `h1–h4` base style.**
+**Weights in use this phase: exactly 2 — 400 (`--fw-regular`) and 600 (`--fw-semibold`). All section/card headings use 600 (semibold); body and meta use 400. No 500 (medium) weight is used in this phase.**
+
+> **Note on the consolidated mono/meta role:** the 11px `--text-2xs` font-mono role now carries every mono data/meta use this phase — eyebrows, column headers, badge text, the checklist abbreviation row (`intake✓ gen·`), timestamps, and the invite token block. Dropping the 12px `--text-xs` size keeps the active subset at exactly 4 declared sizes; the two roles were both mono data/meta and read consistently at 11px.
 
 ---
 
@@ -239,8 +240,8 @@ Clients        [+ Add client]  [right slot]
 - Layout: `Card elevation="sm" padding="none"` containing an inline `<table>` with `.zt-trow` rows
 - Table headers (`.zt-eyebrow` style, font-mono, 11px): NAME / PROGRAM / STATUS / ONBOARDING / ACTIONS
 - Each row columns:
-  1. **NAME**: `Avatar size={24}` + display name (`font-weight: 600, font-size: var(--text-sm)`) + contact email below in `text-muted text-xs`
-  2. **PROGRAM**: program type badge (`Badge tone="neutral" variant="soft"`) + program start date in `font-mono text-xs text-muted`
+  1. **NAME**: `Avatar size={24}` + display name (`font-weight: 600, font-size: var(--text-sm)`) + contact email below in `text-muted text-2xs` (font-mono)
+  2. **PROGRAM**: program type badge (`Badge tone="neutral" variant="soft"`) + program start date in `font-mono text-2xs text-muted`
   3. **STATUS**: invite status (`Badge` — "Pending" neutral/soft, "Active" vital/soft, "Not sent" neutral/outline)
   4. **ONBOARDING**: inline checklist strip (see Checklist Strip spec below)
   5. **ACTIONS**: `Button variant="ghost" size="sm"` "View" → navigates to client detail + switches active subject
@@ -257,7 +258,7 @@ intake✓  gen·  lab∘  whp✓  report∘  protocol∘
 **Empty state (no clients yet):**
 - Center of card area (padding `var(--gap-3xl)` top/bottom)
 - Eyebrow: `NO CLIENTS YET` (`.zt-eyebrow`)
-- Heading: `Add your first client` (font-display, text-lg, fw-500)
+- Heading: `Add your first client` (font-display, text-lg, fw-600)
 - Body: `Create a client record to begin. You can enter data before they redeem their invite.` (text-sm, text-muted, max-width 400px)
 - CTA: `<Button variant="primary" iconLeft={<Plus />}>Add client</Button>`
 
@@ -275,7 +276,7 @@ A vertical checklist showing each step with its 3-state indicator:
 | Protocol v1 | Protocol v1 | `protocol_versions` row exists |
 | Account | Account (invite) | Informational: not-sent / sent / redeemed |
 
-- Each row: `StatusDot size={9}` + label (text-sm) + detail text (text-xs text-muted, e.g. "Approved 2026-06-14" or "2 extractions pending review")
+- Each row: `StatusDot size={9}` + label (text-sm) + detail text (text-2xs text-muted, font-mono, e.g. "Approved 2026-06-14" or "2 extractions pending review")
 - Account row uses `Badge` not `StatusDot` — it is informational, not a gating step
 
 ---
@@ -306,7 +307,7 @@ A vertical checklist showing each step with its 3-state indicator:
 
 **Form actions:**
 - Primary: `<Button variant="primary" type="submit">Create client</Button>`
-- Secondary: `<Button variant="ghost" type="button">Cancel</Button>`
+- Secondary: `<Button variant="ghost" type="button">Discard</Button>`
 - Inline validation: required fields show `color: var(--danger)` error below the field on blur/submit attempt
 
 **Post-submit behavior:** On success, redirect to `/clients` with the new client row visible and active subject cookie left unchanged (remains owner until practitioner explicitly switches).
@@ -322,7 +323,7 @@ Invite generation lives within the `/clients` detail area (or as a card on `/cli
 2. On action success, reveal panel appears inline:
    - Background: `var(--focus-50)`, border `1px solid var(--accent)`, `border-radius: var(--radius-lg)`, padding `var(--gap-lg)`
    - Eyebrow: `INVITE LINK — SHOWN ONCE` (font-mono, 11px, uppercase, `color: var(--accent)`)
-   - Token display: monospaced code block, `font-mono`, `font-size: var(--text-xs)`, `background: var(--surface)`, `border: 1px solid var(--border)`, `border-radius: var(--radius-sm)`, `padding: var(--gap-sm) var(--gap-md)`, full-width, selectable
+   - Token display: monospaced code block, `font-mono`, `font-size: var(--text-2xs)`, `background: var(--surface)`, `border: 1px solid var(--border)`, `border-radius: var(--radius-sm)`, `padding: var(--gap-sm) var(--gap-md)`, full-width, selectable
    - Copy button: `<IconButton>` (Copy lucide icon) right of token, pressing it copies raw token and switches icon to `Check` for 2 seconds
    - Warning copy: `Copy this token now — it will not be shown again. Deliver it to your client out of band (email, message, etc.).`
    - Font: text-sm, color: `var(--text-secondary)`
@@ -330,8 +331,8 @@ Invite generation lives within the `/clients` detail area (or as a card on `/cli
 
 **Invite status row (in client checklist):**
 - Not sent: `Badge tone="neutral" variant="outline"` "No invite" + "Generate invite link" action
-- Sent (pending): `Badge tone="energy" variant="soft"` "Pending" + `font-mono text-xs text-muted` expiry date + "Revoke" ghost button
-- Redeemed: `Badge tone="vital" variant="soft"` "Active" + `font-mono text-xs text-muted` redemption date
+- Sent (pending): `Badge tone="energy" variant="soft"` "Pending" + `font-mono text-2xs text-muted` expiry date + "Revoke" ghost button
+- Redeemed: `Badge tone="vital" variant="soft"` "Active" + `font-mono text-2xs text-muted` redemption date
 
 ---
 
@@ -380,7 +381,7 @@ Invite generation lives within the `/clients` detail area (or as a card on `/cli
 |---------|------|
 | Form heading | `New client` |
 | Submit CTA | `Create client` |
-| Cancel action | `Cancel` |
+| Discard action | `Discard` |
 | Section: Identity | `CLIENT IDENTITY` (eyebrow) |
 | Section: Contact | `CONTACT` (eyebrow) |
 | Section: Program | `PROGRAM` (eyebrow) |
@@ -448,7 +449,7 @@ Invite generation lives within the `/clients` detail area (or as a card on `/cli
 
 | Action | Trigger | Confirmation approach | Confirmation copy |
 |--------|---------|----------------------|-------------------|
-| Revoke invite | `Revoke` ghost button next to pending invite | Inline confirm: button changes to `Confirm revoke` for 3 seconds, then auto-reverts. No modal. | `Confirm revoke` → second click executes; `Cancel` link reverts |
+| Revoke invite | `Revoke` ghost button next to pending invite | Inline confirm: button changes to `Confirm revoke` for 3 seconds, then auto-reverts. No modal. | `Confirm revoke` → second click executes; `Keep invite` link reverts |
 | (No client delete in this phase) | — | — | — |
 
 > **Revoke invite** is the only destructive action in Phase 1. It is recoverable (a new invite can be generated), so a modal confirmation is unnecessary overhead. The two-step inline confirm pattern (matching the app's existing assignment "Unassign" pattern) is appropriate.
@@ -528,6 +529,7 @@ The existing `.zt-grid-*` and `@media (max-width: 760px)` breakpoints in `app.cs
 - [ ] Subject chip: `aria-expanded`, `aria-haspopup="menu"`, `role="menu"`, `role="menuitem"` on dropdown rows
 - [ ] Subject chip: keyboard navigable (Enter/Space opens; arrow keys navigate items; Escape closes)
 - [ ] Checklist strip: each `StatusDot` pair has an `aria-label` describing state in text (not color-only)
+- [ ] `/clients` per-row View button: carries `aria-label="View [client name]"` so it is unambiguous when tabbed to in isolation (visible label stays the single word `View`)
 - [ ] Create-client form: all `<input>` and `<select>` elements have associated `<label htmlFor>` (not placeholder-only)
 - [ ] Invite token: `aria-live="polite"` on copy confirmation area ("Copied!")
 - [ ] Revoke invite: two-step confirm is keyboard accessible; `aria-label="Confirm revoke invite for [name]"`
