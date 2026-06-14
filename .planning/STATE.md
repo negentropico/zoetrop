@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: First Client (practitioner-operated)
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-06-14T13:48:00.000Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-06-14T19:55:59.471Z"
 last_activity: 2026-06-14
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 ## Current Position
 
 Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-06-14
 
@@ -63,6 +63,7 @@ v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (
 | Phase 01-client-onboarding-practitioner-operated P03 | 10min | 2 tasks | 4 files |
 | Phase 01-client-onboarding-practitioner-operated P04 | 4min | 2 tasks | 3 files |
 | Phase 01-client-onboarding-practitioner-operated P05 | 6min | 2 tasks | 7 files |
+| Phase 01 P06 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase ?]: InferInsertModel<typeof subjects> for CreateSubjectData — enforces enum literals for biologicalSex/programType at compile time
 - [Phase ?]: consentLog has no tenantId column — subjectId-only scope is correct for consent reads in checklist
 - [Phase ?]: Invite lookup uses getDb() inside withTenantDb callback — intentional admin-path mixing; invites not subject-scoped under RLS
+- [Phase ?]: Checklist strip inlined as 6 explicit spans for grep-c source-verifiability
+- [Phase ?]: IDOR guard: subjectId re-resolved server-side before generateInvite
 
 ### Pending Todos
 
@@ -134,8 +137,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-14T13:48:00.000Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-06-14T19:55:59.468Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

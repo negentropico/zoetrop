@@ -53,7 +53,7 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
   - [x] 01-03-PLAN.md — subjects.server.ts + checklist.server.ts backend services (honest 3-state) [ONB-01, ONB-04]
   - [x] 01-04-PLAN.md — invites.subjectId thread + Better-Auth redemption-hook wiring [ONB-02]
   - [x] 01-05-PLAN.md — SubjectChip in app shell + layout loader + cessation null-guard [ONB-03 / D-05]
-  - [ ] 01-06-PLAN.md — /clients page: list + checklist strip + create-client intake form + invite generation UI [ONB-01, ONB-02, ONB-04]
+  - [x] 01-06-PLAN.md — /clients page: list + checklist strip + create-client intake form + invite generation UI [ONB-01, ONB-02, ONB-04]
   - [ ] 01-07-PLAN.md — SC-5 / 03.1 residual UAT (private-window redemption + client-role 403) + final full-suite gate
 **UI hint**: yes
 
@@ -109,7 +109,7 @@ Requirements: 27/29 satisfied. Pilot-first re-scope (2026-06-08) deferred PHI co
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Client Onboarding | 4/7 | In Progress|  |
+| 1. Client Onboarding | 6/7 | In Progress|  |
 | 2. Data Ingest | 0/TBD | Not started | — |
 | 3. Library / Corpus Curation | 0/TBD | Not started | — |
 | 4. Per-Client Protocol Authoring | 0/TBD | Not started | — |
