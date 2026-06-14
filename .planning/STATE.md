@@ -4,13 +4,13 @@ milestone: v1.1
 milestone_name: First Client (practitioner-operated)
 status: executing
 stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-06-14T12:00:21.239Z"
-last_activity: 2026-06-14 -- Phase 1 planning complete
+last_updated: "2026-06-14T12:23:02.470Z"
+last_activity: 2026-06-14
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 
 **Core value:** Confidence-graded protocol-decision engine — heterogeneous diagnostics + genetics → personalized, evidence-weighted (K1–K4) protocol with honest uncertainty (not faked certainty)
-**Current focus:** v1.1 — First Client (practitioner-operated) — Phase 1: Client Onboarding (next)
+**Current focus:** Phase 01 — client-onboarding-practitioner-operated
 
 > ✅ **v1.0 — M1 Foundations shipped 2026-06-14.** 9 phases / 50 plans / 116 tasks; 27/29 requirements satisfied (COMP-02/03 deferred to the v1.1 compliance gate). Live at **https://zoetrop.vercel.app** (Vercel `zoetrop`/negentropico, standard Pro) on Neon `orange-paper-97068012`. Archived to `.planning/milestones/v1.0-*`; audit at `milestones/v1.0-MILESTONE-AUDIT.md`; tag `v1.0`. Gates green; integration 5/5 flows; prod healthy.
 > **v1.1 roadmap RECUT 2026-06-14.** 5 phases, 12 requirements (ONB-01..04, ING-01..03, PRO-01, LIB-01..03, PROOF-01, POL-01). Replaces the stale "M1 Operations" (OPS-01..09 + COMP-02/03) plan, now parked as `v1.2-OPERATIONS-PLAN.md`. Spine: client onboarding (Phase 1) → data ingest (Phase 2) → library curation (Phase 3, parallelizable) → per-client protocol authoring (Phase 4) → first-client proof + polish (Phase 5).
 
 ## Current Position
 
-Phase: 1 — Client Onboarding (practitioner-operated)
-Plan: —
+Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-06-14 -- Phase 1 planning complete
+Last activity: 2026-06-14
 
 ```
 v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/5 phases)
@@ -58,6 +58,7 @@ v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (
 **Recent Trend:** No v1.1 data yet
 
 *Updated after each plan completion*
+| Phase 01 P01 | 25 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -126,9 +127,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-14T11:15:07.229Z
+Last session: 2026-06-14T12:23:02.465Z
 Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-client-onboarding-practitioner-operated/01-UI-SPEC.md
+Resume file: None
 
 ## Operator Next Steps
 

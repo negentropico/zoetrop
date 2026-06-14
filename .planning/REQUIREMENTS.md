@@ -10,8 +10,8 @@
 
 ### Client Onboarding (practitioner-operated)
 
-- [ ] **ONB-01**: A practitioner can create a client (subject) record with intake basics
-- [ ] **ONB-02**: A practitioner can invite/provision a client account linked to that subject (reusing the existing per-invite role-scoped tokens)
+- [x] **ONB-01**: A practitioner can create a client (subject) record with intake basics
+- [x] **ONB-02**: A practitioner can invite/provision a client account linked to that subject (reusing the existing per-invite role-scoped tokens)
 - [ ] **ONB-03**: A practitioner can select the active subject (owner or the client) and all PHI surfaces — ingest, report, protocol — scope to it (minimal context for 2 subjects; the at-scale switcher is v1.2)
 - [ ] **ONB-04**: An onboarding surface tracks each client's required inputs (genetics, labs, WHOOP) as a practitioner checklist/status
 
@@ -53,8 +53,8 @@ See `v1.2-OPERATIONS-PLAN.md`: multi-client at scale, client self-service, subje
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ONB-01 | Phase 1 — Client Onboarding | Pending |
-| ONB-02 | Phase 1 — Client Onboarding | Pending |
+| ONB-01 | Phase 1 — Client Onboarding | Complete |
+| ONB-02 | Phase 1 — Client Onboarding | Complete |
 | ONB-03 | Phase 1 — Client Onboarding | Pending |
 | ONB-04 | Phase 1 — Client Onboarding | Pending |
 | ING-01 | Phase 2 — Data Ingest | Pending |
