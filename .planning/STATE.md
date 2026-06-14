@@ -2,9 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: First Client (practitioner-operated)
-status: planning
-last_updated: "2026-06-14"
-last_activity: 2026-06-14
+status: Not started
+stopped_at: Phase 1 context gathered
+last_updated: "2026-06-14T10:38:22.328Z"
+last_activity: 2026-06-14 — v1.1 roadmap recut (5 phases, 12 requirements)
 progress:
   total_phases: 5
   completed_phases: 0
@@ -125,9 +126,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-14
-Stopped at: v1.1 roadmap RECUT — 5 phases, 12 requirements (ONB/ING/PRO/LIB/PROOF/POL). ROADMAP.md, STATE.md, REQUIREMENTS.md (traceability) all written.
-Resume file: .planning/ROADMAP.md (v1.1 Phase 1 — Client Onboarding — next)
+Last session: 2026-06-14T10:38:22.323Z
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-client-onboarding-practitioner-operated/01-CONTEXT.md
 
 ## Operator Next Steps
 
