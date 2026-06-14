@@ -62,12 +62,14 @@ completed: 2026-06-14
 
 ## MIGRATION APPLY STATUS
 
-**Migration 0015_odd_sage.sql — GENERATED, NOT APPLIED.**
+**Migration 0015_odd_sage.sql — GENERATED + APPLIED to Neon (2026-06-14, human-approved).**
 
-The SQL is committed at `remix-app/migrations/0015_odd_sage.sql`. The live Neon apply (`npm run db:migrate`) has NOT been run — this is intentional per the plan's CRITICAL_migration_gate directive. The orchestrator/human must approve and apply before the phase can be fully verified.
+The SQL is committed at `remix-app/migrations/0015_odd_sage.sql`. The executor ran `db:generate` only (apply gated). The orchestrator then applied it after explicit human approval: `npm run db:migrate` → "migrations applied successfully". Verified against Neon via information_schema: `subjects` has all 8 new columns (all nullable), `invites.subject_id` present + nullable FK, `audit_log.subject_id` nullable, enums `biological_sex` + `program_type` present. Existing rows carry NULL for new columns (non-destructive).
+
+Note: 0015 also re-emitted two idempotent drift statements (audit_log DROP NOT NULL — already nullable from hand-written 0013; psa partial-index drop/recreate — identical to hand-written 0014). These are no-ops/identical recreations caused by hand-written migrations not updating Drizzle's meta snapshot; applying 0015 heals that snapshot drift.
 
 ```bash
-# To apply — run from remix-app/ with DATABASE_URL_UNPOOLED set:
+# Applied via (run from remix-app/ with DATABASE_URL_UNPOOLED in .env):
 npm run db:migrate
 ```
 
