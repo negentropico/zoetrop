@@ -87,14 +87,19 @@ milestones not dates on the x-axis.
 4. The **generate** flow shape (scope/range pick → preview → generate), quiet and reassuring.
 5. Mobile (≤760px) behaviour for the detail document.
 
-## Attach (drag these into the chat)
+## Attach (everything is in this folder — upload the whole `round4/` folder, or these files)
 
-- `current-state/app.css` — the **token + class layer** (the foundation; your source of truth for values).
-- From the repo's `docs/design-system/`: `guidelines/color-families.html`, `color-status.html`,
-  `type-data.html`, `components/data/data.card.html` (the brand specimen cards — the visual reference).
-- The current report code for context (optional but useful): `routes/_app/reports/detail.tsx`,
-  `index.tsx`, `components/ui/KGradeBadge.tsx`, `components/ui/RecommendationBlock.tsx`,
-  `components/ui/StatusBadge.tsx`, `types/report.ts`.
+Self-sufficient — the whole `round4/` folder is uploadable as-is. The files that matter:
+
+- `package/current-state/app.css` — the **token + class layer** (your source of truth for every value).
+- `package/current-state/reference/` — the current Reports building blocks to honour: `report.ts` (data
+  shape), `KGradeBadge.tsx` (the K1–K4 colours), `StatusBadge.tsx` (the four status tokens),
+  `RecommendationBlock.tsx` (the unit grouped by body system). See its `README.md`.
+- This file (`PROMPT-PASTE-reports.md`) is the prompt; `BRIEF.md` + `RETURN-SPEC.md` are the goal + return
+  contract. (Ignore the folder's `round-manifest.json` / `DECISIONS.md` / `seed-manifest.json` /
+  `PROMPT-LINE-reports.md` — harness internals; `PROMPT-LINE`'s `../` paths don't resolve here.)
+- *Optional richer brand visuals (not bundled — need the DS stylesheet to render; values already in
+  `app.css`):* the repo's `docs/design-system/guidelines/{color-families,color-status,type-data}.html`.
 
 ## Return (how to send it back — see `RETURN-SPEC.md`)
 
