@@ -1,0 +1,16 @@
+{
+  "extends": "../../remix-app/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@design-roundtrip/*": [".staging-core/src/*"]
+    },
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", ".staging", ".staging-core"]
+}

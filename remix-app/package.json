@@ -16,7 +16,13 @@
     "db:seed-dictionary": "tsx --env-file-if-exists=.env scripts/seed-analyte-dictionary.ts",
     "db:seed-corpus": "tsx --env-file-if-exists=.env scripts/seed-corpus.ts",
     "ds:audit": "bash scripts/ds-audit.sh",
-    "lint": "eslint app/routes app/components"
+    "lint": "eslint app/routes app/components",
+    "design:sync-core": "cd .. && design-bridge/harness/node_modules/.bin/tsx design-bridge/harness/bin/sync-core.ts",
+    "design:typecheck": "cd .. && design-bridge/harness/node_modules/.bin/tsc -p design-bridge/harness/tsconfig.json",
+    "design:init:dry": "cd .. && design-bridge/harness/node_modules/.bin/tsx --tsconfig design-bridge/harness/tsconfig.json design-bridge/harness/bin/init.ts --dry-run",
+    "design:init": "cd .. && design-bridge/harness/node_modules/.bin/tsx --tsconfig design-bridge/harness/tsconfig.json design-bridge/harness/bin/init.ts",
+    "design:seed": "cd .. && design-bridge/harness/node_modules/.bin/tsx --tsconfig design-bridge/harness/tsconfig.json design-bridge/harness/bin/seed.ts",
+    "design:round": "cd .. && design-bridge/harness/node_modules/.bin/tsx --tsconfig design-bridge/harness/tsconfig.json design-bridge/harness/bin/round.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

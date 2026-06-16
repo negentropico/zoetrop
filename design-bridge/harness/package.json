@@ -1,0 +1,13 @@
+{
+  "name": "zoetrop-design-bridge-harness",
+  "private": true,
+  "type": "module",
+  "description": "Local runtime + deps for the zoetrop design-roundtrip harness. zoetrop keeps design-bridge at the repo root (not inside remix-app), so the synced CORE in .staging-core resolves its runtime deps (postcss for token-sync/gate, tar for decode) from THIS node_modules — remix-app/node_modules is not an ancestor of .staging-core. tsx/typescript run + typecheck the bins. node_modules here is gitignored; run `npm install` in this dir once (and after CORE dep bumps).",
+  "devDependencies": {
+    "@types/node": "^22",
+    "postcss": "^8.5.15",
+    "tar": "^7.5.16",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.2"
+  }
+}

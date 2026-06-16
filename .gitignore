@@ -41,3 +41,7 @@ coverage/
 .claude/
 _notes/
 .vercel
+
+# design-bridge harness: synced CORE + return staging are never committed
+design-bridge/harness/.staging-core/
+design-bridge/harness/.staging/

@@ -1,0 +1,14 @@
+{
+  "round": "round4",
+  "roundType": "per-surface-import",
+  "stages": {
+    "seeded": true,
+    "returned": false
+  },
+  "lineType": "refinement",
+  "charter": "ZOETROP-R1",
+  "medium": "screen",
+  "surface": "reports",
+  "syncedSha": "d83b24389f3b53e497e4beec262e2bff31b7e4ae",
+  "seedPath": "design-bridge/harness/rounds/round4/package"
+}

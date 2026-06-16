@@ -1,0 +1,1278 @@
+@import "tailwindcss";
+
+/* ================================================================
+   LAYER 1: DS Token variables — inlined from docs/design-system/tokens/
+   (Path fallback A7: @import of ../../docs/… escapes Vite root;
+    contents are inlined so the Vite build resolves cleanly.)
+   ================================================================ */
+
+/* ---- colors.css ---- */
+:root {
+  /* Brand metric families */
+  --energy: #ffc53d;
+  --vital:  #11c29b;
+  --focus:  #8070ff;
+  --mist:   #dcd1d5;
+  --ink:    #272324;
+
+  /* Energy (amber) ramp */
+  --energy-50:  #fff7e4;
+  --energy-100: #ffedc0;
+  --energy-200: #ffdd88;
+  --energy-300: #ffc53d;
+  --energy-400: #f0ac1f;
+  --energy-500: #c98910;
+  --energy-600: #97640b;
+
+  /* Vital (teal) ramp */
+  --vital-50:  #e0f7f1;
+  --vital-100: #b3ecdf;
+  --vital-200: #6dd9c2;
+  --vital-300: #11c29b;
+  --vital-400: #0aa183;
+  --vital-500: #087d67;
+  --vital-600: #075a4b;
+
+  /* Focus (periwinkle) ramp */
+  --focus-50:  #efecff;
+  --focus-100: #ddd6ff;
+  --focus-200: #b7aaff;
+  --focus-300: #8070ff;
+  --focus-400: #6450f0;
+  --focus-500: #4a37cc;
+  --focus-600: #36289a;
+
+  /* Warm neutral ramp */
+  --paper:   #f5f2f0;
+  --paper-2: #fbf9f8;
+  --n-0:     #ffffff;
+  --n-50:    #f5f2f0;
+  --n-100:   #ece7e6;
+  --n-150:   #e2dbdc;
+  --n-200:   #dcd1d5;
+  --n-300:   #c3b8bb;
+  --n-400:   #9c9295;
+  --n-500:   #756d70;
+  --n-600:   #565052;
+  --n-700:   #3c3839;
+  --n-800:   #2f2b2c;
+  --n-900:   #272324;
+  --n-950:   #1b1819;
+
+  /* Semantic: surfaces */
+  --bg:             var(--paper);
+  --surface-inverse: var(--ink);
+
+  /* Semantic: text */
+  --text:           var(--n-900);
+  --text-secondary: var(--n-600);
+  --text-muted:     var(--n-500);
+  --text-faint:     var(--n-400);
+  --text-on-accent: var(--ink);
+  --text-on-focus:  #ffffff;
+  --text-on-ink:    var(--n-50);
+  --text-inverse:   var(--n-0);
+
+  /* Semantic: borders */
+  --border-ink:     var(--ink);
+
+  /* Semantic: accent */
+  --accent:       var(--focus-300);
+  --accent-hover: var(--focus-400);
+  --accent-press: var(--focus-500);
+  --accent-on:    #ffffff;
+
+  /* Status */
+  --success:    var(--vital-400);
+  --warning:    var(--energy-400);
+  --danger:     #e5484d;
+  --danger-bg:  #fdecec;
+  --info:       var(--focus-300);
+
+  /* Canonical status mapping (round 3) — ONE place charts/badges/dots
+     read from; extends the optimal/borderline/deficient/excess status
+     family (--excess / --excess-bg live in Layer 2). */
+  --optimal:       var(--success);
+  --borderline:    var(--warning);
+  --deficient:     var(--danger);
+  --optimal-bg:    var(--vital-50);
+  --borderline-bg: var(--energy-50);
+  --deficient-bg:  var(--danger-bg);
+
+  /* Metric tint backgrounds */
+  --energy-bg: var(--energy-50);
+  --vital-bg:  var(--vital-50);
+  --focus-bg:  var(--focus-50);
+}
+
+/* ---- typography.css ---- */
+:root {
+  /* Font families declared as strings here; @theme inline uses these strings
+     directly (A1 fix: avoids recursive var(--font-display: var(--font-display))) */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-text:    'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Weights */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Type scale */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.375rem;
+  --text-xl:   1.75rem;
+  --text-2xl:  2.25rem;
+  --text-3xl:  3rem;
+  --text-4xl:  4rem;
+  --text-5xl:  5.5rem;
+
+  /* Line heights */
+  --leading-tight:   1.04;
+  --leading-snug:    1.18;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.03em;
+  --tracking-tight:   -0.015em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.04em;
+  --tracking-caps:    0.12em;
+
+  /* Numeric / data display */
+  --font-feature-tnum: 'tnum' 1, 'ss01' 1;
+}
+
+/* ---- spacing.css ---- */
+:root {
+  /* Spacing (Fibonacci-derived) */
+  --space-0: 0;
+  --space-1: 0.125rem;
+  --space-2: 0.25rem;
+  --space-3: 0.5rem;
+  --space-4: 0.8125rem;
+  --space-5: 1.3125rem;
+  --space-6: 2.125rem;
+  --space-7: 3.4375rem;
+  --space-8: 5.5625rem;
+
+  /* Everyday gap aliases */
+  --gap-xs:  0.25rem;
+  --gap-sm:  0.5rem;
+  --gap-md:  0.75rem;
+  --gap-lg:  1rem;
+  --gap-xl:  1.5rem;
+  --gap-2xl: 2rem;
+  --gap-3xl: 3rem;
+
+  /* Density rhythm (round 3, BAKED: compact is the product default) */
+  --gap-card:    1rem;      /* frame-card padding */
+  --gap-section: 1.5rem;    /* vertical rhythm between page sections */
+  --gap-row:     0.5625rem; /* list/table row vertical padding */
+
+  /* Shadows (warm, ink-tinted) */
+  --shadow-xs: 0 1px 2px rgba(39, 35, 36, 0.06);
+  --shadow-sm: 0 1px 3px rgba(39, 35, 36, 0.08), 0 1px 2px rgba(39, 35, 36, 0.04);
+  --shadow-md: 0 4px 12px rgba(39, 35, 36, 0.08), 0 2px 4px rgba(39, 35, 36, 0.05);
+  --shadow-lg: 0 12px 28px rgba(39, 35, 36, 0.10), 0 4px 8px rgba(39, 35, 36, 0.05);
+  --shadow-xl: 0 24px 48px rgba(39, 35, 36, 0.14), 0 8px 16px rgba(39, 35, 36, 0.06);
+  --shadow-ring: 0 0 0 4px rgba(128, 112, 255, 0.18);
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-frame:  cubic-bezier(0.83, 0, 0.17, 1);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   320ms;
+  --dur-ring:   1600ms; /* round-3 owner pick: slower, calmer sweep (was 900ms) */
+
+  /* Layout */
+  --container-sm: 480px;
+  --container-md: 768px;
+  --container-lg: 1080px;
+  --container-xl: 1280px;
+}
+
+/* ================================================================
+   LAYER 2: Additions not in DS token files
+   (excess token, round1 reduced radii, semantic aliases)
+   ================================================================ */
+:root {
+  /* Excess status (D-06: deep bronze — not in DS token files; from roundtrip :root) */
+  --excess:    #c98910;
+  --excess-bg: #f7edd8;
+
+  /* Round1 reduced radii (D-12: round1 values win over DS readme values) */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   7px;
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-2xl:  18px;
+  --radius-pill: 999px;
+
+  /* Sidebar geometry (consolidated left nav) */
+  --zn-side-w: 264px;
+  --zn-rail-w: 64px;
+  --zn-row-h: 40px;
+  --zn-child-h: 34px;
+  /* Optical-alignment values, named (round-4 px-lint cleanup; values unchanged) */
+  --zn-page-top:  23px;   /* desktop .zn-page top pad → masthead aligns with logo row */
+  --zn-brand-pad: 19.5px; /* expanded sidebar head left pad → mark centers on icon column */
+  --zn-brand-gap: 8.5px;  /* mark → wordmark gap → wordmark aligns with row labels */
+
+  /* Semantic aliases (built on top of neutral ramp) */
+  --surface:        var(--n-0);
+  --surface-2:      var(--paper-2);
+  --surface-sunken: var(--n-100);
+  /* Surface levels for the shell (round 3, surface family):
+     nav rail = level 0 (lowest) < canvas = 1 (paper) < cards = 2 (surface).
+     In light, level 0 borrows the sunken neutral. */
+  --surface-low:    var(--n-100); /* nav rail */
+  --surface-low-2:  var(--n-150); /* hover/active rows on the low surface */
+  --border:         var(--n-150);
+  --border-strong:  var(--n-300);
+}
+
+/* ================================================================
+   LAYER 3: Dark mode variant + @theme inline token bridge
+   ================================================================ */
+
+/* @custom-variant: drives dark: utilities via html[data-theme="dark"] */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* @theme inline: maps DS vars → Tailwind utility namespaces.
+   Using `inline` is MANDATORY so utilities emit var(--token) at
+   runtime (not baked hex) — dark remap cascades automatically.
+   (Pitfall 1: plain @theme would bake hex and break dark mode.) */
+@theme inline {
+  /* Surfaces */
+  --color-paper:          var(--paper);
+  --color-paper-2:        var(--paper-2);
+  --color-surface:        var(--surface);
+  --color-surface-2:      var(--surface-2);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink:            var(--ink);
+  --color-mist:           var(--mist);
+  --color-border:         var(--border);
+  --color-border-strong:  var(--border-strong);
+
+  /* Text semantic aliases */
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--text-muted);
+  --color-text-faint:     var(--text-faint);
+
+  /* Neutral ramp (useful for explicit n-* utilities) */
+  --color-n-0:   var(--n-0);
+  --color-n-50:  var(--n-50);
+  --color-n-100: var(--n-100);
+  --color-n-200: var(--n-200);
+  --color-n-300: var(--n-300);
+  --color-n-400: var(--n-400);
+  --color-n-500: var(--n-500);
+  --color-n-600: var(--n-600);
+  --color-n-700: var(--n-700);
+  --color-n-800: var(--n-800);
+  --color-n-900: var(--n-900);
+  --color-n-950: var(--n-950);
+
+  /* Metric families */
+  --color-energy:     var(--energy);
+  --color-energy-50:  var(--energy-50);
+  --color-energy-100: var(--energy-100);
+  --color-energy-200: var(--energy-200);
+  --color-energy-400: var(--energy-400);
+  --color-energy-500: var(--energy-500);
+
+  --color-vital:     var(--vital);
+  --color-vital-50:  var(--vital-50);
+  --color-vital-100: var(--vital-100);
+  --color-vital-200: var(--vital-200);
+  --color-vital-400: var(--vital-400);
+  --color-vital-500: var(--vital-500);
+
+  --color-focus:     var(--focus);
+  --color-focus-50:  var(--focus-50);
+  --color-focus-100: var(--focus-100);
+  --color-focus-200: var(--focus-200);
+  --color-focus-300: var(--focus-300);
+  --color-focus-400: var(--focus-400);
+  --color-accent:    var(--accent);
+
+  /* Status */
+  --color-success:   var(--success);
+  --color-warning:   var(--warning);
+  --color-danger:    var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-excess:    var(--excess);
+  --color-excess-bg: var(--excess-bg);
+
+  /* Fonts: inlined strings directly (A1 fix: avoids recursive var() — Pitfall 2) */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-text:    'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Type scale (overrides Tailwind defaults; all routes retrofit in Wave 3) */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.375rem;
+  --text-xl:   1.75rem;
+  --text-2xl:  2.25rem;
+  --text-3xl:  3rem;
+
+  /* Radii (round1 values — D-12) */
+  --radius-xs:   var(--radius-xs);
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
+  --radius-2xl:  var(--radius-2xl);
+  --radius-pill: var(--radius-pill);
+
+  /* Shadows */
+  --shadow-xs:   var(--shadow-xs);
+  --shadow-sm:   var(--shadow-sm);
+  --shadow-md:   var(--shadow-md);
+  --shadow-lg:   var(--shadow-lg);
+  --shadow-xl:   var(--shadow-xl);
+  --shadow-ring: var(--shadow-ring);
+
+  /* Easing */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-frame:  cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+/* ================================================================
+   LAYER 4: Warm-dark token remap
+   (from Zoetrop Redesign.html html[data-theme="dark"] block)
+   All brand utilities (bg-paper, text-ink, etc.) cascade to dark
+   values automatically — zero dark: prefixes needed in components.
+   ================================================================ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Neutral ramp — warm dark (never blue-grey) */
+  --paper:   #15110f;
+  --paper-2: #1e1917;
+  --n-0:     #221d1b;
+  --n-50:    #15110f;
+  --n-100:   #2a2421;
+  --n-150:   #332c29;
+  --n-200:   #3e3633;
+  --n-300:   #554b47;
+  --n-400:   #7a6f6a;
+  --n-500:   #9a8e89;
+  --n-600:   #b7aba6;
+  --n-700:   #ccc1bc;
+  --n-800:   #e2d8d4;
+  --n-900:   #f2ece9;
+  --n-950:   #fbf7f5;
+
+  /* Ink flips to warm near-white (active nav/wordmark/chart lines) */
+  --ink:  #f2ece9;
+  --mist: #3e3633;
+
+  /* Family wash darks */
+  --energy-50:  #2c2310;
+  --energy-100: #3c2e13;
+  --vital-50:   #0d2823;
+  --vital-100:  #123a32;
+  --focus-50:   #1f1c36;
+  --focus-100:  #29254b;
+
+  /* Status darks */
+  --danger-bg:  #3a1d1f;
+  --excess:     #e0a92a;
+  --excess-bg:  #362c14;
+
+  /* Shell surface levels (round 3) — keeps the ladder:
+     nav 0 < canvas 1 (paper #15110f) < cards 2 (surface #221d1b) */
+  --surface-low:   #0e0b0a;
+  --surface-low-2: #261f1c;
+
+  /* Round-4 dark sweep finding: the -500 family steps are used as TEXT
+     (chart band tags, diff counts, tier labels) and fall below comfortable
+     contrast on the dark card surface. Remap one step brighter in dark
+     only — same families, variable remap only. */
+  --vital-500:  #11c29b;
+  --energy-500: #f0ac1f;
+
+  /* Shadows (stronger on dark bg) */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+  --shadow-xl: 0 24px 48px rgba(0,0,0,0.55), 0 8px 16px rgba(0,0,0,0.35);
+}
+
+/* ================================================================
+   Scoped theme transitions (Pitfall 4: NOT global * {})
+   Only shell elements transition on theme toggle — prevents visual
+   churn across 200+ DOM elements during dark/light switch.
+   ================================================================ */
+html, body, .zn-side, .zn-topbar, .zt-theme-toggle {
+  transition: background-color var(--dur-base, 200ms) var(--ease-out, ease),
+              border-color var(--dur-base, 200ms) var(--ease-out, ease),
+              color var(--dur-base, 200ms) var(--ease-out, ease);
+}
+
+/* ================================================================
+   Base element defaults
+   ================================================================ */
+html {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  margin: 0;
+  color: var(--text);
+}
+
+/* ================================================================
+   Brand helper classes (from base.css, ported here)
+   ================================================================ */
+.zt-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 400;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.zt-readout {
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+}
+
+.zt-tnum, .zt-data {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================
+   TrendChart line sweep animation (zt-draw CSS keyframe)
+   ================================================================ */
+.zt-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .zt-draw {
+    animation: ztDraw 900ms var(--ease-out, ease) both;
+  }
+}
+
+@keyframes ztDraw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ================================================================
+   Grid helpers (responsive reflow — UI-SPEC §Grid reflow rules)
+   ================================================================ */
+/* Card separation (round 3): stacked frame-card corners need clear air
+   between them — grid gaps step up one notch (xl desktop, lg mobile). */
+.zt-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-xl);
+}
+.zt-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-xl);
+}
+.zt-grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gap-xl);
+}
+
+/* Asymmetric primary/secondary split (e.g. import pages: upload + instructions).
+   Preserves the 1.4/1 ratio on desktop but collapses to a single column at the
+   760px breakpoint so the narrow secondary column can never force a long token
+   (mono path, code filename, fixed-min label) past a mobile viewport (04.1-09 R2). */
+.zt-grid-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--gap-xl);
+  align-items: start;
+}
+
+/* Grid children must be allowed to shrink below their min-content size, so
+   non-shrinkable content (whitespace:nowrap, ellipsis, long tokens) can never
+   push a track past its minmax(0,1fr) share and blow the grid wider than the
+   container. Pairs with the minmax(0,1fr) tracks above (UI-01 regression fix). */
+.zt-grid-2 > *,
+.zt-grid-3 > *,
+.zt-grid-4 > *,
+.zt-grid-split > * { min-width: 0; }
+
+@media (max-width: 980px) {
+  .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .zt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-grid-3, .zt-grid-2, .zt-grid-split { grid-template-columns: minmax(0, 1fr); }
+  .zt-grid-2, .zt-grid-3, .zt-grid-4 { gap: var(--gap-lg); }
+}
+
+/* ================================================================
+   Row hover helpers
+   ================================================================ */
+.zt-trow {
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.zt-trow:hover {
+  background: var(--surface-sunken);
+}
+
+.zt-mrow {
+  transition: background var(--dur-fast) var(--ease-out);
+  border-radius: var(--radius-md);
+}
+.zt-mrow:hover {
+  background: var(--surface-sunken);
+}
+
+/* ================================================================
+   Frame card + page rhythm (round 3)
+   ================================================================ */
+.zt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  padding: var(--gap-card);
+}
+.zt-card-hover {
+  transition: box-shadow var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.zt-card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-strong);
+}
+
+/* Page section rhythm */
+.zt-section { margin-bottom: var(--gap-section); }
+
+/* Rows inside a frame card keep straight corners — no nested
+   radius against the card's own curve. (.zt-frame = the structural
+   hook emitted by the app's Card.tsx — W2a integration shim; same
+   W0 rule, second binding.) */
+.zt-card .zt-mrow,
+.zt-frame .zt-mrow { border-radius: 0; }
+
+/* ---- Stat strip (borderless stats with hairline dividers) -- */
+.zt-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-lg) 0;
+}
+.zt-stat-strip > .zt-stat {
+  min-width: 0;
+  padding: 0 var(--gap-xl);
+  border-left: 1px solid var(--border);
+}
+.zt-stat-strip > .zt-stat:first-child { border-left: none; padding-left: 0; }
+@media (max-width: 760px) {
+  .zt-stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-stat-strip > .zt-stat:nth-child(odd) { border-left: none; padding-left: 0; }
+}
+
+/* ---- Filter pill ------------------------------------------- */
+.zt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.zt-pill:hover { border-color: var(--border-strong); color: var(--ink); }
+.zt-pill.is-active {
+  background: var(--surface-inverse);
+  border-color: var(--surface-inverse);
+  color: var(--text-on-ink);
+}
+
+/* ---- Chart tooltip (Part B — the frame card, baked) --------- */
+.zt-tip-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 13px;
+  box-shadow: var(--shadow-md);
+}
+.zt-tip-frame .zt-tip-date {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.zt-tip-frame .zt-tip-val {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.zt-tip-frame .zt-tip-unit { font-size: var(--text-xs); font-weight: 400; color: var(--text-muted); }
+
+/* ---- Chart empty / loading states (Part B) ------------------ */
+.zt-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  background-image: radial-gradient(var(--n-150) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at center, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 70% at center, #000 30%, transparent 100%);
+}
+.zt-chart-empty .zt-eyebrow { color: var(--text-faint); }
+.zt-chart-empty p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  max-width: 320px;
+}
+
+.zt-chart-skel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100%;
+}
+.zt-chart-skel span {
+  display: block;
+  height: 1px;
+  background: var(--n-150);
+}
+.zt-chart-skel span:nth-child(2) { animation-delay: 120ms; }
+.zt-chart-skel span:nth-child(3) { animation-delay: 240ms; }
+@media (prefers-reduced-motion: no-preference) {
+  .zt-chart-skel span { animation: ztPulse 1.4s var(--ease-in-out) infinite; }
+}
+@keyframes ztPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ---- Drop zone (import / ingest upload) --------------------- */
+.zt-dropzone {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  padding: var(--gap-3xl) var(--gap-xl);
+  text-align: center;
+  color: var(--text-muted);
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.zt-dropzone:hover { border-color: var(--accent); background: var(--surface); }
+
+/* ---- Responsive collapses for round-3 composite grids ------- */
+@media (max-width: 760px) {
+  .zt-hero-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .zt-ranges-grid { grid-template-columns: minmax(0, 1fr) !important; gap: var(--gap-lg) !important; }
+}
+
+/* ---- Inline arrow link -------------------------------------- */
+.zt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+.zt-link:hover { color: var(--accent-hover); }
+
+/* ================================================================
+   Round 4 — ingest review flow, public surfaces
+   ================================================================ */
+
+/* ---- Ink pill button (primary commit action) ----------------- */
+.zt-btn-ink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-inverse);
+  color: var(--text-on-ink);
+  font-family: var(--font-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.zt-btn-ink:hover:not(:disabled) { opacity: 0.88; }
+.zt-btn-ink:active:not(:disabled) { transform: scale(0.97); }
+.zt-btn-ink:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ---- Review split view --------------------------------------- */
+.zt-review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: var(--gap-xl);
+  align-items: start;
+}
+.zt-review-grid > * { min-width: 0; }
+@media (max-width: 1080px) {
+  /* between the breakpoint and full desktop the split is too tight —
+     stack the panels (fields first); ≤760 swaps to the tab toggle */
+  .zt-review-grid { grid-template-columns: minmax(0, 1fr); }
+  .zt-review-grid > :first-child { order: 2; }
+}
+
+/* ---- Document facsimile panel -------------------------------- */
+.zt-docpage {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--gap-lg);
+  overflow-x: auto;
+}
+.zt-docline {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1.9;
+  color: var(--text-secondary);
+  white-space: pre;
+  padding: 0 var(--gap-sm);
+  border-radius: var(--radius-xs);
+}
+.zt-docline.is-hot {
+  background: var(--focus-50);
+  color: var(--text);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* ---- Extraction field rows ----------------------------------- */
+.zt-frow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-lg);
+  padding: var(--gap-row) var(--gap-card);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.zt-frow:hover { background: var(--surface-sunken); }
+.zt-frow.is-selected { background: var(--surface-2); }
+.zt-frow-edge {
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* field decision action (approve / edit / reject) */
+.zt-fact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.zt-fact:hover { color: var(--fact, var(--ink)); background: var(--fact-bg, var(--surface-sunken)); }
+.zt-fact.is-on {
+  color: var(--fact, var(--ink));
+  background: var(--fact-bg, var(--surface-sunken));
+  border-color: color-mix(in srgb, var(--fact, var(--ink)) 35%, transparent);
+}
+
+/* inline value edit */
+.zt-fedit {
+  width: 76px;
+  padding: 5px 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-align: right;
+  outline: none;
+}
+
+/* ---- Consent gate -------------------------------------------- */
+.zt-consent-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  width: 100%;
+  margin-top: var(--gap-lg);
+  padding: var(--gap-md) var(--gap-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-text);
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.zt-consent-row:hover { border-color: var(--border-strong); }
+.zt-consent-row.is-on { border-color: var(--accent); background: var(--focus-50); }
+.zt-consent-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px; flex: 0 0 auto;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--accent-on);
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.zt-consent-row.is-on .zt-consent-box { background: var(--accent); border-color: var(--accent); }
+
+/* ---- Labelled field (login) ----------------------------------- */
+.zt-field { display: flex; flex-direction: column; gap: 7px; }
+.zt-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.zt-field input:focus { border-color: var(--accent); background: var(--surface); box-shadow: none; }
+.zt-field input::placeholder { color: var(--text-faint); }
+
+/* ---- Public surfaces (landing / login) ------------------------ */
+.zt-public {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--n-150) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.zt-pub-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-lg);
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--gap-xl) var(--gap-2xl);
+}
+.zt-pub-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--gap-3xl) var(--gap-2xl) 0;
+}
+.zt-pub-hero { max-width: 640px; padding: var(--gap-2xl) 0 var(--gap-3xl); }
+.zt-pub-h1 {
+  font-size: clamp(2.25rem, 5.5vw, 4rem);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tighter);
+  line-height: var(--leading-tight);
+  margin: 0 0 var(--gap-xl);
+  text-wrap: balance;
+}
+.zt-pub-sub {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0 0 var(--gap-2xl);
+  max-width: 520px;
+  text-wrap: pretty;
+}
+.zt-pub-frame { max-width: 880px; margin: 0 auto; }
+.zt-pub-statrow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-xl);
+  padding: var(--gap-2xl) var(--gap-lg);
+  text-align: center;
+}
+.zt-pub-rows { max-width: 880px; margin: 0 auto; padding-bottom: var(--gap-3xl); }
+.zt-pub-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--gap-xl);
+  align-items: baseline;
+  padding: var(--gap-xl) 0;
+}
+.zt-pub-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: var(--gap-2xl);
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 760px) {
+  .zt-pub-top, .zt-pub-main { padding-left: var(--gap-lg); padding-right: var(--gap-lg); }
+  .zt-pub-hero { padding-top: var(--gap-lg); }
+  .zt-pub-statrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-pub-row { grid-template-columns: 36px minmax(0, 1fr); }
+  .zt-pub-row p { grid-column: 2; }
+}
+
+/* ================================================================
+   Round 5 — import populated states, settings invites, mobile sweep
+   ================================================================ */
+
+/* Settings: account is small, the invites flow needs room — an
+   asymmetric two-column split (account 1 / invites 1.6). */
+.zt-settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: var(--gap-xl);
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .zt-settings-grid { grid-template-columns: minmax(0, 1fr); gap: var(--gap-lg); }
+}
+
+/* Meta stat-strip values (import screens, document viewer):
+   one quiet line on desktop; on mobile the 2-col strip is too
+   narrow for filenames/paths — wrap instead of truncate. */
+.zt-meta-val, .zt-meta-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 760px) {
+  .zt-meta-val, .zt-meta-sub { white-space: normal; overflow: visible; text-overflow: clip; }
+}
+
+/* Mobile sweep fix: the genetics row's fixed 200px gene column
+   starves the impact column at ≤760 — stack the gene id above.
+   The desktop flex-basis lives HERE (not inline) so the mobile
+   override can actually win the cascade (W2b: inline style beat
+   the W0 rule and kept the rows overflowing at 390px). */
+.zt-gene-row > .zt-gene-id { flex: 0 0 200px; }
+@media (max-width: 760px) {
+  .zt-gene-row { flex-wrap: wrap; }
+  .zt-gene-row > .zt-gene-id { flex: 1 1 100%; }
+}
+
+/* ================================================================
+   Reduced motion
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ================================================================
+   Focus-visible ring (brand periwinkle)
+   ================================================================ */
+:where(button, a, input, select, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Text selection */
+::selection {
+  background: var(--focus-100);
+}
+
+/* ================================================================
+   Sidebar shell (zn-*) — consolidated left nav
+   Ported from the left-nav prototype (260610-q56-zn-proto.css
+   lines 65–233 + 238–239) plus mobile-drawer rules and the
+   class-driven desktop content offset (new — not in prototype).
+   z-index map: topbar 40 < mobile backdrop 55 < sidebar 60 <
+   fly-backdrop 70 < flyout 80 < account menu 90.
+   ================================================================ */
+.zn-side {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 60;
+  width: var(--zn-side-w);
+  display: flex; flex-direction: column;
+  background: var(--surface-low); border-right: 1px solid var(--border);
+  transition: width 220ms var(--ease-out, ease);
+}
+.zn-side.is-collapsed { width: var(--zn-rail-w); }
+.zn-side .zn-label { white-space: nowrap; }
+.zn-side.is-collapsed .zn-label { display: none; }
+
+/* Nav chrome (round 3): the rail reads as a LOWER, dimmer surface than
+   the canvas — sunken neutral instead of raised white. Hover/active rows
+   step to --surface-low-2. Interaction model untouched; popovers (flyout,
+   account menu) stay raised (--surface). */
+.zn-side .zn-row:hover,
+.zn-side .zn-row.is-active,
+.zn-side .zn-child:hover,
+.zn-side .zn-child.is-active,
+.zn-side .zn-rail-item:hover,
+.zn-side .zn-rail-item.is-fly,
+.zn-side .zn-rail-item.is-active,
+.zn-side .zn-collapse:hover {
+  background: var(--surface-low-2);
+}
+
+/* header */
+.zn-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 16px 14px 12px;
+}
+.zn-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.zn-wordmark {
+  font-family: var(--font-display); font-weight: 600; font-size: 1.15rem;
+  letter-spacing: -0.02em; color: var(--ink);
+}
+.zn-collapse {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex: 0 0 auto;
+  border: none; background: none; border-radius: var(--radius-sm);
+  color: var(--text-muted); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-collapse:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-side.is-collapsed .zn-head { flex-direction: column; padding: 16px 0 8px; }
+
+/* Logotype alignment (round 3): the spiral mark optically centers on the
+   nav icon column and the wordmark left-aligns with row labels (x = 52px).
+   Expanded state only — the collapsed rail stays centered. */
+.zn-side:not(.is-collapsed) .zn-head { padding-left: var(--zn-brand-pad); }
+.zn-side:not(.is-collapsed) .zn-brand { gap: var(--zn-brand-gap); }
+
+/* nav list */
+.zn-nav {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 6px 12px;
+}
+.zn-side.is-collapsed .zn-nav { padding: 6px 0; gap: 6px; align-items: center; }
+.zn-group { display: flex; flex-direction: column; }
+
+/* tier-1 row */
+.zn-row {
+  position: relative; display: flex; align-items: center; gap: 11px;
+  height: var(--zn-row-h); padding: 0 10px; width: 100%;
+  border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: var(--radius-md);
+  font-family: var(--font-text); font-size: var(--text-sm); font-weight: 500;
+  color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-row:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-row.is-section { color: var(--ink); font-weight: 600; }
+.zn-row.is-active { background: var(--surface-sunken); color: var(--ink); font-weight: 600; }
+.zn-chev {
+  margin-left: auto; display: inline-flex; flex: 0 0 auto;
+  color: var(--text-muted); transition: transform 180ms var(--ease-out);
+}
+
+/* tier-2 children */
+.zn-kids { display: grid; transition: grid-template-rows 220ms var(--ease-out); }
+.zn-kids-inner { overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.zn-child {
+  position: relative; display: flex; align-items: center;
+  height: var(--zn-child-h); flex: 0 0 auto;
+  margin-left: 19px; padding: 0 10px 0 15px;
+  border-left: 1px solid var(--border);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--text-sm); color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-child:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-child.is-active { background: var(--surface-sunken); color: var(--ink); font-weight: 600; }
+.zn-child.is-active::before {
+  content: ''; position: absolute; left: -1px; top: 5px; bottom: 5px; width: 2px;
+  border-radius: 2px; background: var(--ink);
+}
+.zn-kids-inner > .zn-child:last-child { margin-bottom: 6px; }
+
+/* collapsed rail */
+.zn-rail-item {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex: 0 0 auto; margin: 0 auto;
+  border: none; background: none; cursor: pointer; padding: 0;
+  border-radius: var(--radius-md); color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-rail-item:hover, .zn-rail-item.is-fly { background: var(--surface-sunken); color: var(--ink); }
+.zn-rail-item.is-active { background: var(--surface-sunken); color: var(--ink); }
+.zn-rail-item.is-active::before {
+  content: ''; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 2px;
+  border-radius: 0 2px 2px 0; background: var(--ink);
+}
+
+/* flyout */
+.zn-flyout {
+  position: fixed; left: calc(var(--zn-rail-w) + 8px); z-index: 80;
+  min-width: 196px; padding: 7px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  animation: znFlyIn 140ms var(--ease-out) both;
+}
+@keyframes znFlyIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .zn-flyout { animation: none; } }
+.zn-flyout-title {
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); padding: 7px 10px 6px;
+}
+.zn-flyout-item {
+  position: relative; display: flex; align-items: center; height: 34px; padding: 0 10px;
+  border-radius: var(--radius-md); font-size: var(--text-sm);
+  color: var(--text-secondary); text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-flyout-item:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-flyout-item.is-active { background: var(--surface-sunken); color: var(--ink); font-weight: 600; }
+.zn-fly-backdrop { position: fixed; inset: 0; z-index: 70; background: transparent; }
+
+/* footer */
+.zn-foot {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 10px 12px; display: flex; flex-direction: column;
+}
+.zn-side.is-collapsed .zn-foot { padding: 10px 0; align-items: center; }
+.zn-account-wrap { position: relative; }
+.zn-side.is-collapsed .zn-account-wrap { width: 40px; }
+.zn-account {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 7px 8px; border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: var(--radius-md); font-family: var(--font-text); color: var(--text);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.zn-account:hover, .zn-account.is-open { background: var(--surface-sunken); }
+.zn-side.is-collapsed .zn-account { width: 40px; height: 40px; justify-content: center; padding: 0; border-radius: var(--radius-md); }
+.zn-account-chev { margin-left: auto; display: inline-flex; flex: 0 0 auto; color: var(--text-muted); }
+.zn-side.is-collapsed .zn-account-chev { display: none; }
+.zn-avatar {
+  width: 30px; height: 30px; flex: 0 0 auto; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--ink); color: var(--n-50);
+  font-family: var(--font-display); font-weight: 600; font-size: var(--text-sm);
+}
+.zn-account-name { min-width: 0; }
+.zn-account-menu {
+  position: absolute; bottom: calc(100% + 8px); left: 0; right: 0; z-index: 90;
+  min-width: 208px; padding: 7px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+}
+.zn-account-menu.is-rail { left: calc(100% + 14px); right: auto; bottom: 0; width: 224px; }
+.zn-account-head { padding: 8px 10px 10px; }
+.zn-role {
+  display: inline-block; margin-top: 9px; padding: 3px 9px;
+  border-radius: var(--radius-pill); background: var(--focus-50); color: var(--accent);
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.zn-account-sep { height: 1px; background: var(--border); margin: 5px 4px; }
+.zn-menu-item {
+  display: flex; align-items: center; gap: 9px; width: 100%; height: 34px; padding: 0 10px;
+  border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: var(--radius-md); font-family: var(--font-text);
+  font-size: var(--text-sm); color: var(--text-secondary);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.zn-menu-item:hover { background: var(--surface-sunken); color: var(--ink); }
+.zn-menu-item.is-danger { color: var(--danger); }
+.zn-menu-item.is-danger:hover { background: var(--danger-bg); color: var(--danger); }
+
+/* content area */
+.zn-main { transition: margin-left 220ms var(--ease-out, ease); }
+.zn-page { max-width: 1180px; margin: 0 auto; padding: var(--gap-3xl) var(--gap-2xl) 80px; }
+
+/* Masthead alignment (round 3): page eyebrow row optically aligns with
+   the sidebar logo row (zn-head: 16px top + 30px row → center ≈31px;
+   17px eyebrow row → 23px top pad). Desktop only; mobile keeps breathing
+   room under the topbar. */
+@media (min-width: 761px) {
+  .zn-page { padding-top: var(--zn-page-top); }
+}
+
+/* Desktop content offset — class-driven (no inline styles in AppShell) */
+.zn-app .zn-main { margin-left: var(--zn-side-w); }
+.zn-app.is-collapsed .zn-main { margin-left: var(--zn-rail-w); }
+
+/* Mobile top bar — hidden above the drawer breakpoint */
+.zn-topbar { display: none; }
+
+/* Mobile drawer (≤760px — the app's existing breakpoint) */
+@media (max-width: 760px) {
+  .zn-topbar {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 10px;
+    height: 56px; padding: 0 12px;
+    background: var(--surface-low); border-bottom: 1px solid var(--border);
+  }
+  .zn-side {
+    transform: translateX(-100%);
+    transition: transform 220ms var(--ease-out, ease), width 220ms var(--ease-out, ease);
+  }
+  .zn-side.is-mobile-open { transform: none; box-shadow: var(--shadow-xl); }
+  .zn-collapse { display: none; }
+  .zn-app .zn-main,
+  .zn-app.is-collapsed .zn-main { margin-left: 0 !important; }
+  .zn-mobile-backdrop {
+    position: fixed; inset: 0; z-index: 55;
+    background: color-mix(in srgb, var(--ink) 35%, transparent);
+  }
+}

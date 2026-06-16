@@ -1,0 +1,17 @@
+{
+  "round": "round4",
+  "tokenSource": "remix-app/app/app.css",
+  "wrote": [
+    "/Users/mac/Code/zoetrop/design-bridge/harness/rounds/round4/package/README.md",
+    "/Users/mac/Code/zoetrop/design-bridge/harness/rounds/round4/package/BRIEF.md",
+    "/Users/mac/Code/zoetrop/design-bridge/harness/rounds/round4/package/RETURN-SPEC.md",
+    "/Users/mac/Code/zoetrop/design-bridge/harness/rounds/round4/package/current-state/app.css",
+    "/Users/mac/Code/zoetrop/design-bridge/harness/rounds/round4/package/current-state/README.md"
+  ],
+  "deferredSlots": [
+    "prototype/",
+    "screenshots/",
+    "current-state/routes.md",
+    "current-state/components.md"
+  ]
+}
