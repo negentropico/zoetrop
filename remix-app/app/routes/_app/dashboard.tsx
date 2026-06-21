@@ -35,6 +35,7 @@ import { PhaseBar } from "~/components/ui/PhaseBar";
 import { Sparkline } from "~/components/ui/Sparkline";
 import { Delta } from "~/components/ui/Delta";
 import type { Phase } from "~/components/ui/PhaseBar";
+import { SigGhost, SigEyebrow, goldenRanks, sigDelay } from "~/components/ui/Signature";
 
 // Significance derivation — survivor presentation helper (non-PHI)
 function getCorrelationSignificance(r: number): "strong" | "moderate" | "weak" | "none" {
@@ -419,12 +420,16 @@ function GeneRow({ g, last }: { g: DerivedVariant; last: boolean }) {
 // "N markers · n optimal" readout; icon tiles kept as the dashboard idiom).
 // Supersedes the round-3 CountDots/ring treatment — rings only ever read
 // true completion, never status share (BAKED).
+// Round-5 LINE-signature: zt-sig-frame settle + φ-stagger; zt-sig-icon
+// hairline frame around the icon tile.
 function CategoryCardItem({
   category,
   metrics,
+  sigIndex,
 }: {
   category: MetricCategory;
   metrics: Metric[];
+  sigIndex: number;
 }) {
   const info = CATEGORY_INFO[category];
   const icon = LUCIDE_MAP[info.icon];
@@ -435,8 +440,14 @@ function CategoryCardItem({
     // W2a card-structure fix: anchors are flex containers, cards flex:1 —
     // no height:100% inside grid-item anchors.
     <Link to={`/metrics/${category}`} style={{ display: "flex", textDecoration: "none" }}>
-      <Card interactive padding="md" style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "var(--gap-lg)" }}>
-        {icon && <CatChip icon={icon} family={info.family} size={36} />}
+      {/* zt-sig-frame settle + φ-stagger index for golden-order mount animation */}
+      <Card interactive padding="md" className="zt-sig-frame" style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "var(--gap-lg)", ...sigDelay(sigIndex) }}>
+        {/* zt-sig-icon: hairline frame around the category icon tile */}
+        {icon && (
+          <span className="zt-sig-icon">
+            <CatChip icon={icon} family={info.family} size={36} />
+          </span>
+        )}
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text)" }}>
             {info.label}
@@ -487,6 +498,11 @@ export default function Dashboard() {
     ? buildPhaseBarPhases(cessationDay, targetDay)
     : [];
 
+  // φ-stagger ranks for the 9 category cards (golden-ratio ordering)
+  const catRanks = goldenRanks(categories.length);
+  // φ-stagger ranks for the 4 highlight cards
+  const hlRanks = goldenRanks(highlights.length);
+
   // Eyebrow date
   const now = new Date();
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -502,8 +518,22 @@ export default function Dashboard() {
 
       {/* Phasing hero — round-3 rebuild: day readout leads, phase bar
           carries the current-day marker. Guard: hasCessationProgram prevents
-          a misleading "Day 0 · Acute" for client subjects with no program (Pitfall 6). */}
-      <Card padding="lg">
+          a misleading "Day 0 · Acute" for client subjects with no program (Pitfall 6).
+          Round-5: corner spiral watermark (SigGhost draw) clipped to the hero. */}
+      <Card padding="lg" style={{ position: "relative", overflow: "hidden" }}>
+        {/* Corner spiral watermark — ink hairline, 5% opacity, clipped */}
+        <SigGhost
+          size={200}
+          strokeWidth={3}
+          draw
+          withEye
+          style={{
+            position: "absolute",
+            bottom: -40,
+            right: -40,
+            pointerEvents: "none",
+          }}
+        />
         {hasCessationProgram && cessationDay !== null && cessationPhase !== null ? (
           <div
             className="zt-hero-grid"
@@ -562,7 +592,7 @@ export default function Dashboard() {
         )}
       </Card>
 
-      {/* Stat tiles — zt-grid-4 */}
+      {/* Stat tiles — zt-grid-4; each tile settles in φ-stagger order */}
       <div className="zt-grid-4">
         <StatTile label="Metrics tracked" value={totalMetrics} to="/metrics" />
         <StatTile
@@ -593,7 +623,7 @@ export default function Dashboard() {
       {/* Metric status — stat strip (round 4: no ring for status share) */}
       <Card padding="lg">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--gap-lg)" }}>
-          <div className="zt-eyebrow">Metric status</div>
+          <SigEyebrow>Metric status</SigEyebrow>
           <Link to="/metrics" className="zt-link" style={{ fontSize: "var(--text-xs)" }}>
             All metrics <ArrowRight size={13} strokeWidth={2} />
           </Link>
@@ -613,14 +643,17 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      {/* Recent highlights — figure leads, delta-since-last + status sparkline */}
+      {/* Recent highlights — figure leads, delta-since-last + status sparkline.
+          Round-5: SigEyebrow section label; zt-sig-frame + φ-stagger on each card. */}
       {highlights.length > 0 && (
         <div>
-          <div className="zt-eyebrow" style={{ marginBottom: "var(--gap-lg)" }}>Recent highlights</div>
+          <div style={{ marginBottom: "var(--gap-lg)" }}>
+            <SigEyebrow>Recent highlights</SigEyebrow>
+          </div>
           <div className="zt-grid-4">
-            {highlights.map((m) => (
+            {highlights.map((m, i) => (
               <Link key={m.id} to={`/metrics/${m.category}/${m.id}`} style={{ display: "flex", textDecoration: "none" }}>
-                <Card interactive padding="md" style={{ flex: "1 1 auto" }}>
+                <Card interactive padding="md" className="zt-sig-frame" style={{ flex: "1 1 auto", ...sigDelay(hlRanks[i]) }}>
                   <div className="zt-eyebrow" style={{ marginBottom: 10 }}>{m.name}</div>
                   <div className="zt-readout" style={{ fontSize: "var(--text-xl)", color: "var(--ink)", marginBottom: 8 }}>
                     {m.value}{" "}
@@ -682,20 +715,23 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Category grid — zt-grid-3, frame-strip cards */}
+      {/* Category grid — zt-grid-3, frame-strip cards.
+          Round-5: SigEyebrow section label; zt-sig-frame + φ-stagger on cards (9);
+          zt-sig-icon hairline around each category icon tile. */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "var(--gap-lg)" }}>
-          <div className="zt-eyebrow">Metric categories</div>
+          <SigEyebrow>Metric categories</SigEyebrow>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>
             {categories.length}
           </span>
         </div>
         <div className="zt-grid-3">
-          {categories.map((category) => (
+          {categories.map((category, i) => (
             <CategoryCardItem
               key={category}
               category={category}
               metrics={byCategory[category] || []}
+              sigIndex={catRanks[i]}
             />
           ))}
         </div>

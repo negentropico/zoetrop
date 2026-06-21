@@ -29,6 +29,7 @@ import { Sparkline } from "~/components/ui/Sparkline";
 import { RangeBar } from "~/components/ui/RangeBar";
 import type { MetricWithRange } from "~/components/ui/RangeBar";
 import { PageHeader } from "~/components/ui/PageHeader";
+import { goldenRanks, sigDelay } from "~/components/ui/Signature";
 
 const LUCIDE_MAP: Record<string, LucideIcon> = {
   pill: Pill,
@@ -224,12 +225,17 @@ function MetricRow({ metric }: { metric: MetricWithChartInfo }) {
   );
 }
 
+// Round-5 LINE-signature: CategorySection receives its φ-stagger rank so the
+// catalog cards settle in golden order. No watermark; no grain on rows — the
+// character holds without turning the dense list into noise.
 function CategorySection({
   category,
   metrics,
+  sigIndex,
 }: {
   category: MetricCategory;
   metrics: MetricWithChartInfo[];
+  sigIndex: number;
 }) {
   const info = CATEGORY_INFO[category];
   const icon = LUCIDE_MAP[info.icon];
@@ -238,7 +244,9 @@ function CategorySection({
   const optimal = metrics.filter((m) => getMetricStatus(m) === "optimal").length;
 
   return (
-    <Card padding="md" style={{ marginBottom: "var(--gap-lg)" }}>
+    // zt-sig-frame: settle in φ-stagger order; icon tile gets zt-sig-icon hairline frame.
+    // Dense rows carry NO watermark and NO per-row grain (grain is canvas-level only).
+    <Card padding="md" className="zt-sig-frame" style={{ marginBottom: "var(--gap-lg)", ...sigDelay(sigIndex) }}>
       {/* Category header — round-4 FRAME STRIP (owner pick, exploration A):
           one status dot per marker + mono "N markers · n optimal" readout.
           Supersedes the round-3 ring/CountDots treatments — a ring never
@@ -253,7 +261,12 @@ function CategorySection({
           marginBottom: 8,
         }}
       >
-        {icon && <CatChip icon={icon} family={info.family} size={34} />}
+        {/* zt-sig-icon: hairline frame around the category icon tile */}
+        {icon && (
+          <span className="zt-sig-icon">
+            <CatChip icon={icon} family={info.family} size={34} />
+          </span>
+        )}
         <div style={{ minWidth: 0 }}>
           <Link
             to={`/metrics/${category}`}
@@ -278,7 +291,7 @@ function CategorySection({
           ))}
         </div>
       </div>
-      {/* Metric rows */}
+      {/* Metric rows — no watermark, no grain per-row */}
       {metrics.map((metric) => (
         <MetricRow key={metric.id} metric={metric} />
       ))}
@@ -318,6 +331,8 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
     : metrics.length;
 
   const categories = Object.keys(CATEGORY_INFO) as MetricCategory[];
+  // φ-stagger ranks for the category section cards (golden-ratio ordering)
+  const catRanks = goldenRanks(categories.length);
   const statusOrder: MetricStatus[] = ["optimal", "borderline", "deficient", "excess"];
   const STATUS_LABEL: Record<MetricStatus, string> = {
     optimal: "Optimal",
@@ -370,13 +385,15 @@ export default function MetricsIndex({ loaderData }: Route.ComponentProps) {
         })}
       </div>
 
-      {/* Category sections */}
+      {/* Category sections — zt-sig-frame + φ-stagger on each card.
+          No watermark; no grain on rows (calm dense list). */}
       <div>
-        {categories.map((category) => (
+        {categories.map((category, i) => (
           <CategorySection
             key={category}
             category={category}
             metrics={filteredByCategory[category] || []}
+            sigIndex={catRanks[i]}
           />
         ))}
       </div>

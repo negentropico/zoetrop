@@ -20,6 +20,7 @@ import { DataTable } from "~/components/ui/DataTable";
 import { PageHeader } from "~/components/ui/PageHeader";
 import { Delta } from "~/components/ui/Delta";
 import { statusOf } from "~/lib/status";
+import { sigDelay } from "~/components/ui/Signature";
 
 function isValidCategory(category: string): category is MetricCategory {
   return category in CATEGORY_INFO;
@@ -137,8 +138,9 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
       />
 
       {/* Trend chart — leads the screen; the big readout moved here from the
-          masthead right slot (round 3: chart card leads with readout + delta). */}
-      <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+          masthead right slot (round 3: chart card leads with readout + delta).
+          Round-5: zt-sig-frame settle (index 0 of 3 frame cards). */}
+      <Card padding="lg" className="zt-sig-frame" style={{ marginBottom: "var(--gap-lg)", ...sigDelay(0) }}>
         <div
           style={{
             display: "flex",
@@ -219,8 +221,9 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
       </Card>
 
       {/* Ranges — consolidated into ONE card (round 3): range bar with
-          endpoints + optimal/reference figures. */}
-      <Card padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+          endpoints + optimal/reference figures.
+          Round-5: zt-sig-frame settle (index 1 of 3 frame cards). */}
+      <Card padding="lg" className="zt-sig-frame" style={{ marginBottom: "var(--gap-lg)", ...sigDelay(1) }}>
         <div
           className="zt-ranges-grid"
           style={{
@@ -269,9 +272,9 @@ export default function MetricDetail({ loaderData }: Route.ComponentProps) {
         </div>
       </Card>
 
-      {/* 2026 Targets */}
+      {/* 2026 Targets — Round-5: zt-sig-frame settle (index 2 of 3 frame cards). */}
       {targets && (
-        <Card tone="focus" padding="lg" style={{ marginBottom: "var(--gap-lg)" }}>
+        <Card tone="focus" padding="lg" className="zt-sig-frame" style={{ marginBottom: "var(--gap-lg)", ...sigDelay(2) }}>
           <div
             className="zt-eyebrow"
             style={{ color: "var(--focus-500, var(--focus))", marginBottom: 16 }}
