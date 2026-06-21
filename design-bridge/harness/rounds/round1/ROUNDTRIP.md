@@ -38,10 +38,19 @@ Design: refine truth → reference render → RETURN a bundle (loose source + ne
 Two artifacts cross the boundary: a **return bundle** (Design→Code; loose source + `new.css` with only
 rules NOT already in the `current-state/` snapshot + `CHANGES.md`, per `package/RETURN-SPEC.md`) and
 **`FEEDBACK-LINE-<name>.md`** (Code→Design; what couldn't be honored, what surface/state was needed, any
-token added). No silent local forks on the code side. **Inbound is currently manual** — the
-`react-tailwind` CORE adapter isn't built yet, so `zoetrop-design-roundtrip`'s decode→adapt→gate→capture
-runs by hand against the existing harness scripts (`docs/design-system/_rounds/harness/unbundle.mjs` +
-`css-delta.mjs` are the pre-harness origin of CORE's decode + css-delta gate).
+token added). No silent local forks on the code side.
+
+**Transport = the native `DesignSync` tool**, not an MCP server (`/design-login` grants the design OAuth
+scope; nothing appears in `claude mcp list`). **Two projects, two roles:** the round **prototype/return**
+lives in a *regular* project (`PROJECT_TYPE_PROJECT`, e.g. "ZTP1" `f200a4ef-34c4-4d73-9e03-c210e759225a`) —
+**not** in `DesignSync list_projects`; pull it by id/URL via `get_project` / `list_files` / `get_file`. The
+**design-system** project (`PROJECT_TYPE_DESIGN_SYSTEM`, "Zoetrope Design System"
+`48aebcac-8daa-4a26-b920-7e9f98bafa40` ⇄ `docs/design-system/`) is the reusable component library — a
+*post-integration* `/design-sync` promotion target, not where rounds prototype. **The rest of inbound runs
+by hand** — the `react-tailwind` CORE adapter isn't built yet, so `zoetrop-design-roundtrip`'s
+decode→adapt→gate→capture runs against the existing harness scripts
+(`docs/design-system/_rounds/harness/unbundle.mjs` + `css-delta.mjs` are the pre-harness origin of CORE's
+decode + css-delta gate).
 
 ## 4 · Lines of development
 
@@ -77,10 +86,16 @@ lines editing one token serialize.
 
 ## 7 · Playbook — Claude Code (implementing a line)
 
-1. Decode the return (loose source; `unbundle.mjs` if it arrives as a bundler HTML). Read its `CHANGES.md`.
-2. `css-delta.mjs` (or `design:tokens` once the adapter lands) the `new.css` against `current-state/` —
-   confirm only-new tokens, no redefinitions; fold new tokens into `app.css` (`:root` + dark block).
-3. Rebuild each component **to its spec** in React (recreate, don't paste prototype CSS); honor §5.
+1. Pull the return via `DesignSync get_file` from the prototype project (loose source; `unbundle.mjs` if it
+   arrives as a bundler HTML). Read its `CHANGES.md`.
+2. **Run the return gate** — `../../../RETURN-GATE.md` (the standing 7-point check: token existence · zero
+   new/redefined tokens · namespacing · no colour-gradient fill · transform-only gated motion · motif
+   consumes canonical assets · the (a)–(f) ledger in `CHANGES.md`). A single FAIL blocks integration. Then
+   `css-delta.mjs` (or `design:tokens` once the adapter lands) the `new.css` against `current-state/` and
+   fold confirmed-new tokens into `app.css` (`:root` + dark block).
+3. **Rebuild to the real stack.** Returns are `window`-global UMD JSX (React via CDN) — **never paste the
+   prototype's JSX/CSS.** Rebuild each component to its spec as React Router 7 + TypeScript + Tailwind v4;
+   honor §5.
 4. Verify in both themes (`zoetrop-design-roundtrip` capture: media light/dark, reduced-motion, the
    3-viewport device matrix) + the fact-register discipline + frozen rules.
 5. Record every gap/constraint/added token in `FEEDBACK-LINE-<name>.md`. Never fork a token silently.

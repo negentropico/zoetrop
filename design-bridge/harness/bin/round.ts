@@ -160,5 +160,68 @@ line = markStage(line, 'returned', false); // staged for the first refinement li
 writeManifest(resolve(`${roundsDir}/round4/round-manifest.json`), line);
 writeFileSync(resolve(`${roundsDir}/round4/DECISIONS.md`), renderManifestLedger(line) + '\n');
 
+// ─────────────────────────────────────────────────────────────────────────────
+// round5 — LINE-signature refinement LINE (seeded, not yet returned)
+//   "More unique within the LOCK": activate the locked-but-unused expressive layer
+//   (spiral/phyllotaxis motif · motion signature · chart/empty-state finish · texture ·
+//   iconography) across three layout archetypes — dashboard, metric-detail, metrics —
+//   changing ZERO locked tokens. Scope (C): stage ZOETROP-R2 only if it still reads generic.
+//   roundType = global-token-line (app-global character, no single surface) — see PROMPT-LINE-signature.md.
+//   Inbound transport = DesignSync (the 48aebc… project ⇄ docs/design-system/); react-tailwind adapter deferred.
+// ─────────────────────────────────────────────────────────────────────────────
+
+let sig: RoundManifest = newManifest('round5', 'global-token-line');
+sig = {
+  ...sig,
+  lineType: 'refinement',
+  charter: 'ZOETROP-R1',
+  medium: 'screen',
+  // no single surface — app-global signature line, proven on dashboard + metric-detail + metrics
+  syncedSha: sha,
+  seedPath: `${roundsDir}/round5/package`,
+};
+sig = markStage(sig, 'seeded', true);
+sig = markStage(sig, 'returned', true); // returned via DesignSync (ZTP1 prototype), gated PASS, integrated into the app
+
+// The one session block — LINE-signature closed. (a)–(f) taken from the gated return's
+// CHANGES.md ledger; integrated into remix-app (Signature.tsx + zt-sig-* layer) at quick task 260620-rd4.
+const sigBlock: LedgerBlock = {
+  session: 'S-sig',
+  title: 'LINE-signature — activate the dormant expressive layer (motif · the settle · grain · branded empty/loading · frame-dot), integrated',
+  status: 'closed',
+  closedDate: '2026-06-20',
+  propagation: 'physics',
+  recordVsDecide: {
+    record: [
+      'every locked token + the four status tokens',
+      'the frames chart idiom + the one app-wide frame-card tooltip',
+      'compact density + the left-nav chrome',
+      'no gradients / no emoji / dark = variable-remap only',
+    ],
+    decide: [
+      'the expressive layer only: spiral/phyllotaxis motif activation, the motion signature, chart/empty-state finish, paper texture, iconography',
+    ],
+  },
+  outputs: {
+    selected:
+      'Activate the already-locked-but-unused expressive layer, consuming the DS’s own vocabulary: spiral/phyllotaxis as a quiet STRUCTURAL motif (a hairline corner watermark on the dashboard hero, a spiral ghost behind chart-empty, a phyllotaxis seed-head for chart-loading, and phyllotaxis φ-order as the mount-stagger ordering); ONE motion gesture — "the settle" (frames rise 7px→0 on --ease-frame, φ-staggered via --sig-i, transform-only); a canvas paper grain (feTurbulence noise behind content); branded empty/loading states; and a frame-dot icon signature (ringed ink dot echoing the chart frame + hairline icon-tile frames). Integrated into the real app as React Router 7 + TS: new Signature.tsx + a zt-sig-* layer appended to app.css, applied to dashboard + metric-detail + metrics catalog. The inline spiral path is byte-identical to docs/design-system/assets/mark-spiral.svg. Build green; gated PASS (RETURN-GATE 7/7).',
+    rejected:
+      'Hue-tinted / metric-coloured motif (breaks status-colour-only-on-bands/dots/badges); grain over cards/text or any gradient sheen (contrast cost + no-gradients ban — grain lives behind content on the canvas); opacity fade-in entrance (left content hidden JS-off/reduced-motion — replaced with transform-only settle); repeating phyllotaxis wallpaper behind data (noise on the dense list — catalog rows carry the icon-signature only, no watermark/grain); a bespoke icon set (icon-set swap = a charter decision — treated the glyphs instead).',
+    tokenDelta:
+      'NONE. Every value resolves to an existing token (--ink, --n-100/150/300/400, --border, --border-strong, --surface, --radius-md, --ease-frame, --dur-fast/slow). New zt-sig-* class layer + ztSigDraw/ztSigSettle/ztSigSeed keyframes + the --sig-i instance stagger index (a unitless var, not a token). Two logged feature-gated shims: .zt-sig-on .zn-app{position:relative} and the .zn-app::before grain layer.',
+    contrastNotes:
+      'Text contrast unchanged — the signature adds nothing in front of text. Body/title AAA in both themes; grain is a ≤7% layer BEHIND content (no text pairing); the spiral watermark (5–8% --ink) and empty-state ghost (--n-400, 45%) are decorative/non-informational, never the sole carrier of meaning. No pairing regressed in either theme.',
+    motionNotes:
+      'Reduced-motion → instant (global rule; the settle is transform-only so the resting state is the visible one; spiral resolves fully drawn; seed dots rest at base opacity). JS-off → fully static + visible (motion/grain/draw gated under .zt-sig-on, added by JS on mount). The locked ring sweep is untouched.',
+    nextConstraints:
+      'Scope-(C) verdict: the character LANDED WITHIN THE LOCK — zero locked-token change — so NO ZOETROP-R2 reopening is warranted by this line. Carry-forward (app-wide sweep, not this round): propagate zt-sig-frame + φ-stagger to the remaining ~13 surfaces via the shared Card; wire the ztSigSettle curve as the live data-update "settle". Only if a future honesty render still reads generic AFTER full propagation would distinctiveness require a locked decision (sharper type pairing / evolved card-radius idiom) — stage that deliberately as ZOETROP-R2 with MIGRATION.md, not here.',
+  },
+};
+sig = recordSession(sig, sigBlock);
+
+writeManifest(resolve(`${roundsDir}/round5/round-manifest.json`), sig);
+writeFileSync(resolve(`${roundsDir}/round5/DECISIONS.md`), renderManifestLedger(sig) + '\n');
+
 console.log(`round: wrote ${roundsDir}/round1/{round-manifest.json,DECISIONS.md} (charter ZOETROP-R1 FROZEN, synced ${sha.slice(0, 8)}, sessions: ${Object.keys(charter.sessions ?? {}).join(', ')}, lockedAt ${charter.lockedAt})`);
 console.log(`round: wrote ${roundsDir}/round4/{round-manifest.json,DECISIONS.md} (first refinement LINE, lineType refinement, staged)`);
+console.log(`round: wrote ${roundsDir}/round5/{round-manifest.json,DECISIONS.md} (LINE-signature, lineType refinement, global-token-line, returned + closed: ${Object.keys(sig.sessions ?? {}).join(', ')})`);

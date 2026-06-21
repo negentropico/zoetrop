@@ -19,9 +19,18 @@
   left-nav IA / calm-instrument screen language), **locked at S1.0**. Harness wired (`design:*` scripts in
   `remix-app/package.json`; `.staging-core` pinned to the evolved CORE; harness-local deps in
   `design-bridge/harness/package.json`). Further work runs as **refinement LINEs**.
-- **Starting point:** the first refinement line is drafted at
+- **Active plan (2026-06-20):** **[`NEXT-LINE-PLAN.md`](./NEXT-LINE-PLAN.md)** — refinement
+  `LINE-signature` (refine the visual language further, *more unique*). **Status: SEEDED, ready to
+  transmit** (`harness/rounds/round5/`). Both blockers resolved: design access is live via the native
+  **`DesignSync`** tool (not an MCP server; `/design-login` grants the scope) and **scope (C)** is chosen —
+  push the expressive layer *within the LOCK* (activate the locked-but-unused spiral/phyllotaxis motif,
+  motion signature, texture, etc.; zero new locked tokens), staging **ZOETROP-R2** only if it still reads
+  generic. Decisions taken: 3 archetype surfaces (dashboard · metric-detail · metrics) · **inbound =
+  DesignSync, `react-tailwind` adapter deferred**. Next: transmit `round5/package/PROMPT-PASTE-signature.md`
+  in the `48aebc…` claude.ai/design project, then integrate the return by hand.
+- **Earlier starting point (parked):** the first drafted refinement line at
   `harness/rounds/round4/PROMPT-LINE-reports.md` (apply the calm-instrument language to the Reports
-  surface — the one major surface still without a design treatment).
+  surface — still un-executed; superseded as the active priority by the plan above).
 
 ## Run the harness (from `remix-app/`)
 
@@ -39,11 +48,17 @@ npm run design:round       # (re)write all round-manifest.json + DECISIONS.md
 
 1. Read `harness/rounds/round1/CHARTER.md` → `DECISIONS.md` (S1.0–S1.2 ☑) → `ROUNDTRIP.md`.
 2. `npm run design:seed -- --round=round<n>` to snapshot the current foundation into the line's `package/`.
-3. Author `PROMPT-LINE-<name>.md` (scope · inputs · record-vs-decide · propagation=physics · exit). Take
-   it to claude.ai/design; return per `package/RETURN-SPEC.md` (loose source + a new-rules-only `new.css`
-   + `CHANGES.md` — token freeze: prefer zero new tokens; any new one extends an existing family).
-4. Integrate (manual until the `react-tailwind` adapter lands): `css-delta` / fold `new.css` into
-   `app.css`; rebuild components to spec; capture both themes via `zoetrop-design-roundtrip`.
+3. **ASSET-INVENTORY first** (see [`RETURN-GATE.md`](./RETURN-GATE.md)): enumerate the DS's existing
+   expressive vocabulary (`docs/design-system/assets/pattern-*.svg` + `mark-*.svg`,
+   `guidelines/brand-patterns.html`, the `.zt-grain` texture utility) and tell the design side to **consume**
+   it (reference/inline the canonical geometry), never reinvent. Then author `PROMPT-LINE-<name>.md` (scope ·
+   inputs · record-vs-decide · propagation=physics · exit). Transmit via **`DesignSync`** in the round
+   prototype project; return per `package/RETURN-SPEC.md` (loose source + a new-rules-only `new.css` +
+   `CHANGES.md` — token freeze: prefer zero new tokens; any new one extends an existing family).
+4. **Gate, then integrate** (by hand until the `react-tailwind` adapter lands): run the 7-point
+   [`RETURN-GATE.md`](./RETURN-GATE.md) (a single FAIL blocks); `css-delta` / fold `new.css` into `app.css`;
+   **rebuild components to spec as the real stack — never paste the prototype's UMD JSX/CSS**; capture both
+   themes via `zoetrop-design-roundtrip`.
 5. Record the session: append a block + `npm run design:round` (regenerates the manifest + `DECISIONS.md`);
    honor the propagation rule (screen-only = `physics`); run the honesty render (both themes, JS-off);
    log gaps in `FEEDBACK-LINE-<name>.md`.
