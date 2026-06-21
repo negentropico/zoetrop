@@ -15,22 +15,22 @@
 - **Medium:** `screen` (single — no print sibling).
 - **Stack / token home:** react-tailwind (React Router 7 + Vite + Tailwind v4). Tokens at
   `remix-app/app/app.css` (`:root` light + `html[data-theme="dark"]` dark).
-- **Status:** charter **ZOETROP-R1 FROZEN / archived** — sessions **S1.0–S1.2 closed** (foundation /
-  left-nav IA / calm-instrument screen language), **locked at S1.0**. Harness wired (`design:*` scripts in
-  `remix-app/package.json`; `.staging-core` pinned to the evolved CORE; harness-local deps in
-  `design-bridge/harness/package.json`). Further work runs as **refinement LINEs**.
-- **Active plan (2026-06-20):** **[`NEXT-LINE-PLAN.md`](./NEXT-LINE-PLAN.md)** — refinement
-  `LINE-signature` (refine the visual language further, *more unique*). **Status: SEEDED, ready to
-  transmit** (`harness/rounds/round5/`). Both blockers resolved: design access is live via the native
-  **`DesignSync`** tool (not an MCP server; `/design-login` grants the scope) and **scope (C)** is chosen —
-  push the expressive layer *within the LOCK* (activate the locked-but-unused spiral/phyllotaxis motif,
-  motion signature, texture, etc.; zero new locked tokens), staging **ZOETROP-R2** only if it still reads
-  generic. Decisions taken: 3 archetype surfaces (dashboard · metric-detail · metrics) · **inbound =
-  DesignSync, `react-tailwind` adapter deferred**. Next: transmit `round5/package/PROMPT-PASTE-signature.md`
-  in the `48aebc…` claude.ai/design project, then integrate the return by hand.
-- **Earlier starting point (parked):** the first drafted refinement line at
-  `harness/rounds/round4/PROMPT-LINE-reports.md` (apply the calm-instrument language to the Reports
-  surface — still un-executed; superseded as the active priority by the plan above).
+- **Status:** charter **ZOETROP-R1 FROZEN** (S1.0–S1.2 closed, locked at S1.0). **ZOETROP-R2 is now OPEN** —
+  a *scoped reopening* of the one R1 subsystem the app outgrew (the **chart / data-viz language**, S1.2);
+  everything else in R1 stays frozen. Harness wired (`design:*` scripts; `.staging-core` pinned;
+  harness-local deps). Refinement LINEs run off frozen subsystems; the chart language now runs through R2.
+- **Active charter (2026-06-21): ZOETROP-R2 — the data-viz language, on visx.** Contract:
+  **[`harness/rounds/round6/CHARTER.md`](./harness/rounds/round6/CHARTER.md)**; opening session prompt:
+  `round6/PROMPT-S-R2.0.md`; migration map: `round6/MIGRATION.md`. **Status: SEEDED, ready to transmit**
+  (`harness/rounds/round6/`). Decisions taken (2026-06-21): **(B) reopen the chart language** · **migrate
+  everything to visx** (retire Recharts) · proving viz = **distribution/"you are here" · multi-series
+  autonomic (WHOOP) · body-comp (DEXA)** + re-express the trend frames. The crux it resolves: a
+  **series-encoding** policy that uses the three metric families (Energy/Vital/Focus), never the four status
+  tokens. Next: transmit `round6/package/PROMPT-PASTE-viz.md` in the ZTP1 prototype project
+  (`f200a4ef-34c4-4d73-…`), gate the return with `RETURN-GATE.md`, integrate.
+- **Closed:** `round5`/`LINE-signature` (the expressive-layer line) — **DONE** (returned, gated, integrated;
+  ledger closed S-sig; see `NEXT-LINE-PLAN.md`, now historical). **Parked:** `round4`/`LINE-reports` (apply
+  the calm-instrument language to the Reports surface — un-executed).
 
 ## Run the harness (from `remix-app/`)
 

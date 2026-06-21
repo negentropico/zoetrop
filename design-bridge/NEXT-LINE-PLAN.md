@@ -3,9 +3,11 @@
 > **Saved 2026-06-20, updated 2026-06-20 (session: `/design-login`).** Goal: roundtrip Zoetrop's design
 > language **again** to refine it further — *more unique* — off the **frozen** `ZOETROP-R1` foundation.
 > Run via `zoetrop-design-line` (lifecycle) + `zoetrop-design-roundtrip` (per-round).
-> **STATUS: round5/LINE-signature is SEEDED and ready to transmit.** Both blocking decisions are resolved
-> (scope + inbound). The line is **not yet returned/integrated.**
-> **Resume pointer:** read this file → §"On reopen, do this first".
+> **⚠ HISTORICAL / SUPERSEDED (2026-06-21).** round5/LINE-signature is **DONE** — returned via DesignSync,
+> gated PASS, integrated (quick task `260620-rd4`), ledger closed `S-sig`. The active line is now
+> **ZOETROP-R2** (the data-viz language, on visx) — see `OPEN-A-LINE.md` → `harness/rounds/round6/CHARTER.md`.
+> This file is kept as the round5 record; the playbook below (DesignSync transport, the phased roundtrip)
+> still applies to R2.
 
 ---
 

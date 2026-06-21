@@ -1,0 +1,57 @@
+{
+  "round": "round6",
+  "roundType": "global-token-line",
+  "stages": {
+    "seeded": true,
+    "returned": false
+  },
+  "lineType": "charter",
+  "charter": "ZOETROP-R2",
+  "medium": "screen",
+  "syncedSha": "d83b24389f3b53e497e4beec262e2bff31b7e4ae",
+  "seedPath": "design-bridge/harness/rounds/round6/package",
+  "freezeCriteria": [
+    {
+      "id": "viz-tokenized",
+      "met": false,
+      "kind": "freeze-blocking",
+      "note": "every chart value resolves to a token; any new viz token extends an existing family + has a MIGRATION.md row"
+    },
+    {
+      "id": "both-themes",
+      "met": false,
+      "kind": "freeze-blocking",
+      "note": "light + dark parity via the variable-remap (no per-component dark selectors)"
+    },
+    {
+      "id": "contrast-floor",
+      "met": false,
+      "kind": "freeze-blocking",
+      "note": "AA for every chart text/mark pairing, both themes, incl. the series-encoding hues"
+    },
+    {
+      "id": "series-vs-status-distinct",
+      "met": false,
+      "kind": "freeze-blocking",
+      "note": "series encoding never collides with the four status tokens; the two axes are visually unmistakable"
+    },
+    {
+      "id": "engine-unified",
+      "met": false,
+      "kind": "freeze-blocking",
+      "note": "all viz on visx; Recharts removed from the dependency tree"
+    },
+    {
+      "id": "reduced-motion-js-off-ok",
+      "met": false,
+      "kind": "freeze-blocking",
+      "note": "charts render JS-off (SSR-safe) and reduced-motion → instant"
+    },
+    {
+      "id": "owner-accept",
+      "met": false,
+      "kind": "human-required",
+      "note": "owner accepts the R2 chart language live"
+    }
+  ]
+}

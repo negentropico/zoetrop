@@ -222,6 +222,41 @@ sig = recordSession(sig, sigBlock);
 writeManifest(resolve(`${roundsDir}/round5/round-manifest.json`), sig);
 writeFileSync(resolve(`${roundsDir}/round5/DECISIONS.md`), renderManifestLedger(sig) + '\n');
 
+// ─────────────────────────────────────────────────────────────────────────────
+// round6 — ZOETROP-R2 charter OPENING (the data-viz language, on visx)
+//   An explicit, scoped REOPENING of the one R1 subsystem the app outgrew — the
+//   S1.2 chart language. Everything else in R1 stays frozen. Engine moves Recharts→visx.
+//   lineType: charter (a SECOND charter); seeded, not yet returned (awaiting S2.0).
+//   See round6/{CHARTER.md, PROMPT-S-R2.0.md, MIGRATION.md}.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const r2Freeze: FreezeCriterion[] = [
+  { id: 'viz-tokenized', met: false, kind: 'freeze-blocking', note: 'every chart value resolves to a token; any new viz token extends an existing family + has a MIGRATION.md row' },
+  { id: 'both-themes', met: false, kind: 'freeze-blocking', note: 'light + dark parity via the variable-remap (no per-component dark selectors)' },
+  { id: 'contrast-floor', met: false, kind: 'freeze-blocking', note: 'AA for every chart text/mark pairing, both themes, incl. the series-encoding hues' },
+  { id: 'series-vs-status-distinct', met: false, kind: 'freeze-blocking', note: 'series encoding never collides with the four status tokens; the two axes are visually unmistakable' },
+  { id: 'engine-unified', met: false, kind: 'freeze-blocking', note: 'all viz on visx; Recharts removed from the dependency tree' },
+  { id: 'reduced-motion-js-off-ok', met: false, kind: 'freeze-blocking', note: 'charts render JS-off (SSR-safe) and reduced-motion → instant' },
+  { id: 'owner-accept', met: false, kind: 'human-required', note: 'owner accepts the R2 chart language live' },
+];
+
+let r2: RoundManifest = newManifest('round6', 'global-token-line');
+r2 = {
+  ...r2,
+  lineType: 'charter',
+  charter: 'ZOETROP-R2',
+  medium: 'screen',
+  syncedSha: sha,
+  seedPath: `${roundsDir}/round6/package`,
+  freezeCriteria: r2Freeze,
+};
+r2 = markStage(r2, 'seeded', true);
+r2 = markStage(r2, 'returned', false); // OPEN — awaiting the S2.0 return (DesignSync, ZTP1 prototype)
+
+writeManifest(resolve(`${roundsDir}/round6/round-manifest.json`), r2);
+writeFileSync(resolve(`${roundsDir}/round6/DECISIONS.md`), renderManifestLedger(r2) + '\n');
+
 console.log(`round: wrote ${roundsDir}/round1/{round-manifest.json,DECISIONS.md} (charter ZOETROP-R1 FROZEN, synced ${sha.slice(0, 8)}, sessions: ${Object.keys(charter.sessions ?? {}).join(', ')}, lockedAt ${charter.lockedAt})`);
 console.log(`round: wrote ${roundsDir}/round4/{round-manifest.json,DECISIONS.md} (first refinement LINE, lineType refinement, staged)`);
 console.log(`round: wrote ${roundsDir}/round5/{round-manifest.json,DECISIONS.md} (LINE-signature, lineType refinement, global-token-line, returned + closed: ${Object.keys(sig.sessions ?? {}).join(', ')})`);
+console.log(`round: wrote ${roundsDir}/round6/{round-manifest.json,DECISIONS.md} (ZOETROP-R2 charter OPENING — chart-language reopen, engine=visx, ${Object.keys(r2.sessions ?? {}).length} sessions, seeded)`);
