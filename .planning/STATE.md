@@ -117,6 +117,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 | 260611-jq8 | Repo-wide rename Zoetrop→Zoetrop (all case variants, 95 files + round1 filename; includes wordmark rebrand edit) | 2026-06-11 | 1ed1ba6 | [260611-jq8-repo-wide-rename-zoetrop-to-zoetrop-all](./quick/260611-jq8-repo-wide-rename-zoetrop-to-zoetrop-all/) |
 | 260611-py7 | Canonical platform history doc — docs/HISTORY.md (Bwell vault origins → Tracker/Astro → Remix/Neon → Zoetrop platform pivot → GSD M1) + CLAUDE.md pointer | 2026-06-11 | d90fc96 | [260611-py7-canonical-platform-history-doc-docs-hist](./quick/260611-py7-canonical-platform-history-doc-docs-hist/) |
 | 260612-d8s | Round3 self-rendering design package (build-free prototype: left-nav chrome + Part A screens + Recharts idiom + theme toggle; README/BRIEF re-pointed off basic-auth preview) + 50 light/dark reference screenshots of live app | 2026-06-12 | 837dd96 | [260612-d8s-round3-self-rendering-design-package-ref](./quick/260612-d8s-round3-self-rendering-design-package-ref/) |
+| 260620-rd4 | round5 LINE-signature design integration (Phase 5) — spiral/phyllotaxis "signature" layer (motif watermark · "the settle" φ-stagger motion · paper grain · branded chart empty/loading · frame-dot iconography) across dashboard·metric-detail·metrics; within-LOCK, **zero token delta**; 3 atomic commits, build green | 2026-06-20 | b0705ae | [260620-rd4-r5-signature-integrate](./quick/260620-rd4-r5-signature-integrate/) |
 
 ## Deferred Items
 
