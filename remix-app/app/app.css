@@ -1276,3 +1276,194 @@ h1, h2, h3, h4 {
     background: color-mix(in srgb, var(--ink) 35%, transparent);
   }
 }
+
+/* ================================================================
+   Round 5 · LINE-signature — zt-sig-* layer
+   NEW RULES ONLY. Everything here is additive to the frozen
+   token + class layer above. No token is redefined; no locked
+   class is restyled except two zero-risk structural shims (logged
+   in design-bridge/harness/rounds/round5/return/CHANGES.md §shims).
+   All new classes are namespaced zt-sig-*.
+
+   TOKEN DELTA: none. Every value resolves to an existing token
+   (--ink, --n-*, --border, --surface, --ease-frame, --dur-*).
+
+   GATING (honesty render):
+   - Everything renders with JS off — every base state is the
+     final, visible state. Motion/draw only play UNDER the
+     .zt-sig-on root class (added by JS on mount via useSignature())
+     AND inside @media (prefers-reduced-motion: no-preference).
+   - Reduced motion → instant (global reduce rule above collapses
+     all durations; final state is already visible, so nothing hidden).
+   - Three review toggles switch levers off independently:
+     .zt-sig-grain-off / .zt-sig-motif-off / .zt-sig-motion-off on <html>.
+   ================================================================ */
+
+/* ================================================================
+   LEVER 4 — TEXTURE: paper grain
+   A desaturated fractal-noise tile, multiplied onto the canvas
+   only (behind all content → zero contrast cost). Darker theme
+   gets a touch more and screens instead of multiplies so it
+   reads as light grain on warm-dark paper. No gradient.
+   Shim: .zn-app gains position:relative so the absolute grain
+   layer can sit behind in-flow content via z-index:-1.
+   ================================================================ */
+.zt-sig-on .zn-app { position: relative; }
+.zt-sig-on .zn-app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+html[data-theme="dark"] .zt-sig-on .zn-app::before {
+  opacity: 0.07;
+  mix-blend-mode: screen;
+}
+.zt-sig-grain-off .zn-app::before { display: none; }
+
+/* ================================================================
+   LEVER 1 — MOTIF: spiral ghost + phyllotaxis seed
+   The spiral/phyllotaxis is drawn in ink/neutrals ONLY, never a
+   hue, and appears as a QUIET structural watermark — once per
+   surface, anchored to a hero or an empty region. It must NOT
+   tile, repeat behind data, or sit on a dense list row.
+   ================================================================ */
+
+/* A hairline structural watermark (rendered by SigGhost in Signature.tsx).
+   Positioned by the host; we only own its ink + opacity here. */
+.zt-sig-ghost {
+  position: absolute;
+  pointer-events: none;
+  color: var(--ink);
+  opacity: 0.05;
+}
+html[data-theme="dark"] .zt-sig-ghost { opacity: 0.08; }
+.zt-sig-motif-off .zt-sig-ghost { display: none; }
+
+/* Spiral draw-on: the watermark unspools once on mount along the
+   golden curve, using --ease-frame as THE signature easing.
+   The hidden state lives only in the keyframe so the resting state
+   (JS-off / reduced motion / post-animation) is always fully drawn. */
+.zt-sig-ghost path { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .zt-sig-on .zt-sig-ghost--draw path {
+    stroke-dasharray: 1;
+    animation: ztSigDraw 1600ms var(--ease-frame) backwards;
+  }
+}
+@keyframes ztSigDraw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ================================================================
+   LEVER 2 — MOTION: "the settle" (one named gesture)
+   Frames rise 7px on mount, ordered by a golden-ratio (φ) stagger
+   via --sig-i, eased on --ease-frame. This is the single Zoetrop
+   motion gesture; the ring sweep (locked) stays as-is. Base state
+   is visible; the gesture only plays under .zt-sig-on + no-preference.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .zt-sig-on .zt-sig-frame {
+    animation: ztSigSettle var(--dur-slow) var(--ease-frame) backwards;
+    animation-delay: calc(var(--sig-i, 0) * 55ms);
+  }
+}
+.zt-sig-motion-off .zt-sig-frame { animation: none !important; }
+/* Transform-only: the frame never drops below full opacity, so every
+   static / JS-off / reduced-motion render shows the content (it only
+   travels ~7px). A quiet positional "settle", not a fade-in. */
+@keyframes ztSigSettle {
+  from { transform: translateY(7px); }
+  to   { transform: none; }
+}
+
+/* ================================================================
+   LEVER 3 — EMPTY / LOADING personality (inside the frames idiom)
+   Empty = the existing dot-grain frame + a spiral ghost that
+   unspools behind a calm mono caption.
+   Loading = a phyllotaxis seed-head whose dots breathe in golden
+   order (stepped on --ease-frame). Reduced motion → static dots.
+   ================================================================ */
+.zt-sig-empty { position: relative; overflow: hidden; }
+.zt-sig-empty-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.zt-sig-empty-mark .zt-sig-ghost {
+  position: static;
+  width: 108px;
+  height: 108px;
+  color: var(--n-400);
+  opacity: 0.45;
+}
+html[data-theme="dark"] .zt-sig-empty-mark .zt-sig-ghost { opacity: 0.4; }
+.zt-sig-empty-body { position: relative; z-index: 1; }
+
+/* phyllotaxis loading seed-head */
+.zt-sig-seed { display: block; }
+.zt-sig-seed circle { fill: var(--n-300); opacity: 0.5; }
+@media (prefers-reduced-motion: no-preference) {
+  .zt-sig-on .zt-sig-seed circle {
+    animation: ztSigSeed 1500ms var(--ease-frame) infinite;
+    animation-delay: calc(var(--sig-i, 0) * 42ms);
+  }
+}
+@keyframes ztSigSeed {
+  0%, 100% { opacity: 0.18; }
+  45%      { opacity: 0.85; }
+}
+
+/* ================================================================
+   LEVER 5 — ICONOGRAPHY: the frame-dot signature
+   The chart idiom's "ringed ink dot + frame tick" becomes the
+   app's wayfinding glyph: a hairline ring framing category
+   icon-tiles, and a small ringed frame-dot leading mono section
+   eyebrows. Consistent 1.5px ink stroke; no icon-set change.
+   ================================================================ */
+
+/* hairline frame around an icon tile (host adds it next to .zt-card etc) */
+.zt-sig-icon { position: relative; }
+.zt-sig-icon::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-md) + 3px);
+  pointer-events: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.zt-card-hover:hover .zt-sig-icon::after { border-color: var(--border-strong); }
+
+/* the frame-dot glyph: ringed ink dot, echoing a chart "frame" */
+.zt-sig-dot {
+  position: relative;
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--surface);
+  vertical-align: middle;
+}
+.zt-sig-dot::after {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.zt-sig-motif-off .zt-sig-dot { display: none; }
+
+/* eyebrow that carries the frame-dot: align glyph + mono label */
+.zt-sig-eyebrow { display: inline-flex; align-items: center; gap: 8px; }
