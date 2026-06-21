@@ -9,6 +9,7 @@ import { useLocation } from "react-router";
 import { Sidebar } from "./Sidebar";
 import { MobileTopBar } from "./MobileTopBar";
 import { SpiralMark } from "../ui/SpiralMark";
+import { useSignature } from "../ui/Signature";
 
 interface AppShellProps {
   children: ReactNode;
@@ -25,6 +26,10 @@ export function AppShell({ children, user, navCollapsed, subjectList, activeSubj
   const { pathname, search } = useLocation();
   const [collapsed, setCollapsed] = useState(navCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Wire the root .zt-sig-on class (enables grain + motion under the honesty gate).
+  // Called once at the app root so it activates globally on mount.
+  useSignature();
 
   const toggleCollapsed = () => {
     const next = !collapsed;

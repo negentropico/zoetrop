@@ -38,6 +38,7 @@ import { format, parseISO } from "date-fns";
 import type { MetricStatus } from "~/types/metrics";
 import { statusOf, statusColor, type StatusRanges } from "~/lib/status";
 import { Sparkline } from "./Sparkline";
+import { SigEmpty, SigLoading } from "./Signature";
 
 interface Range {
   min: number;
@@ -95,6 +96,9 @@ function fmtValue(v: number): string {
    Empty / loading states — exported for reuse by non-chart
    surfaces (ingest review, vault) per rule 6.
    ============================================================ */
+// ChartEmpty — delegates to SigEmpty (branded spiral ghost + dot-grain frame)
+// for the signature empty state. The locked .zt-chart-empty idiom (dot-grain +
+// mono caption) is preserved — SigEmpty wraps it and unspools the spiral behind.
 export function ChartEmpty({
   height = 240,
   title = "No readings yet",
@@ -104,37 +108,13 @@ export function ChartEmpty({
   title?: string;
   body?: string;
 }) {
-  return (
-    <div className="zt-chart-empty" style={{ height }}>
-      <div className="zt-eyebrow">{title}</div>
-      <p>{body}</p>
-    </div>
-  );
+  return <SigEmpty height={height} title={title} body={body} />;
 }
 
+// ChartLoading — delegates to SigLoading (phyllotaxis seed-head, breathes in
+// golden order). Replaces the bare hairline pulse; reduced motion → static dots.
 export function ChartLoading({ height = 240 }: { height?: number }) {
-  return (
-    <div style={{ height, position: "relative" }}>
-      <div className="zt-chart-skel" style={{ position: "absolute", inset: "12% 4%" }}>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <span className="zt-eyebrow" style={{ color: "var(--text-faint)" }}>
-          Loading frames…
-        </span>
-      </div>
-    </div>
-  );
+  return <SigLoading height={height} />;
 }
 
 /* ============================================================
