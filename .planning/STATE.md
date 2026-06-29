@@ -140,10 +140,11 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-14T19:55:59.468Z
-Stopped at: Completed 01-06-PLAN.md
-Resume file: None
+Last session: 2026-06-29 (design-bridge B01 SSOT kit + design-rounds consolidation)
+Stopped at: Completed quick tasks 260629-h1h + 260629-ktv; DesignSync link verified in-sync.
+Resume file: **`.planning/HANDOFF.md`** — next-session agenda (Docker repair + deeper design streamline + B01 vectors round).
 
 ## Operator Next Steps
 
+- **`.planning/HANDOFF.md`** — (next session) repair Docker so the app runs in a container; perform the deeper design-content streamline (unify design-bridge + docs/design-system, drop empty `_notes/`, generated artifacts); then B01 accurate vectors in a Figma-aligned round.
 - `/gsd:plan-phase 1` — plan Phase 1 (Client Onboarding: practitioner-operated)
