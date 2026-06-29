@@ -1,0 +1,208 @@
+<!-- @dsCard group="Zoetrop" -->
+<!-- Static board (no <x-dc>): the navigator loads board HTML in an iframe and
+     themes it by setting data-theme on this <html>. The adapter keys off
+     [data-theme], so light/dark "just works". Kept as .dc.html for clean-slug
+     routing; can be migrated to a DC card later if inspector chrome is wanted. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zoetrop · Programme overview</title>
+<link rel="stylesheet" href="../_kit/_adapter.css">
+<link rel="stylesheet" href="../_kit/infocard.css">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;background:var(--canvas);}
+  .tabular{font-variant-numeric:tabular-nums;}
+  a{color:inherit;}
+  [data-focusring]:focus-visible{outline:2px solid var(--p-fig);outline-offset:2px;border-radius:6px;}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
+</style>
+</head>
+<body>
+<div style="background:var(--canvas);min-height:100vh;padding:60px 68px 100px;font-family:var(--font),system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background .2s ease;">
+
+<div style="display:flex;align-items:flex-start;gap:52px;flex-wrap:nowrap;max-width:1320px;margin:0 auto;">
+
+  <!-- ════════ INFOCARD RAIL ════════ -->
+  <div class="ic ic-rail">
+
+    <!-- CARD A · SUBJECT -->
+    <div class="ic-card">
+      <div class="ic-cardhead">
+        <div class="ic-taxon"><span class="ic-pill">(00 · L00)</span><span class="ic-seq">01 of 01</span></div>
+        <button class="ic-toggle" data-focusring onclick="ztToggleTheme()"><span class="gl">◐</span> Theme</button>
+      </div>
+      <div class="pad">
+        <div class="ic-kick"><span class="ic-eye">Zoetrop · Design line</span><a class="ic-crumblink" data-focusring href="../07-screens/S01-screens-index.dc.html">Jump to screens →</a></div>
+        <div class="ic-title">Zoetrop Design Programme <span class="facet">· overview</span></div>
+        <p class="ic-statement"><span class="lead">This board</span> maps Zoetrop's design line from the <b>broadest arc</b> — the member's health journey — down to a single token, and records where the line itself stands: R1 frozen, the signature line shipped, the data-viz charter (R2) open.</p>
+      </div>
+      <div class="pad div ic-meta">
+        <div class="ic-mrow"><div class="mk">Layer</div><div class="mv"><span class="dot"></span>00 · Design Programme</div></div>
+        <div class="ic-mrow"><div class="mk">Product</div><div class="mv">Wellness instrument — n=1 → practitioner platform</div></div>
+        <div class="ic-mrow"><div class="mk">Stack</div><div class="mv">13 zoom levels · React Router 7 + Tailwind</div></div>
+        <div class="ic-mrow"><div class="mk">Charter</div><div class="mv">ZOETROP-R1 (frozen) · ZOETROP-R2 (open)</div></div>
+        <div class="ic-mrow"><div class="mk">As of</div><div class="mv tabular">2026-06-28</div></div>
+      </div>
+      <div class="pad div">
+        <div class="ic-crumb-h">Levels-of-zoom spine</div>
+        <div class="ic-crumb">
+          <div class="rail"></div>
+          <div class="ic-crows">
+            <div class="ic-crow is-here"><span class="cd"></span><span class="ctype">00 · Programme</span><span class="cdesc">this board</span></div>
+            <div class="ic-crow"><span class="cd"></span><span class="ctype">01 · Lifecycle</span><span class="cdesc">the health arc</span></div>
+            <div class="ic-crow"><span class="cd"></span><span class="ctype">02–06 · Service design</span><span class="cdesc">journeys → blueprints</span></div>
+            <div class="ic-crow"><span class="cd"></span><a class="ctype" data-focusring href="../07-screens/S01-screens-index.dc.html">07 · Screens</a><span class="cdesc"><b>S01</b> · 6 product areas</span></div>
+            <div class="ic-crow"><span class="cd"></span><span class="ctype">08–11 · Surfaces</span><span class="cdesc">panels → components</span></div>
+            <div class="ic-crow"><span class="cd"></span><span class="ctype">12 · Tokens</span><span class="cdesc">docs/design-system</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD B · HOW TO READ -->
+    <div class="ic-card">
+      <div class="pad">
+        <div class="ic-howto-h">How to read it</div>
+        <p class="ic-howto">Read <b>top-down</b>: each level zooms in one step, 00 widest → 12 finest (§1). The <span class="pos">build arc</span> (§2) shows where the design <i>line</i> stands — R1 frozen, R2 open on visx. The <b>charter</b> (§3) is the binding contract. Levels render as <b>planned</b> until their boards are authored — the nav is honest about what exists.</p>
+      </div>
+    </div>
+
+  </div>
+  <!-- /RAIL -->
+
+  <!-- ════════ CONTENT ════════ -->
+  <div style="flex:1;min-width:0;max-width:960px;">
+
+    <!-- LEDE -->
+    <div style="position:relative;overflow:hidden;background:var(--resting);border:1px solid var(--line);border-radius:11px;box-shadow:var(--sh-2);padding:40px 46px;margin-bottom:34px;">
+      <div style="position:absolute;top:-120px;right:-90px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,var(--p-tint),transparent 68%);pointer-events:none;"></div>
+      <div style="font:500 11px var(--mono),monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;position:relative;">Wellness instrument · the whole design line on one board</div>
+      <h1 style="margin:0 0 16px;font:600 36px/1.09 var(--display),sans-serif;letter-spacing:-.02em;max-width:820px;text-wrap:balance;color:var(--ink);position:relative;">From the health arc to a single token — the Zoetrop design line, on one page.</h1>
+      <p style="margin:0 0 22px;font:400 15px/1.62 var(--font),sans-serif;color:var(--ink-2);max-width:780px;text-wrap:pretty;position:relative;">Zoetrop is a confidence-graded wellness instrument. This board is the design line on one page: the <b style="font-weight:600;color:var(--ink);">13 zoom levels</b> from the member lifecycle down to a token, and the <b style="font-weight:600;color:var(--ink);">build arc</b> of the design line itself — what's frozen, what shipped, and the one subsystem now reopened.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;position:relative;">
+        <span style="font:600 12.5px var(--font),sans-serif;color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:5px 13px;">Calm</span>
+        <span style="font:600 12.5px var(--font),sans-serif;color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:5px 13px;">Instrument</span>
+        <span style="font:600 12.5px var(--font),sans-serif;color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:5px 13px;">Warm-neutral</span>
+        <span style="font:600 12.5px var(--font),sans-serif;color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:5px 13px;">Honest-uncertainty</span>
+        <span style="font:600 12.5px var(--font),sans-serif;color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:5px 13px;">Data-dense</span>
+      </div>
+    </div>
+
+    <!-- §1 · 13-LEVEL THROUGH-LINE -->
+    <section style="margin-bottom:40px;">
+      <div style="display:flex;align-items:baseline;gap:13px;margin:0 0 10px;">
+        <span style="font:600 12px var(--mono),monospace;letter-spacing:.04em;color:var(--on-rail);background:var(--rail);padding:4px 10px;border-radius:4px;" class="tabular">01</span>
+        <h2 style="margin:0;font:600 19px var(--display),sans-serif;letter-spacing:-.01em;color:var(--ink);">Thirteen-level through-line</h2>
+        <span style="font:400 13px var(--font),sans-serif;color:var(--ink-3);">lifecycle → tokens — the spine every board navigates by</span>
+      </div>
+      <p style="margin:0 0 16px;font:400 13px/1.62 var(--font),sans-serif;color:var(--ink-2);max-width:840px;text-wrap:pretty;">One continuous zoom. The member <b style="font-weight:600;color:var(--ink);">lifecycle</b> contains the jobs; each job is walked as a <b style="font-weight:600;color:var(--ink);">journey</b> and <b style="font-weight:600;color:var(--ink);">flow</b> across screens; each screen is built from <b style="font-weight:600;color:var(--ink);">panels &amp; tables</b>, assembled from <b style="font-weight:600;color:var(--ink);">components</b>, which resolve to a single <b style="font-weight:600;color:var(--ink);">token</b>.</p>
+
+      <div id="spine" style="border:1px solid var(--line);border-radius:11px;background:var(--resting);box-shadow:var(--sh-1);overflow:hidden;"></div>
+    </section>
+
+    <!-- §2 · THE BUILD ARC -->
+    <section style="margin-bottom:40px;">
+      <div style="display:flex;align-items:baseline;gap:13px;margin:0 0 10px;">
+        <span style="font:600 12px var(--mono),monospace;letter-spacing:.04em;color:var(--on-rail);background:var(--rail);padding:4px 10px;border-radius:4px;" class="tabular">02</span>
+        <h2 style="margin:0;font:600 19px var(--display),sans-serif;letter-spacing:-.01em;color:var(--ink);">The design-line build arc</h2>
+        <span style="font:400 13px var(--font),sans-serif;color:var(--ink-3);">charter → refinements → reopening</span>
+      </div>
+      <p style="margin:0 0 16px;font:400 13px/1.62 var(--font),sans-serif;color:var(--ink-2);max-width:840px;text-wrap:pretty;">The token foundation is <b style="font-weight:600;color:var(--ink);">frozen under ZOETROP-R1</b> — palette, the three metric hue families, the four status tokens, the type pairing, and the left-nav chrome are decided, not re-decided. Refinement lines run off that foundation; R2 is an explicit, scoped <b style="font-weight:600;color:var(--p-fig);">charter reopening</b> of the chart language only.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+        <div style="border:1px solid var(--p-line);border-radius:11px;background:var(--p-tint);padding:18px 16px;">
+          <div style="font:700 10.5px var(--mono),monospace;letter-spacing:.04em;color:var(--p-fig);" class="tabular">R1</div>
+          <div style="font:600 13.5px var(--display),sans-serif;color:var(--ink);margin:6px 0 4px;">Foundation charter</div>
+          <div style="font:400 11.5px/1.5 var(--font),sans-serif;color:var(--ink-2);">Design language → IA spine → calm-instrument screens.</div>
+          <span style="display:inline-block;margin-top:10px;font:700 8px var(--mono),monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:3px 7px;color:var(--p-fig);border:1px solid var(--p-line);">Frozen ✓</span>
+        </div>
+        <div style="border:1px solid var(--line);border-radius:11px;background:var(--resting);padding:18px 16px;">
+          <div style="font:700 10.5px var(--mono),monospace;letter-spacing:.04em;color:var(--ink-3);" class="tabular">R1 · round4</div>
+          <div style="font:600 13.5px var(--display),sans-serif;color:var(--ink);margin:6px 0 4px;">Reports refinement</div>
+          <div style="font:400 11.5px/1.5 var(--font),sans-serif;color:var(--ink-2);">First harness-native refinement line off the foundation.</div>
+          <span style="display:inline-block;margin-top:10px;font:700 8px var(--mono),monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:3px 7px;color:var(--pos);border:1px solid var(--pos-line);background:var(--pos-soft);">Closed ✓</span>
+        </div>
+        <div style="border:1px solid var(--line);border-radius:11px;background:var(--resting);padding:18px 16px;">
+          <div style="font:700 10.5px var(--mono),monospace;letter-spacing:.04em;color:var(--ink-3);" class="tabular">R1 · round5</div>
+          <div style="font:600 13.5px var(--display),sans-serif;color:var(--ink);margin:6px 0 4px;">LINE-signature</div>
+          <div style="font:400 11.5px/1.5 var(--font),sans-serif;color:var(--ink-2);">The zt-sig-* signature layer, integrated across archetypes.</div>
+          <span style="display:inline-block;margin-top:10px;font:700 8px var(--mono),monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:3px 7px;color:var(--pos);border:1px solid var(--pos-line);background:var(--pos-soft);">Closed ✓</span>
+        </div>
+        <div style="border:1px solid var(--warn-line);border-radius:11px;background:var(--warn-soft);padding:18px 16px;">
+          <div style="font:700 10.5px var(--mono),monospace;letter-spacing:.04em;color:var(--warn);" class="tabular">R2 · round6</div>
+          <div style="font:600 13.5px var(--display),sans-serif;color:var(--ink);margin:6px 0 4px;">Data-viz language</div>
+          <div style="font:400 11.5px/1.5 var(--font),sans-serif;color:var(--ink-2);">Chart language on visx — distributions, multi-series, composition.</div>
+          <span style="display:inline-block;margin-top:10px;font:700 8px var(--mono),monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:3px 7px;color:var(--warn);border:1px solid var(--warn-line);">Open ◷</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- §3 · CHARTER ANCHOR -->
+    <section>
+      <div style="display:flex;align-items:baseline;gap:13px;margin:0 0 10px;">
+        <span style="font:600 12px var(--mono),monospace;letter-spacing:.04em;color:var(--on-rail);background:var(--rail);padding:4px 10px;border-radius:4px;" class="tabular">03</span>
+        <h2 style="margin:0;font:600 19px var(--display),sans-serif;letter-spacing:-.01em;color:var(--ink);">Charter anchor</h2>
+        <span style="font:400 13px var(--font),sans-serif;color:var(--ink-3);">the binding contract this spine reads against</span>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:11px;background:var(--resting);box-shadow:var(--sh-1);padding:22px 24px;">
+        <p style="margin:0 0 12px;font:400 13px/1.62 var(--font),sans-serif;color:var(--ink-2);">The frozen contract lives at <code style="font:500 12px var(--mono),monospace;color:var(--p-fig);background:var(--p-tint);padding:1px 6px;border-radius:4px;">design-bridge/harness/rounds/round1/CHARTER.md</code> (ZOETROP-R1), with the open reopening at <code style="font:500 12px var(--mono),monospace;color:var(--warn);background:var(--warn-soft);padding:1px 6px;border-radius:4px;">round6/CHARTER.md</code> (ZOETROP-R2). Line governance + how to open the next line: <code style="font:500 12px var(--mono),monospace;color:var(--ink-2);background:var(--sunk);padding:1px 6px;border-radius:4px;">design-bridge/OPEN-A-LINE.md</code>.</p>
+        <p style="margin:0;font:400 12px/1.6 var(--font),sans-serif;color:var(--ink-3);">FROZEN (R1): palette · three metric hue families · four status token values · Space Grotesk / Hanken Grotesk / Space Mono · warm neutral ramp · left-nav chrome · frame-card idiom · compact density. REOPENED (R2): the chart / data-viz language only — engine Recharts → visx.</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+</div>
+
+<script>
+  // Standalone theme toggle (in-shell, the navigator also sets data-theme on this <html>).
+  function ztToggleTheme(){var h=document.documentElement;if(h.getAttribute('data-theme')==='dark')h.removeAttribute('data-theme');else h.setAttribute('data-theme','dark');}
+
+  // §1 spine — rendered from data so status stays single-sourced + honest.
+  (function(){
+    var LEVELS=[
+      ["00","Programme","this board — the design line on one page","here","#"],
+      ["01","Lifecycle","the member health arc — onboard → baseline → protocol → review → sustain","planned",null],
+      ["02","Service journeys","member journey over time (effort / emotion, role-tagged)","planned",null],
+      ["03","Mental models","how members think about their health data (cityline)","planned",null],
+      ["04","Jobs to be done","ranked JTBD — understand a lab result, adjust a protocol","planned",null],
+      ["05","Flows of work","per-job taskflows across screens","planned",null],
+      ["06","Service blueprints","front-stage ↔ back-stage — ingest → analysis → insight → report","planned",null],
+      ["07","Screens","the 6 product areas — Dashboard · Metrics · Protocol · Insights · Reports · Ingest","built","../07-screens/S01-screens-index.dc.html"],
+      ["08","Panels","detail / analysis panels — correlations, genetics, supplement detail","planned",null],
+      ["09","Actions","controls & state transitions","planned",null],
+      ["10","Tables","dense surfaces — metrics, supplements, reports list","planned",null],
+      ["11","Components","the screen component register","planned",null],
+      ["12","Tokens","the colour / type / space token layer (docs/design-system/tokens)","planned",null]
+    ];
+    var host=document.getElementById('spine');
+    LEVELS.forEach(function(L,i){
+      var n=L[0],title=L[1],desc=L[2],status=L[3],href=L[4];
+      var here=status==='here',built=status==='built';
+      var row=document.createElement('div');
+      row.style.cssText='display:grid;grid-template-columns:52px 1fr 1.5fr;gap:0;'+
+        (here?'background:var(--p-tint);box-shadow:inset 0 0 0 1px var(--p-line);':(i?'border-top:1px solid var(--line-2);':''));
+      var numC=here?'var(--p-fig)':'var(--ink-3)';
+      var titleC=(here||built)?'var(--ink)':'var(--ink-3)';
+      var descC=(here||built)?'var(--ink-2)':'var(--ink-3)';
+      var titleHTML=(href&&built)
+        ? '<a href="'+href+'" style="font:600 13.5px var(--display),sans-serif;color:var(--ink);text-decoration:none;">'+title+'</a>'
+        : '<span style="font:600 13.5px var(--display),sans-serif;color:'+titleC+';">'+title+'</span>';
+      var chip = here
+        ? '<span style="font:700 8px var(--mono),monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--p-fig);border:1px solid var(--p-line);border-radius:3px;padding:1px 6px;margin-left:6px;">here</span>'
+        : built
+          ? '<span style="font:700 8px var(--mono),monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--pos);background:var(--pos-soft);border:1px solid var(--pos-line);border-radius:3px;padding:1px 6px;margin-left:6px;">built</span>'
+          : '<span style="font:700 8px var(--mono),monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:3px;padding:1px 6px;margin-left:6px;">planned</span>';
+      row.innerHTML=
+        '<div style="padding:12px 16px;font:700 12px var(--mono),monospace;color:'+numC+';" class="tabular">'+n+'</div>'+
+        '<div style="padding:12px 16px;">'+titleHTML+chip+'</div>'+
+        '<div style="padding:12px 16px;font:400 12px var(--font),sans-serif;color:'+descC+';">'+desc+'</div>';
+      host.appendChild(row);
+    });
+  })();
+</script>
+</body>
+</html>
