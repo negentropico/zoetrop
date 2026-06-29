@@ -25,6 +25,7 @@
       "href": "00-design-programme/programme-overview.dc.html"
     },
     "reference": [
+      { "title": "Vocabulary spine · taxonomy · ontology · grammar", "href": "00-design-programme/vocabulary-spine.dc.html" },
       { "title": "Brand · logo & mark", "href": DS + "guidelines/brand-logo.html" },
       { "title": "Brand · patterns",    "href": DS + "guidelines/brand-patterns.html" }
       // NOTE: the _rounds/round1 + round3 prototypes are intentionally NOT linked
@@ -66,7 +67,11 @@
       {
         "code": "06", "slug": "06-service-blueprints", "dir": "06-service-blueprints", "title": "Service blueprints",
         "items": [
-          { "code": "B01", "title": "System & surfaces — the full machinery (intake → ingest → engine → protocol → report)", "href": "06-service-blueprints/B01-system-and-surfaces.dc.html", "status": "built" }
+          { "code": "B01", "title": "System & surfaces — the full machinery (intake → ingest → engine → protocol → report)", "href": "06-service-blueprints/B01-system-and-surfaces.dc.html", "status": "built",
+            "variants": [
+              { "label": "lo-fi", "href": "06-service-blueprints/B01-system-and-surfaces.dc.html" },
+              { "label": "hi-fi", "href": "06-service-blueprints/B01-system-and-surfaces-hifi.dc.html" }
+            ] }
         ]
       },
       {
