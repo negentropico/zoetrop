@@ -69,9 +69,11 @@ prototypes appear as `reference` rows above the spine.
 - **L11 Components** — core / data / forms galleries (need internet: React/Babel CDN).
 - **L07 Screens** — `S01` in-tree index + `S02` mobile app prototype (`ui_kits/app`).
 - **L06 Service blueprints** — `B01` System & surfaces map (in-tree; modeled on the
-  Atlas F02 flow-of-work). Two **fidelity variants** (pills in the drawer): `lo-fi`
-  (skeleton cards) and `hi-fi` (token-pure mini-screens built from reused page
-  elements — app-bar, inputs, rings, K-grade chips, CTAs — the FSN/Atlas technique).
+  Atlas F02 flow-of-work). Three **fidelity variants** (pills in the drawer), all in
+  the same six-stage arrangement: `lo-fi` (skeleton cards) · `hi-fi` (token-pure
+  mini-screens from reused page elements) · `full` (complete app views — top bar +
+  practitioner sidebar + dense content, data-driven from one chassis and scaled into
+  the flow via `transform`, the Atlas rung-4 idea).
 - **reference** — **Vocabulary spine** (taxonomy · ontology · composition grammar,
   recreated from PRX for Zoetrop's domain); brand logo & patterns.
 - **planned** — `01-05` (lifecycle/journeys/models/JTBD/flows) + `08-10`

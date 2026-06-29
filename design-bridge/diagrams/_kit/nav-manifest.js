@@ -70,7 +70,8 @@
           { "code": "B01", "title": "System & surfaces — the full machinery (intake → ingest → engine → protocol → report)", "href": "06-service-blueprints/B01-system-and-surfaces.dc.html", "status": "built",
             "variants": [
               { "label": "lo-fi", "href": "06-service-blueprints/B01-system-and-surfaces.dc.html" },
-              { "label": "hi-fi", "href": "06-service-blueprints/B01-system-and-surfaces-hifi.dc.html" }
+              { "label": "hi-fi", "href": "06-service-blueprints/B01-system-and-surfaces-hifi.dc.html" },
+              { "label": "full",  "href": "06-service-blueprints/B01-system-and-surfaces-full.dc.html" }
             ] }
         ]
       },

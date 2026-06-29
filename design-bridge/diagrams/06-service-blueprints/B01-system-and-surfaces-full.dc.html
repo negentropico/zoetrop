@@ -1,0 +1,305 @@
+<!-- @dsCard group="Zoetrop" -->
+<!-- System & surfaces — FULL. Same six stages, surfaces, and arrangement as the
+     lo-fi / hi-fi twins, but each card renders an ACTUAL full app view (top bar +
+     practitioner sidebar + page header + dense content) — data-driven (one spec
+     array → one chassis, the Atlas rung-4 idea) and scaled into the flow via
+     transform:scale so the layout still matches lo-fi/hi-fi. Static board. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zoetrop · System &amp; surfaces (full)</title>
+<link rel="stylesheet" href="../_kit/_adapter.css">
+<link rel="stylesheet" href="../_kit/infocard.css">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;}
+  body{background:var(--board-ground);font-feature-settings:'tnum' 1,'ss01' 1;}
+  .tabular,.mono{font-variant-numeric:tabular-nums;}
+  a{color:inherit;}
+  :root,[data-theme="light"]{--board-ground:#ece7e6;}
+  [data-theme="dark"]{--board-ground:var(--canvas);}
+
+  /* layout — identical structure to lo-fi/hi-fi */
+  .fmstage{width:max-content;min-width:100%;padding:46px 52px 80px;display:flex;align-items:flex-start;gap:48px;
+    font-family:var(--font),system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--board-ground);min-height:100vh;}
+  .fmmain{flex:none;}
+  .lanes{position:relative;display:flex;flex-direction:column;gap:28px;}
+  .lanes::before{content:"";position:absolute;left:53px;top:24px;bottom:24px;width:2.5px;border-radius:2px;background:var(--p);opacity:.85;}
+  .lane{position:relative;display:flex;align-items:center;gap:22px;}
+  .track{display:flex;align-items:center;gap:0;flex-wrap:nowrap;}
+  .arr{flex:none;width:26px;text-align:center;font:600 15px var(--mono),monospace;color:var(--ink-3);}
+  .arr.mut{color:var(--ink-4);}
+  .stb{position:relative;z-index:2;flex:none;width:108px;border-radius:9px;background:var(--rail);box-shadow:var(--sh-2);
+    padding:15px 13px;display:flex;flex-direction:column;justify-content:center;}
+  .stb .se{font:700 8px/1 var(--mono),monospace;letter-spacing:.13em;text-transform:uppercase;color:color-mix(in oklab,var(--p) 55%,#fff);}
+  .stb .sn{font:600 13.5px/1.2 var(--font),sans-serif;letter-spacing:-.012em;color:var(--on-rail);margin-top:8px;text-wrap:pretty;}
+  .stb .sp{font:400 7.5px/1.3 var(--mono),monospace;color:color-mix(in oklab,var(--on-rail) 70%,transparent);margin-top:7px;}
+  .stb.term{background:color-mix(in oklab,var(--pos) 30%,var(--rail));}
+  .stb.term .se{color:color-mix(in oklab,var(--pos) 60%,#fff);}
+
+  /* the scaled full-screen card */
+  .nb{flex:none;border:1px solid var(--line-2);border-radius:7px;overflow:hidden;box-shadow:var(--sh-2);background:var(--resting);}
+  .nb.foc{border:1.8px solid var(--p);box-shadow:0 0 0 3px color-mix(in oklab,var(--p) 13%,transparent),var(--sh-2);}
+  .nb.term{border:1.8px solid var(--pos);box-shadow:0 0 0 3px color-mix(in oklab,var(--pos) 12%,transparent),var(--sh-2);}
+  .zs-wrap{width:288px;height:184px;overflow:hidden;}
+  .zs-screen{width:800px;height:511px;transform:scale(.36);transform-origin:top left;background:var(--board-card);
+    display:flex;flex-direction:column;font-family:var(--font),system-ui,sans-serif;color:var(--ink);}
+  [data-theme="light"]{--board-card:#ffffff;}
+  [data-theme="dark"]{--board-card:var(--resting);}
+
+  /* ── full app-view chassis (.zs-*) — native sizes; scaled by the wrap ── */
+  .zs-top{height:48px;flex:none;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--resting);}
+  .zs-wm{display:flex;align-items:center;gap:9px;font:700 17px var(--font-display),sans-serif;color:var(--ink);letter-spacing:-.01em;}
+  .zs-wm .mk{width:24px;height:24px;border-radius:6px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font:800 14px var(--font-display),sans-serif;}
+  .zs-chip{margin-left:auto;display:flex;align-items:center;gap:8px;font:600 12.5px var(--font),sans-serif;color:var(--ink-2);background:var(--canvas);border:1px solid var(--line-2);border-radius:999px;padding:5px 13px 5px 6px;}
+  .zs-chip .av{width:19px;height:19px;border-radius:50%;background:var(--p-tint);border:1px solid var(--p-line);}
+  .zs-body{flex:1;min-height:0;display:flex;}
+  .zs-side{width:170px;flex:none;border-right:1px solid var(--line);background:var(--resting);padding:11px 10px;display:flex;flex-direction:column;gap:2px;}
+  .zs-nav{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;font:600 13px var(--font),sans-serif;color:var(--ink-2);}
+  .zs-nav .i{width:15px;height:15px;border-radius:4px;background:color-mix(in oklab,var(--ink) 13%,transparent);flex:none;}
+  .zs-nav.on{background:var(--p-tint);color:var(--p-fig);}
+  .zs-nav.on .i{background:var(--p);}
+  .zs-main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--board-card);}
+  .zs-ph{flex:none;padding:17px 22px 14px;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;gap:12px;}
+  .zs-ph .eye{font:700 10px var(--mono),monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--p-fig);margin-bottom:3px;}
+  .zs-ph h3{margin:0;font:600 22px/1.05 var(--font-display),sans-serif;letter-spacing:-.02em;color:var(--ink);}
+  .zs-ph .sub{font:400 12px var(--font),sans-serif;color:var(--ink-3);margin-bottom:3px;}
+  .zs-ph .act{margin-left:auto;font:600 12px var(--font),sans-serif;color:var(--p-on);background:var(--p);border-radius:7px;padding:9px 15px;}
+  .zs-ph .act.gn{background:var(--pos);}
+  .zs-c{flex:1;min-height:0;padding:18px 22px;overflow:hidden;display:flex;flex-direction:column;gap:13px;}
+  /* content primitives */
+  .zs-field{display:flex;flex-direction:column;gap:6px;}
+  .zs-lab{font:600 11px var(--mono),monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);}
+  .zs-inp{height:34px;border:1px solid var(--line-2);border-radius:7px;background:var(--canvas);display:flex;align-items:center;padding:0 13px;font:500 13px var(--font),sans-serif;color:var(--ink);}
+  .zs-inp .ph{color:var(--ink-4);}
+  .zs-opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1px solid var(--line-2);border-radius:9px;}
+  .zs-opt .r{width:16px;height:16px;border-radius:50%;border:2px solid var(--line-3);flex:none;}
+  .zs-opt.on{border-color:var(--p);background:var(--p-tint);}
+  .zs-opt.on .r{border:5px solid var(--p);}
+  .zs-opt .ot{font:600 13px var(--font),sans-serif;color:var(--ink);}
+  .zs-opt .od{font:400 11px var(--font),sans-serif;color:var(--ink-3);margin-top:1px;}
+  .zs-row{display:flex;gap:11px;}.zs-row>*{flex:1;}
+  .zs-ring{width:118px;height:118px;border-radius:50%;flex:none;position:relative;
+    background:conic-gradient(var(--p) 0 var(--v,70%), color-mix(in oklab,var(--ink) 9%,var(--board-card)) var(--v,70%) 100%);
+    -webkit-mask:radial-gradient(circle 36px at 50% 50%,transparent 98%,#000 100%);mask:radial-gradient(circle 36px at 50% 50%,transparent 98%,#000 100%);}
+  .zs-ringwrap{display:flex;align-items:center;gap:20px;}
+  .zs-stat{display:flex;flex-direction:column;gap:3px;}
+  .zs-stat .v{font:700 26px var(--font-mono),monospace;color:var(--ink);letter-spacing:-.02em;}
+  .zs-stat .l{font:500 12px var(--font),sans-serif;color:var(--ink-3);}
+  .zs-stat .v.sm{font-size:18px;}
+  .zs-stats{display:flex;gap:26px;}
+  .zs-trow{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line);}
+  .zs-trow:first-child{border-top:0;}
+  .zs-trow .nm{flex:1;font:500 13px var(--font),sans-serif;color:var(--ink);}
+  .zs-trow .vl{font:600 13px var(--mono),monospace;color:var(--ink-2);}
+  .zs-pill{font:700 9.5px var(--mono),monospace;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 9px;}
+  .zs-pill.g{color:var(--pos);background:var(--pos-soft);} .zs-pill.a{color:var(--warn);background:var(--warn-soft);}
+  .zs-pill.r{color:var(--urgent);background:var(--urgent-soft);} .zs-pill.e{color:var(--warn);background:var(--warn-soft);}
+  .zs-k{font:700 9.5px var(--mono),monospace;color:var(--p-fig);background:var(--p-tint);border-radius:5px;padding:3px 7px;}
+  .zs-tiles{display:flex;gap:13px;flex:1;min-height:0;}
+  .zs-tile{flex:1;border:1px solid var(--line-2);border-radius:10px;background:var(--resting);padding:14px;display:flex;flex-direction:column;}
+  .zs-tile .d{width:26px;height:26px;border-radius:7px;background:var(--p-tint);border:1px solid var(--p-line);margin-bottom:auto;}
+  .zs-tile .d.v{background:color-mix(in oklab,var(--vital-300) 22%,transparent);border-color:var(--vital-400);}
+  .zs-tile .d.e{background:color-mix(in oklab,var(--energy-300) 26%,transparent);border-color:var(--energy-400);}
+  .zs-tile .tt{font:600 13px var(--font),sans-serif;color:var(--ink);}
+  .zs-tile .ts{font:400 11px var(--font),sans-serif;color:var(--ink-3);margin-top:2px;}
+  .zs-hero{flex:1;border-radius:11px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 20px;min-height:0;
+    background:linear-gradient(120deg,color-mix(in oklab,var(--p) 80%,#000 0%),color-mix(in oklab,var(--vital-300) 58%,var(--p)));}
+  .zs-hero .ht{font:700 19px var(--font-display),sans-serif;color:#fff;text-shadow:0 1px 3px rgba(20,17,15,.4);letter-spacing:-.01em;}
+  .zs-hero .hs{font:400 12px var(--font),sans-serif;color:rgba(255,255,255,.85);margin-top:4px;}
+  .zs-hero .hcta{margin-top:12px;align-self:flex-start;font:600 12px var(--font),sans-serif;color:var(--accent-press);background:#fff;border-radius:7px;padding:8px 13px;}
+  .zs-doc{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line);font:500 13px var(--font),sans-serif;color:var(--ink-2);}
+  .zs-doc:first-child{border-top:0;} .zs-doc .fi{width:18px;height:22px;border:1px solid var(--line-2);border-radius:3px;background:var(--canvas);flex:none;}
+  .zs-doc .dd{margin-left:auto;font:500 11px var(--mono),monospace;color:var(--ink-3);}
+  .zs-ok{display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:10px;background:var(--pos-soft);border:1px solid var(--pos-line);font:600 14px var(--font),sans-serif;color:var(--pos);}
+  .zs-ok .ck{width:22px;height:22px;border-radius:50%;background:var(--pos);color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px var(--font);flex:none;}
+  .zs-spark{flex:1;min-height:0;border:1px solid var(--line-2);border-radius:10px;background:var(--canvas);position:relative;overflow:hidden;}
+  .zs-spark svg{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px);}
+  .zs-bigk{display:flex;align-items:center;gap:9px;}
+  .zs-bigk b{font:700 12px var(--mono),monospace;color:var(--p-fig);background:var(--p-tint);border-radius:6px;padding:5px 10px;}
+  .zs-note{font:400 12px/1.5 var(--font),sans-serif;color:var(--ink-3);}
+
+  /* sticky + rail meta */
+  .sticky{flex:none;width:188px;align-self:center;margin-left:8px;background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:7px;padding:8px 11px 9px;box-shadow:var(--sh-1);text-wrap:pretty;}
+  .sticky.sys{background:var(--info-soft);border-color:var(--info-line);}
+  .sticky .h{display:flex;align-items:center;gap:5px;font:700 7.5px/1 var(--mono),monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-bottom:5px;}
+  .sticky.sys .h{color:var(--info);}
+  .sticky .b{font:400 10px/1.5 var(--font),sans-serif;color:var(--ink-2);} .sticky .b b{color:var(--ink);font-weight:600;}
+  .imeta{display:flex;flex-direction:column;gap:17px;}
+  .mlbl{font:700 8px/1.3 var(--mono),monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px;}
+  .scen{display:flex;align-items:center;gap:9px;font:400 12px/1.45 var(--font),sans-serif;color:var(--ink-2);}
+  .scen .sd{width:6px;height:6px;border-radius:50%;background:var(--p);flex:none;}
+  .stages{display:flex;flex-direction:column;gap:7px;font:500 11px/1 var(--font),sans-serif;color:var(--ink-2);}
+  .stages .stg{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
+  .stages .stg b{font:700 9px/1 var(--mono),monospace;color:var(--p-fig);background:color-mix(in oklab,var(--p) 10%,transparent);border-radius:3px;padding:3px 6px;}
+  .stats{display:flex;flex-direction:column;}
+  .stat{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:7px 0;border-top:1px solid var(--line);}
+  .stat:first-child{border-top:0;padding-top:1px;}
+  .stat .sl{font:500 11px/1.3 var(--font),sans-serif;color:var(--ink-3);}
+  .stat .sv{font:600 11px/1.3 var(--mono),monospace;color:var(--ink);text-align:right;letter-spacing:-.01em;}
+  [data-focusring]:focus-visible{outline:2px solid var(--p-fig);outline-offset:2px;border-radius:6px;}
+</style>
+</head>
+<body>
+<div class="fmstage">
+
+  <!-- ════════ RAIL ════════ -->
+  <div class="ic ic-rail">
+    <div class="ic-card">
+      <div class="ic-cardhead">
+        <div class="ic-taxon"><span class="ic-pill">(06 · B01)</span><span class="ic-seq">blueprint · full</span></div>
+        <button class="ic-toggle" data-focusring onclick="ztToggleTheme()"><span class="gl">◐</span> Theme</button>
+      </div>
+      <div class="pad">
+        <div class="ic-kick"><span class="ic-eye">Zoetrop · Service blueprint</span><a class="ic-crumblink" data-focusring href="B01-system-and-surfaces-hifi.dc.html">← hi-fi</a></div>
+        <div class="ic-title">System &amp; surfaces <span class="facet">— the full machinery, full</span></div>
+        <p class="ic-statement"><span class="lead">Now the real views.</span> Same stages, surfaces, and arrangement — each card is a complete app view (top bar · practitioner sidebar · page header · dense content), one chassis driven from a spec, scaled into the flow.</p>
+      </div>
+      <div class="pad div imeta">
+        <div>
+          <div class="mlbl">Scenario</div>
+          <div class="scen"><span class="sd"></span>Practitioner onboards a client · diagnostics → graded protocol → report</div>
+        </div>
+        <div>
+          <div class="mlbl">Six stages · the spine snakes the sequence</div>
+          <div class="stages">
+            <span class="stg"><b>1</b>Onboard — client intake &amp; consent</span>
+            <span class="stg"><b>2</b>Ingest — labs · WHOOP · vault → review</span>
+            <span class="stg"><b>3</b>Analyze — the confidence-graded engine</span>
+            <span class="stg"><b>4</b>Protocol — author &amp; adjust</span>
+            <span class="stg"><b>5</b>Report — assemble &amp; deliver</span>
+            <span class="stg"><b>6</b>Sustain — track &amp; loop back</span>
+          </div>
+        </div>
+        <div>
+          <div class="mlbl">Fidelity ladder</div>
+          <div class="stats">
+            <div class="stat"><span class="sl">lo-fi</span><span class="sv">skeleton cards</span></div>
+            <div class="stat"><span class="sl">hi-fi</span><span class="sv">mini-screens</span></div>
+            <div class="stat"><span class="sl">full</span><span class="sv">actual app views ←</span></div>
+            <div class="stat"><span class="sl">Arrangement</span><span class="sv">identical</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ic-card"><div class="pad ic-legend">
+      <div class="ic-legcol">
+        <div class="ic-legh">Flow</div>
+        <div class="ic-key"><svg width="24" height="8" style="overflow:visible"><line x1="0" y1="4" x2="17" y2="4" stroke="var(--ink-3)" stroke-width="2"/><path d="M16,1.4 L21,4 L16,6.6 Z" fill="var(--ink-3)"/></svg>Main sequence · within a stage</div>
+        <div class="ic-key"><svg width="24" height="8" style="overflow:visible"><line x1="0" y1="4" x2="17" y2="4" stroke="var(--p)" stroke-width="2.5"/></svg>Spine · stage-to-stage</div>
+        <div class="ic-legh" style="margin-top:16px">Marks</div>
+        <div class="ic-key"><span style="width:16px;height:12px;background:var(--info-soft);border:1px solid var(--info-line);border-radius:3px"></span>Back-stage system note</div>
+        <div class="ic-key"><span style="width:16px;height:12px;background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:3px"></span>Decision / gate note</div>
+      </div>
+      <div class="ic-legcol">
+        <div class="ic-legh">Nodes</div>
+        <div class="ic-key"><span style="width:16px;height:12px;background:var(--rail);border-radius:2px"></span>Stage · section anchor</div>
+        <div class="ic-key"><span style="width:16px;height:12px;background:var(--board-card);border:1px solid var(--line-2);border-radius:2px"></span>Surface · full app view</div>
+        <div class="ic-key"><span style="width:16px;height:12px;background:var(--canvas);border:1.4px solid var(--p);border-radius:2px"></span>Focal · the binding decision</div>
+        <div class="ic-key"><span style="width:16px;height:12px;background:var(--canvas);border:1.2px solid var(--pos);border-radius:2px"></span>Terminal · delivered</div>
+      </div>
+    </div></div>
+
+    <div class="ic-card"><div class="pad">
+      <div class="ic-howto-h">How to read it</div>
+      <p class="ic-howto">Same map as the lo-fi/hi-fi twins — same stages, surfaces, arrangement — but each card is a <b>real app view</b>: the practitioner shell (top bar + sidebar) with the surface's actual content, one chassis driven from a spec and <b>scaled</b> into the flow. Zoom in to read any screen. Stage 6 loops back to Ingest.</p>
+    </div></div>
+  </div>
+  <!-- /rail -->
+
+  <div class="fmmain"><div class="lanes" id="lanes"></div></div>
+</div>
+
+<script>
+  function ztToggleTheme(){var h=document.documentElement;if(h.getAttribute('data-theme')==='dark')h.removeAttribute('data-theme');else h.setAttribute('data-theme','dark');}
+
+  // ── the practitioner shell nav (mirrors components/shell/nav-tree.ts + /clients) ──
+  var NAV=[["clients","Clients"],["dashboard","Dashboard"],["metrics","Metrics"],["protocol","Protocol"],["insights","Insights"],["reports","Reports"],["ingest","Ingest"]];
+  function side(active){
+    return '<div class="zs-side">'+NAV.map(function(n){return '<div class="zs-nav'+(n[0]===active?' on':'')+'"><span class="i"></span>'+n[1]+'</div>';}).join('')+'</div>';
+  }
+  // ── content renderers ──
+  var pill={optimal:'g',borderline:'a',deficient:'r',excess:'e'};
+  function trow(nm,vl,st,k){return '<div class="zs-trow"><span class="nm">'+nm+'</span><span class="vl">'+vl+'</span>'+(st?'<span class="zs-pill '+pill[st]+'">'+st.slice(0,3)+'</span>':'')+(k?'<span class="zs-k">'+k+'</span>':'')+'</div>';}
+  var C={
+    form:function(d){return d.fields.map(function(f){return '<div class="zs-field"><span class="zs-lab">'+f[0]+'</span><div class="zs-inp">'+(f[2]?'<span class="ph">'+f[1]+'</span>':f[1])+'</div></div>';}).join('');},
+    opts:function(d){return d.opts.map(function(o){return '<div class="zs-opt'+(o[2]?' on':'')+'"><span class="r"></span><div><div class="ot">'+o[0]+'</div><div class="od">'+o[1]+'</div></div></div>';}).join('');},
+    ring:function(d){return '<div class="zs-ringwrap"><div class="zs-ring" style="--v:'+d.v+'%"></div><div class="zs-stats" style="flex-direction:column;gap:13px">'+d.stats.map(function(s){return '<div class="zs-stat"><span class="v sm">'+s[0]+'</span><span class="l">'+s[1]+'</span></div>';}).join('')+'</div></div>';},
+    tiles:function(d){return '<div class="zs-tiles">'+d.tiles.map(function(t){return '<div class="zs-tile"><span class="d '+(t[2]||'')+'"></span><span class="tt">'+t[0]+'</span><span class="ts">'+t[1]+'</span></div>';}).join('')+'</div>';},
+    hero:function(d){return '<div class="zs-hero"><div class="ht">'+d.t+'</div><div class="hs">'+d.s+'</div><span class="hcta">'+d.cta+'</span></div>';},
+    docs:function(d){return d.docs.map(function(x){return '<div class="zs-doc"><span class="fi"></span>'+x[0]+'<span class="dd">'+x[1]+'</span></div>';}).join('');},
+    gate:function(d){return '<div class="zs-ok"><span class="ck">✓</span>'+d.ok+'</div>'+(d.note?'<div class="zs-note">'+d.note+'</div>':'');},
+    table:function(d){return d.rows.map(function(r){return trow(r[0],r[1],r[2],r[3]);}).join('');},
+    trend:function(d){return '<div class="zs-spark">'+d.svg+'</div><div class="zs-stats">'+d.stats.map(function(s){return '<div class="zs-stat"><span class="v sm">'+s[0]+'</span><span class="l">'+s[1]+'</span></div>';}).join('')+'</div>';},
+    overview:function(d){return '<div class="zs-row">'+d.cards.map(function(c){return '<div class="zs-tile"><span class="tt" style="margin-bottom:auto">'+c[0]+'</span><span class="zs-stat"><span class="v sm">'+c[1]+'</span><span class="l">'+c[2]+'</span></span></div>';}).join('')+'</div>';},
+    compare:function(d){return '<div class="zs-row" style="flex:1;min-height:0">'+['Current P5','Proposed P6'].map(function(h,i){return '<div class="zs-tile"><span class="tt" style="margin-bottom:8px">'+h+'</span>'+d.cols[i].map(function(x){return '<div class="zs-trow" style="padding:6px 0"><span class="nm" style="font-size:12px">'+x[0]+'</span>'+(x[1]?'<span class="zs-k">'+x[1]+'</span>':'')+'</div>';}).join('')+'</div>';}).join('')+'</div>';}
+  };
+  var spark1='<svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="2,32 22,28 42,30 62,18 82,13 98,8" fill="none" stroke="var(--p)" stroke-width="2.5"/></svg>';
+  var sparkv='<svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="2,30 22,26 42,27 62,19 82,16 98,11" fill="none" stroke="var(--vital-400)" stroke-width="2.5"/></svg>';
+  var scatter='<svg viewBox="0 0 100 40"><line x1="6" y1="34" x2="94" y2="7" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3"/><circle cx="16" cy="31" r="2.6" fill="var(--vital-400)"/><circle cx="34" cy="25" r="2.6" fill="var(--vital-400)"/><circle cx="52" cy="22" r="2.6" fill="var(--p)"/><circle cx="70" cy="14" r="2.6" fill="var(--p)"/><circle cx="86" cy="10" r="2.6" fill="var(--p)"/></svg>';
+
+  // ── the spec: same surfaces & arrangement as lo-fi / hi-fi ──
+  var LANES=[
+    {se:"Stage 1",sn:"Onboard",sp:"/clients",sticky:["sys","◇ back-stage","Client record + <b>tenancy &amp; identity</b> provisioned; invite link issued."],surfaces:[
+      {nav:"clients",eye:"Clients",h:"New client",act:"Create",type:"form",d:{fields:[["Name","Jordan Vale"],["Email","jordan@…",1],["Practice","HIGHER"]]}},
+      {nav:"clients",eye:"Consent",h:"Data sharing",act:"Agree",type:"opts",d:{opts:[["Share lab results","retroactive + ongoing",1],["Share WHOOP","HRV · recovery · sleep",1]]}},
+      {nav:"clients",eye:"Baseline",h:"Goals & history",act:"Save",type:"form",d:{fields:[["Primary goal","Recomposition"],["Age / sex","38 · M"],["History","Cessation — day 41"]]}}
+    ]},
+    {se:"Stage 2",sn:"Ingest",sp:"/ingest",sticky:["sys","◇ back-stage","Lab PDF <b>parsed → normalized</b> into the metrics table; WHOOP JSON → HRV/recovery/RHR/sleep series."],surfaces:[
+      {nav:"ingest",eye:"Ingest",h:"Sources",sub:"3 connected",type:"tiles",d:{tiles:[["Lab PDFs","2 pending",""],["WHOOP","synced","v"],["Vault","12 notes","e"]]}},
+      {nav:"ingest",eye:"Lab PDFs",h:"Upload",act:"Upload",type:"hero",d:{t:"Drop a lab PDF",s:"Quest · LabCorp · Function",cta:"Choose file"}},
+      {nav:"ingest",eye:"WHOOP",h:"Autonomic",type:"ring",d:{v:62,stats:[["62","HRV ms"],["48","RHR bpm"],["91%","Sleep"]]}},
+      {nav:"ingest",eye:"Vault",h:"Obsidian notes",type:"docs",d:{docs:[["05_Physiological_Metrics","md"],["08_Cessation_Protocol","md"],["09_Targets_2026","md"]]}},
+      {nav:"ingest",eye:"Review · gate",h:"Verify import",act:"Approve",foc:1,type:"gate",d:{ok:"12 markers parsed · 0 conflicts",note:"Confirm units &amp; ranges before they reach the metrics table."}}
+    ]},
+    {se:"Stage 3",sn:"Analyze",sp:"the engine",sticky:["sys","◆ the moat","The <b>confidence-graded engine</b> grades each marker <b>K1–K4</b> — honest uncertainty, not faked certainty."],surfaces:[
+      {nav:"metrics",eye:"Metrics",h:"All categories",sub:"9 panels",type:"table",d:{rows:[["Lipids","8 markers","borderline","K2"],["Metabolic","optimal","optimal","K1"],["Hormones","review","deficient","K3"]]}},
+      {nav:"metrics",eye:"Lipids",h:"Lipid panel",sub:"8 markers",type:"table",d:{rows:[["LDL-C","98 mg/dL","borderline","K2"],["HDL-C","61 mg/dL","optimal","K1"],["ApoB","82 mg/dL","optimal","K2"],["Lp(a)","44 nmol/L","deficient","K3"]]}},
+      {nav:"metrics",eye:"LDL-C",h:"Marker detail",act:"History",type:"trend",d:{svg:spark1,stats:[["98","mg/dL"],["−18%","6 mo"],["K2","grade"]]}},
+      {nav:"insights",eye:"Correlations",h:"HRV × LDL",sub:"r = −0.61",type:"trend",d:{svg:scatter,stats:[["−0.61","Pearson r"],["18","points"]]}},
+      {nav:"insights",eye:"Genetics",h:"Variants",type:"table",d:{rows:[["APOE","ε3/ε4","excess","K2"],["MTHFR","C677T","borderline","K2"],["FAAH","C385A","optimal","K3"]]}}
+    ]},
+    {se:"Stage 4",sn:"Protocol",sp:"/protocol",sticky:["warn","◷ decision","The <b>protocol-decision engine</b> proposes adjustments from graded evidence; the practitioner commits a new version."],surfaces:[
+      {nav:"protocol",eye:"Protocol",h:"P6 · current",sub:"adherence 88%",type:"overview",d:{cards:[["Adherence","88%","30-day"],["Phase","3 of 4","Clearing"],["Tiers","12","active"]]}},
+      {nav:"protocol",eye:"Versions",h:"Version history",type:"opts",d:{opts:[["P6 · 2026-06","current — graded recut",1],["P5 · 2026-03","prior baseline"],["P4 · 2025-12","pre-cessation"]]}},
+      {nav:"protocol",eye:"Supplements",h:"Tiers",type:"tiles",d:{tiles:[["Tier 1","core · 5",""],["Tier 2","support · 4","v"],["Tier 3","trial · 3","e"]]}},
+      {nav:"protocol",eye:"Phasing",h:"FAAH cessation",act:"Day 41",type:"hero",d:{t:"120-day arc",s:"Acute → Stabilization → Clearing → Optimization",cta:"Phase 3 · Clearing"}},
+      {nav:"protocol",eye:"Compare · decide",h:"P5 → P6",act:"Commit",foc:1,type:"compare",d:{cols:[[["Omega-3 2g",""],["NMN 500mg",""],["—",""]],[["Omega-3 3g","Δ"],["NMN 500mg",""],["+ Berberine","+"]]]}}
+    ]},
+    {se:"Stage 5",sn:"Report",sp:"/reports",term:1,sticky:["sys","◇ back-stage","Report assembles <b>graded findings + protocol</b> into a client-ready document (PDF / shareable)."],surfaces:[
+      {nav:"reports",eye:"Reports",h:"All reports",sub:"3",type:"docs",d:{docs:[["2026-06 · Quarterly review","PDF"],["2026-03 · Quarterly review","PDF"],["2025-12 · Baseline","PDF"]]}},
+      {nav:"reports",eye:"Generate",h:"Assemble report",act:"Build",type:"hero",d:{t:"Quarterly review",s:"Graded findings + P6 protocol + trends",cta:"Generate"}},
+      {nav:"reports",eye:"Deliver",h:"Client-ready",act:"Send",actgn:1,term:1,type:"gate",d:{ok:"Report ready · 14 pages",note:"Share a secure link or export the PDF for the client."}}
+    ]},
+    {se:"Stage 6",sn:"Sustain",sp:"/dashboard",sticky:["warn","↻ the loop","New labs &amp; WHOOP re-enter <b>Stage 2 · Ingest</b> — the instrument is continuous, not one-shot."],surfaces:[
+      {nav:"dashboard",eye:"Dashboard",h:"Today",sub:"day 41",type:"ring",d:{v:78,stats:[["78","Recovery"],["7:42","Sleep"],["P6","Protocol"]]}},
+      {nav:"metrics",eye:"Trends",h:"Ongoing",sub:"last 90d",type:"trend",d:{svg:sparkv,stats:[["+12%","HRV"],["−18%","LDL"],["88%","Adherence"]]}}
+    ]}
+  ];
+
+  function card(s){
+    var cls='nb'+(s.foc?' foc':'')+(s.term?' term':'');
+    var act=s.act?'<span class="act'+(s.actgn?' gn':'')+'">'+s.act+'</span>':'';
+    var sub=s.sub?'<div class="sub">'+s.sub+'</div>':'';
+    var screen='<div class="zs-screen">'+
+      '<div class="zs-top"><div class="zs-wm"><span class="mk">Z</span>Zoetrop</div><div class="zs-chip"><span class="av"></span>Jordan Vale</div></div>'+
+      '<div class="zs-body">'+side(s.nav)+
+        '<div class="zs-main"><div class="zs-ph"><div><div class="eye">'+s.eye+'</div><h3>'+s.h+'</h3></div>'+sub+act+'</div>'+
+        '<div class="zs-c">'+C[s.type](s.d)+'</div></div>'+
+      '</div></div>';
+    return '<div class="'+cls+'"><div class="zs-wrap">'+screen+'</div></div>';
+  }
+  var host=document.getElementById('lanes');
+  LANES.forEach(function(L){
+    var band='<div class="stb'+(L.term?' term':'')+'"><div class="se">'+L.se+'</div><div class="sn">'+L.sn+'</div><div class="sp">'+L.sp+'</div></div>';
+    var cards=L.surfaces.map(card).join('<span class="arr">→</span>');
+    var stick=L.sticky?'<div class="sticky '+(L.sticky[0]==='sys'?'sys':'')+'"><div class="h">'+L.sticky[1]+'</div><div class="b">'+L.sticky[2]+'</div></div>':'';
+    if(L.sn==='Sustain') cards+='<span class="arr mut">⤴</span>';
+    host.insertAdjacentHTML('beforeend','<div class="lane">'+band+'<div class="track">'+cards+stick+'</div></div>');
+  });
+</script>
+</body>
+</html>
