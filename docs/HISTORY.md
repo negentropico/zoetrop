@@ -130,7 +130,7 @@ The M1 phases then execute at high cadence (139 commits on 2026-06-10 alone):
 workstream: **round 1** (full redesign → Phase 4.1), **round 2** (consolidated left-nav
 chrome, integrated 2026-06-10/11 via GSD quick tasks q56/rj2/rwg), and **round 3**
 (whole-app polish + data-viz language — outbound package prepped 2026-06-11). The round-2
-integration pain produced the **roundtrip harness** (`docs/design-system/_rounds/harness/`:
+integration pain produced the **roundtrip harness** (`design-bridge/design-system/_archive/rounds/harness/`:
 unbundle + css-delta + RETURN-SPEC contract).
 
 **2026-06-11** — the rebrand completes: repo-wide **Zoetrope → Zoetrop** rename

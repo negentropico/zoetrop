@@ -2,7 +2,7 @@
 
 > Narrative companion to the GSD roadmap (alongside `docs/PLATFORM.md` and
 > `docs/PRINCIPLES.md`). How the generated **Zoetrop** brand design system
-> (`docs/design-system/`) lands in the product and binds future UI work.
+> (`design-bridge/design-system/`) lands in the product and binds future UI work.
 >
 > **Status:** Phase 04.1 **complete** · design roundtrip delivered · brand shipped
 > in-app · binding contract in `04.1-UI-SPEC.md` · warm-dark theme live ·
@@ -14,7 +14,7 @@
 
 ## 1. Why this exists
 
-`docs/design-system/` is a fully-realized brand — warm Paper palette, the
+`design-bridge/design-system/` is a fully-realized brand — warm Paper palette, the
 Energy / Vital / Focus metric families, Space Grotesk / Hanken / Space Mono type,
 frame cards, Lucide icons, a signature **MetricRing**, and a calm "quiet coach"
 voice. The shipped app is a **cool-grey/blue Tailwind dashboard in Inter** with
@@ -34,7 +34,7 @@ This doc plans that application **without derailing the engine-first roadmap**.
 ## 3. Sequence
 
 ```
-[done] Build screens package  →  docs/design-system/uploads/screens-package/
+[done] Build screens package  →  design-bridge/design-system/uploads/screens-package/
           │   (8 archetype screens: current-state screenshots + redesign briefs)
           ▼
 [NOW ] Design roundtrip  →  hand package + brand DS to claude.ai/design
@@ -51,12 +51,12 @@ gating artifact; this doc + the eventual UI-SPEC are the contract.
 
 > **Round protocol (added after round 2):** the repeatable roundtrip workflow, tooling
 > (`unbundle.mjs`, `css-delta.mjs`), and return contract now live at
-> `docs/design-system/_rounds/harness/README.md`; round 3 is prepped at
-> `docs/design-system/_rounds/round3/package/`.
+> `design-bridge/design-system/_archive/rounds/harness/README.md`; round 3 is prepped at
+> `design-bridge/design-system/_archive/rounds/round3/package/`.
 
 ## 4. The package (input to the roundtrip)
 
-`docs/design-system/uploads/screens-package/` — see its `README.md`. Eight
+`design-bridge/design-system/uploads/screens-package/` — see its `README.md`. Eight
 archetypes (dashboard, grouped list, section+nav, detail+chart, tabbed section,
 signature timeline, data table, upload/form) chosen to cover every pattern the
 product needs through M1. Each has desktop + mobile current-state screenshots and
@@ -101,7 +101,7 @@ path (D-01, D-02, D-03 from CONTEXT):
   under `app/components/shell/`. The `.jsx`/`_ds_bundle.js` runtime was not
   shipped into the TS-strict app. (D-02)
 - **No shadcn** — tooling = Tailwind `@theme` + hand-ported TSX only. (D-03)
-  `docs/design-system/` stays the source of truth; the app consumes a bridged
+  `design-bridge/design-system/` stays the source of truth; the app consumes a bridged
   subset. Token→Tailwind mapping is documented in `app/app.css` comments so
   drift is visible.
 - **All 16 routes** retrofitted — no half-branded app. (D-10)
@@ -153,7 +153,7 @@ revisions return.
 > 3. Retrofit screens 01–07 to brand (class swaps + component substitution).
 > 4. Resolve the category color/icon + 4-status palette in code.
 > **Mechanism:** run `/gsd:ui-phase 04.1` once revisions land — feed it this
-> package, the revised screens, and `docs/design-system/` to produce `UI-SPEC.md`,
+> package, the revised screens, and `design-bridge/design-system/` to produce `UI-SPEC.md`,
 > then `/gsd:plan-phase 04.1`.
 
 ### Done as part of this incorporation
