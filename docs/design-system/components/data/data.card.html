@@ -1,0 +1,57 @@
+<!-- @dsCard group="Components" viewport="700x340" name="Data — MetricRing, ProgressBar, Stat" subtitle="Rings, bars and readouts for metrics" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; background: var(--paper); padding: 24px; font-family: var(--font-text); color: var(--text); }
+  .lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); margin-bottom: 11px; }
+  .group { margin-bottom: 20px; }
+  .rings { display: flex; gap: 28px; align-items: center; }
+  .bars { display: flex; flex-direction: column; gap: 14px; max-width: 320px; }
+  .stats { display: flex; gap: 34px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { MetricRing, ProgressBar, Stat } = window.ZoetropDesignSystem_48aebc;
+
+function Demo() {
+  return (
+    <div>
+      <div className="group">
+        <div className="lbl">MetricRing</div>
+        <div className="rings">
+          <MetricRing value={6418} max={8000} tone="energy" label="80%" sublabel="Move" />
+          <MetricRing value={0.62} tone="vital" size={96} thickness={10} label="62" sublabel="Recover" />
+          <MetricRing value={0.91} tone="focus" size={96} thickness={10} label="7:42" sublabel="Sleep" />
+        </div>
+      </div>
+      <div className="group">
+        <div className="lbl">ProgressBar &amp; Stat</div>
+        <div style={{ display:'flex', gap: 40, alignItems:'center', flexWrap:'wrap' }}>
+          <div className="bars">
+            <ProgressBar value={6418} max={8000} tone="energy" label="Steps" showValue />
+            <ProgressBar value={42} max={60} tone="vital" label="Active minutes" showValue />
+            <ProgressBar value={0.91} tone="focus" label="Sleep goal" showValue />
+          </div>
+          <div className="stats">
+            <Stat label="Resting HR" value="58" unit="bpm" tone="vital" trend={{dir:'down', value:'3 bpm'}} />
+            <Stat label="Steps" value="6,418" tone="energy" trend={{dir:'up', value:'12%'}} />
+            <Stat label="Asleep" value="7:42" unit="hrs" tone="focus" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

@@ -22,8 +22,9 @@ build/
 # Netlify
 .netlify
 
-# database
-data/
+# database (anchored to repo root — an unanchored `data/` also matched
+# docs/design-system/components/data/, hiding the data component gallery)
+/data/
 *.db
 *.db-wal
 *.db-shm
