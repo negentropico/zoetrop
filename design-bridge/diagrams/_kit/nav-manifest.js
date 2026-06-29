@@ -1,22 +1,24 @@
 // HAND-AUTHORED (Trouvant-style) — the Zoetrop levels-of-zoom spine.
 //
-// SERVE FROM REPO ROOT: built boards under docs/design-system/ are linked
-// in-place via ../../docs/design-system/... (resolved against the index.html
-// baseURI = /design-bridge/diagrams/index.html → /docs/...). Run:
-//   python3 -m http.server 8781 --directory .   # repo root
-//   open http://127.0.0.1:8781/design-bridge/diagrams/index.html
+// SELF-CONTAINED — serve from THIS dir (design-bridge/diagrams). The pre-existing
+// design-system boards live one tree over (docs/design-system/) and are reached
+// through the `_ds` symlink (design-bridge/diagrams/_ds → ../../docs/design-system),
+// so every href stays inside the navigator root and resolves under a plain:
+//   python3 -m http.server 8781 --directory design-bridge/diagrams
+//   open http://127.0.0.1:8781/index.html
+// The symlink preserves directory depth, so each linked board's own relative
+// assets (../styles.css, ../../_ds_bundle.js) resolve too.
 //
 // Schema mirrors the generator (_kit/build-nav-manifest.mjs). The design-system
-// boards are authored OUTSIDE this tree (docs/design-system/) and predate the
-// navigator — they are linked, not regenerated; the generator only governs the
-// in-tree .dc.html boards. A `planned` item has no href → non-navigable.
+// boards predate the navigator — they are linked, not regenerated; the generator
+// only governs the in-tree .dc.html boards. A `planned` item has no href.
 //
 // Status reflects what genuinely exists (scan 2026-06-28): the token + component
 // layers (L11/L12) and brand are BUILT; service-design + screen-decomposition
 // levels (01-06, 08-10) have no artifacts yet → planned.
 
 ;(function (g) {
-  var DS = "../../docs/design-system/";
+  var DS = "_ds/";   // symlink → ../../docs/design-system (see header)
   g.ZOETROP_NAV = {
     "overview": {
       "title": "Programme overview",
@@ -24,9 +26,11 @@
     },
     "reference": [
       { "title": "Brand · logo & mark", "href": DS + "guidelines/brand-logo.html" },
-      { "title": "Brand · patterns",    "href": DS + "guidelines/brand-patterns.html" },
-      { "title": "History · R1 Redesign prototype", "href": DS + "_rounds/round1/Zoetrop%20Redesign.html" },
-      { "title": "History · R3 return prototype",   "href": DS + "_rounds/round3/round3-return/index.html" }
+      { "title": "Brand · patterns",    "href": DS + "guidelines/brand-patterns.html" }
+      // NOTE: the _rounds/round1 + round3 prototypes are intentionally NOT linked
+      // here — they are multi-file Babel React apps that don't self-mount standalone
+      // (undefined component exports + a 404 sub-resource; superseded snapshots).
+      // Re-add only once their mount is repaired, or link as raw "open in tab".
     ],
     "sections": [
       {
