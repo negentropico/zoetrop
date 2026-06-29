@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: First Client (practitioner-operated)
 status: executing
 stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-06-14T19:55:59.471Z"
-last_activity: 2026-06-14
+last_updated: "2026-06-29T21:47:20.761Z"
+last_activity: 2026-06-29
 progress:
   total_phases: 5
   completed_phases: 0
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
 Plan: 7 of 7
 Status: Ready to execute
-Last activity: 2026-06-29 - Completed quick task 260629-ktv: consolidated design rounds sprawl for system alignment (DesignSync link verified)
+Last activity: 2026-06-29 - Completed quick task 260629-lxg: repaired Docker so the app actually serves in a container (3 layered fixes; live sign-in + authed screen verified)
 
 ```
 v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/5 phases)
@@ -120,6 +120,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 | 260620-rd4 | round5 LINE-signature design integration (Phase 5) — spiral/phyllotaxis "signature" layer (motif watermark · "the settle" φ-stagger motion · paper grain · branded chart empty/loading · frame-dot iconography) across dashboard·metric-detail·metrics; within-LOCK, **zero token delta**; 3 atomic commits, build green | 2026-06-20 | b0705ae | [260620-rd4-r5-signature-integrate](./quick/260620-rd4-r5-signature-integrate/) |
 | 260629-h1h | B01 "System & surfaces" service-blueprint boards rebuilt onto a single SSOT screen-kit (`design-bridge/diagrams/_kit/zoetrop/` — AppScreen.jsx + screens.B01.js + app-screen.css, DC-runtime), modeled on the Stripe Atlas kit. lo-fi/hi-fi/full now render from ONE data source (contentType×fidelity matrix, shell defined once); full tier = real app views (TopBar+Sidebar+PageHeader, native 1280×800 scaled). Navigator-verified light+dark; **dark-theme root-scoping fix** + Inter-link cleanup (7209f92) | 2026-06-29 | 798a257 | [260629-h1h-rebuild-b01-service-blueprint-boards-ont](./quick/260629-h1h-rebuild-b01-service-blueprint-boards-ont/) |
 | 260629-ktv | Consolidated the design "rounds" sprawl for system alignment (audit → 3-layer model). `git mv docs/design-system/_rounds → _archive/rounds` (124 files, history-preserving) + archived closed round5 + superseded NEXT-LINE-PLAN under `design-bridge/_archive/`; pinned token SoT (`app.css` CANONICAL, `tokens/*.css` + `_adapter.css` DERIVED); "two rounds trees" docs. 150 files, **0 deletions** (only md5-verified gitignored `_notes/*.png` removed). Verified: `npm run build` exit 0, Navigator renders, `_ds` symlink resolves. DesignSync link confirmed in-sync (ZTP1 `f200a4ef…` / Zoetrope DS `48aebc…`). | 2026-06-29 | 3c98347 | [260629-ktv-consolidate-and-streamline-design-rounds](./quick/260629-ktv-consolidate-and-streamline-design-rounds/) |
+| 260629-lxg | Repaired Docker so the app actually **serves** in a container (HANDOFF Task A). Live `docker run` exposed **3 layered defects all masked by the Vercel preset**: (1) unconditional `vercelPreset()` → no `build/server/index.js` (gated on `process.env.VERCEL`, `d5b0825`); (2) `better-auth` + `@better-auth/drizzle-adapter` in **devDependencies** → dropped by `npm ci --omit=dev` since the standard SSR build externalizes node_modules (moved to `dependencies`, `ed71a60`); (3) `node:20-alpine` has no global `WebSocket` for Neon's serverless `Pool` (bumped → `node:24-alpine`, `b9ecedb`). Verified end-to-end: container signs in (HTTP 200, `better-auth.session_token`) and renders the authed **/metrics** screen (124 KB, real Neon data). Vercel deploy unaffected. Broken 704 MB image removed; `zoetrop-app:latest` rebuilt & verified. | 2026-06-29 | b9ecedb | [260629-lxg-docker-serve-fix](./quick/260629-lxg-docker-serve-fix/) |
 
 ## Deferred Items
 
@@ -140,9 +141,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-29 (design-bridge B01 SSOT kit + design-rounds consolidation)
-Stopped at: Completed quick tasks 260629-h1h + 260629-ktv; DesignSync link verified in-sync.
-Resume file: **`.planning/HANDOFF.md`** — next-session agenda (Docker repair + deeper design streamline + B01 vectors round).
+Last session: 2026-06-29 (Docker repair — HANDOFF Task A, done & live-verified)
+Stopped at: Completed quick task 260629-lxg — Docker now serves a live authed screen (3 layered fixes). **HANDOFF Task A is DONE.** Tasks B (deeper design-content streamline — needs owner decisions) and C (B01 accurate vectors, Figma-aligned round) remain.
+Resume file: **`.planning/HANDOFF.md`** — Task A complete; pick up Task B (design-content streamline) or Task C (B01 vectors).
 
 ## Operator Next Steps
 

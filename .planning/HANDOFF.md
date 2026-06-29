@@ -3,8 +3,8 @@
 **Created:** 2026-06-29 (end of session) · branch `design/zoetrop-dl-prime` (unpushed)
 
 ## TL;DR — next session does two things (owner-flagged), then a later one
-1. **REPAIR DOCKER** — the app must actually run in a container (it currently can't; root cause below).
-2. **DEEPER STREAMLINE** of the design locations — this session did only a conservative *archival* reorg; the owner still sees `design-bridge` **and** `docs/design-system` **and** an empty `_notes/` etc. They want real consolidation (fewer places).
+1. ~~**REPAIR DOCKER**~~ ✅ **DONE 2026-06-29** (quick task `260629-lxg`) — the app now serves a live, authenticated, DB-backed screen in a container. Took **3 layered fixes** (only #1 was anticipated below); see Task A section + `quick/260629-lxg-docker-serve-fix/260629-lxg-SUMMARY.md`.
+2. **DEEPER STREAMLINE** of the design locations — this session did only a conservative *archival* reorg; the owner still sees `design-bridge` **and** `docs/design-system` **and** an empty `_notes/` etc. They want real consolidation (fewer places). **← next up; needs owner decisions (see Task B options).**
 3. *(later)* **B01 accurate vectors** in a Figma-aligned design round — not hand-built ad-hoc.
 
 ---
@@ -17,7 +17,17 @@
 
 ---
 
-## TASK A — Repair Docker (make it actually serve)
+## TASK A — Repair Docker (make it actually serve) — ✅ DONE 2026-06-29 (`260629-lxg`)
+
+**Outcome:** the container now serves a live, authenticated, DB-backed screen. The anticipated root cause (below) was only the FIRST of **three layered defects, all masked by the Vercel preset**:
+1. **Unconditional `vercelPreset()`** → no `build/server/index.js`. Fixed: `presets: process.env.VERCEL ? [vercelPreset()] : []` (`d5b0825`).
+2. **`better-auth` + `@better-auth/drizzle-adapter` in `devDependencies`** → dropped by the Dockerfile's `npm ci --omit=dev` because the standard React Router SSR build *externalizes* node_modules (the Vercel preset bundled them, hiding this). Fixed: moved both to `dependencies` (`@better-auth/core` follows transitively) (`ed71a60`).
+3. **`node:20-alpine` has no global `WebSocket`** that `@neondatabase/serverless`'s `Pool` (via `db.server.ts` → `drizzle-orm/neon-serverless`) needs → sign-in 500'd with "All attempts to open a WebSocket … failed". Fixed: base image → `node:24-alpine` (Node ≥22.4 ships global WebSocket; matches Vercel's Node 24 LTS + dev) (`b9ecedb`).
+
+**Verified end-to-end:** `docker build` exit 0 → `docker run` → `GET /` 200 → `/metrics` 302→/login unauthenticated → `POST /api/auth/sign-in/email` 200 (sets `better-auth.session_token`) → authed `GET /metrics` 200 with 124 KB of real Neon-backed content. Vercel deploy unaffected (VERCEL=1 keeps the preset; deps-in-`dependencies` is strictly safer; Vercel doesn't use the Dockerfile). Broken 704 MB image removed; `zoetrop-app:latest` rebuilt & verified. **Full detail:** `quick/260629-lxg-docker-serve-fix/260629-lxg-SUMMARY.md`.
+
+<details><summary>Original anticipated root cause (pre-fix, for the record)</summary>
+
 **Root cause:** `remix-app/react-router.config.ts` applies `vercelPreset()`, so `react-router build` emits **Vercel build-output** (`.vercel/output/`) — there is no `build/server/index.js` for the Dockerfile's `CMD ["npm","run","start"]` (`react-router-serve ./build/server/index.js`). The image *builds* fine but **crashes on start**: `Cannot find module /app/build/server/index.js`.
 
 **Recommended fix:** apply the Vercel preset only for Vercel builds, so a Docker/standalone build emits the standard SSR output:
@@ -34,6 +44,8 @@ docker run --rm -p 3000:3000 --env-file remix-app/.env zoetrop-app
 # → load http://localhost:3000, sign in (owner creds in .env), confirm a gated screen renders
 ```
 Also confirm the **Vercel deploy still works** (the preset must still apply there). The image built this session — `zoetrop-app:latest` (704 MB) — is BROKEN; `docker rmi zoetrop-app` before rebuilding.
+
+</details>
 
 ---
 
