@@ -68,8 +68,11 @@ prototypes appear as `reference` rows above the spine.
   neutral/status), spacing (scale/radii/shadows), type (scale/display/body/data).
 - **L11 Components** — core / data / forms galleries (need internet: React/Babel CDN).
 - **L07 Screens** — `S01` in-tree index + `S02` mobile app prototype (`ui_kits/app`).
-- **reference** — brand logo & patterns; R1 Redesign + R3 return prototypes (history).
-- **planned** — `01-06` (service design) + `08-10` (panels/actions/tables): no artifacts yet.
+- **L06 Service blueprints** — `B01` System & surfaces map (in-tree; modeled on the
+  Atlas F02 flow-of-work — staged lo-fi surface cards + back-stage system notes).
+- **reference** — brand logo & patterns.
+- **planned** — `01-05` (lifecycle/journeys/models/JTBD/flows) + `08-10`
+  (panels/actions/tables): no artifacts yet.
 
 ## Spine (00 widest → 12 finest)
 

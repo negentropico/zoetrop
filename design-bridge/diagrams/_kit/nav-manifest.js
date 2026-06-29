@@ -66,7 +66,7 @@
       {
         "code": "06", "slug": "06-service-blueprints", "dir": "06-service-blueprints", "title": "Service blueprints",
         "items": [
-          { "code": "B01", "title": "Front-stage ↔ back-stage — ingest → analysis → insight → report", "status": "planned" }
+          { "code": "B01", "title": "System & surfaces — the full machinery (intake → ingest → engine → protocol → report)", "href": "06-service-blueprints/B01-system-and-surfaces.dc.html", "status": "built" }
         ]
       },
       {
