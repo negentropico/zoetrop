@@ -1,135 +1,37 @@
 <!-- @dsCard group="Zoetrop" -->
-<!-- System & surfaces — HI-FI. Same six stages, same surfaces, same arrangement
-     as the lo-fi B01; each card now renders a token-pure realistic mini-screen
-     (the FSN/Atlas "rung 3" technique: reusable .hf-* page elements at tiny type,
-     no transform-scale). Static board, themed via data-theme. -->
+<!-- System & surfaces — HI-FI. Thin DC board: renders from the shared SSOT kit
+     (_kit/zoetrop/AppScreen.jsx + screens.B01.js → window.ZOETROP_B01). Same six
+     stages, surfaces, and arrangement as the lo-fi / full twins; this tier shows
+     token-pure realistic mini-screens. The flow, data, and styling now live in
+     the kit — this board is documentation chrome (rail + theme toggle) only. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zoetrop · System &amp; surfaces (hi-fi)</title>
-<link rel="stylesheet" href="../_kit/_adapter.css">
-<link rel="stylesheet" href="../_kit/infocard.css">
-<style>
-  *{box-sizing:border-box;}
-  html,body{margin:0;min-height:100%;}
-  body{background:var(--board-ground);font-feature-settings:'tnum' 1,'ss01' 1;}
-  .tabular,.mono{font-variant-numeric:tabular-nums;}
-  a{color:inherit;}
-  :root,[data-theme="light"]{--board-ground:#ece7e6;--board-card:#ffffff;--board-cardln:#d8cfd1;
-    --board-cardsh:0 1px 2px rgba(39,35,36,.07),0 4px 10px rgba(39,35,36,.05);}
-  [data-theme="dark"]{--board-ground:var(--canvas);--board-card:var(--resting);--board-cardln:var(--line-2);
-    --board-cardsh:var(--sh-1);}
-
-  /* layout */
-  .fmstage{width:max-content;min-width:100%;padding:46px 52px 80px;display:flex;align-items:flex-start;gap:48px;
-    font-family:var(--font),system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--board-ground);min-height:100vh;}
-  .fmmain{flex:none;}
-  .lanes{position:relative;display:flex;flex-direction:column;gap:24px;}
-  .lanes::before{content:"";position:absolute;left:53px;top:24px;bottom:24px;width:2.5px;border-radius:2px;background:var(--p);opacity:.85;}
-  .lane{position:relative;display:flex;align-items:stretch;gap:22px;}
-  .track{display:flex;align-items:center;gap:0;flex-wrap:nowrap;}
-  .arr{flex:none;width:30px;text-align:center;font:600 15px var(--mono),monospace;color:var(--ink-3);}
-  .arr.mut{color:var(--ink-4);}
-
-  /* stage band */
-  .stb{position:relative;z-index:2;flex:none;width:108px;border-radius:9px;background:var(--rail);box-shadow:var(--sh-2);
-    padding:15px 13px;display:flex;flex-direction:column;justify-content:center;}
-  .stb .se{font:700 8px/1 var(--mono),monospace;letter-spacing:.13em;text-transform:uppercase;color:color-mix(in oklab,var(--p) 55%,#fff);}
-  .stb .sn{font:600 13.5px/1.2 var(--font),sans-serif;letter-spacing:-.012em;color:var(--on-rail);margin-top:8px;text-wrap:pretty;}
-  .stb .sp{font:400 7.5px/1.3 var(--mono),monospace;color:color-mix(in oklab,var(--on-rail) 70%,transparent);margin-top:7px;}
-  .stb.term{background:color-mix(in oklab,var(--pos) 30%,var(--rail));}
-  .stb.term .se{color:color-mix(in oklab,var(--pos) 60%,#fff);}
-
-  /* card frame */
-  .nb{flex:none;border:1px solid var(--board-cardln);background:var(--board-card);box-shadow:var(--board-cardsh);
-    border-radius:6px;width:172px;min-height:120px;overflow:hidden;}
-  .nb.foc{border:1.6px solid var(--p);box-shadow:0 0 0 3px color-mix(in oklab,var(--p) 13%,transparent),var(--board-cardsh);}
-  .nb.term{border:1.4px solid var(--pos);}
-
-  /* ── hi-fi mini-screen primitives (token-pure; tiny type, real proportions) ── */
-  .hf{display:flex;flex-direction:column;height:120px;overflow:hidden;}
-  .hf-bar{display:flex;align-items:center;gap:3px;height:14px;flex:none;padding:0 7px;background:var(--sunk);border-bottom:1px solid var(--line);}
-  .hf-bar i{width:3.5px;height:3.5px;border-radius:50%;background:var(--line-3);flex:none;}
-  .hf-bar .u{margin-left:5px;font:600 5.5px/1 var(--mono),monospace;letter-spacing:.03em;color:var(--ink-4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .hf-b{flex:1;min-height:0;display:flex;flex-direction:column;gap:3px;padding:7px 9px 8px;}
-  .hf-eye{font:700 6px/1 var(--mono),monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--p-fig);flex:none;}
-  .hf-t{font:600 9px/1.16 var(--font),sans-serif;color:var(--ink);letter-spacing:-.01em;text-wrap:pretty;flex:none;}
-  .hf-lab{font:600 6px/1 var(--mono),monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);flex:none;}
-  .hf-inp{display:flex;align-items:center;height:13px;padding:0 6px;border:1px solid var(--line-2);border-radius:3px;background:var(--canvas);font:500 7px/1 var(--font),sans-serif;color:var(--ink-2);white-space:nowrap;overflow:hidden;flex:none;}
-  .hf-inp .ph{color:var(--ink-4);}
-  .hf-cta{margin-top:auto;align-self:flex-end;display:flex;align-items:center;height:14px;padding:0 8px;border-radius:3px;background:var(--p);color:var(--p-on);font:600 6.5px/1 var(--font),sans-serif;flex:none;}
-  .hf-cta.gn{background:var(--pos);}
-  .hf-opt{display:flex;align-items:center;gap:5px;padding:4px 6px;border:1px solid var(--line-2);border-radius:4px;flex:none;}
-  .hf-opt .r{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line-3);flex:none;}
-  .hf-opt.on{border-color:var(--p);background:var(--p-tint);}
-  .hf-opt.on .r{border:2.5px solid var(--p);}
-  .hf-opt .ot{font:600 7px/1.05 var(--font),sans-serif;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .hf-row{display:flex;align-items:center;gap:4px;flex:none;}
-  .hf-row .hf-inp{flex:1;min-width:0;}
-  .hf-row .gr{flex:1;}
-  .hf-doc{display:flex;align-items:center;gap:4px;font:500 6.5px/1.25 var(--font),sans-serif;color:var(--ink-2);flex:none;}
-  .hf-doc::before{content:"";width:6px;height:7px;border:1px solid var(--line-2);border-radius:1px;background:var(--canvas);flex:none;}
-  .hf-ok{display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:4px;background:var(--pos-soft);border:1px solid var(--pos-line);font:600 7px/1.1 var(--font),sans-serif;color:var(--pos);flex:none;}
-  .hf-ok .ck{width:9px;height:9px;border-radius:50%;background:var(--pos);color:#fff;display:flex;align-items:center;justify-content:center;font-size:6px;line-height:1;flex:none;}
-  .hf-hero{flex:1;border-radius:4px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:7px 8px;min-height:0;
-    background:linear-gradient(120deg,color-mix(in oklab,var(--p) 78%,#000 0%),color-mix(in oklab,var(--vital-300) 60%,var(--p)));}
-  .hf-hero .ht{font:700 8px/1.12 var(--font),sans-serif;color:#fff;text-shadow:0 1px 2px rgba(20,17,15,.45);letter-spacing:-.01em;}
-  .hf-hero .hcta{margin-top:4px;align-self:flex-start;font:600 6px/1 var(--font),sans-serif;color:var(--accent-press);background:#fff;border-radius:3px;padding:3px 6px;}
-  .hf-spark{flex:1;min-height:0;border-radius:4px;border:1px solid var(--line-2);background:var(--canvas);position:relative;overflow:hidden;}
-  .hf-spark svg{position:absolute;inset:0;width:100%;height:100%;}
-  .hf-tiles{display:flex;gap:4px;flex:1;min-height:0;}
-  .hf-tile{flex:1;border:1px solid var(--line-2);border-radius:3px;background:var(--resting);display:flex;flex-direction:column;justify-content:flex-end;padding:4px;font:600 6px/1.1 var(--font),sans-serif;color:var(--ink-2);}
-  .hf-tile .d{width:9px;height:9px;border-radius:2px;background:var(--p-tint);border:1px solid var(--p-line);margin-bottom:auto;}
-  .hf-tile .d.v{background:color-mix(in oklab,var(--vital-300) 22%,transparent);border-color:var(--vital-400);}
-  .hf-tile .d.e{background:color-mix(in oklab,var(--energy-300) 26%,transparent);border-color:var(--energy-400);}
-  .hf-side{display:flex;gap:6px;flex:1;min-height:0;}
-  .hf-nav{width:30%;display:flex;flex-direction:column;gap:2px;flex:none;}
-  .hf-nav span{height:5px;border-radius:1px;background:color-mix(in oklab,var(--ink) 8%,var(--board-card));}
-  .hf-nav span.on{background:var(--p);width:84%;}
-  .hf-pane{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
-  .hf-mrow{display:flex;align-items:center;gap:4px;flex:none;}
-  .hf-mrow .nm{flex:1;height:5px;border-radius:1px;background:color-mix(in oklab,var(--ink) 9%,var(--board-card));}
-  .hf-pct{display:flex;align-items:center;gap:4px;flex:none;}
-  .hf-pct .v{font:700 7px/1 var(--mono),monospace;color:var(--ink);min-width:18px;}
-  .hf-pct .b{flex:1;height:5px;border-radius:3px;background:color-mix(in oklab,var(--ink) 8%,var(--board-card));overflow:hidden;}
-  .hf-pct .b i{display:block;height:100%;background:var(--p);border-radius:3px;}
-  /* Zoetrop signatures: metric ring + status-grade chip */
-  .hf-ring{margin:1px auto;width:40px;height:40px;border-radius:50%;flex:none;
-    background:conic-gradient(var(--p) 0 70%, color-mix(in oklab,var(--ink) 10%,var(--board-card)) 70% 100%);
-    -webkit-mask:radial-gradient(circle 12px at 50% 50%,transparent 98%,#000 100%);mask:radial-gradient(circle 12px at 50% 50%,transparent 98%,#000 100%);}
-  .hf-chip{display:inline-flex;align-items:center;height:9px;padding:0 5px;border-radius:999px;font:700 5.5px/1 var(--mono),monospace;letter-spacing:.04em;flex:none;}
-  .hf-chip.k{color:var(--p-fig);background:var(--p-tint);}
-  .hf-chip.g{color:var(--pos);background:var(--pos-soft);}
-  .hf-chip.a{color:var(--warn);background:var(--warn-soft);}
-  .hf-chip.r{color:var(--urgent);background:var(--urgent-soft);}
-  .hf-chips{display:flex;gap:3px;flex-wrap:wrap;flex:none;}
-
-  /* sticky + rail meta (shared with lo-fi) */
-  .sticky{flex:none;width:188px;align-self:center;margin-left:8px;background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:7px;padding:8px 11px 9px;box-shadow:var(--sh-1);text-wrap:pretty;}
-  .sticky.sys{background:var(--info-soft);border-color:var(--info-line);}
-  .sticky .h{display:flex;align-items:center;gap:5px;font:700 7.5px/1 var(--mono),monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-bottom:5px;}
-  .sticky.sys .h{color:var(--info);}
-  .sticky .b{font:400 10px/1.5 var(--font),sans-serif;color:var(--ink-2);}
-  .sticky .b b{color:var(--ink);font-weight:600;}
-  .imeta{display:flex;flex-direction:column;gap:17px;}
-  .mlbl{font:700 8px/1.3 var(--mono),monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px;}
-  .scen{display:flex;align-items:center;gap:9px;font:400 12px/1.45 var(--font),sans-serif;color:var(--ink-2);}
-  .scen .sd{width:6px;height:6px;border-radius:50%;background:var(--p);flex:none;}
-  .stages{display:flex;flex-direction:column;gap:7px;font:500 11px/1 var(--font),sans-serif;color:var(--ink-2);}
-  .stages .stg{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
-  .stages .stg b{font:700 9px/1 var(--mono),monospace;color:var(--p-fig);background:color-mix(in oklab,var(--p) 10%,transparent);border-radius:3px;padding:3px 6px;}
-  .stats{display:flex;flex-direction:column;}
-  .stat{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:7px 0;border-top:1px solid var(--line);}
-  .stat:first-child{border-top:0;padding-top:1px;}
-  .stat .sl{font:500 11px/1.3 var(--font),sans-serif;color:var(--ink-3);}
-  .stat .sv{font:600 11px/1.3 var(--mono),monospace;color:var(--ink);text-align:right;letter-spacing:-.01em;}
-  [data-focusring]:focus-visible{outline:2px solid var(--p-fig);outline-offset:2px;border-radius:6px;}
-  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
-</style>
+<title>Zoetrop &middot; System &amp; surfaces (hi-fi)</title>
+<script src="../_kit/support.js"></script>
+<script src="../_kit/zoetrop/screens.B01.js"></script>
 </head>
 <body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_kit/_adapter.css">
+  <link rel="stylesheet" href="../_kit/infocard.css">
+  <link rel="stylesheet" href="../_kit/zoetrop/app-screen.css">
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;min-height:100%;}
+    body{background:#ece7e6;font-feature-settings:'tnum' 1,'ss01' 1;}
+    body:has([data-theme="dark"]){background:var(--canvas);}
+    a{color:inherit;}
+  </style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="background:var(--board-ground);min-height:100vh;width:max-content;min-width:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;">
 <div class="fmstage">
 
   <!-- ════════ RAIL ════════ -->
@@ -137,12 +39,12 @@
     <div class="ic-card">
       <div class="ic-cardhead">
         <div class="ic-taxon"><span class="ic-pill">(06 · B01)</span><span class="ic-seq">blueprint · hi-fi</span></div>
-        <button class="ic-toggle" data-focusring onclick="ztToggleTheme()"><span class="gl">◐</span> Theme</button>
+        <button class="ic-toggle" data-focusring onClick="{{ toggleTheme }}"><span class="gl">◐</span> {{ toggleLabel }}</button>
       </div>
       <div class="pad">
         <div class="ic-kick"><span class="ic-eye">Zoetrop · Service blueprint</span><a class="ic-crumblink" data-focusring href="B01-system-and-surfaces.dc.html">← lo-fi</a></div>
         <div class="ic-title">System &amp; surfaces <span class="facet">— the full machinery, hi-fi</span></div>
-        <p class="ic-statement"><span class="lead">Same flow, rendered:</span> the lo-fi skeletons are now <b>real surfaces</b> — every card a token-pure mini-screen built from reused page elements. Front-stage on the spine; the <b>back-stage system</b> in the margin notes.</p>
+        <p class="ic-statement"><span class="lead">Same flow, rendered:</span> the lo-fi skeletons are now <b>real surfaces</b> — every card a token-pure mini-screen built from reused page elements. Front-stage on the spine; the <b>back-stage system</b> in the margin notes. <span class="facet">Now rendered from the shared screen-kit.</span></p>
       </div>
       <div class="pad div imeta">
         <div>
@@ -164,7 +66,7 @@
           <div class="mlbl">Fidelity</div>
           <div class="stats">
             <div class="stat"><span class="sl">Render</span><span class="sv">real surfaces</span></div>
-            <div class="stat"><span class="sl">Built from</span><span class="sv">reused elements</span></div>
+            <div class="stat"><span class="sl">Built from</span><span class="sv">shared kit</span></div>
             <div class="stat"><span class="sl">Tokens</span><span class="sv">R1 frozen</span></div>
             <div class="stat"><span class="sl">Lo-fi twin</span><span class="sv">same arrangement</span></div>
           </div>
@@ -197,105 +99,26 @@
   </div>
   <!-- /rail -->
 
-  <!-- ════════ LANES ════════ -->
-  <div class="fmmain">
-    <div class="lanes">
-
-      <!-- STAGE 1 · ONBOARD -->
-      <div class="lane">
-        <div class="stb"><div class="se">Stage 1</div><div class="sn">Onboard</div><div class="sp">/clients</div></div>
-        <div class="track">
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/clients/new</span></div><div class="hf-b"><div class="hf-eye">Clients</div><div class="hf-t">New client</div><div class="hf-lab">Name</div><div class="hf-inp">Jordan Vale</div><div class="hf-lab">Email</div><div class="hf-inp"><span class="ph">jordan@…</span></div><div class="hf-cta">Create</div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/clients/consent</span></div><div class="hf-b"><div class="hf-eye">Consent</div><div class="hf-t">Data sharing</div><div class="hf-opt on"><span class="r"></span><span class="ot">Share lab results</span></div><div class="hf-opt on"><span class="r"></span><span class="ot">Share WHOOP</span></div><div class="hf-cta">Agree</div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/clients/baseline</span></div><div class="hf-b"><div class="hf-eye">Baseline</div><div class="hf-t">Goals &amp; history</div><div class="hf-lab">Goal</div><div class="hf-inp">Recomposition</div><div class="hf-row"><div class="hf-inp">Age 38</div><div class="hf-inp">M</div></div><div class="hf-cta">Save</div></div></div></div>
-          <div class="sticky sys"><div class="h">◇ back-stage</div><div class="b">Client record + <b>tenancy &amp; identity</b> provisioned; invite link issued.</div></div>
-        </div>
-      </div>
-
-      <!-- STAGE 2 · INGEST -->
-      <div class="lane">
-        <div class="stb"><div class="se">Stage 2</div><div class="sn">Ingest</div><div class="sp">/ingest</div></div>
-        <div class="track">
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/ingest</span></div><div class="hf-b"><div class="hf-eye">Ingest</div><div class="hf-t">Sources</div><div class="hf-tiles"><div class="hf-tile"><span class="d"></span>Labs</div><div class="hf-tile"><span class="d v"></span>WHOOP</div><div class="hf-tile"><span class="d e"></span>Vault</div></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/ingest/upload</span></div><div class="hf-b"><div class="hf-eye">Lab PDFs</div><div class="hf-hero"><div class="ht">Drop lab PDF</div><span class="hcta">Upload</span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/import/whoop</span></div><div class="hf-b"><div class="hf-eye">WHOOP</div><div class="hf-ring"></div><div class="hf-pct"><span class="v">62</span><span class="b"><i style="width:62%"></i></span></div><div class="hf-pct"><span class="v">48</span><span class="b"><i style="width:80%"></i></span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/import/vault</span></div><div class="hf-b"><div class="hf-eye">Vault</div><div class="hf-t">Obsidian notes</div><div class="hf-doc">05_Physiological_Metrics</div><div class="hf-doc">08_Cessation_Protocol</div><div class="hf-doc">09_Targets_2026</div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb foc"><div class="hf"><div class="hf-bar"><i></i><span class="u">/ingest/review</span></div><div class="hf-b"><div class="hf-eye">Review · gate</div><div class="hf-t">Verify import</div><div class="hf-ok"><span class="ck">✓</span>12 markers parsed</div><div class="hf-cta">Approve</div></div></div></div>
-          <div class="sticky sys"><div class="h">◇ back-stage</div><div class="b">Lab PDF <b>parsed → normalized</b> into the metrics table; WHOOP JSON → HRV/recovery/RHR/sleep series.</div></div>
-        </div>
-      </div>
-
-      <!-- STAGE 3 · ANALYZE -->
-      <div class="lane">
-        <div class="stb"><div class="se">Stage 3</div><div class="sn">Analyze</div><div class="sp">the engine</div></div>
-        <div class="track">
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/metrics</span></div><div class="hf-b"><div class="hf-eye">Metrics</div><div class="hf-side"><div class="hf-nav"><span class="on"></span><span></span><span></span><span></span></div><div class="hf-pane"><div class="hf-chips"><span class="hf-chip g">OPT</span><span class="hf-chip a">BRD</span><span class="hf-chip r">DEF</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip g">K1</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip a">K3</span></div></div></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/metrics/lipids</span></div><div class="hf-b"><div class="hf-eye">Lipids</div><div class="hf-t">8 markers</div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip a">BRD</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip g">OPT</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip r">DEF</span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/metrics/lipids/ldl</span></div><div class="hf-b"><div class="hf-eye">LDL-C</div><div class="hf-spark"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="2,30 20,26 38,28 56,18 74,14 96,9" fill="none" stroke="var(--p)" stroke-width="2.5"/></svg></div><div class="hf-pct"><span class="v">98</span><span class="b"><i style="width:46%"></i></span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/insights/correlations</span></div><div class="hf-b"><div class="hf-eye">Correlations</div><div class="hf-spark"><svg viewBox="0 0 100 40"><circle cx="18" cy="30" r="2.4" fill="var(--vital-400)"/><circle cx="34" cy="24" r="2.4" fill="var(--vital-400)"/><circle cx="52" cy="22" r="2.4" fill="var(--p)"/><circle cx="68" cy="14" r="2.4" fill="var(--p)"/><circle cx="86" cy="11" r="2.4" fill="var(--p)"/><line x1="10" y1="33" x2="92" y2="8" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3"/></svg></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/insights/genetics</span></div><div class="hf-b"><div class="hf-eye">Genetics</div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip k">APOE</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip k">MTHFR</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip k">FAAH</span></div></div></div></div>
-          <div class="sticky sys"><div class="h">◆ the moat</div><div class="b">The <b>confidence-graded engine</b> grades each marker <b>K1–K4</b> — honest uncertainty, not faked certainty.</div></div>
-        </div>
-      </div>
-
-      <!-- STAGE 4 · PROTOCOL -->
-      <div class="lane">
-        <div class="stb"><div class="se">Stage 4</div><div class="sn">Protocol</div><div class="sp">/protocol</div></div>
-        <div class="track">
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/protocol</span></div><div class="hf-b"><div class="hf-eye">Protocol</div><div class="hf-t">P6 · current</div><div class="hf-lab">Adherence</div><div class="hf-pct"><span class="v">88</span><span class="b"><i style="width:88%"></i></span></div><div class="hf-row"><div class="hf-inp">Phase 3</div></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/protocol/versions</span></div><div class="hf-b"><div class="hf-eye">Versions</div><div class="hf-opt on"><span class="r"></span><span class="ot">P6 · 2026-06</span></div><div class="hf-opt"><span class="r"></span><span class="ot">P5 · 2026-03</span></div><div class="hf-opt"><span class="r"></span><span class="ot">P4 · 2025-12</span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/protocol/supplements</span></div><div class="hf-b"><div class="hf-eye">Supplements</div><div class="hf-tiles"><div class="hf-tile"><span class="d"></span>Tier 1</div><div class="hf-tile"><span class="d v"></span>Tier 2</div><div class="hf-tile"><span class="d e"></span>Tier 3</div></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/protocol/cessation</span></div><div class="hf-b"><div class="hf-eye">Phasing</div><div class="hf-hero"><div class="ht">FAAH · 120-day</div><span class="hcta">Day 41</span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb foc"><div class="hf"><div class="hf-bar"><i></i><span class="u">/protocol/compare</span></div><div class="hf-b"><div class="hf-eye">Compare · decide</div><div class="hf-side"><div class="hf-pane"><div class="hf-mrow"><span class="nm"></span></div><div class="hf-mrow"><span class="nm"></span></div></div><div class="hf-pane"><div class="hf-mrow"><span class="nm"></span><span class="hf-chip g">+</span></div><div class="hf-mrow"><span class="nm"></span><span class="hf-chip k">Δ</span></div></div></div><div class="hf-cta">Commit</div></div></div></div>
-          <div class="sticky"><div class="h">◷ decision</div><div class="b">The <b>protocol-decision engine</b> proposes adjustments from graded evidence; the practitioner commits a new version.</div></div>
-        </div>
-      </div>
-
-      <!-- STAGE 5 · REPORT -->
-      <div class="lane">
-        <div class="stb term"><div class="se">Stage 5</div><div class="sn">Report</div><div class="sp">/reports</div></div>
-        <div class="track">
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/reports</span></div><div class="hf-b"><div class="hf-eye">Reports</div><div class="hf-t">3 reports</div><div class="hf-doc">2026-06 · Quarterly</div><div class="hf-doc">2026-03 · Quarterly</div><div class="hf-doc">2025-12 · Baseline</div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/reports/generate</span></div><div class="hf-b"><div class="hf-eye">Generate</div><div class="hf-hero"><div class="ht">Assemble report</div><span class="hcta">Build</span></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb term"><div class="hf"><div class="hf-bar"><i></i><span class="u">/reports/r-0626</span></div><div class="hf-b"><div class="hf-eye">Deliver</div><div class="hf-t">Client-ready</div><div class="hf-ok"><span class="ck">✓</span>Report ready</div><div class="hf-cta gn">Send</div></div></div></div>
-          <div class="sticky sys"><div class="h">◇ back-stage</div><div class="b">Report assembles <b>graded findings + protocol</b> into a client-ready document (PDF / shareable).</div></div>
-        </div>
-      </div>
-
-      <!-- STAGE 6 · SUSTAIN -->
-      <div class="lane">
-        <div class="stb"><div class="se">Stage 6</div><div class="sn">Sustain</div><div class="sp">/dashboard</div></div>
-        <div class="track">
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/dashboard</span></div><div class="hf-b"><div class="hf-eye">Dashboard</div><div class="hf-side"><div class="hf-ring" style="margin:0"></div><div class="hf-pane"><div class="hf-pct"><span class="v">78</span><span class="b"><i style="width:78%"></i></span></div><div class="hf-tiles"><div class="hf-tile"><span class="d v"></span></div><div class="hf-tile"><span class="d e"></span></div></div></div></div></div></div></div>
-          <span class="arr">→</span>
-          <div class="nb"><div class="hf"><div class="hf-bar"><i></i><span class="u">/metrics</span></div><div class="hf-b"><div class="hf-eye">Trends · ongoing</div><div class="hf-chips"><span class="hf-chip g">OPT</span><span class="hf-chip g">OPT</span><span class="hf-chip a">BRD</span><span class="hf-chip g">OPT</span></div><div class="hf-spark"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="2,28 22,24 42,26 62,18 82,16 98,12" fill="none" stroke="var(--vital-400)" stroke-width="2.5"/></svg></div></div></div></div>
-          <span class="arr mut">⤴</span>
-          <div class="sticky"><div class="h">↻ the loop</div><div class="b">New labs &amp; WHOOP re-enter <b>Stage 2 · Ingest</b> — the instrument is continuous, not one-shot.</div></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
+  <div class="fmmain"><x-import from="../_kit/zoetrop/AppScreen.jsx" component="FlowBoard" fidelity="hifi"></x-import></div>
 </div>
-
-<script>
-  function ztToggleTheme(){var h=document.documentElement;if(h.getAttribute('data-theme')==='dark')h.removeAttribute('data-theme');else h.setAttribute('data-theme','dark');}
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1040}}">
+class Component extends DCLogic {
+  state = { theme: 'light' };
+  componentDidMount() {
+    try { const t = localStorage.getItem('zoetrop-theme'); if (t === 'dark' || t === 'light') this.setState({ theme: t }); } catch (e) {}
+  }
+  renderVals() {
+    const theme = this.state.theme;
+    const toggleTheme = () => {
+      const next = this.state.theme === 'dark' ? 'light' : 'dark';
+      this.setState({ theme: next });
+      try { localStorage.setItem('zoetrop-theme', next); } catch (e) {}
+    };
+    return { theme, toggleTheme, toggleLabel: theme === 'dark' ? 'Light' : 'Dark' };
+  }
+}
 </script>
 </body>
 </html>
