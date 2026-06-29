@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
 Plan: 7 of 7
 Status: Ready to execute
-Last activity: 2026-06-14
+Last activity: 2026-06-29 - Completed quick task 260629-h1h: B01 SSOT screen-kit (lo-fi/hi-fi/full from one data source)
 
 ```
 v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/5 phases)
@@ -118,6 +118,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 | 260611-py7 | Canonical platform history doc — docs/HISTORY.md (Bwell vault origins → Tracker/Astro → Remix/Neon → Zoetrop platform pivot → GSD M1) + CLAUDE.md pointer | 2026-06-11 | d90fc96 | [260611-py7-canonical-platform-history-doc-docs-hist](./quick/260611-py7-canonical-platform-history-doc-docs-hist/) |
 | 260612-d8s | Round3 self-rendering design package (build-free prototype: left-nav chrome + Part A screens + Recharts idiom + theme toggle; README/BRIEF re-pointed off basic-auth preview) + 50 light/dark reference screenshots of live app | 2026-06-12 | 837dd96 | [260612-d8s-round3-self-rendering-design-package-ref](./quick/260612-d8s-round3-self-rendering-design-package-ref/) |
 | 260620-rd4 | round5 LINE-signature design integration (Phase 5) — spiral/phyllotaxis "signature" layer (motif watermark · "the settle" φ-stagger motion · paper grain · branded chart empty/loading · frame-dot iconography) across dashboard·metric-detail·metrics; within-LOCK, **zero token delta**; 3 atomic commits, build green | 2026-06-20 | b0705ae | [260620-rd4-r5-signature-integrate](./quick/260620-rd4-r5-signature-integrate/) |
+| 260629-h1h | B01 "System & surfaces" service-blueprint boards rebuilt onto a single SSOT screen-kit (`design-bridge/diagrams/_kit/zoetrop/` — AppScreen.jsx + screens.B01.js + app-screen.css, DC-runtime), modeled on the Stripe Atlas kit. lo-fi/hi-fi/full now render from ONE data source (contentType×fidelity matrix, shell defined once); full tier = real app views (TopBar+Sidebar+PageHeader, native 1280×800 scaled). Navigator-verified light+dark; **dark-theme root-scoping fix** + Inter-link cleanup (7209f92) | 2026-06-29 | 798a257 | [260629-h1h-rebuild-b01-service-blueprint-boards-ont](./quick/260629-h1h-rebuild-b01-service-blueprint-boards-ont/) |
 
 ## Deferred Items
 
