@@ -18,7 +18,7 @@
 
    SELF-CONTAINED by design: the navigator + its boards are standalone HTML that
    do NOT load the app build, so this file embeds Zoetrop's own token system
-   (lifted from docs/design-system/tokens/ + remix-app/app/app.css) and then
+   (lifted from design-bridge/design-system/tokens/ + remix-app/app/app.css) and then
    binds the kit names on top. Because Zoetrop self-themes by remapping the SAME
    token names under [data-theme="dark"], the kit seam needs only ONE block —
    dark resolves automatically through the base layer (the one exception is the

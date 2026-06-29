@@ -13,11 +13,11 @@ A change is *real* only when it lands in these files — the renders follow the 
 | Truth | File(s) | Authority |
 |---|---|---|
 | Token truth (consumable) | `remix-app/app/app.css` | the values, both themes (`:root` + `html[data-theme="dark"]`) |
-| Token truth (DS source) | `docs/design-system/tokens/*.css` + `_ds_manifest.json` | the catalogued DS vocabulary |
-| DS-as-skill | `docs/design-system/` (SKILL.md · guidelines · components · assets) | brand + component reference (adopted, not duplicated) |
+| Token truth (DS source) | `design-bridge/design-system/tokens/*.css` + `_ds_manifest.json` | the catalogued DS vocabulary |
+| DS-as-skill | `design-bridge/design-system/` (SKILL.md · guidelines · components · assets) | brand + component reference (adopted, not duplicated) |
 | Component truth | `remix-app/app/components/**` + the `zt-*`/`zn-*` class layers in `app.css` | role · states · rules |
 | Honesty test | the running app (`npm run dev`) + `zoetrop-design-roundtrip` capture | renders prove the tokens |
-| Rules | `CLAUDE.md` · `docs/design-system/readme.md` | the inviolable constraints |
+| Rules | `CLAUDE.md` · `design-bridge/design-system/readme.md` | the inviolable constraints |
 
 ## 2 · The two environments
 
@@ -45,11 +45,11 @@ scope; nothing appears in `claude mcp list`). **Two projects, two roles:** the r
 lives in a *regular* project (`PROJECT_TYPE_PROJECT`, e.g. "ZTP1" `f200a4ef-34c4-4d73-9e03-c210e759225a`) —
 **not** in `DesignSync list_projects`; pull it by id/URL via `get_project` / `list_files` / `get_file`. The
 **design-system** project (`PROJECT_TYPE_DESIGN_SYSTEM`, "Zoetrope Design System"
-`48aebcac-8daa-4a26-b920-7e9f98bafa40` ⇄ `docs/design-system/`) is the reusable component library — a
+`48aebcac-8daa-4a26-b920-7e9f98bafa40` ⇄ `design-bridge/design-system/`) is the reusable component library — a
 *post-integration* `/design-sync` promotion target, not where rounds prototype. **The rest of inbound runs
 by hand** — the `react-tailwind` CORE adapter isn't built yet, so `zoetrop-design-roundtrip`'s
 decode→adapt→gate→capture runs against the existing harness scripts
-(`docs/design-system/_rounds/harness/unbundle.mjs` + `css-delta.mjs` are the pre-harness origin of CORE's
+(`design-bridge/design-system/_archive/rounds/harness/unbundle.mjs` + `css-delta.mjs` are the pre-harness origin of CORE's
 decode + css-delta gate).
 
 ## 4 · Lines of development
@@ -76,7 +76,7 @@ lines editing one token serialize.
 
 ## 6 · Playbook — Claude Design (start of a line)
 
-1. Read the foundation (`CLAUDE.md` → `docs/design-system/readme.md` → the `current-state/app.css`
+1. Read the foundation (`CLAUDE.md` → `design-bridge/design-system/readme.md` → the `current-state/app.css`
    snapshot in the line's `package/`). Read any open `FEEDBACK-LINE-*`.
 2. Write `PROMPT-LINE-<name>.md`: scope, inputs, record-vs-decide, propagation (screen-only), exit.
 3. Change the **truth** additively (a `new.css` of rules NOT already in the snapshot); keep `zt-*`/`zn-*`

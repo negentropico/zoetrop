@@ -3,15 +3,15 @@
 > How to continue Zoetrop's design-language line, using the shared model in ngtops
 > `.claude/skills/ngt-design-line/` (`SKILL.md` + `templates/`). Scaffolded into this repo as
 > `zoetrop-design-line` + `zoetrop-design-roundtrip` (under `.claude/skills/`, gitignored — re-scaffold
-> with ngtops `scaffold-skills` if missing). The DS-as-skill is the existing `docs/design-system/`
+> with ngtops `scaffold-skills` if missing). The DS-as-skill is the existing `design-bridge/design-system/`
 > (`ZoetropDesignSystem_48aebc`) — **adopted, not re-scaffolded**.
 
 ## This project
 
 - **Archetype:** B · existing-app round — specifically **adopt-existing foundation → refinement LINE**.
-  Zoetrop is **not greenfield**: `docs/design-system/` is a mature, shipped DS (3 prior rounds, live at
+  Zoetrop is **not greenfield**: `design-bridge/design-system/` is a mature, shipped DS (3 prior rounds, live at
   zoetrop.netlify.app) and is the **origin the design-roundtrip CORE was ported from**
-  (`docs/design-system/_rounds/harness/{unbundle,css-delta}.mjs`).
+  (`design-bridge/design-system/_archive/rounds/harness/{unbundle,css-delta}.mjs`).
 - **Medium:** `screen` (single — no print sibling).
 - **Stack / token home:** react-tailwind (React Router 7 + Vite + Tailwind v4). Tokens at
   `remix-app/app/app.css` (`:root` light + `html[data-theme="dark"]` dark).
@@ -49,7 +49,7 @@ npm run design:round       # (re)write all round-manifest.json + DECISIONS.md
 1. Read `harness/rounds/round1/CHARTER.md` → `DECISIONS.md` (S1.0–S1.2 ☑) → `ROUNDTRIP.md`.
 2. `npm run design:seed -- --round=round<n>` to snapshot the current foundation into the line's `package/`.
 3. **ASSET-INVENTORY first** (see [`RETURN-GATE.md`](./RETURN-GATE.md)): enumerate the DS's existing
-   expressive vocabulary (`docs/design-system/assets/pattern-*.svg` + `mark-*.svg`,
+   expressive vocabulary (`design-bridge/design-system/assets/pattern-*.svg` + `mark-*.svg`,
    `guidelines/brand-patterns.html`, the `.zt-grain` texture utility) and tell the design side to **consume**
    it (reference/inline the canonical geometry), never reinvent. Then author `PROMPT-LINE-<name>.md` (scope ·
    inputs · record-vs-decide · propagation=physics · exit). Transmit via **`DesignSync`** in the round
@@ -67,4 +67,4 @@ npm run design:round       # (re)write all round-manifest.json + DECISIONS.md
 
 `harness/rounds/round1/CHARTER.md` (the contract) · `DECISIONS.md` (the closed record S1.0–S1.2) ·
 `ROUNDTRIP.md` (the Design⇄Code contract) · `carried/README.md` (the foundation = the carry) ·
-`docs/design-system/` (the adopted DS-as-skill). The token truth is `remix-app/app/app.css`.
+`design-bridge/design-system/` (the adopted DS-as-skill). The token truth is `remix-app/app/app.css`.

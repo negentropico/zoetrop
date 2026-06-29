@@ -1,5 +1,5 @@
 // Zoetrop brand mark: Fibonacci (φ) logarithmic spiral
-// SVG path data copied verbatim from docs/design-system/_rounds/round1/app/lib.jsx
+// SVG path data copied verbatim from design-bridge/design-system/_archive/rounds/round1/app/lib.jsx
 
 interface SpiralMarkProps {
   size?: number;  // default 26

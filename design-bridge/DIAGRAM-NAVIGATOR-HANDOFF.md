@@ -32,7 +32,7 @@ Mirror the FSN layout (a diagram family under the repo's design-bridge):
 ```
 zoetrop/design-bridge/diagrams/
   index.html                 ← shell entry (links _adapter.css + nav-shell.css; sets window.NAV_CONFIG)
-  _adapter.css               ← Zoetrop token seam (lift from docs/design-system/tokens/colors.css)
+  _adapter.css               ← Zoetrop token seam (lift from design-bridge/design-system/tokens/colors.css)
   _kit/
     nav-shell.css            ← copy verbatim from PRX canonical
     nav-shell.js             ← copy verbatim from PRX canonical
@@ -62,7 +62,7 @@ zoetrop/design-bridge/diagrams/
 
 ## Step 2 — `_adapter.css` (theme seam)
 The Navigator consumes the shared adapter vocabulary as **complete colours**. Lift
-Zoetrop's tokens from `docs/design-system/tokens/colors.css` (light + dark) into a
+Zoetrop's tokens from `design-bridge/design-system/tokens/colors.css` (light + dark) into a
 self-contained `_adapter.css` (see Stripe's `_kit/_adapter.css` for the self-contained
 form, or Trouvant's `_adapter.css` for wrapping channel tokens). Mapping:
 
@@ -105,7 +105,7 @@ structure in `design-bridge/OPEN-A-LINE.md`. Proposed spine:
 | 09 | Actions | controls & state transitions |
 | 10 | Tables | the dense surfaces (metrics, supplements, reports list) |
 | 11 | Components | the screen component register |
-| 12 | Tokens | the colour/type/space token layer (Zoetrop already has this — `docs/design-system/tokens/`) |
+| 12 | Tokens | the colour/type/space token layer (Zoetrop already has this — `design-bridge/design-system/tokens/`) |
 
 Notes:
 - Build the **register/index page per section** (`*-register.dc.html`) if you want the
@@ -114,7 +114,7 @@ Notes:
   placeholders (see Trouvant 07–11). The nav is honest about what exists.
 - Cards are `.dc.html` (`<x-dc>` + `_kit/support.js`); copy the CSS engines you need
   (`flowmap.css`, `journey.css`, `infocard.css`, `screens.css`) from a sibling `_kit`.
-  Level 12 (Tokens) can link straight to `../../docs/design-system/` artifacts.
+  Level 12 (Tokens) can link straight to `../../design-bridge/design-system/` artifacts.
 
 ## Step 4 — Serve + verify
 - Serve from a root where the boards' relative links resolve (likely

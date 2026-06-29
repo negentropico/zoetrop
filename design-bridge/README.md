@@ -6,7 +6,7 @@ repo-root layout. Entry point + archetype: **[`OPEN-A-LINE.md`](./OPEN-A-LINE.md
 
 ## Archetype — adopt-existing foundation → refinement LINE
 
-Zoetrop is **NOT greenfield.** `docs/design-system/` is a mature, shipped DS (3 prior design rounds; live
+Zoetrop is **NOT greenfield.** `design-bridge/design-system/` is a mature, shipped DS (3 prior design rounds; live
 at zoetrop.netlify.app) and is the **origin the design-roundtrip CORE was ported from**. So the harness
 does **not** author a charter from scratch — it **adopts** the existing foundation as the frozen charter
 **ZOETROP-R1**, backfills the three prior rounds into the ledger as history, and opens the next round as
@@ -37,12 +37,12 @@ design-bridge/
 
 ## The DS-as-skill — adopted, not re-scaffolded (reconcile)
 
-The `ngt-design-system` (§C3) pattern is **already instantiated** for zoetrop at **`docs/design-system/`**:
+The `ngt-design-system` (§C3) pattern is **already instantiated** for zoetrop at **`design-bridge/design-system/`**:
 `_ds_manifest.json` (namespace `ZoetropDesignSystem_48aebc`; 11 core components), `_adherence.oxlintrc.json`
 (real oxlint adherence rules), `SKILL.md` (the `zoetrop-design` skill), brand marks, guidelines, and the
 component library. **It is authoritative — adopt/reference it; do not reinvent or overwrite.** No competing
 `.claude/skills/zoetrop-design-system` was scaffolded; the line/roundtrip skills and `ROUNDTRIP.md` point
-at `docs/design-system/`.
+at `design-bridge/design-system/`.
 
 ## Run (from `remix-app/`)
 
@@ -72,10 +72,10 @@ There are **two rounds trees** in this repo, and they are easy to confuse — so
 1. **LIVE LEDGER** — `design-bridge/harness/rounds/`. Harness-generated, the active
    workflow surface. Holds only the in-flight entries: `round1` (frozen charter), `round4`
    (parked), `round6` (active). Closed records are moved out (see below).
-2. **PRIOR RETURN ARTIFACTS** — `docs/design-system/_archive/rounds/` (was
-   `docs/design-system/_rounds/`, ~16M). Frozen *return* snapshots from the prototype
+2. **PRIOR RETURN ARTIFACTS** — `design-bridge/design-system/_archive/rounds/` (was
+   `design-bridge/design-system/_archive/rounds/`, ~16M). Frozen *return* snapshots from the prototype
    rounds — provenance, **not** an active ledger. Relocated + explained in
-   `docs/design-system/_archive/README.md`.
+   `design-bridge/design-system/_archive/README.md`.
 
 Closed Layer-3 records (the round5 LINE-signature line + its superseded `NEXT-LINE-PLAN.md`)
 live at `design-bridge/_archive/` — see `design-bridge/_archive/README.md`.
@@ -89,7 +89,7 @@ separate, post-integration component-library sync — not a round return locatio
 | Round | System it touched | ZTP1 return location |
 |-------|-------------------|----------------------|
 | `round1` (S1.0–S1.2 backfill, frozen) | `remix-app/app/app.css` + DS library + Navigator (foundation) | pre-harness (backfilled into the ledger from prior prose) |
-| `round2` (left-nav prototype, archived) | app chrome (left-nav rail/accordion) | archived: `docs/design-system/_archive/rounds/round2/` |
+| `round2` (left-nav prototype, archived) | app chrome (left-nav rail/accordion) | archived: `design-bridge/design-system/_archive/rounds/round2/` |
 | `round3` (calm-instrument screens, archived) | metric/dashboard screens + Recharts idiom | ZTP1 `f200a4ef…` `round3-return/` (co-mingles the r4/r5 iteration files) |
 | `round4` (parked) | Reports surface (seeded, not returned) | ZTP1 `f200a4ef…` |
 | `round5` (CLOSED, archived) | `app.css` `zt-sig-*` expressive layer | ZTP1 `f200a4ef…` `round3-return/round5/return` → archived at `design-bridge/_archive/rounds/round5/return/` |

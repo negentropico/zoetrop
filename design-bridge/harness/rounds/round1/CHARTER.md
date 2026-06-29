@@ -34,7 +34,7 @@
   Space Grotesk display / Hanken Grotesk body / Space Mono data; large-radius "frame" cards, pill
   controls, soft warm ink-tinted shadows; spiral + phyllotaxis motifs. **No gradients. No emoji.**
 - **Token system** — `remix-app/app/app.css` is the consumable token layer (DS source at
-  `docs/design-system/`); dark via `html[data-theme="dark"]` variable-remap (no per-component dark
+  `design-bridge/design-system/`); dark via `html[data-theme="dark"]` variable-remap (no per-component dark
   selectors); Tailwind v4 `@theme inline` bridge.
 - **Left-nav interaction model** (S1.1) — consolidated left sidebar (264/64 rail, single-open accordion,
   collapsed-rail flyout, mobile drawer + sticky topbar, unified PageHeader). **BAKED.**
@@ -66,7 +66,7 @@
 
 ## Exit (already cleared)
 
-All criteria met; the foundation is tokenized, documented (`docs/design-system/`), shipped, and live.
+All criteria met; the foundation is tokenized, documented (`design-bridge/design-system/`), shipped, and live.
 The charter is **archived**. Further work runs as **refinement LINEs** off this foundation per
 `ROUNDTRIP.md`. First line: `../round4/PROMPT-LINE-reports.md` (apply the calm-instrument language to the
 Reports surface — the one major surface still without a design treatment).

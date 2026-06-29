@@ -1,6 +1,6 @@
 // Zoetrop brand wordmark: SpiralMark + "zoetrop." with periwinkle period
 // shell (MobileTopBar), so it links to /dashboard (WR-03 — `/` is the public landing).
-// Source: docs/design-system/_rounds/round1/app/lib.jsx Wordmark (lines 346–355)
+// Source: design-bridge/design-system/_archive/rounds/round1/app/lib.jsx Wordmark (lines 346–355)
 import { Link } from "react-router";
 import { SpiralMark } from "./SpiralMark";
 

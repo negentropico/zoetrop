@@ -9,7 +9,7 @@
  * — the barrel pulls postcss/tar and must not leak into this harness).
  *
  * LAYOUT NOTE — zoetrop keeps its design artifacts at the REPO ROOT
- * (`design-bridge/`, `docs/design-system/`), and the app lives in `remix-app/`.
+ * (`design-bridge/`, `design-bridge/design-system/`), and the app lives in `remix-app/`.
  * So the design:* scripts run with cwd = the repo root (the npm scripts in
  * `remix-app/package.json` `cd ..` first). Every relative path below is
  * therefore anchored at the zoetrop repo root.
@@ -22,7 +22,7 @@
  *   `init`/`seed` run without resolving an adapter module.
  *
  * ARCHETYPE — adopt-existing foundation → refinement LINE. zoetrop is NOT
- * greenfield: `docs/design-system/` is a mature, shipped DS (3 prior rounds,
+ * greenfield: `design-bridge/design-system/` is a mature, shipped DS (3 prior rounds,
  * live site). The token snapshot below (`remix-app/app/app.css`) is the FROZEN
  * foundation, not a baseline being replaced (cf. FSN, which builds from zero).
  */

@@ -15,7 +15,7 @@
  *   round4/round-manifest.json + DECISIONS.md  — the FIRST harness-native refinement LINE (skeleton;
  *       lineType: refinement, charter: ZOETROP-R1). Staged, not yet run — see round4/PROMPT-LINE-reports.md.
  *
- * Source for the backfill is the prior rounds' prose ledgers (docs/design-system/_rounds/round2/README.md
+ * Source for the backfill is the prior rounds' prose ledgers (design-bridge/design-system/_archive/rounds/round2/README.md
  * and round3/round3-return/CHANGES.md + INTEGRATION-PLAN.md). This records the decisions; it does not
  * re-ingest the design artifacts. Dates are when each round landed/baked (git-grounded).
  *
@@ -167,7 +167,7 @@ writeFileSync(resolve(`${roundsDir}/round4/DECISIONS.md`), renderManifestLedger(
 //   iconography) across three layout archetypes — dashboard, metric-detail, metrics —
 //   changing ZERO locked tokens. Scope (C): stage ZOETROP-R2 only if it still reads generic.
 //   roundType = global-token-line (app-global character, no single surface) — see PROMPT-LINE-signature.md.
-//   Inbound transport = DesignSync (the 48aebc… project ⇄ docs/design-system/); react-tailwind adapter deferred.
+//   Inbound transport = DesignSync (the 48aebc… project ⇄ design-bridge/design-system/); react-tailwind adapter deferred.
 // ─────────────────────────────────────────────────────────────────────────────
 
 let sig: RoundManifest = newManifest('round5', 'global-token-line');
@@ -204,7 +204,7 @@ const sigBlock: LedgerBlock = {
   },
   outputs: {
     selected:
-      'Activate the already-locked-but-unused expressive layer, consuming the DS’s own vocabulary: spiral/phyllotaxis as a quiet STRUCTURAL motif (a hairline corner watermark on the dashboard hero, a spiral ghost behind chart-empty, a phyllotaxis seed-head for chart-loading, and phyllotaxis φ-order as the mount-stagger ordering); ONE motion gesture — "the settle" (frames rise 7px→0 on --ease-frame, φ-staggered via --sig-i, transform-only); a canvas paper grain (feTurbulence noise behind content); branded empty/loading states; and a frame-dot icon signature (ringed ink dot echoing the chart frame + hairline icon-tile frames). Integrated into the real app as React Router 7 + TS: new Signature.tsx + a zt-sig-* layer appended to app.css, applied to dashboard + metric-detail + metrics catalog. The inline spiral path is byte-identical to docs/design-system/assets/mark-spiral.svg. Build green; gated PASS (RETURN-GATE 7/7).',
+      'Activate the already-locked-but-unused expressive layer, consuming the DS’s own vocabulary: spiral/phyllotaxis as a quiet STRUCTURAL motif (a hairline corner watermark on the dashboard hero, a spiral ghost behind chart-empty, a phyllotaxis seed-head for chart-loading, and phyllotaxis φ-order as the mount-stagger ordering); ONE motion gesture — "the settle" (frames rise 7px→0 on --ease-frame, φ-staggered via --sig-i, transform-only); a canvas paper grain (feTurbulence noise behind content); branded empty/loading states; and a frame-dot icon signature (ringed ink dot echoing the chart frame + hairline icon-tile frames). Integrated into the real app as React Router 7 + TS: new Signature.tsx + a zt-sig-* layer appended to app.css, applied to dashboard + metric-detail + metrics catalog. The inline spiral path is byte-identical to design-bridge/design-system/assets/mark-spiral.svg. Build green; gated PASS (RETURN-GATE 7/7).',
     rejected:
       'Hue-tinted / metric-coloured motif (breaks status-colour-only-on-bands/dots/badges); grain over cards/text or any gradient sheen (contrast cost + no-gradients ban — grain lives behind content on the canvas); opacity fade-in entrance (left content hidden JS-off/reduced-motion — replaced with transform-only settle); repeating phyllotaxis wallpaper behind data (noise on the dense list — catalog rows carry the icon-signature only, no watermark/grain); a bespoke icon set (icon-set swap = a charter decision — treated the glyphs instead).',
     tokenDelta:

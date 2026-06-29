@@ -6,7 +6,7 @@
 // branded empty/loading states, and the frame-dot icon signature.
 // No new tokens — all colour resolves to --ink / --n-* / --border.
 //
-// The spiral path below is byte-identical to docs/design-system/assets/mark-spiral.svg.
+// The spiral path below is byte-identical to design-bridge/design-system/assets/mark-spiral.svg.
 // That asset is the canonical source; keeping it inline avoids an asset fetch for a
 // hairline watermark and keeps this module self-contained (reconciliation #1).
 

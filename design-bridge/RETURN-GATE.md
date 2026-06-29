@@ -6,7 +6,7 @@
 > `harness/rounds/round1/ROUNDTRIP.md §7` and the line lifecycle in `OPEN-A-LINE.md`.
 >
 > Token truth = `remix-app/app/app.css`. The snapshot the return was authored against =
-> the round's `package/current-state/app.css`. Canonical assets = `docs/design-system/assets/`.
+> the round's `package/current-state/app.css`. Canonical assets = `design-bridge/design-system/assets/`.
 
 ## Transport (set the mental model first)
 
@@ -15,7 +15,7 @@ server; nothing in `claude mcp list`). The **round prototype/return** lives in a
 (`PROJECT_TYPE_PROJECT`, e.g. "ZTP1" `f200a4ef-34c4-4d73-9e03-c210e759225a`) — **not** in
 `DesignSync list_projects` (which lists only writable design-system projects); reach it by id/URL via
 `get_project` / `list_files` / `get_file`. The **design-system** project (`PROJECT_TYPE_DESIGN_SYSTEM`,
-"Zoetrope Design System" `48aebcac-8daa-4a26-b920-7e9f98bafa40` ⇄ `docs/design-system/`) is the reusable
+"Zoetrope Design System" `48aebcac-8daa-4a26-b920-7e9f98bafa40` ⇄ `design-bridge/design-system/`) is the reusable
 component library — a **post-integration promotion target** via `/design-sync`, not where rounds prototype.
 
 ## The 7-point gate
@@ -27,7 +27,7 @@ component library — a **post-integration promotion target** via `/design-sync`
 | **c** | **Namespacing** | a new class is not namespaced (`zt-sig-*` / `zt-<line>-*`), **or** a locked class is restyled without being logged as a feature-gated shim. |
 | **d** | **No gradients** | texture/finish uses a **colour-gradient fill**. Noise/structure is allowed — `feTurbulence`, or the canonical dotted-radial `.zt-grain` technique (a 1px radial dot, *not* a colour gradient) — gradients used to fake colour are not. |
 | **e** | **Motion is transform-only + gated** | motion hides via `opacity` (must be transform-only); or it is not gated under the signature root class **and** `@media (prefers-reduced-motion: no-preference)`; or JS-off / reduced-motion does not show the resting state. |
-| **f** | **Motif consumes canonical assets** | a motif is reinvented instead of consuming `docs/design-system/assets/` — verify path/geometry **identity** (an inlined path must be byte-identical to the source SVG, or reference it). |
+| **f** | **Motif consumes canonical assets** | a motif is reinvented instead of consuming `design-bridge/design-system/assets/` — verify path/geometry **identity** (an inlined path must be byte-identical to the source SVG, or reference it). |
 | **g** | **Decision ledger present** | the (a)–(f) verdict ledger is not recorded in `CHANGES.md`. |
 
 A return that passes a–f but omits g still FAILs — the ledger is how the next round trusts this one.
@@ -38,10 +38,10 @@ The DS already owns a rich expressive vocabulary. **Consume it; never assert it 
 Before writing a `PROMPT-LINE-*` / `BRIEF.md`, enumerate the existing assets + utilities and instruct the
 design side to **reference or inline the canonical geometry**, not reinvent it:
 
-- **Patterns / marks** — `docs/design-system/assets/pattern-*.svg` + `mark-*.svg` (spiral · phyllotaxis ·
+- **Patterns / marks** — `design-bridge/design-system/assets/pattern-*.svg` + `mark-*.svg` (spiral · phyllotaxis ·
   aperture · orbit · drum · pulsering). Inline the byte-identical path or reference the file.
-- **Pattern system doc** — `docs/design-system/guidelines/brand-patterns.html`.
-- **Texture** — the `.zt-grain` utility in `docs/design-system/tokens/base.css` (faint 1px dotted radial
+- **Pattern system doc** — `design-bridge/design-system/guidelines/brand-patterns.html`.
+- **Texture** — the `.zt-grain` utility in `design-bridge/design-system/tokens/base.css` (faint 1px dotted radial
   grain). Consume/extend it; don't author a new texture primitive unless `.zt-grain` genuinely can't serve.
 
 The outbound prompt states which of these the round consumes, and gate-(f) verifies geometry identity on the

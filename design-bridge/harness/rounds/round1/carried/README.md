@@ -6,7 +6,7 @@ loads it, never re-derives it:
 - **Token truth:** `remix-app/app/app.css` (`:root` light + `html[data-theme="dark"]` dark; Tailwind v4
   `@theme inline` bridge). The `current-state/app.css` snapshot in each line's `package/` is a copy taken
   at seed time.
-- **DS source + reference:** `docs/design-system/` (`_ds_manifest.json` namespace
+- **DS source + reference:** `design-bridge/design-system/` (`_ds_manifest.json` namespace
   `ZoetropDesignSystem_48aebc`; 11 core components; guidelines; brand marks; `_adherence.oxlintrc.json`).
 - **Closed decisions:** `../CHARTER.md` (the LOCK) + `../DECISIONS.md` (S1.0–S1.2 ☑).
 - **The `zt-*` / `zn-*` class layers** in `app.css` (the calm-instrument component vocabulary + the

@@ -19,7 +19,7 @@ Reports surface rendering in the foundation language, both themes, honesty rende
 - `package/current-state/app.css` (the token + `zt-*`/`zn-*` snapshot) and live `remix-app/app/app.css`.
 - The shipped chart language: `remix-app/app/components/ui/TrendChart.tsx` + `Sparkline.tsx` (the "frames"
   idiom) and the frame-card tooltip; the stat-strip (`zt-stat-strip`) and frame-card (`zt-card`) patterns.
-- `docs/design-system/` (components, guidelines) + the confidence-graded reports UI contract already in
+- `design-bridge/design-system/` (components, guidelines) + the confidence-graded reports UI contract already in
   the repo (`.planning` Phase 6 — the report domain: generate flow, confidence grading).
 
 ## Record vs decide

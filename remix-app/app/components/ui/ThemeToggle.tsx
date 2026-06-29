@@ -5,7 +5,7 @@
 // state and re-applies it after mount — this corrects the StrictMode / Suspense
 // "reappear" path in which React's singleton acquisition strips all attributes
 // from <html> (including data-theme) during the commit phase.
-// Source: docs/design-system/_rounds/round1 + 04.1-RESEARCH.md § ThemeToggle
+// Source: design-bridge/design-system/_archive/rounds/round1 + 04.1-RESEARCH.md § ThemeToggle
 import { useLayoutEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 

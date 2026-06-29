@@ -1,8 +1,8 @@
 // HAND-AUTHORED (Trouvant-style) — the Zoetrop levels-of-zoom spine.
 //
 // SELF-CONTAINED — serve from THIS dir (design-bridge/diagrams). The pre-existing
-// design-system boards live one tree over (docs/design-system/) and are reached
-// through the `_ds` symlink (design-bridge/diagrams/_ds → ../../docs/design-system),
+// design-system boards live one tree over (design-bridge/design-system/) and are reached
+// through the `_ds` symlink (design-bridge/diagrams/_ds → ../design-system),
 // so every href stays inside the navigator root and resolves under a plain:
 //   python3 -m http.server 8781 --directory design-bridge/diagrams
 //   open http://127.0.0.1:8781/index.html
@@ -18,7 +18,7 @@
 // levels (01-06, 08-10) have no artifacts yet → planned.
 
 ;(function (g) {
-  var DS = "_ds/";   // symlink → ../../docs/design-system (see header)
+  var DS = "_ds/";   // symlink → ../design-system (see header)
   g.ZOETROP_NAV = {
     "overview": {
       "title": "Programme overview",

@@ -19,8 +19,8 @@ python3 -m http.server 8781 --directory design-bridge/diagrams
 # open http://127.0.0.1:8781/index.html
 ```
 
-The design-system boards live one tree over (`docs/design-system/`) and are
-reached through the **`_ds` symlink** (`_ds → ../../docs/design-system`), so all
+The design-system boards live one tree over (`design-bridge/design-system/`) and are
+reached through the **`_ds` symlink** (`_ds → ../design-system`), so all
 links stay inside the navigator root — no repo-root serving needed. The symlink
 preserves depth, so each linked board's own `../styles.css` / `_ds_bundle.js`
 resolve too.
@@ -33,7 +33,7 @@ light/dark (the shell sets `data-theme` on each board iframe).
 ```
 diagrams/
   index.html              shell entry (NAV_CONFIG → ZOETROP_NAV)
-  _ds → ../../docs/design-system   symlink: in-place links to design-system boards
+  _ds → ../design-system   symlink: in-place links to design-system boards
   _kit/
     _adapter.css          Zoetrop token seam (self-contained: light + dark)
     nav-shell.{js,css}    canonical drawer + iframe canvas (verbatim from PRX)
@@ -54,7 +54,7 @@ Two kinds, both loaded into the iframe canvas:
    themed via `data-theme` on the board `<html>`; kept as `.dc.html` for clean-slug
    routing.
 2. **Linked design-system boards** — the pre-existing `@dsCard` HTML under
-   `docs/design-system/` (token guidelines, component galleries, the mobile
+   `design-bridge/design-system/` (token guidelines, component galleries, the mobile
    app-kit, brand), referenced via the `_ds` symlink (`_ds/…`). These predate the
    navigator and are linked, not regenerated.
 
