@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
 Plan: 7 of 7
 Status: Ready to execute
-Last activity: 2026-06-29 - Completed quick task 260629-lxg: repaired Docker so the app actually serves in a container (3 layered fixes; live sign-in + authed screen verified)
+Last activity: 2026-06-29 - Completed quick task 260629-mtl: nested docs/design-system → design-bridge/design-system (one design root, HANDOFF Task B)
 
 ```
 v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/5 phases)
@@ -121,6 +121,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 | 260629-h1h | B01 "System & surfaces" service-blueprint boards rebuilt onto a single SSOT screen-kit (`design-bridge/diagrams/_kit/zoetrop/` — AppScreen.jsx + screens.B01.js + app-screen.css, DC-runtime), modeled on the Stripe Atlas kit. lo-fi/hi-fi/full now render from ONE data source (contentType×fidelity matrix, shell defined once); full tier = real app views (TopBar+Sidebar+PageHeader, native 1280×800 scaled). Navigator-verified light+dark; **dark-theme root-scoping fix** + Inter-link cleanup (7209f92) | 2026-06-29 | 798a257 | [260629-h1h-rebuild-b01-service-blueprint-boards-ont](./quick/260629-h1h-rebuild-b01-service-blueprint-boards-ont/) |
 | 260629-ktv | Consolidated the design "rounds" sprawl for system alignment (audit → 3-layer model). `git mv docs/design-system/_rounds → _archive/rounds` (124 files, history-preserving) + archived closed round5 + superseded NEXT-LINE-PLAN under `design-bridge/_archive/`; pinned token SoT (`app.css` CANONICAL, `tokens/*.css` + `_adapter.css` DERIVED); "two rounds trees" docs. 150 files, **0 deletions** (only md5-verified gitignored `_notes/*.png` removed). Verified: `npm run build` exit 0, Navigator renders, `_ds` symlink resolves. DesignSync link confirmed in-sync (ZTP1 `f200a4ef…` / Zoetrope DS `48aebc…`). | 2026-06-29 | 3c98347 | [260629-ktv-consolidate-and-streamline-design-rounds](./quick/260629-ktv-consolidate-and-streamline-design-rounds/) |
 | 260629-lxg | Repaired Docker so the app actually **serves** in a container (HANDOFF Task A). Live `docker run` exposed **3 layered defects all masked by the Vercel preset**: (1) unconditional `vercelPreset()` → no `build/server/index.js` (gated on `process.env.VERCEL`, `d5b0825`); (2) `better-auth` + `@better-auth/drizzle-adapter` in **devDependencies** → dropped by `npm ci --omit=dev` since the standard SSR build externalizes node_modules (moved to `dependencies`, `ed71a60`); (3) `node:20-alpine` has no global `WebSocket` for Neon's serverless `Pool` (bumped → `node:24-alpine`, `b9ecedb`). Verified end-to-end: container signs in (HTTP 200, `better-auth.session_token`) and renders the authed **/metrics** screen (124 KB, real Neon data). Vercel deploy unaffected. Broken 704 MB image removed; `zoetrop-app:latest` rebuilt & verified. | 2026-06-29 | b9ecedb | [260629-lxg-docker-serve-fix](./quick/260629-lxg-docker-serve-fix/) |
+| 260629-mtl | Nested `docs/design-system/` → `design-bridge/design-system/` so the repo has **one top-level design root** (HANDOFF Task B — owner chose "nest under design-bridge"). History-preserving `git mv` (241 files, all R100); `docs/` keeps its 6 narrative docs. Repointed the `_ds` symlink (`→ ../design-system`) — Navigator verified resolving (`759cff7`). Swept **22 live files** to the new path (app provenance comments + active design-bridge docs/config + `.gitignore`/narrative), correcting the `_rounds`→`_archive/rounds` trap via an ordered two-pass (`21b3640`, `9e376d5`); `.planning`/`_archive`/frozen `package/` snapshots left as history. `npm run build` exit 0; **0 live stale refs**; comment-only diffs. DesignSync mapping is prose-only (no repo binding) — not invoked, prose repointed. | 2026-06-29 | 9e376d5 | [260629-mtl-nest-design-system](./quick/260629-mtl-nest-design-system/) |
 
 ## Deferred Items
 
@@ -141,9 +142,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-29 (Docker repair — HANDOFF Task A, done & live-verified)
-Stopped at: Completed quick task 260629-lxg — Docker now serves a live authed screen (3 layered fixes). **HANDOFF Task A is DONE.** Tasks B (deeper design-content streamline — needs owner decisions) and C (B01 accurate vectors, Figma-aligned round) remain.
-Resume file: **`.planning/HANDOFF.md`** — Task A complete; pick up Task B (design-content streamline) or Task C (B01 vectors).
+Last session: 2026-06-29 (HANDOFF Tasks A + B done — Docker repair + design-root unification)
+Stopped at: Completed quick tasks 260629-lxg (Docker serves a live authed screen) + 260629-mtl (one design root: design-bridge/design-system). **HANDOFF Tasks A and B are DONE.** Remaining: Task C (B01 accurate vectors, Figma-aligned round) + optional Task-B hygiene (rmdir repo-root `_notes/`, gitignore generated DS artifacts, relocate `uploads/` 5.9M).
+Resume file: **`.planning/HANDOFF.md`** — Tasks A & B complete; Task C (B01 vectors) is the next handoff item.
 
 ## Operator Next Steps
 

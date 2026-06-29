@@ -4,8 +4,8 @@
 
 ## TL;DR — next session does two things (owner-flagged), then a later one
 1. ~~**REPAIR DOCKER**~~ ✅ **DONE 2026-06-29** (quick task `260629-lxg`) — the app now serves a live, authenticated, DB-backed screen in a container. Took **3 layered fixes** (only #1 was anticipated below); see Task A section + `quick/260629-lxg-docker-serve-fix/260629-lxg-SUMMARY.md`.
-2. **DEEPER STREAMLINE** of the design locations — this session did only a conservative *archival* reorg; the owner still sees `design-bridge` **and** `docs/design-system` **and** an empty `_notes/` etc. They want real consolidation (fewer places). **← next up; needs owner decisions (see Task B options).**
-3. *(later)* **B01 accurate vectors** in a Figma-aligned design round — not hand-built ad-hoc.
+2. ~~**DEEPER STREAMLINE**~~ ✅ **CORE DONE 2026-06-29** (quick task `260629-mtl`) — owner chose to nest `docs/design-system/` under `design-bridge/`; now ONE top-level design root. Optional hygiene (rmdir repo-root `_notes/`, gitignore generated DS artifacts, relocate `uploads/`) remains — see Task B section.
+3. *(now the next item)* **B01 accurate vectors** in a Figma-aligned design round — not hand-built ad-hoc.
 
 ---
 
@@ -49,37 +49,32 @@ Also confirm the **Vercel deploy still works** (the preset must still apply ther
 
 ---
 
-## TASK B — Deeper design-content streamline
-**Current state** ("I still see design-bridge and design-system and _notes etc."):
-- **Two top-level design trees:** `design-bridge/` (98 tracked: `diagrams/` Navigator + `harness/` roundtrip + 5 `.md` docs + `_archive/`) and `docs/design-system/` (241 tracked: tokens/components/guidelines/assets/ui_kits/slides + generated bundle/manifest + `uploads/` 5.9M + `_archive/`).
-- **Empty `_notes/`** dir still present (gitignored; its `.png` dupes were removed in `260629-ktv`).
-- **Generated artifacts still tracked:** `docs/design-system/{_ds_bundle.js, _ds_manifest.json, _adherence.oxlintrc.json}`.
-- **`uploads/` (5.9M)** still in `docs/design-system/` (referenced by `readme.md`).
+## TASK B — Deeper design-content streamline — ✅ CORE DONE 2026-06-29 (`260629-mtl`)
 
-**Streamline options (decide with owner):**
-1. **Unify under ONE design root** (the owner's main ask — fewer places). E.g. nest `docs/design-system/` under `design-bridge/`, or both under a new top-level `design/`. **Watch:** the `_ds` symlink (`design-bridge/diagrams/_ds → ../../docs/design-system`); the **DesignSync ⇄ `docs/design-system/` path mapping** (the library project syncs *that* path — moving it needs the sync target updated); `app.css` "inlined from docs/design-system/tokens/" comments; the harness config `surfaces[]`.
-2. `rmdir _notes/` (empty, gitignored, zero risk).
-3. Gitignore the generated DS artifacts (`_ds_bundle.js`, `_ds_manifest.json`, `_adherence.oxlintrc.json`) — first confirm the `*.card.html` galleries / offline Navigator don't need the committed bundle.
-4. Relocate `uploads/` (5.9M) → `_archive/` — but FIRST repoint `docs/design-system/readme.md`'s `colors.jpg` reference (it's a protected cross-ref).
+**Owner chose option 1: nest `docs/design-system/` → `design-bridge/design-system/`.** Done via history-preserving `git mv` (241 files), `_ds` symlink repointed (`→ ../design-system`, Navigator verified), 22 live references swept to the new path (with the `_rounds→_archive/rounds` trap handled), build green, **0 live stale refs**. `design-bridge/` is now the single top-level design root; `docs/` keeps only its 6 narrative docs. DesignSync mapping is prose-only (no repo binding) — not invoked, prose repointed. Detail: `quick/260629-mtl-nest-design-system/260629-mtl-SUMMARY.md`. The **3-layer model** is now: LIVE (`remix-app/app/`) · DS PACKAGE (`design-bridge/design-system/`) · MACHINERY (`design-bridge/` harness+diagrams).
 
-**Basis = this session's audit** (summarized in `260629-ktv` PLAN + the `design-rounds-consolidated` memory). The **3-layer model:** LIVE (`remix-app/app/`) · DS PACKAGE (`docs/design-system/`) · MACHINERY (`design-bridge/`).
-**Safety rules that held this session (keep):** `git mv` only (reversible); delete only md5-verified dupes; **never `git add -A`** (parallel sessions share this tree); keep the `_ds` symlink resolving; don't break the DesignSync↔`docs/design-system` mapping; no DesignSync writes unless intentionally promoting.
+**Remaining optional hygiene (owner did NOT select these; pick up anytime):**
+1. `rmdir _notes/` — empty, gitignored, at **repo root** (not under design-system); zero risk.
+2. Gitignore the generated DS artifacts (`design-bridge/design-system/{_ds_bundle.js, _ds_manifest.json, _adherence.oxlintrc.json}`) — first confirm the `*.card.html` galleries / offline Navigator don't need the committed bundle.
+3. Relocate `uploads/` (5.9M) → `_archive/` — but FIRST repoint `design-bridge/design-system/readme.md`'s `colors.jpg` reference (protected cross-ref).
+
+**Safety rules that held (keep):** `git mv` only (reversible); delete only md5-verified dupes; **never `git add -A`** (parallel sessions share this tree); keep the `_ds` symlink resolving; don't break the DesignSync↔DS mapping; no DesignSync writes unless intentionally promoting.
 
 ---
 
 ## TASK C (later) — B01 accurate vectors
-Develop in a design round aligned to **Figma + screen systems** (not hand-built ad-hoc). The current B01 boards drift from the real app (which is a **dense single-OWNER instrument**, not the practitioner/client "Jordan Vale" flow they depict). Desktop reference: `docs/design-system/_archive/rounds/round3/screenshots/` (50 light+dark, 1280px, every surface — **no mobile**). Active design line: `round6`/ZOETROP-R2 (viz on visx). A "B01 · desktop" + "B01 · mobile" nav-item pair was requested. See memory `b01-fidelity-vectors-deferred`.
+Develop in a design round aligned to **Figma + screen systems** (not hand-built ad-hoc). The current B01 boards drift from the real app (which is a **dense single-OWNER instrument**, not the practitioner/client "Jordan Vale" flow they depict). Desktop reference: `design-bridge/design-system/_archive/rounds/round3/screenshots/` (50 light+dark, 1280px, every surface — **no mobile**) — *moved here in `260629-mtl`*. Active design line: `round6`/ZOETROP-R2 (viz on visx). A "B01 · desktop" + "B01 · mobile" nav-item pair was requested. See memory `b01-fidelity-vectors-deferred`.
 
 ---
 
-## Run the app meanwhile (until Task A lands)
+## Run the app (Task A landed — container now works too; dev server is the fast path)
 ```
 cd remix-app && node --env-file=.env node_modules/@react-router/dev/bin.js dev --port 3000
 ```
 Auth = Better-Auth email/password; owner creds in `remix-app/.env`; `DATABASE_URL` → Neon. Gated routes 302→`/login`. Mint a session by POSTing those creds to `/api/auth/sign-in/email` (read from `.env` at runtime, never print them).
 
 ## Loose ends
-- 3 stale `// Source: …_rounds…` provenance comments in `remix-app/app/components/ui/{Wordmark,SpiralMark,ThemeToggle}.tsx` now point to the moved path — non-functional; fix to `_archive/rounds` during the streamline.
+- ~~3 stale `// Source: …_rounds…` provenance comments~~ ✅ fixed in `260629-mtl` (repointed to `design-bridge/design-system/_archive/rounds/round1`).
 - `harness/bin/round.ts` still emits a round5 block → `npm run design:round` would recreate a round5 stub; prune that block when streamlining the harness.
 - Navigator inspect server: `python3 -m http.server 8123 --directory design-bridge/diagrams`.
 
