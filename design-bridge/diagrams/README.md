@@ -12,9 +12,12 @@ rollout lineage.
 
 ## Run
 
+Serve from the **repo root** — the navigator links design-system boards in-place
+under `docs/design-system/` (one tree over), so both must resolve:
+
 ```bash
-python3 -m http.server 8781 --directory design-bridge/diagrams
-# open http://127.0.0.1:8781/index.html
+python3 -m http.server 8781 --directory .   # repo root
+# open http://127.0.0.1:8781/design-bridge/diagrams/index.html
 ```
 
 Shortcuts: `\` or `Esc` toggles the drawer; footer **Theme** button toggles
@@ -39,11 +42,28 @@ diagrams/
 
 ## Boards
 
-Boards are **self-contained static HTML** (no `<x-dc>`): the navigator loads board
-HTML in its iframe and themes it via `data-theme` on the board `<html>`; the
-adapter resolves light/dark from there. Kept as `.dc.html` for clean-slug routing.
+Two kinds, both loaded into the iframe canvas:
+
+1. **In-tree boards** (`00-…`, `07-…`) — self-contained static HTML (no `<x-dc>`),
+   themed via `data-theme` on the board `<html>`; kept as `.dc.html` for clean-slug
+   routing.
+2. **Linked design-system boards** — the pre-existing `@dsCard` HTML under
+   `docs/design-system/` (token guidelines, component galleries, the mobile
+   app-kit, brand), referenced in-place via `../../docs/design-system/…`. These
+   predate the navigator and are linked, not regenerated.
+
 Status is single-sourced in `_kit/nav-manifest.js` (`built` vs `planned`; a
-`planned` item has no `href` and is non-navigable).
+`planned` item has no `href` and is non-navigable). Brand + historical round
+prototypes appear as `reference` rows above the spine.
+
+### What's wired (scan 2026-06-28)
+
+- **L12 Tokens** — 13 guideline boards: color (families/energy/vital/focus/
+  neutral/status), spacing (scale/radii/shadows), type (scale/display/body/data).
+- **L11 Components** — core / data / forms galleries (need internet: React/Babel CDN).
+- **L07 Screens** — `S01` in-tree index + `S02` mobile app prototype (`ui_kits/app`).
+- **reference** — brand logo & patterns; R1 Redesign + R3 return prototypes (history).
+- **planned** — `01-06` (service design) + `08-10` (panels/actions/tables): no artifacts yet.
 
 ## Spine (00 widest → 12 finest)
 
