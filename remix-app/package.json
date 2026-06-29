@@ -26,11 +26,13 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
+    "@better-auth/drizzle-adapter": "^1.6.15",
     "@neondatabase/serverless": "^1.0.2",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",
     "@vercel/functions": "^3.7.0",
     "@vercel/react-router": "^1.3.1",
+    "better-auth": "^1.6.15",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
     "isbot": "^5.1.31",
@@ -43,7 +45,6 @@
     "unpdf": "^1.6.2"
   },
   "devDependencies": {
-    "@better-auth/drizzle-adapter": "^1.6.15",
     "@react-router/dev": "7.12.0",
     "@tailwindcss/vite": "^4.1.13",
     "@testing-library/react": "^16.3.2",
@@ -52,7 +53,6 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.1.8",
-    "better-auth": "^1.6.15",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.4",
     "jsdom": "^29.1.1",
