@@ -64,3 +64,36 @@ Charter **ZOETROP-R1 FROZEN** (S1.0–S1.2 closed, locked at S1.0). Token harnes
 against the synced CORE. The **inbound** half (decode → adapt → gate → capture) is **deferred** until a
 `react-tailwind` CORE adapter lands; until then `zoetrop-design-roundtrip` integrates by hand against the
 existing scripts. First refinement line drafted: `harness/rounds/round4/PROMPT-LINE-reports.md`.
+
+## The two rounds trees (live ledger vs prior return artifacts)
+
+There are **two rounds trees** in this repo, and they are easy to confuse — so name them:
+
+1. **LIVE LEDGER** — `design-bridge/harness/rounds/`. Harness-generated, the active
+   workflow surface. Holds only the in-flight entries: `round1` (frozen charter), `round4`
+   (parked), `round6` (active). Closed records are moved out (see below).
+2. **PRIOR RETURN ARTIFACTS** — `docs/design-system/_archive/rounds/` (was
+   `docs/design-system/_rounds/`, ~16M). Frozen *return* snapshots from the prototype
+   rounds — provenance, **not** an active ledger. Relocated + explained in
+   `docs/design-system/_archive/README.md`.
+
+Closed Layer-3 records (the round5 LINE-signature line + its superseded `NEXT-LINE-PLAN.md`)
+live at `design-bridge/_archive/` — see `design-bridge/_archive/README.md`.
+
+### Each round → the system it touched → its ZTP1 return location
+
+ZTP1 = the prototype project `f200a4ef-34c4-4d73-9e03-c210e759225a` (`PROJECT_TYPE_PROJECT`),
+the inbound DesignSync transport. (The `48aebc…` "Zoetrope Design System" project is a
+separate, post-integration component-library sync — not a round return location.)
+
+| Round | System it touched | ZTP1 return location |
+|-------|-------------------|----------------------|
+| `round1` (S1.0–S1.2 backfill, frozen) | `remix-app/app/app.css` + DS library + Navigator (foundation) | pre-harness (backfilled into the ledger from prior prose) |
+| `round2` (left-nav prototype, archived) | app chrome (left-nav rail/accordion) | archived: `docs/design-system/_archive/rounds/round2/` |
+| `round3` (calm-instrument screens, archived) | metric/dashboard screens + Recharts idiom | ZTP1 `f200a4ef…` `round3-return/` (co-mingles the r4/r5 iteration files) |
+| `round4` (parked) | Reports surface (seeded, not returned) | ZTP1 `f200a4ef…` |
+| `round5` (CLOSED, archived) | `app.css` `zt-sig-*` expressive layer | ZTP1 `f200a4ef…` `round3-return/round5/return` → archived at `design-bridge/_archive/rounds/round5/return/` |
+| `round6` (active R2) | chart language on visx | ZTP1 `f200a4ef…` |
+
+> The per-round system alignment lives **here** (the editable home). The generated
+> `round-manifest.json` / `DECISIONS.md` are NOT hand-edited — `bin/round.ts` regenerates them.

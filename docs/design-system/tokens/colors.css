@@ -1,4 +1,14 @@
 /* ============================================================
+   TOKEN-SOT:DERIVED
+   ------------------------------------------------------------
+   DERIVED, LIGHT-ONLY mirror of the canonical token source-of-truth
+   at remix-app/app/app.css. Dark theme is NOT represented here — it
+   lives ONLY in app.css (html[data-theme="dark"] remap). This file
+   is the DS-package surface; editing values here does NOT change the
+   shipping product. To change a product token, edit app.css.
+   ============================================================ */
+
+/* ============================================================
    Zoetrop — Color tokens
    Derived from the source brand board (warm grey / amber / teal /
    periwinkle / charcoal), re-mapped to wellness metric families.

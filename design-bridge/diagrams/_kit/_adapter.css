@@ -1,4 +1,15 @@
 /* =========================================================================
+   TOKEN-SOT:DERIVED
+   -------------------------------------------------------------------------
+   DERIVED, self-contained mirror — NOT canonical. The standalone Navigator
+   does not load the app build, so this file embeds its own copy of Zoetrop's
+   tokens (light + dark remap) so boards render in isolation. The canonical
+   token source-of-truth is remix-app/app/app.css; this is a mirror the
+   Navigator needs to stand alone. Do NOT merge or delete it, and do not treat
+   it as the place to change product tokens.
+   ========================================================================= */
+
+/* =========================================================================
    ZOETROP ADAPTER — the semantic token seam for the Diagram Navigator
    -------------------------------------------------------------------------
    The cross-project SWAP SEAM. Every kit semantic name (--canvas, --ink, --p,

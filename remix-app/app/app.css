@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
 /* ================================================================
+   TOKEN-SOT:CANONICAL
+   ----------------------------------------------------------------
+   This file is the CANONICAL token source-of-truth for Zoetrop.
+   It is the ONLY place where the dark theme lives (via the
+   html[data-theme="dark"] remap further down). Light AND dark both
+   originate here. Every other token file is a DERIVED, light-only
+   mirror of this one:
+     - docs/design-system/tokens/*.css           (DS-package mirror)
+     - design-bridge/diagrams/_kit/_adapter.css  (Navigator mirror)
+   To change a product token, edit it HERE. Do not expect a dark
+   value to exist in any of the derived mirrors.
+   ================================================================ */
+
+/* ================================================================
    LAYER 1: DS Token variables — inlined from docs/design-system/tokens/
    (Path fallback A7: @import of ../../docs/… escapes Vite root;
     contents are inlined so the Vite build resolves cleanly.)
