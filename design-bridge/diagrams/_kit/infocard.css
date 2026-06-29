@@ -1,0 +1,148 @@
+/* =========================================================================
+   UNIFIED INFOCARD — one wayfinding component, every fidelity board
+   -------------------------------------------------------------------------
+   The single source the blueprint · flow-map · journey · cityline all consume
+   (the "unification the user asked for"). Extracted from the v2 blueprint
+   rail; spec'd in praxis-ds/components/layout/InfoCard.d.ts.
+
+     Card A · Subject   taxonomy pill · eyebrow · title + facet · the one
+                        sentence · meta rows (trigger · the moments/phases
+                        strip with the focal step lime · the spine→forks or
+                        JTBD sequence · stack) · the references breadcrumb.
+     Card B · Legend    the typed wire/band vocabulary + the signal/role set.
+     Card C · How to    one muted paragraph naming the reading order.
+
+   Two containers, one grammar:
+     .ic-rail   vertical mat (the canvas formats — flow-map, blueprint)
+     .ic-band   header band   (the journey)
+   Adapter mode: values from kit/_adapter.css. One lime focal; tabular mono
+   for every id/§ref; the active breadcrumb level is a dot, no "you are here".
+   ========================================================================= */
+
+.ic{font-family:var(--font);color:var(--ink)}
+.ic-card{background:var(--resting);border:1px solid var(--line-2);border-radius:var(--r-card);box-shadow:var(--sh-1)}
+.ic-card .pad{padding:18px 20px}
+.ic-card .div{border-top:1px solid var(--line)}
+
+/* contained header band — taxonomy (left) + theme toggle (right), above the title */
+.ic-cardhead{display:flex;align-items:center;gap:10px;padding:11px 20px 12px;border-bottom:1px solid var(--line)}
+.ic-taxon{display:flex;align-items:center;gap:10px}
+.ic-seq{font:600 10px var(--mono);letter-spacing:.04em;color:var(--ink-3)}
+.ic-cardhead .ic-toggle{margin-left:auto;height:28px;padding:0 11px}
+
+/* ── Card A · subject — shared atoms ─────────────────────────────────────*/
+.ic-kick{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.ic-pill{font:700 11px var(--mono);letter-spacing:.04em;color:var(--p-fig);background:var(--p-tint);
+  border:1px solid var(--p-line);border-radius:var(--r-xs);padding:2px 8px}
+.ic-eye{font:600 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a-fig)}
+.ic-crumblink{margin-left:auto;font:600 9px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.ic-crumblink:hover{color:var(--ink-2);text-decoration:underline}
+.ic-title{font:700 19px var(--display);letter-spacing:-.015em;color:var(--ink);line-height:1.2;text-wrap:pretty}
+.ic-title .facet{color:var(--ink-3);font-weight:400}
+.ic-statement{margin:11px 0 0;font:400 13px/1.6 var(--font);color:var(--ink-2);text-wrap:pretty}
+.ic-statement .lead{color:var(--ink-3);font-weight:500}
+.ic-statement b{color:var(--ink);font-weight:600}
+
+/* meta rows */
+.ic-meta{display:flex;flex-direction:column;gap:15px}
+.ic-mrow .mk{font:600 8.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.ic-mrow .mv{font:400 12px var(--font);color:var(--ink-2)}
+.ic-mrow .mv .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--a);margin-right:6px;vertical-align:middle}
+.ic-mrow .mv .gate{display:inline-block;width:10px;height:10px;background:var(--p-tint);border:1.5px solid var(--p);
+  transform:rotate(45deg);margin-right:7px;vertical-align:middle}
+/* the moments / phases strip — the focal step wears lime */
+.ic-phases{display:flex;align-items:center;gap:5px 4px;flex-wrap:wrap;font:500 9px var(--mono);color:var(--ink-2)}
+.ic-ph{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap}
+.ic-ph .n{color:var(--ink-4);font-weight:700}
+.ic-ph.is-focal{font-weight:600;color:var(--p-fig);background:var(--p-tint);border:1px solid var(--p-line);
+  border-radius:var(--r-xs);padding:1px 6px}
+.ic-ph.is-focal .n{color:var(--p-fig)}
+.ic-arr{color:var(--ink-4)}
+/* aligned key→value stack (the Stack / surfaces row) */
+.ic-stack{display:flex;flex-direction:column;gap:5px;font:400 10px var(--mono);line-height:1.3}
+.ic-stack .r{display:flex;gap:10px;white-space:nowrap}
+.ic-stack .r .k{flex:none;width:74px;color:var(--ink-3)}
+.ic-stack .r .v{color:var(--ink-2)}
+
+/* references breadcrumb — a centred rail; the active level is a haloed dot */
+.ic-crumb-h{font:600 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.ic-crumb{position:relative;margin-top:13px}
+.ic-crumb .rail{position:absolute;left:4px;top:7px;bottom:8px;width:2px;background:var(--line-3)}
+.ic-crows{position:relative;display:flex;flex-direction:column;gap:9px}
+/* 2-column rows: dot · level (link) · description + the instance hierarchy at the level */
+.ic-crow{display:grid;grid-template-columns:10px 148px 1fr;align-items:baseline;column-gap:11px}
+.ic-crow .cd{grid-column:1;align-self:center;width:9px;height:9px;border-radius:50%;background:var(--ink-4)}
+.ic-crow .ctype{grid-column:2;font:700 9px var(--mono);letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);
+  text-decoration:none;line-height:1.5}
+.ic-crow .ctype:hover{color:var(--ink);text-decoration:underline}
+.ic-crow .cdesc{grid-column:3;display:block;min-width:0;font:400 10px var(--font);color:var(--ink-3);line-height:1.5}
+.ic-crow .cdesc b{font:700 9px var(--mono);font-style:normal;color:var(--ink-2);letter-spacing:.02em}
+/* active level — tinted band (negative margin = padding so columns stay aligned) */
+.ic-crow.is-here{background:var(--p-tint);border:1px solid var(--p-line);border-radius:7px;margin:-2px -11px;padding:5px 10px}
+.ic-crow.is-here .cd{width:11px;height:11px;background:var(--p-fig);box-shadow:0 0 0 2px var(--resting)}
+.ic-crow.is-here .ctype{color:var(--p-fig);font-size:9.5px}
+.ic-crow.is-here .cdesc{color:var(--ink-2);font-weight:500}
+.ic-crow.is-here .cdesc b{color:var(--p-fig)}
+
+/* ── Card B · legend — typed wire/signal/role vocabulary ─────────────────*/
+.ic-legend{display:flex;gap:30px}
+.ic-legcol{flex:1;min-width:0}
+.ic-legh{font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--p-fig);margin-bottom:13px}
+/* fixed 26px icon gutter → every label starts at the same x; consistent row rhythm */
+.ic-key{display:grid;grid-template-columns:26px 1fr;align-items:center;column-gap:12px;font:400 11px/1.4 var(--font);color:var(--ink-2);margin-bottom:12px}
+.ic-key:last-child{margin-bottom:0}
+.ic-key>:first-child{justify-self:center}
+.ic-key:last-child{margin-bottom:0}
+/* line swatches (the wire vocabulary) */
+.icsw{width:24px;height:0;flex:none}
+.icsw-spine{border-top:2.4px solid var(--p)}
+.icsw-fork{border-top:2px dashed var(--s)}
+.icsw-rejoin{border-top:2px solid var(--s)}
+.icsw-time{border-top:2px dashed var(--urgent)}
+.icsw-pass{border-top:2.2px solid var(--pos)}
+/* signal swatches */
+.ic-tap{width:11px;height:11px;flex:none;border-radius:50%;background:var(--p);box-shadow:0 0 0 4px var(--p-tint)}
+.ic-tap.urgent{background:var(--urgent);box-shadow:0 0 0 4px var(--ox-tint)}
+.ic-gate{width:13px;height:13px;flex:none;background:var(--p-tint);border:1.5px solid var(--p);transform:rotate(45deg)}
+.ic-mono{width:15px;height:15px;flex:none;border-radius:50%;background:var(--ink-3);color:var(--on-rail);
+  font:700 7px var(--mono);display:inline-flex;align-items:center;justify-content:center}
+.ic-note{width:13px;height:13px;flex:none;border-radius:3px;border:1.5px dashed var(--line-3)}
+/* role swatches (the journey "whose need") + strength line styles */
+.ic-role{width:9px;height:9px;flex:none;border-radius:2px;background:var(--rolec)}
+.ic-role.op{--rolec:var(--role-op)} .ic-role.crew{--rolec:var(--role-crew)}
+.ic-role.sys{--rolec:var(--role-sys)} .ic-role.cust{--rolec:var(--role-cust)}
+.ic-strk{width:18px;height:0;flex:none}
+.ic-strk.strong{border-top:2px solid var(--ink-2)}
+.ic-strk.weak{border-top:2px dashed var(--ink-3)}
+.ic-strk.gap{border-top:2px dashed var(--ink-4)}
+
+/* ── Card C · how to read it ─────────────────────────────────────────────*/
+.ic-howto-h{font:600 8.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.ic-howto{margin:7px 0 0;font:400 11px/1.6 var(--font);color:var(--ink-3);text-wrap:pretty}
+.ic-howto b{color:var(--ink-2);font-weight:600}
+.ic-howto .pos{color:var(--pos);font-weight:600} .ic-howto .urgent{color:var(--urgent);font-weight:600}
+
+/* ══ Container A · the left RAIL (canvas formats + the journey) ══════════*/
+.ic-rail{flex:none;width:484px;padding:32px;background:color-mix(in oklab,var(--ink) 5%,transparent);
+  border-radius:var(--r-sheet);display:flex;flex-direction:column;gap:16px}
+
+/* the rail head — carries the theme toggle as part of the component */
+.ic-railhead{display:flex;align-items:center;justify-content:flex-end;margin-bottom:-4px}
+.ic-toggle{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:var(--r-ctl);
+  font:600 11px var(--font);color:var(--ink);background:var(--resting);border:1px solid var(--line-2);
+  box-shadow:var(--sh-1);cursor:pointer;font-family:var(--font)}
+.ic-toggle .gl{color:var(--p-fig);font-size:13px;line-height:1}
+
+/* ══ Container B · the header BAND (journey) ═════════════════════════════*/
+.ic-band{display:flex;flex-direction:column;gap:18px;margin-bottom:24px}
+.ic-bandtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ic-bandtop .rule{flex:1;height:1px;background:var(--line-2)}
+.ic-lifecrumb{display:inline-flex;align-items:center;gap:6px;font:600 9px var(--mono);letter-spacing:.06em;
+  text-transform:uppercase;color:var(--p-fig);background:var(--p-tint);border:1px solid var(--p-line);
+  border-radius:var(--r-pill);padding:3px 10px;text-decoration:none}
+.ic-lifecrumb .dot{width:6px;height:6px;border-radius:50%;background:var(--p)}
+.ic-band .ic-title{font-size:29px;letter-spacing:-.022em;line-height:1.1}
+.ic-band .ic-statement{max-width:880px;font-size:13.5px}
+.ic-bandgrid{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch}
+.ic-bandgrid .ic-card{flex:1;min-width:300px}
+.ic-bandgrid .ic-card.wide{flex:2.4}

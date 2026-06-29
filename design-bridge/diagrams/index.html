@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zoetrop · Diagram Navigator</title>
+  <link rel="stylesheet" href="_kit/_adapter.css">
+  <link rel="stylesheet" href="_kit/nav-shell.css">
+</head>
+<body>
+  <!-- Chrome is built by nav-shell.js into <body>:
+       floating menu control · drawer (header / tree / footer) · iframe canvas.
+       This is the DESIGN-line navigator (design-bridge boards), NOT the product
+       left-nav — that ships at remix-app/app/components/shell/. -->
+  <script>
+    window.NAV_CONFIG = {
+      manifest: "ZOETROP_NAV",
+      storageKey: "zoetrop-nav-v1",
+      wideBreakpoint: 860,
+      brand: { name: "Zoetrop", mark: "Z", tag: "Navigator" }
+    };
+  </script>
+  <script src="_kit/nav-manifest.js"></script>
+  <script src="_kit/nav-shell.js"></script>
+</body>
+</html>

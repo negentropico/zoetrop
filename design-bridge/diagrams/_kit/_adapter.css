@@ -1,0 +1,206 @@
+/* =========================================================================
+   ZOETROP ADAPTER — the semantic token seam for the Diagram Navigator
+   -------------------------------------------------------------------------
+   The cross-project SWAP SEAM. Every kit semantic name (--canvas, --ink, --p,
+   --pos …) binds to a Zoetrop design token. This is the ONE file where Zoetrop
+   colour lives; boards + nav-shell stay var(--…)-only.
+
+   SELF-CONTAINED by design: the navigator + its boards are standalone HTML that
+   do NOT load the app build, so this file embeds Zoetrop's own token system
+   (lifted from docs/design-system/tokens/ + remix-app/app/app.css) and then
+   binds the kit names on top. Because Zoetrop self-themes by remapping the SAME
+   token names under [data-theme="dark"], the kit seam needs only ONE block —
+   dark resolves automatically through the base layer (the one exception is the
+   nav rail, overridden at the bottom so it stays dark in dark mode).
+
+   FROZEN-SYSTEM DISCIPLINE (ZOETROP-R1 + R2 charter): no new colour / radius /
+   family is introduced here — every kit token maps to an existing Zoetrop token
+   or a color-mix()/alpha of one.
+
+   Provenance of corrections vs DIAGRAM-NAVIGATOR-HANDOFF.md:
+     · dark tokens lifted from remix-app/app/app.css (NOT colors.css — it is
+       :root/light-only);
+     · --pos* → the VITAL (teal) success hue, not --energy (amber = warning);
+     · radii → real --radius-* tokens (4/8/14/20/28/999), not 5/7/9/999;
+     · font families from tokens/typography.css (fonts.css is only the @import);
+     · --info shares periwinkle with the focal marker — deliberate (Zoetrop R1
+       defines --info as the focus hue; no 4th hue exists to spend).
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+/* ===== ZOETROP BASE TOKENS — light (lifted from tokens/colors.css :root,
+         + radii/shadow/motion from tokens/spacing.css, families from
+         tokens/typography.css) ===== */
+:root {
+  /* brand metric families (base hues) */
+  --energy: #ffc53d;  --vital: #11c29b;  --focus: #8070ff;  --mist: #dcd1d5;  --ink: #272324;
+
+  /* energy (amber) ramp */
+  --energy-50:#fff7e4; --energy-100:#ffedc0; --energy-200:#ffdd88; --energy-300:#ffc53d;
+  --energy-400:#f0ac1f; --energy-500:#c98910; --energy-600:#97640b;
+  /* vital (teal) ramp */
+  --vital-50:#e0f7f1; --vital-100:#b3ecdf; --vital-200:#6dd9c2; --vital-300:#11c29b;
+  --vital-400:#0aa183; --vital-500:#087d67; --vital-600:#075a4b;
+  /* focus (periwinkle) ramp */
+  --focus-50:#efecff; --focus-100:#ddd6ff; --focus-200:#b7aaff; --focus-300:#8070ff;
+  --focus-400:#6450f0; --focus-500:#4a37cc; --focus-600:#36289a;
+
+  /* warm neutral ramp (paper → ink) */
+  --paper:#f5f2f0; --paper-2:#fbf9f8;
+  --n-0:#ffffff; --n-50:#f5f2f0; --n-100:#ece7e6; --n-150:#e2dbdc; --n-200:#dcd1d5;
+  --n-300:#c3b8bb; --n-400:#9c9295; --n-500:#756d70; --n-600:#565052; --n-700:#3c3839;
+  --n-800:#2f2b2c; --n-900:#272324; --n-950:#1b1819;
+
+  /* semantic surfaces */
+  --bg:var(--paper); --surface:var(--n-0); --surface-2:var(--paper-2);
+  --surface-sunken:var(--n-100); --surface-inverse:var(--ink);
+  /* semantic text */
+  --text:var(--n-900); --text-secondary:var(--n-600); --text-muted:var(--n-500); --text-faint:var(--n-400);
+  --text-on-accent:var(--ink); --text-on-focus:#ffffff; --text-on-ink:var(--n-50); --text-inverse:var(--n-0);
+  /* semantic borders */
+  --border:var(--n-150); --border-strong:var(--n-300); --border-ink:var(--ink);
+  /* semantic accent (default brand action — periwinkle) */
+  --accent:var(--focus-300); --accent-hover:var(--focus-400); --accent-press:var(--focus-500); --accent-on:#ffffff;
+  /* status */
+  --success:var(--vital-400); --warning:var(--energy-400); --danger:#e5484d; --danger-bg:#fdecec; --info:var(--focus-300);
+
+  /* radii (tokens/spacing.css) */
+  --radius-xs:4px; --radius-sm:8px; --radius-md:14px; --radius-lg:20px; --radius-xl:28px;
+  --radius-2xl:36px; --radius-pill:999px; --radius-circle:50%;
+  /* shadows — warm, ink-tinted (tokens/spacing.css) */
+  --shadow-xs:0 1px 2px rgba(39,35,36,0.06);
+  --shadow-sm:0 1px 3px rgba(39,35,36,0.08),0 1px 2px rgba(39,35,36,0.04);
+  --shadow-md:0 4px 12px rgba(39,35,36,0.08),0 2px 4px rgba(39,35,36,0.05);
+  --shadow-lg:0 12px 28px rgba(39,35,36,0.10),0 4px 8px rgba(39,35,36,0.05);
+  --shadow-xl:0 24px 48px rgba(39,35,36,0.14),0 8px 16px rgba(39,35,36,0.06);
+  /* motion (tokens/spacing.css) */
+  --ease-out:cubic-bezier(0.22,1,0.36,1); --ease-frame:cubic-bezier(0.83,0,0.17,1);
+  --dur-fast:120ms; --dur-base:200ms; --dur-slow:320ms;
+  /* families (tokens/typography.css) */
+  --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --font-text:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'Space Mono',ui-monospace,'SFMono-Regular',monospace;
+}
+
+/* ===== ZOETROP BASE TOKENS — dark (lifted from app.css html[data-theme="dark"];
+         scoped to [data-theme="dark"] so it resolves on the shell <html> AND each
+         themed iframe). Same names, swapped values — everything cascades. ===== */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:#15110f; --paper-2:#1e1917;
+  --n-0:#221d1b; --n-50:#15110f; --n-100:#2a2421; --n-150:#332c29; --n-200:#3e3633;
+  --n-300:#554b47; --n-400:#7a6f6a; --n-500:#9a8e89; --n-600:#b7aba6; --n-700:#ccc1bc;
+  --n-800:#e2d8d4; --n-900:#f2ece9; --n-950:#fbf7f5;
+  --ink:#f2ece9; --mist:#3e3633;
+  --energy-50:#2c2310; --energy-100:#3c2e13; --vital-50:#0d2823; --vital-100:#123a32;
+  --focus-50:#1f1c36; --focus-100:#29254b;
+  --danger-bg:#3a1d1f;
+  /* -500 steps used as TEXT need a brighter step on dark (R4 sweep) */
+  --vital-500:#11c29b; --energy-500:#f0ac1f;
+  /* shell surface ladder: nav 0 < canvas 1 < cards 2 */
+  --surface-low:#0e0b0a; --surface-low-2:#261f1c;
+  /* shadows (stronger on dark) */
+  --shadow-xs:0 1px 2px rgba(0,0,0,0.4);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.45),0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45),0 2px 4px rgba(0,0,0,0.3);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.5),0 4px 8px rgba(0,0,0,0.3);
+  --shadow-xl:0 24px 48px rgba(0,0,0,0.55),0 8px 16px rgba(0,0,0,0.35);
+}
+
+/* ===== KIT SEAM — bind kit semantic names to Zoetrop tokens. One block: each
+         binding points at a Zoetrop token that itself self-themes, so dark
+         resolves automatically (rail excepted; see bottom). ===== */
+:root, [data-theme="light"] {
+  /* ground · card · popover · well */
+  --canvas:  var(--bg);
+  --resting: var(--surface);
+  --overlay: var(--surface-2);
+  --sunk:    var(--surface-sunken);
+  --hover:   color-mix(in oklab, var(--ink) 5%, var(--surface));
+
+  /* text ramp */
+  --ink:   var(--text);
+  --ink-2: var(--text-secondary);
+  --ink-3: var(--text-muted);
+  --ink-4: var(--text-faint);
+
+  /* hairlines */
+  --line:   var(--border);
+  --line-2: var(--border-strong);
+  --line-3: color-mix(in oklab, var(--text) 22%, var(--border));
+
+  /* periwinkle focal — the ONE marker (calm-instrument discipline: spark, not flood) */
+  --p:      var(--accent);
+  --p-fig:  var(--accent-press);                     /* AA text/icon/active dot */
+  --p-on:   var(--accent-on);
+  --p-tint: color-mix(in oklab, var(--p) 14%, transparent);
+  --p-line: color-mix(in oklab, var(--p) 45%, var(--line-2));
+
+  /* attention / ageing — the SECOND marker (Zoetrop amber = warning) */
+  --a:         var(--warning);
+  --warn:      var(--warning);
+  --warn-soft: color-mix(in oklab, var(--warning) 14%, var(--canvas));
+  --warn-line: color-mix(in oklab, var(--warning) 40%, var(--line));
+
+  /* reference figure ink — quiet mono neutral */
+  --a-fig: var(--text-muted);
+
+  /* structural "slate" — fork / alternative-route (stays mono ink, reads by position) */
+  --s:      var(--text-secondary);
+  --s-tint: color-mix(in oklab, var(--ink) 7%, transparent);
+  --s-line: var(--line-3);
+  --s-on:   var(--canvas);
+
+  /* semantics — fg + soft-bg + border, ALWAYS paired with an icon/label.
+     CORRECTION: --pos rides VITAL (teal/--success), not amber. --info shares the
+     periwinkle focal hue (Zoetrop R1 defines --info as the focus hue). */
+  --pos:    var(--success); --pos-soft:    color-mix(in oklab, var(--success) 14%, var(--canvas)); --pos-line:    color-mix(in oklab, var(--success) 40%, var(--line));
+  --info:   var(--info);    --info-soft:   color-mix(in oklab, var(--info) 14%, var(--canvas));    --info-line:   color-mix(in oklab, var(--info) 40%, var(--line));
+  --urgent: var(--danger);  --urgent-soft: color-mix(in oklab, var(--danger) 14%, var(--canvas)); --urgent-line: color-mix(in oklab, var(--danger) 42%, var(--line));
+  --ox-tint: var(--urgent-soft); --ox-line: var(--urgent-line);
+  --neutral: var(--text-muted); --neutral-soft: var(--surface-sunken);
+
+  /* nav rail — Zoetrop ink in LIGHT (dark rail on warm paper); see dark override below */
+  --rail:         var(--surface-inverse);
+  --rail-surface: color-mix(in oklab, var(--canvas) 8%, var(--surface-inverse));
+  --on-rail:      var(--n-50);
+
+  /* journey role hues — Zoetrop has THREE families + neutral (no 4th hue under
+     R1 freeze); the 4th role rides neutral ink. Exercised only by the journey
+     boards (level 02), not the boards authored this pass. */
+  --role-op:   var(--focus-300);   /* periwinkle */
+  --role-crew: var(--energy-400);  /* amber      */
+  --role-sys:  var(--vital-400);   /* teal       */
+  --role-cust: var(--n-500);       /* neutral    */
+
+  /* radii — kit aliases → Zoetrop --radius-* */
+  --r-xs: var(--radius-xs); --r-sm: var(--radius-sm); --r-md: var(--radius-md);
+  --r-lg: var(--radius-lg); --r-xl: var(--radius-xl); --r-pill: var(--radius-pill);
+  --r-ctl: var(--r-sm); --r-card: var(--r-lg); --r-chip: var(--r-pill); --r-sheet: var(--r-xl);
+
+  /* elevation — kit aliases → Zoetrop --shadow-* */
+  --sh-1: var(--shadow-sm);
+  --sh-2: var(--shadow-md);
+  --sh-3: var(--shadow-lg);
+
+  /* motion */
+  --dur-1: var(--dur-base);
+  /* --ease-out already defined by the base layer */
+
+  /* type — Space Grotesk (display) · Hanken Grotesk (UI) · Space Mono (data) */
+  --font:    var(--font-text);
+  --mono:    var(--font-mono);
+  --display: var(--font-display);
+  --serif:   var(--font-text);     /* Zoetrop has no serif voice */
+  --feat:    'tnum' 1, 'ss01' 1;   /* tabular numerals for data cells */
+}
+
+/* ===== RAIL — dark override. The base layer flips --ink to near-white in dark,
+         which would make the rail bright; pin it to the darkest shell surface so
+         the drawer stays a dark rail in dark mode too. ===== */
+[data-theme="dark"] {
+  --rail:         var(--surface-low);
+  --rail-surface: var(--surface-low-2);
+  --on-rail:      var(--text);
+}
