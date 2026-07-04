@@ -34,7 +34,7 @@ This doc plans that application **without derailing the engine-first roadmap**.
 ## 3. Sequence
 
 ```
-[done] Build screens package  →  design-bridge/design-system/uploads/screens-package/
+[done] Build screens package  →  design-bridge/design-system/_archive/uploads/screens-package/
           │   (8 archetype screens: current-state screenshots + redesign briefs)
           ▼
 [NOW ] Design roundtrip  →  hand package + brand DS to claude.ai/design
@@ -56,7 +56,7 @@ gating artifact; this doc + the eventual UI-SPEC are the contract.
 
 ## 4. The package (input to the roundtrip)
 
-`design-bridge/design-system/uploads/screens-package/` — see its `README.md`. Eight
+`design-bridge/design-system/_archive/uploads/screens-package/` — see its `README.md`. Eight
 archetypes (dashboard, grouped list, section+nav, detail+chart, tabbed section,
 signature timeline, data table, upload/form) chosen to cover every pattern the
 product needs through M1. Each has desktop + mobile current-state screenshots and
