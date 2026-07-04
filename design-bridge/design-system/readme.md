@@ -16,7 +16,7 @@ indexes the tokens. Consumers link one file: **`styles.css`**.
 ## Provenance & sources
 
 This system was **extrapolated and modeled** from a single supplied brand board
-(`uploads/colors.jpg`) — originally a colorway + identity study for a developer
+(`_archive/uploads/colors.jpg`) — originally a colorway + identity study for a developer
 platform ("source.dev"). Zoetrop re-targets that visual language for health &
 wellness. What was carried across:
 
