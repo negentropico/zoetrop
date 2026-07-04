@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: First Client (practitioner-operated)
 status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-06-29T21:47:20.761Z"
-last_activity: 2026-06-29
+stopped_at: "Completed quick task 260704-dpp: closed out HANDOFF Task-B design/repo hygiene remainder (rmdir root _notes/, item-2 gitignore SKIP documented, uploads/ relocated to _archive/uploads/, round5 stub pruned from harness). HANDOFF Task B fully closed. Remaining: Task C (B01 accurate vectors, Figma-aligned round)."
+last_updated: "2026-07-04T16:06:28.189Z"
+last_activity: "2026-07-04 - Completed quick task 260704-dpp: closed out HANDOFF Task-B design/repo hygiene remainder (rmdir root _notes/, uploads/ relocated to _archive/, round5 stub pruned from harness)"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 — v1.0 milestone evolution)
 Phase: 01 (client-onboarding-practitioner-operated) — EXECUTING
 Plan: 7 of 7
 Status: Ready to execute
-Last activity: 2026-07-04 - Completed quick task 260704-dh3: refreshed stale core docs (README, CLAUDE.md, PRINCIPLES, PROJECT) to post-v1.0 reality
+Last activity: 2026-07-04 - Completed quick task 260704-dpp: closed out HANDOFF Task-B design/repo hygiene remainder (rmdir root _notes/, uploads/ relocated to _archive/, round5 stub pruned from harness)
 
 ```
 v1.1 Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (0/5 phases)
@@ -91,6 +91,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase ?]: Invite lookup uses getDb() inside withTenantDb callback — intentional admin-path mixing; invites not subject-scoped under RLS
 - [Phase ?]: Checklist strip inlined as 6 explicit spans for grep-c source-verifiability
 - [Phase ?]: IDOR guard: subjectId re-resolved server-side before generateInvite
+- [Phase quick-260704-dpp]: Item 2 (gitignore DS runtime artifacts) SKIPPED — _ds_bundle.js/_ds_manifest.json/_adherence.oxlintrc.json are runtime deps loaded via static <script src> in 4 offline gallery/Navigator surfaces with no regeneration script; gitignoring would break a fresh checkout
 
 ### Pending Todos
 
@@ -123,6 +124,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 | 260629-lxg | Repaired Docker so the app actually **serves** in a container (HANDOFF Task A). Live `docker run` exposed **3 layered defects all masked by the Vercel preset**: (1) unconditional `vercelPreset()` → no `build/server/index.js` (gated on `process.env.VERCEL`, `d5b0825`); (2) `better-auth` + `@better-auth/drizzle-adapter` in **devDependencies** → dropped by `npm ci --omit=dev` since the standard SSR build externalizes node_modules (moved to `dependencies`, `ed71a60`); (3) `node:20-alpine` has no global `WebSocket` for Neon's serverless `Pool` (bumped → `node:24-alpine`, `b9ecedb`). Verified end-to-end: container signs in (HTTP 200, `better-auth.session_token`) and renders the authed **/metrics** screen (124 KB, real Neon data). Vercel deploy unaffected. Broken 704 MB image removed; `zoetrop-app:latest` rebuilt & verified. | 2026-06-29 | b9ecedb | [260629-lxg-docker-serve-fix](./quick/260629-lxg-docker-serve-fix/) |
 | 260629-mtl | Nested `docs/design-system/` → `design-bridge/design-system/` so the repo has **one top-level design root** (HANDOFF Task B — owner chose "nest under design-bridge"). History-preserving `git mv` (241 files, all R100); `docs/` keeps its 6 narrative docs. Repointed the `_ds` symlink (`→ ../design-system`) — Navigator verified resolving (`759cff7`). Swept **22 live files** to the new path (app provenance comments + active design-bridge docs/config + `.gitignore`/narrative), correcting the `_rounds`→`_archive/rounds` trap via an ordered two-pass (`21b3640`, `9e376d5`); `.planning`/`_archive`/frozen `package/` snapshots left as history. `npm run build` exit 0; **0 live stale refs**; comment-only diffs. DesignSync mapping is prose-only (no repo binding) — not invoked, prose repointed. | 2026-06-29 | 9e376d5 | [260629-mtl-nest-design-system](./quick/260629-mtl-nest-design-system/) |
 | 260704-dh3 | Refreshed stale core docs to post-v1.0 reality (found by a `/orient` staleness audit). **README.md**: Netlify→Vercel (`zoetrop.vercel.app`), M0-status → v1.0-shipped/v1.1-executing, schema 201→636 lines/22 tables, "file-based"→explicit `routes.ts`, route table rebuilt with auth/landing/dashboard/ingest/reports/clients/settings (`d3baedb`). **CLAUDE.md**: directory+route tables rebuilt from real `routes.ts` (public vs authed under `_app/layout.tsx`), Better-Auth + design-bridge design-root notes added, planning section recut to v1.1 Phase 01 reality, "two open decisions" reframed as resolved, footer→2026-07-04 (`3852bd2`). **docs/PRINCIPLES.md** + **.planning/PROJECT.md**: Netlify→Vercel, 8→22 tables, tenancy-shipped (`b46531b`). All claims verified against live codebase; `docs/HISTORY.md`/`NAMING.md` historical mentions deliberately untouched. | 2026-07-04 | b46531b | [260704-dh3-refresh-stale-core-docs-to-post-v1-0-rea](./quick/260704-dh3-refresh-stale-core-docs-to-post-v1-0-rea/) |
+| 260704-dpp | Closed out the optional design/repo-hygiene remainder from `HANDOFF.md` Task B. rmdir'd the dead repo-root `_notes/` (main tree, untracked/gitignored, zero git delta). Documented an evidence-backed SKIP on gitignoring the DS runtime bundle (`_ds_bundle.js`/`_ds_manifest.json`/`_adherence.oxlintrc.json` — still loaded via static `<script src>` in 4 offline gallery/Navigator surfaces, no regen script). Relocated `design-bridge/design-system/uploads/` → `_archive/uploads/` (27 files, 5.9M, history-preserving `git mv`); repointed `readme.md` + two additional live refs found in `docs/DESIGN-SYSTEM-ADOPTION.md` during the re-sweep (`9dd6b21`). Pruned the closed round5 (LINE-signature) emitter block from `design-bridge/harness/bin/round.ts` so `npm run design:round` stops recreating a stale manifest stub; round4/round6 blocks + archived round5 files untouched; harness typecheck verified exit 0 via an isolated scratch-copy of the harness env (worktree lacked `node_modules`/`.staging-core`) (`d42c148`). | 2026-07-04 | d42c148 | [260704-dpp-design-repo-hygiene-rmdir-root-notes-git](./quick/260704-dpp-design-repo-hygiene-rmdir-root-notes-git/) |
 
 ## Deferred Items
 
@@ -143,11 +145,11 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-06-29 (HANDOFF Tasks A + B done — Docker repair + design-root unification)
-Stopped at: Completed quick tasks 260629-lxg (Docker serves a live authed screen) + 260629-mtl (one design root: design-bridge/design-system). **HANDOFF Tasks A and B are DONE.** Remaining: Task C (B01 accurate vectors, Figma-aligned round) + optional Task-B hygiene (rmdir repo-root `_notes/`, gitignore generated DS artifacts, relocate `uploads/` 5.9M).
-Resume file: **`.planning/HANDOFF.md`** — Tasks A & B complete; Task C (B01 vectors) is the next handoff item.
+Last session: 2026-07-04T16:06:28.185Z
+Stopped at: Completed quick task 260704-dpp: closed out HANDOFF Task-B design/repo hygiene remainder (rmdir root _notes/, item-2 gitignore SKIP documented, uploads/ relocated to _archive/uploads/, round5 stub pruned from harness). HANDOFF Task B fully closed. Remaining: Task C (B01 accurate vectors, Figma-aligned round).
+Resume file: .planning/HANDOFF.md
 
 ## Operator Next Steps
 
-- **`.planning/HANDOFF.md`** — (next session) repair Docker so the app runs in a container; perform the deeper design-content streamline (unify design-bridge + docs/design-system, drop empty `_notes/`, generated artifacts); then B01 accurate vectors in a Figma-aligned round.
+- **`.planning/HANDOFF.md`** — HANDOFF Tasks A and B are now fully DONE (Docker repair, design-root unification, and the Task-B hygiene remainder — rmdir `_notes/`, `uploads/` relocation, round5 prune — all closed). Remaining: Task C (B01 accurate vectors, Figma-aligned round).
 - `/gsd:plan-phase 1` — plan Phase 1 (Client Onboarding: practitioner-operated)
