@@ -17,7 +17,7 @@ Legend: ✅ durable · ♻️ corrected (constitution was stale) · 🎯 aspirat
 
 - Feature work shipped on spec-kit branches: `001-core-data-layer`, `002-mvp-dashboard`, `003-remix-foundation` (current).
 - **M0 (n=1 instrument) is shipped.** Astro→Remix migration complete (`f1463ba`); the old Astro app is in `.archive/astro/`.
-- Live at `zoetrop.netlify.app`. 8 Drizzle tables, all **single-subject** (no identity/tenancy yet — the central M1 gap).
+- Live at `zoetrop.vercel.app`. 22 Drizzle tables; identity + tenant/subject scoping shipped in v1.0 (was the central M1 gap — now closed via Postgres RLS).
 
 ---
 

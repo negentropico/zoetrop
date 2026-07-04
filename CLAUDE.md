@@ -28,49 +28,82 @@ remix-app/
 │   │   ├── real-data.ts       # Real blood work, body comp, WHOOP data
 │   │   ├── protocol-data.ts   # Protocol versions (P0–P6), supplements, cessation
 │   │   ├── seed-data.ts       # Seed data for correlations, genetics
+│   │   ├── auth.server.ts     # Better-Auth instance (email/password)
 │   │   └── db.server.ts       # Neon/Drizzle server-side client
-│   ├── routes/                # Config-based routing — see app/routes.ts
-│   │   ├── home.tsx
-│   │   ├── metrics/           # layout.tsx + index/category/detail
-│   │   ├── protocol/          # layout.tsx + index/versions/version-detail/supplements/cessation/compare
-│   │   ├── insights/          # layout.tsx + index/correlations/genetics
-│   │   └── import/            # layout.tsx + index/whoop/vault
+│   ├── routes/                # Explicit routing — see app/routes.ts
+│   │   ├── landing.tsx        # Public landing page (root `/`)
+│   │   ├── auth/              # login.tsx, logout.tsx (public)
+│   │   ├── api.auth.$.ts      # Better-Auth catch-all handler
+│   │   └── _app/              # Authenticated app — gated by _app/layout.tsx (302→/login)
+│   │       ├── layout.tsx
+│   │       ├── dashboard.tsx
+│   │       ├── metrics/       # index/category/detail
+│   │       ├── protocol/      # index/versions/version-detail/supplements/cessation/compare
+│   │       ├── insights/      # index/correlations/genetics
+│   │       ├── import/        # index/whoop/vault
+│   │       ├── ingest/        # index/upload/review/consent/document(-raw)
+│   │       ├── reports/       # index/generate/detail
+│   │       ├── clients/       # index/new
+│   │       ├── settings/      # index/invites/assignments
+│   │       └── subject-switch.ts  # action-only, sets zt-subject cookie
 │   ├── routes.ts              # Explicit route table (RouteConfig), not file-name convention
 │   └── types/
 │       ├── metrics.ts         # 9 categories with CATEGORY_INFO
 │       └── protocol.ts        # Protocol types, CESSATION_PHASES, SUPPLEMENT_TIERS
 ├── db/
-│   └── schema.ts              # Drizzle table definitions (201 lines, 8 tables)
+│   └── schema.ts              # Drizzle table definitions (636 lines, 22 tables)
 ├── drizzle.config.ts          # Drizzle ORM configuration
 ├── vite.config.ts
 ├── tsconfig.json
 └── package.json
 ```
 
-> Routing is **explicit** via `app/routes.ts` (`@react-router/dev/routes` — `index`/`route`/`layout`), not the flat file-name convention. Each section folder has a `layout.tsx` wrapping its child routes.
+> Routing is **explicit** via `app/routes.ts` (`@react-router/dev/routes` — `index`/`route`/`layout`), not the flat file-name convention. The authenticated app is registered flat under a single `_app/layout.tsx` (consolidated left sidebar owns section nav — no per-section layouts).
+
+> **Design root** (since 2026-06-29): single top-level `design-bridge/` — LIVE `remix-app/app/` · DS PACKAGE `design-bridge/design-system/` · MACHINERY `design-bridge/` (harness + diagrams).
+
+> **Auth**: Better-Auth email/password. `app/lib/auth.server.ts` builds the instance; `routes/api.auth.$.ts` is the catch-all handler; authenticated routes 302→`/login` via the `_app/layout.tsx` loader when there is no session.
 
 ## Route Structure
 
+**Public (no auth):**
+
 | Route | File | Description |
 |-------|------|-------------|
-| `/` | `routes/home.tsx` | Dashboard with cessation tracker |
-| `/metrics` | `routes/metrics/index.tsx` | Metrics overview |
-| `/metrics/:category` | `routes/metrics/category.tsx` | Category detail |
-| `/metrics/:category/:metricId` | `routes/metrics/detail.tsx` | Metric detail |
-| `/protocol` | `routes/protocol/index.tsx` | Protocol overview |
-| `/protocol/versions` | `routes/protocol/versions.tsx` | Version history |
-| `/protocol/versions/:version` | `routes/protocol/version-detail.tsx` | Version detail |
-| `/protocol/supplements` | `routes/protocol/supplements.tsx` | Supplement tiers |
-| `/protocol/cessation` | `routes/protocol/cessation.tsx` | Cessation timeline |
-| `/protocol/compare` | `routes/protocol/compare.tsx` | Version comparison |
-| `/insights` | `routes/insights/index.tsx` | Insights overview |
-| `/insights/correlations` | `routes/insights/correlations.tsx` | Metric correlations |
-| `/insights/genetics` | `routes/insights/genetics.tsx` | Genetic variants |
-| `/import` | `routes/import/index.tsx` | Import overview |
-| `/import/whoop` | `routes/import/whoop.tsx` | WHOOP data import |
-| `/import/vault` | `routes/import/vault.tsx` | Obsidian vault import |
+| `/` | `routes/landing.tsx` | Landing page (NOT the dashboard) |
+| `/login` | `routes/auth/login.tsx` | Sign in |
+| `/logout` | `routes/auth/logout.tsx` | Sign out |
+| `/api/auth/*` | `routes/api.auth.$.ts` | Better-Auth catch-all handler |
 
-Each section also has a `layout.tsx` (`metrics`/`protocol`/`insights`/`import`) that wraps its children.
+**Authenticated** — all children of `routes/_app/layout.tsx`, whose loader 302s to `/login?redirect=<pathname>` when there is no session:
+
+| Route | File | Description |
+|-------|------|-------------|
+| `/dashboard` | `routes/_app/dashboard.tsx` | Dashboard with cessation tracker |
+| `/metrics` | `routes/_app/metrics/index.tsx` | Metrics overview |
+| `/metrics/:category` | `routes/_app/metrics/category.tsx` | Category detail |
+| `/metrics/:category/:metricId` | `routes/_app/metrics/detail.tsx` | Metric detail |
+| `/protocol` | `routes/_app/protocol/index.tsx` | Protocol overview |
+| `/protocol/versions` | `routes/_app/protocol/versions.tsx` | Version history |
+| `/protocol/versions/:version` | `routes/_app/protocol/version-detail.tsx` | Version detail |
+| `/protocol/supplements` | `routes/_app/protocol/supplements.tsx` | Supplement tiers |
+| `/protocol/cessation` | `routes/_app/protocol/cessation.tsx` | Cessation timeline |
+| `/protocol/compare` | `routes/_app/protocol/compare.tsx` | Version comparison |
+| `/insights` | `routes/_app/insights/index.tsx` | Insights overview |
+| `/insights/correlations` | `routes/_app/insights/correlations.tsx` | Metric correlations |
+| `/insights/genetics` | `routes/_app/insights/genetics.tsx` | Genetic variants |
+| `/import` | `routes/_app/import/index.tsx` | Import overview |
+| `/import/whoop` | `routes/_app/import/whoop.tsx` | WHOOP data import |
+| `/import/vault` | `routes/_app/import/vault.tsx` | Obsidian vault import |
+| `/ingest`, `/ingest/upload`, `/ingest/review`, `/ingest/consent` | `routes/_app/ingest/*.tsx` | Lab-ingest pipeline |
+| `/ingest/documents/:id`, `/ingest/documents/:id/raw` | `routes/_app/ingest/document(-raw).tsx` | Document viewer + raw PDF bytes |
+| `/reports`, `/reports/generate`, `/reports/:reportId` | `routes/_app/reports/*.tsx` | Confidence-graded report generation |
+| `/clients`, `/clients/new` | `routes/_app/clients/*.tsx` | Practitioner client management |
+| `/settings`, `/settings/assignments` | `routes/_app/settings/*.tsx` | Account, subject assignments |
+| `/settings/invites/:inviteId/revoke` | `routes/_app/settings/invites.ts` | Invite revoke action |
+| `/subject-switch` | `routes/_app/subject-switch.ts` | Action-only; sets `zt-subject` cookie |
+
+Section routes are registered flat under one `_app/layout.tsx` — the consolidated left sidebar (AppShell) owns section navigation; no per-section layouts.
 
 ## 9 Metric Categories
 
@@ -173,11 +206,13 @@ npx react-router build     # Production build
 
 Planning runs on **GSD**, initialized 2026-06-07. The legacy **spec-kit** scaffolding is retired (archived to `.archive/specify/`, gitignored). `.planning/` is the source of truth:
 
-- **`.planning/ROADMAP.md`** — the M1 roadmap (6 phases). **`.planning/STATE.md`** — current position. **`.planning/PROJECT.md`** — project context. **`.planning/REQUIREMENTS.md`** — 28 v1 requirements + traceability.
+- **v1.0 "M1 Foundations" SHIPPED 2026-06-14**: 9 phases / 50 plans / 116 tasks; 27/29 requirements satisfied (COMP-02/03 deferred to the v1.1 compliance gate); tagged `v1.0`. Archived to `.planning/milestones/v1.0-*`.
+- **Current milestone: v1.1 "First Client (practitioner-operated)" — EXECUTING.** 5 phases, 12 requirements (ONB/ING/PRO/LIB/PROOF/POL). Phase 01 (client-onboarding-practitioner-operated) is in progress.
+- **`.planning/ROADMAP.md`** — the v1.1 roadmap. **`.planning/STATE.md`** — current position. **`.planning/PROJECT.md`** — project context. **`.planning/REQUIREMENTS.md`** — requirements + traceability.
 - **`.planning/codebase/`** — 7-doc codebase map. **`.planning/research/`** — M1 stack/features/architecture/pitfalls + SUMMARY.
 - **Direction & constraints**: `docs/PLATFORM.md` (M0→M3 product brief) and `docs/PRINCIPLES.md` (engineering constraints) are the narrative companions to the GSD roadmap.
-- **Two open decisions before later phases**: LLM-provider PHI/BAA (lab-ingest, Phase 5) and the Better-Auth↔Neon-JWK seam (Phase-1 spike). See `.planning/research/SUMMARY.md`.
-- **Next step**: `/gsd:discuss-phase 1` (or `/gsd:plan-phase 1`) — Phase 1 = schema baseline + engine tests + auth spike.
+- **Resolved decisions**: the Better-Auth↔Neon-JWK seam was resolved by the v1.0 auth implementation (SET LOCAL + NOBYPASSRLS `app_user` RLS pattern, not JWK-native). The LLM-provider PHI/BAA question was re-decided 2026-06-12 as a pilot-first deferral — HIPAA/BAA/RLS hardening is deferred to a pre-first-external-client gate; stay on Neon in the meantime. See `.planning/research/SUMMARY.md` and `.planning/PROJECT.md` Key Decisions.
+- **Next step**: Phase 01 (client onboarding, practitioner-operated) is executing — see `.planning/STATE.md` for current plan/position.
 - ⚠️ The archived constitution describes the retired **Astro/LocalStorage era** — ground truth = the Tech Stack table above + `docs/PRINCIPLES.md`.
 
 <!-- GSD:workflow-start source:GSD defaults -->
@@ -195,4 +230,4 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 
 ---
 
-*Last Updated: June 7, 2026*
+*Last Updated: July 4, 2026*

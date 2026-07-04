@@ -32,7 +32,7 @@ The confidence-graded protocol-decision engine: turning heterogeneous diagnostic
 - ✓ FAAH-informed 120+ day cessation tracker across 4 phases (acute→stabilization→clearing→optimization) — existing (M0)
 - ✓ Insights: supplement↔metric correlations (Pearson + lag + p-value) and genetic-variant profile (K1–K4) — existing (M0)
 - ✓ WHOOP JSON + Obsidian-vault import parsers (parse + preview only) — existing (M0)
-- ✓ Remix (React Router 7) + Neon/Drizzle schema (8 tables) + Netlify CI/CD, TS strict — existing (M0)
+- ✓ Remix (React Router 7) + Neon/Drizzle schema (8 tables) + Vercel CI/CD, TS strict — existing (M0)
 
 <!-- v1.0 M1 Foundations — shipped 2026-06-14 (27/29 requirements). Locked. -->
 
@@ -79,7 +79,7 @@ Deferred → v1.2 (`v1.2-OPERATIONS-PLAN.md`): multi-client at scale, client sel
 
 ## Constraints
 
-- **Tech stack**: React Router 7 (Remix) + Neon Postgres + Drizzle + Netlify, TS strict — locked. Add on top: auth/identity, RLS or tenancy guard, background jobs (ingest/report/correlation), LLM routing. (PRINCIPLES)
+- **Tech stack**: React Router 7 (Remix) + Neon Postgres + Drizzle + Vercel, TS strict — locked. Add on top: auth/identity, RLS or tenancy guard, background jobs (ingest/report/correlation), LLM routing. (PRINCIPLES)
 - **Type safety**: strict mode, no `any` — non-negotiable. (PRINCIPLES III)
 - **Security / PHI**: per-client diagnostics are PHI → tenant+subject isolation via RLS, encryption, RBAC, audit trail, consent, BAA. **Pilot-first (2026-06-08):** the single-user pilot runs on standard-tier infra + the subscription API; full hardening (RLS enforcement + Neon/Vercel/LLM BAAs + pgAudit verification) is gated at **Phase 7 — before the first external client's PHI**. Gate explicitly; do not hand-wave. (PLATFORM §5.7)
 - **LLM usage**: extraction + drafting only, never final clinical judgment; human review in the loop always.
